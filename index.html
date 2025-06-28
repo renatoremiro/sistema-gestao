@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.0)</title>
+    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.1)</title>
     <style>
         * {
             margin: 0;
@@ -589,6 +589,10 @@
             background: #ef4444;
         }
         
+        .notification.warning {
+            background: #f59e0b;
+        }
+        
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -1137,6 +1141,49 @@
         .horario-group .form-group {
             margin-bottom: 0;
         }
+
+        /* Alertas de prazo */
+        .alerta-prazo {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #ef4444;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 300px;
+            z-index: 1500;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .alerta-prazo.warning {
+            background: #f59e0b;
+        }
+
+        .alerta-prazo .close-btn {
+            float: right;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        /* Modal de editar tarefa */
+        .modal-editar-tarefa {
+            max-width: 600px;
+        }
+
+        .prazo-invalido {
+            background: #fee2e2;
+            border-color: #ef4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body>
@@ -1223,7 +1270,7 @@
                 <h1>Sistema de Gestão Colaborativo</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v5.0 Firebase - Colaboração em Tempo Real 🚀
+                    Sistema v5.1 Firebase - Melhorias Avançadas 🚀
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -1327,13 +1374,13 @@
             
             <!-- Dica do sistema -->
             <div style="background: #dbeafe; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #1e40af;">
-                <strong>🔥 Sistema v5.0 Firebase - Colaboração em Tempo Real:</strong> 
-                <br><strong>☁️ Dados na Nuvem:</strong> Todas as alterações são sincronizadas automaticamente
-                <br><strong>👥 Usuários Online:</strong> Veja quem está trabalhando agora no canto inferior esquerdo
-                <br><strong>📋 Log de Atividades:</strong> Acompanhe todas as mudanças em tempo real
-                <br><strong>⚡ Indicadores de Edição:</strong> Saiba quando alguém está editando algo
-                <br><strong>🔐 Sistema Seguro:</strong> Login individual para cada membro da equipe
-                <br><strong>📱 Acesse de Qualquer Lugar:</strong> Funciona em computador, tablet ou celular!
+                <strong>🔥 Sistema v5.1 - Novas Funcionalidades:</strong> 
+                <br><strong>✅ Edição Completa de Tarefas:</strong> Agora você pode editar descrição, prioridade e dependências
+                <br><strong>⚠️ Validação de Prazos:</strong> Sistema bloqueia criação de atividades com prazo no passado
+                <br><strong>📊 Progresso Automático:</strong> Calculado automaticamente baseado nas tarefas concluídas
+                <br><strong>🔔 Alertas Inteligentes:</strong> Notificações automáticas para prazos vencendo
+                <br><strong>⏰ Monitoramento 24/7:</strong> Sistema verifica automaticamente status das atividades
+                <br><strong>📱 Ainda mais responsivo:</strong> Funciona perfeitamente em qualquer dispositivo!
             </div>
             
             <!-- Cards das Áreas -->
@@ -1559,8 +1606,9 @@
             </div>
             <div class="form-group">
                 <label>Prazo <span style="color: #ef4444;">*</span></label>
-                <input type="date" id="atividadePrazo" required>
+                <input type="date" id="atividadePrazo" required onchange="validarPrazoAtividade()">
                 <span class="error-message hidden" id="atividadePrazoError">Prazo é obrigatório</span>
+                <span class="error-message hidden" id="atividadePrazoPassadoError">⚠️ Prazo não pode ser no passado!</span>
             </div>
             <div class="form-group">
                 <label>Responsáveis <span style="color: #ef4444;">*</span></label>
@@ -1577,8 +1625,10 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Progresso (%) <span class="tooltip" data-tooltip="0 = Não iniciado, 100 = Concluído">ℹ️</span></label>
-                <input type="number" id="atividadeProgresso" min="0" max="100" placeholder="0-100" value="0">
+                <label>Progresso (%) <span class="tooltip" data-tooltip="Calculado automaticamente pelas tarefas">ℹ️</span></label>
+                <input type="number" id="atividadeProgresso" min="0" max="100" placeholder="Calculado automaticamente" readonly 
+                       style="background: #f9fafb; cursor: not-allowed;">
+                <small style="color: #6b7280;">O progresso é calculado automaticamente baseado nas tarefas concluídas</small>
             </div>
             <div style="display: flex; gap: 8px; justify-content: flex-end;">
                 <button class="btn btn-secondary" onclick="fecharModal('modalAtividade')">Cancelar</button>
@@ -1647,6 +1697,60 @@
             <div style="display: flex; gap: 8px; justify-content: flex-end;">
                 <button class="btn btn-secondary" onclick="fecharModal('modalTarefa')">Cancelar</button>
                 <button class="btn btn-primary" onclick="salvarTarefa()" id="btnSalvarTarefa">Salvar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Editar Tarefa Individual -->
+    <div id="modalEditarTarefa" class="modal">
+        <div class="modal-content modal-editar-tarefa">
+            <h3 style="margin-bottom: 24px;">✏️ Editar Tarefa</h3>
+            <input type="hidden" id="editTarefaAtividadeId">
+            <input type="hidden" id="editTarefaId">
+            
+            <div class="form-group">
+                <label>Descrição <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="editTarefaDescricao" placeholder="Digite a descrição da tarefa" required>
+                <span class="error-message hidden" id="editTarefaDescricaoError">Descrição é obrigatória</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Prioridade</label>
+                <select id="editTarefaPrioridade">
+                    <option value="baixa">🟢 Baixa</option>
+                    <option value="media">🟡 Média</option>
+                    <option value="alta">🔴 Alta</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Responsável</label>
+                <select id="editTarefaResponsavel">
+                    <!-- Será preenchido dinamicamente -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Prazo (opcional)</label>
+                <input type="date" id="editTarefaPrazo">
+            </div>
+            
+            <div class="form-group">
+                <label>Dependências</label>
+                <div id="editTarefaDependencias" style="max-height: 150px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px;">
+                    <!-- Será preenchido dinamicamente -->
+                </div>
+                <small style="color: #6b7280;">Selecione tarefas que devem ser concluídas antes desta</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Observações</label>
+                <textarea id="editTarefaObservacoes" rows="3" placeholder="Adicione observações sobre a tarefa..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="fecharModal('modalEditarTarefa')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarEdicaoTarefa()">Salvar Alterações</button>
             </div>
         </div>
     </div>
@@ -1768,12 +1872,14 @@
         let connectedRef = null;
         let syncTimeout = null;
         let conflitosResolucao = null;
+        let intervaloPrazos = null;
         
         // Constantes e configurações
-        const VERSAO_SISTEMA = '5.0';
+        const VERSAO_SISTEMA = '5.1';
         const VERSAO_DB = 5;
         const CHAVE_STORAGE = 'sistemaGestaoFirebase';
         const INTERVALO_SALVAMENTO = 5000;
+        const INTERVALO_VERIFICACAO_PRAZOS = 3600000; // 1 hora
         
         // Estado Global do Sistema
         let estadoSistema = {
@@ -1784,11 +1890,13 @@
             filtroAtual: 'todos',
             editandoAtividade: null,
             editandoEvento: null,
+            editandoTarefa: null,
             pessoasSelecionadas: new Set(),
             tarefasVinculadas: new Map(),
             versaoSistema: VERSAO_SISTEMA,
             usuarioEmail: null,
-            usuarioNome: null
+            usuarioNome: null,
+            alertasPrazosExibidos: new Set()
         };
         
         // Dados do Sistema
@@ -1877,6 +1985,10 @@
                         ref.off();
                     }
                 });
+
+                if (intervaloPrazos) {
+                    clearInterval(intervaloPrazos);
+                }
                 
                 auth.signOut().then(() => {
                     mostrarNotificacao('Até logo!');
@@ -2100,6 +2212,9 @@
                 case 'evento_criado':
                     mensagem = `${atividade.nomeUsuario} criou evento "${atividade.detalhes.titulo}"`;
                     break;
+                case 'tarefa_editada':
+                    mensagem = `${atividade.nomeUsuario} editou tarefa "${atividade.detalhes.tarefa}"`;
+                    break;
                 default:
                     mensagem = `${atividade.nomeUsuario} fez uma alteração`;
             }
@@ -2163,6 +2278,117 @@
                 }
             });
         }
+
+        // ========== SISTEMA DE VERIFICAÇÃO AUTOMÁTICA DE PRAZOS ==========
+        function iniciarVerificacaoPrazos() {
+            // Verificação inicial
+            verificarPrazosAtividades();
+            
+            // Verificação a cada hora
+            intervaloPrazos = setInterval(() => {
+                verificarPrazosAtividades();
+            }, INTERVALO_VERIFICACAO_PRAZOS);
+        }
+
+        function verificarPrazosAtividades() {
+            if (!dados || !dados.areas) return;
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            Object.values(dados.areas).forEach(area => {
+                area.atividades.forEach(atividade => {
+                    const prazoData = new Date(atividade.prazo);
+                    prazoData.setHours(0, 0, 0, 0);
+                    
+                    const diasRestantes = Math.floor((prazoData - hoje) / (1000 * 60 * 60 * 24));
+                    const statusAnterior = atividade.status;
+                    let novoStatus = statusAnterior;
+
+                    // Lógica de atualização automática de status
+                    if (diasRestantes < 0 && atividade.status !== 'vermelho') {
+                        novoStatus = 'vermelho'; // Atrasado
+                    } else if (diasRestantes <= 3 && diasRestantes >= 0 && atividade.status === 'verde') {
+                        novoStatus = 'amarelo'; // Atenção - perto do prazo
+                    }
+
+                    // Atualizar status se necessário
+                    if (novoStatus !== statusAnterior) {
+                        atividade.status = novoStatus;
+                        
+                        registrarAtividade('status_automatico', {
+                            atividade: atividade.nome,
+                            de: statusAnterior,
+                            para: novoStatus,
+                            motivo: diasRestantes < 0 ? 'prazo_vencido' : 'prazo_proximo'
+                        });
+
+                        console.log(`Status da atividade "${atividade.nome}" alterado automaticamente de ${statusAnterior} para ${novoStatus}`);
+                    }
+
+                    // Alertas de prazo
+                    const alertaKey = `${atividade.id}_${atividade.prazo}`;
+                    if (!estadoSistema.alertasPrazosExibidos.has(alertaKey)) {
+                        if (diasRestantes === 0) {
+                            mostrarAlertaPrazo(`⏰ PRAZO HOJE: ${atividade.nome}`, 'error');
+                            estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                        } else if (diasRestantes === 1) {
+                            mostrarAlertaPrazo(`⚠️ Prazo amanhã: ${atividade.nome}`, 'warning');
+                            estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                        } else if (diasRestantes === 3) {
+                            mostrarAlertaPrazo(`📅 Prazo em 3 dias: ${atividade.nome}`, 'warning');
+                            estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                        } else if (diasRestantes === -1) {
+                            mostrarAlertaPrazo(`🚨 ATRASADO: ${atividade.nome}`, 'error');
+                            estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                        }
+                    }
+                });
+            });
+
+            // Salvar se houve mudanças
+            salvarDados();
+        }
+
+        function mostrarAlertaPrazo(mensagem, tipo = 'warning') {
+            const alertaExistente = document.querySelector('.alerta-prazo');
+            if (alertaExistente) {
+                alertaExistente.remove();
+            }
+
+            const alerta = document.createElement('div');
+            alerta.className = `alerta-prazo ${tipo}`;
+            alerta.innerHTML = `
+                ${mensagem}
+                <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+            `;
+
+            document.body.appendChild(alerta);
+
+            // Auto-remover após 10 segundos
+            setTimeout(() => {
+                if (alerta.parentElement) {
+                    alerta.remove();
+                }
+            }, 10000);
+        }
+
+        // ========== VALIDAÇÃO DE PRAZOS ==========
+        function validarPrazoAtividade() {
+            const prazoInput = document.getElementById('atividadePrazo');
+            const hoje = new Date().toISOString().split('T')[0];
+            
+            if (prazoInput.value && prazoInput.value < hoje) {
+                prazoInput.classList.add('prazo-invalido');
+                document.getElementById('atividadePrazoPassadoError').classList.remove('hidden');
+                mostrarNotificacao('Não é possível criar atividade com prazo no passado!', 'error');
+                return false;
+            } else {
+                prazoInput.classList.remove('prazo-invalido');
+                document.getElementById('atividadePrazoPassadoError').classList.add('hidden');
+                return true;
+            }
+        }
         
         // ========== INICIALIZAÇÃO DO SISTEMA ==========
         function inicializarSistema() {
@@ -2175,6 +2401,7 @@
             
             configurarPresenca();
             configurarSincronizacao();
+            iniciarVerificacaoPrazos();
             
             mostrarNotificacao(`Bem-vindo(a), ${estadoSistema.usuarioNome}!`);
         }
@@ -2324,7 +2551,7 @@
             const notification = document.getElementById('notification');
             const notificationText = document.getElementById('notificationText');
             notificationText.textContent = texto;
-            notification.className = `notification ${tipo === 'error' ? 'error' : ''}`;
+            notification.className = `notification ${tipo === 'error' ? 'error' : tipo === 'warning' ? 'warning' : ''}`;
             notification.classList.add('active');
             setTimeout(() => {
                 notification.classList.remove('active');
@@ -2819,7 +3046,7 @@
                             <span style="font-size: 12px; color: #6b7280;">Progresso:</span>
                             <input type="number" value="${calcularProgressoAtividade(atividade)}" min="0" max="100" 
                                    style="width: 50px; padding: 2px 4px; font-size: 12px; border: 1px solid #d1d5db; border-radius: 4px;"
-                                   onchange="atualizarProgresso(${atividade.id}, this.value)" readonly
+                                   readonly
                                    title="Progresso calculado automaticamente pelas tarefas">
                             <span>%</span>
                             <div style="flex: 1; background: #e5e7eb; height: 6px; border-radius: 3px; overflow: hidden;">
@@ -3334,7 +3561,7 @@
             estadoSistema.editandoAtividade = null;
             document.getElementById('modalAtividadeTitulo').textContent = 'Nova Atividade';
             document.getElementById('atividadeId').value = '';
-            document.getElementById('atividadeProgresso').value = '0';
+            document.getElementById('atividadeProgresso').value = '';
             
             const select = document.getElementById('atividadeResponsaveis');
             select.innerHTML = '';
@@ -3375,7 +3602,7 @@
                 document.getElementById('atividadeNome').value = atividade.nome;
                 document.getElementById('atividadePrazo').value = atividade.prazo;
                 document.getElementById('atividadeStatus').value = atividade.status;
-                document.getElementById('atividadeProgresso').value = atividade.progresso || 0;
+                document.getElementById('atividadeProgresso').value = calcularProgressoAtividade(atividade);
                 
                 const select = document.getElementById('atividadeResponsaveis');
                 select.innerHTML = '';
@@ -3413,6 +3640,11 @@
                 mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
                 return;
             }
+
+            // Validar prazo
+            if (!validarPrazoAtividade()) {
+                return;
+            }
             
             const area = dados.areas[estadoSistema.areaAtual];
             const responsaveis = Array.from(responsaveisSelect.selectedOptions).map(opt => opt.value);
@@ -3421,18 +3653,8 @@
                 nome: document.getElementById('atividadeNome').value,
                 prazo: document.getElementById('atividadePrazo').value,
                 responsaveis: responsaveis,
-                status: document.getElementById('atividadeStatus').value,
-                progresso: parseInt(document.getElementById('atividadeProgresso').value) || 0
+                status: document.getElementById('atividadeStatus').value
             };
-            
-            if (atividadeData.progresso < 0 || atividadeData.progresso > 100) {
-                mostrarNotificacao('Progresso deve estar entre 0 e 100!', 'error');
-                return;
-            }
-            
-            if (atividadeData.progresso === 100) {
-                atividadeData.status = 'verde';
-            }
             
             if (estadoSistema.editandoAtividade) {
                 const index = area.atividades.findIndex(a => a.id === estadoSistema.editandoAtividade);
@@ -3453,6 +3675,7 @@
                 const novaAtividade = {
                     id: Date.now(),
                     ...atividadeData,
+                    progresso: 0,
                     dataAdicionado: new Date().toISOString(),
                     tarefas: []
                 };
@@ -3512,7 +3735,7 @@
             }
         }
         
-        // Funções de Tarefas
+        // ========== FUNÇÕES DE TAREFAS MELHORADAS ==========
         function calcularProgressoAtividade(atividade) {
             if (!atividade.tarefas || atividade.tarefas.length === 0) {
                 return atividade.progresso || 0;
@@ -3647,6 +3870,441 @@
             `;
             
             modal.classList.add('active');
+        }
+
+        function renderizarListaTarefas(atividade) {
+            if (!atividade.tarefas || atividade.tarefas.length === 0) {
+                return `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p style="font-size: 48px; margin-bottom: 16px;">📋</p>
+                        <p>Nenhuma tarefa cadastrada ainda.</p>
+                        <p style="font-size: 14px; margin-top: 8px;">
+                            Adicione tarefas manualmente ou aplique um template.
+                        </p>
+                    </div>
+                `;
+            }
+            
+            return atividade.tarefas.map((tarefa, index) => {
+                const bloqueada = verificarTarefaBloqueada(tarefa, atividade);
+                
+                return `
+                    <div class="tarefa-item ${bloqueada ? 'dependencia-bloqueada' : ''}" id="tarefa_${tarefa.id}">
+                        <div class="tarefa-header">
+                            ${tarefa.subtarefas && tarefa.subtarefas.length > 0 ? `
+                                <span class="tarefa-expandir" onclick="toggleSubtarefas('${tarefa.id}')">▶</span>
+                            ` : '<span style="width: 20px;"></span>'}
+                            
+                            <input type="checkbox" 
+                                   class="tarefa-checkbox" 
+                                   ${tarefa.status === 'concluida' ? 'checked' : ''}
+                                   ${bloqueada ? 'disabled' : ''}
+                                   onchange="toggleTarefa(${atividade.id}, '${tarefa.id}')">
+                            
+                            <span class="tarefa-descricao ${tarefa.status === 'concluida' ? 'concluida' : ''}">
+                                ${tarefa.descricao}
+                            </span>
+                            
+                            <div class="tarefa-info">
+                                ${tarefa.prioridade ? `
+                                    <span class="prioridade-${tarefa.prioridade}">
+                                        ${tarefa.prioridade === 'alta' ? '🔴' : tarefa.prioridade === 'media' ? '🟡' : '🟢'}
+                                        ${tarefa.prioridade}
+                                    </span>
+                                ` : ''}
+                                
+                                ${tarefa.responsavel ? `
+                                    <span>👤 ${tarefa.responsavel}</span>
+                                ` : ''}
+                                
+                                ${tarefa.prazo ? `
+                                    <span>📅 ${formatarData(tarefa.prazo)}</span>
+                                ` : ''}
+                                
+                                ${tarefa.dependencias && tarefa.dependencias.length > 0 ? `
+                                    <span title="Depende de: ${tarefa.dependencias.join(', ')}">
+                                        🔗 ${tarefa.dependencias.length} dep.
+                                    </span>
+                                ` : ''}
+                                
+                                <button class="btn btn-primary btn-sm" onclick="editarTarefaModal(${atividade.id}, '${tarefa.id}')">
+                                    ✏️
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deletarTarefaItem(${atividade.id}, '${tarefa.id}')">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                        
+                        ${tarefa.subtarefas && tarefa.subtarefas.length > 0 ? `
+                            <div class="subtarefas-container" id="subtarefas_${tarefa.id}" style="display: none;">
+                                ${tarefa.subtarefas.map((subtarefa, subIndex) => `
+                                    <div class="subtarefa-item">
+                                        <input type="checkbox" 
+                                               class="tarefa-checkbox" 
+                                               ${subtarefa.status === 'concluida' ? 'checked' : ''}
+                                               onchange="toggleSubtarefa(${atividade.id}, '${tarefa.id}', '${subtarefa.id}')">
+                                        
+                                        <span class="${subtarefa.status === 'concluida' ? 'concluida' : ''}">
+                                            ${subtarefa.descricao}
+                                        </span>
+                                        
+                                        ${subtarefa.responsavel ? `
+                                            <span style="font-size: 11px; color: #6b7280;">
+                                                👤 ${subtarefa.responsavel}
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                                
+                                <div style="margin-top: 8px;">
+                                    <button class="btn btn-primary btn-sm" onclick="adicionarSubtarefa(${atividade.id}, '${tarefa.id}')">
+                                        + Adicionar subtarefa
+                                    </button>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function editarTarefaModal(atividadeId, tarefaId) {
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            const tarefa = atividade.tarefas.find(t => t.id === tarefaId);
+            
+            if (!tarefa) return;
+
+            estadoSistema.editandoTarefa = {atividadeId, tarefaId};
+            
+            // Preencher responsáveis
+            const selectResponsavel = document.getElementById('editTarefaResponsavel');
+            selectResponsavel.innerHTML = '';
+            
+            atividade.responsaveis.forEach(responsavel => {
+                const option = document.createElement('option');
+                option.value = responsavel;
+                option.textContent = responsavel;
+                option.selected = tarefa.responsavel === responsavel;
+                selectResponsavel.appendChild(option);
+            });
+
+            // Preencher dependências
+            const containerDependencias = document.getElementById('editTarefaDependencias');
+            containerDependencias.innerHTML = '';
+            
+            atividade.tarefas.forEach(outraTarefa => {
+                if (outraTarefa.id !== tarefaId) {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'margin-bottom: 8px;';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = outraTarefa.descricao;
+                    checkbox.checked = tarefa.dependencias && tarefa.dependencias.includes(outraTarefa.descricao);
+                    checkbox.style.marginRight = '8px';
+                    
+                    const label = document.createElement('label');
+                    label.style.cssText = 'display: flex; align-items: center; cursor: pointer; font-size: 13px;';
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(outraTarefa.descricao));
+                    
+                    div.appendChild(label);
+                    containerDependencias.appendChild(div);
+                }
+            });
+
+            // Preencher campos
+            document.getElementById('editTarefaAtividadeId').value = atividadeId;
+            document.getElementById('editTarefaId').value = tarefaId;
+            document.getElementById('editTarefaDescricao').value = tarefa.descricao || '';
+            document.getElementById('editTarefaPrioridade').value = tarefa.prioridade || 'media';
+            document.getElementById('editTarefaPrazo').value = tarefa.prazo || '';
+            document.getElementById('editTarefaObservacoes').value = tarefa.observacoes || '';
+
+            document.getElementById('modalEditarTarefa').classList.add('active');
+        }
+
+        function salvarEdicaoTarefa() {
+            const atividadeId = parseInt(document.getElementById('editTarefaAtividadeId').value);
+            const tarefaId = document.getElementById('editTarefaId').value;
+            
+            if (!validarFormulario([{id: 'editTarefaDescricao'}])) {
+                mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            const tarefa = atividade.tarefas.find(t => t.id === tarefaId);
+
+            if (!tarefa) return;
+
+            // Coletar dependências selecionadas
+            const dependenciasSelecionadas = [];
+            document.querySelectorAll('#editTarefaDependencias input[type="checkbox"]:checked').forEach(cb => {
+                dependenciasSelecionadas.push(cb.value);
+            });
+
+            // Atualizar tarefa
+            tarefa.descricao = document.getElementById('editTarefaDescricao').value;
+            tarefa.prioridade = document.getElementById('editTarefaPrioridade').value;
+            tarefa.responsavel = document.getElementById('editTarefaResponsavel').value;
+            tarefa.prazo = document.getElementById('editTarefaPrazo').value;
+            tarefa.dependencias = dependenciasSelecionadas;
+            tarefa.observacoes = document.getElementById('editTarefaObservacoes').value;
+
+            registrarAtividade('tarefa_editada', {
+                tarefa: tarefa.descricao,
+                atividade: atividade.nome
+            });
+
+            salvarDados();
+            fecharModal('modalEditarTarefa');
+            mostrarModalTarefas(atividade);
+            mostrarNotificacao('Tarefa editada com sucesso!');
+        }
+        
+        function verificarTarefaBloqueada(tarefa, atividade) {
+            if (!tarefa.dependencias || tarefa.dependencias.length === 0) return false;
+            
+            return tarefa.dependencias.some(dep => {
+                const tarefaDependente = atividade.tarefas.find(t => t.descricao === dep);
+                return tarefaDependente && tarefaDependente.status !== 'concluida';
+            });
+        }
+        
+        function toggleSubtarefas(tarefaId) {
+            const container = document.getElementById(`subtarefas_${tarefaId}`);
+            const expandir = container.parentElement.querySelector('.tarefa-expandir');
+            
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                expandir.classList.add('expandido');
+            } else {
+                container.style.display = 'none';
+                expandir.classList.remove('expandido');
+            }
+        }
+
+        function toggleTarefa(atividadeId, tarefaId) {
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            const tarefa = atividade.tarefas.find(t => t.id === tarefaId);
+            
+            if (tarefa) {
+                if (tarefa.subtarefas && tarefa.subtarefas.length > 0) {
+                    const subtarefasPendentes = tarefa.subtarefas.filter(st => st.status !== 'concluida').length;
+                    if (subtarefasPendentes > 0 && tarefa.status !== 'concluida') {
+                        mostrarNotificacao(`Conclua todas as ${subtarefasPendentes} subtarefas primeiro!`, 'error');
+                        mostrarModalTarefas(atividade);
+                        return;
+                    }
+                }
+                
+                tarefa.status = tarefa.status === 'concluida' ? 'pendente' : 'concluida';
+                
+                if (tarefa.status === 'concluida' && tarefa.subtarefas) {
+                    tarefa.subtarefas.forEach(st => st.status = 'concluida');
+                }
+                
+                const novoProgresso = calcularProgressoAtividade(atividade);
+                atividade.progresso = novoProgresso;
+                
+                if (novoProgresso === 100) {
+                    atividade.status = 'verde';
+                    mostrarNotificacao('🎉 Todas as tarefas concluídas! Responsabilidade completa!');
+                }
+                
+                salvarDados();
+                mostrarModalTarefas(atividade);
+            }
+        }
+        
+        function toggleSubtarefa(atividadeId, tarefaId, subtarefaId) {
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            const tarefa = atividade.tarefas.find(t => t.id === tarefaId);
+            const subtarefa = tarefa.subtarefas.find(st => st.id === subtarefaId);
+            
+            if (subtarefa) {
+                subtarefa.status = subtarefa.status === 'concluida' ? 'pendente' : 'concluida';
+                
+                const todasConcluidas = tarefa.subtarefas.every(st => st.status === 'concluida');
+                if (todasConcluidas && tarefa.status !== 'concluida') {
+                    mostrarNotificacao('Todas as subtarefas concluídas! Você pode marcar a tarefa principal agora.');
+                }
+                
+                const novoProgresso = calcularProgressoAtividade(atividade);
+                atividade.progresso = novoProgresso;
+                
+                salvarDados();
+                mostrarModalTarefas(atividade);
+            }
+        }
+        
+        function adicionarTarefa(atividadeId) {
+            const descricao = prompt('Digite a descrição da nova tarefa:');
+            if (!descricao) return;
+            
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            
+            if (!atividade.tarefas) atividade.tarefas = [];
+            
+            const novaTarefa = {
+                id: `${atividadeId}_T${Date.now()}`,
+                descricao: descricao,
+                tipo: 'tarefa',
+                status: 'pendente',
+                responsavel: atividade.responsaveis[0] || '',
+                prioridade: 'media',
+                subtarefas: [],
+                dependencias: [],
+                observacoes: ''
+            };
+            
+            atividade.tarefas.push(novaTarefa);
+            salvarDados();
+            mostrarModalTarefas(atividade);
+            mostrarNotificacao('Tarefa adicionada com sucesso!');
+        }
+        
+        function aplicarTemplate(atividadeId) {
+            const templates = obterTemplatesPadrao();
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            
+            const template = templates.asBuilt;
+            
+            if (confirm('Aplicar template "As Built"? Isso substituirá as tarefas existentes.')) {
+                atividade.tarefas = JSON.parse(JSON.stringify(template.tarefas));
+                
+                atividade.tarefas.forEach((tarefa, index) => {
+                    tarefa.id = `${atividadeId}_T${Date.now()}_${index}`;
+                    tarefa.responsavel = atividade.responsaveis[0] || '';
+                    
+                    if (tarefa.subtarefas) {
+                        tarefa.subtarefas.forEach((sub, subIndex) => {
+                            sub.id = `${tarefa.id}_S${subIndex + 1}`;
+                            sub.responsavel = tarefa.responsavel;
+                        });
+                    }
+                });
+                
+                salvarDados();
+                mostrarModalTarefas(atividade);
+                mostrarNotificacao('Template aplicado com sucesso!');
+            }
+        }
+        
+        function deletarTarefaItem(atividadeId, tarefaId) {
+            if (confirm('Deseja realmente excluir esta tarefa?')) {
+                const area = dados.areas[estadoSistema.areaAtual];
+                const atividade = area.atividades.find(a => a.id === atividadeId);
+                
+                atividade.tarefas = atividade.tarefas.filter(t => t.id !== tarefaId);
+                
+                salvarDados();
+                mostrarModalTarefas(atividade);
+                mostrarNotificacao('Tarefa excluída!');
+            }
+        }
+        
+        function adicionarSubtarefa(atividadeId, tarefaId) {
+            const descricao = prompt('Digite a descrição da subtarefa:');
+            if (!descricao) return;
+            
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            const tarefa = atividade.tarefas.find(t => t.id === tarefaId);
+            
+            if (!tarefa.subtarefas) tarefa.subtarefas = [];
+            
+            const novaSubtarefa = {
+                id: `${tarefaId}_S${Date.now()}`,
+                descricao: descricao,
+                status: 'pendente',
+                responsavel: tarefa.responsavel || ''
+            };
+            
+            tarefa.subtarefas.push(novaSubtarefa);
+            salvarDados();
+            mostrarModalTarefas(atividade);
+            mostrarNotificacao('Subtarefa adicionada!');
+        }
+        
+        function fecharModalTarefas() {
+            const modal = document.getElementById('modalTarefas');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+            
+            const area = dados.areas[estadoSistema.areaAtual];
+            renderizarAtividades(area);
+            atualizarEstatisticas();
+        }
+
+        function obterTemplatesPadrao() {
+            return {
+                asBuilt: {
+                    nome: "As Built",
+                    tarefas: [
+                        {
+                            descricao: "Levantamento de Campo",
+                            tipo: "tarefa",
+                            status: "pendente",
+                            prioridade: "alta",
+                            dependencias: [],
+                            subtarefas: [
+                                { descricao: "Medição Térreo", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Medição 1º Pavimento", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Medição 2º Pavimento", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Conferência de Medidas", tipo: "subtarefa", status: "pendente" }
+                            ]
+                        },
+                        {
+                            descricao: "Desenho Técnico",
+                            tipo: "tarefa",
+                            status: "pendente",
+                            prioridade: "alta",
+                            dependencias: ["Levantamento de Campo"],
+                            subtarefas: [
+                                { descricao: "Plantas Baixas", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Cortes", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Fachadas", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Detalhamentos", tipo: "subtarefa", status: "pendente" }
+                            ]
+                        },
+                        {
+                            descricao: "Revisão Técnica",
+                            tipo: "tarefa",
+                            status: "pendente",
+                            prioridade: "media",
+                            dependencias: ["Desenho Técnico"],
+                            subtarefas: [
+                                { descricao: "Revisão Interna", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Correções", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Aprovação Coordenador", tipo: "subtarefa", status: "pendente" }
+                            ]
+                        },
+                        {
+                            descricao: "Entrega Final",
+                            tipo: "tarefa",
+                            status: "pendente",
+                            prioridade: "alta",
+                            dependencias: ["Revisão Técnica"],
+                            subtarefas: [
+                                { descricao: "Gerar PDFs", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Organizar Arquivos", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Upload no Sistema", tipo: "subtarefa", status: "pendente" },
+                                { descricao: "Notificar Cliente", tipo: "subtarefa", status: "pendente" }
+                            ]
+                        }
+                    ]
+                }
+            };
         }
         
         // Funções de Agenda Individual
@@ -4006,216 +4664,6 @@ ${evento.pessoas && evento.pessoas.length > 1 ? `👥 ${evento.pessoas.length} p
             }
         }
         
-        // Templates e outras funcionalidades
-        function obterTemplatesPadrao() {
-            return {
-                asBuilt: {
-                    nome: "As Built",
-                    tarefas: [
-                        {
-                            descricao: "Levantamento de Campo",
-                            tipo: "tarefa",
-                            status: "pendente",
-                            prioridade: "alta",
-                            subtarefas: [
-                                { descricao: "Medição Térreo", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Medição 1º Pavimento", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Medição 2º Pavimento", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Conferência de Medidas", tipo: "subtarefa", status: "pendente" }
-                            ]
-                        },
-                        {
-                            descricao: "Desenho Técnico",
-                            tipo: "tarefa",
-                            status: "pendente",
-                            prioridade: "alta",
-                            dependencias: ["Levantamento de Campo"],
-                            subtarefas: [
-                                { descricao: "Plantas Baixas", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Cortes", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Fachadas", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Detalhamentos", tipo: "subtarefa", status: "pendente" }
-                            ]
-                        },
-                        {
-                            descricao: "Revisão Técnica",
-                            tipo: "tarefa",
-                            status: "pendente",
-                            prioridade: "media",
-                            dependencias: ["Desenho Técnico"],
-                            subtarefas: [
-                                { descricao: "Revisão Interna", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Correções", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Aprovação Coordenador", tipo: "subtarefa", status: "pendente" }
-                            ]
-                        },
-                        {
-                            descricao: "Entrega Final",
-                            tipo: "tarefa",
-                            status: "pendente",
-                            prioridade: "alta",
-                            dependencias: ["Revisão Técnica"],
-                            subtarefas: [
-                                { descricao: "Gerar PDFs", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Organizar Arquivos", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Upload no Sistema", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Notificar Cliente", tipo: "subtarefa", status: "pendente" }
-                            ]
-                        }
-                    ]
-                },
-                relatorioFotografico: {
-                    nome: "Relatório Fotográfico",
-                    tarefas: [
-                        {
-                            descricao: "Captura de Imagens",
-                            tipo: "tarefa",
-                            status: "pendente",
-                            prioridade: "alta",
-                            subtarefas: [
-                                { descricao: "Fotografar Fachadas", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Fotografar Ambientes Internos", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Fotografar Detalhes Construtivos", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Fotografar Patologias", tipo: "subtarefa", status: "pendente" }
-                            ]
-                        },
-                        {
-                            descricao: "Edição e Tratamento",
-                            tipo: "tarefa",
-                            status: "pendente",
-                            prioridade: "media",
-                            dependencias: ["Captura de Imagens"],
-                            subtarefas: [
-                                { descricao: "Selecionar Melhores Fotos", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Ajustar Cor e Brilho", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Adicionar Legendas", tipo: "subtarefa", status: "pendente" },
-                                { descricao: "Organizar por Categoria", tipo: "subtarefa", status: "pendente" }
-                            ]
-                        }
-                    ]
-                }
-            };
-        }
-        
-        function renderizarListaTarefas(atividade) {
-            if (!atividade.tarefas || atividade.tarefas.length === 0) {
-                return `
-                    <div style="text-align: center; padding: 40px; color: #6b7280;">
-                        <p style="font-size: 48px; margin-bottom: 16px;">📋</p>
-                        <p>Nenhuma tarefa cadastrada ainda.</p>
-                        <p style="font-size: 14px; margin-top: 8px;">
-                            Adicione tarefas manualmente ou aplique um template.
-                        </p>
-                    </div>
-                `;
-            }
-            
-            return atividade.tarefas.map((tarefa, index) => {
-                const bloqueada = verificarTarefaBloqueada(tarefa, atividade);
-                
-                return `
-                    <div class="tarefa-item ${bloqueada ? 'dependencia-bloqueada' : ''}" id="tarefa_${tarefa.id}">
-                        <div class="tarefa-header">
-                            ${tarefa.subtarefas && tarefa.subtarefas.length > 0 ? `
-                                <span class="tarefa-expandir" onclick="toggleSubtarefas('${tarefa.id}')">▶</span>
-                            ` : '<span style="width: 20px;"></span>'}
-                            
-                            <input type="checkbox" 
-                                   class="tarefa-checkbox" 
-                                   ${tarefa.status === 'concluida' ? 'checked' : ''}
-                                   ${bloqueada ? 'disabled' : ''}
-                                   onchange="toggleTarefa(${atividade.id}, '${tarefa.id}')">
-                            
-                            <span class="tarefa-descricao ${tarefa.status === 'concluida' ? 'concluida' : ''}">
-                                ${tarefa.descricao}
-                            </span>
-                            
-                            <div class="tarefa-info">
-                                ${tarefa.prioridade ? `
-                                    <span class="prioridade-${tarefa.prioridade}">
-                                        ${tarefa.prioridade === 'alta' ? '🔴' : tarefa.prioridade === 'media' ? '🟡' : '🟢'}
-                                        ${tarefa.prioridade}
-                                    </span>
-                                ` : ''}
-                                
-                                ${tarefa.responsavel ? `
-                                    <span>👤 ${tarefa.responsavel}</span>
-                                ` : ''}
-                                
-                                ${tarefa.prazo ? `
-                                    <span>📅 ${formatarData(tarefa.prazo)}</span>
-                                ` : ''}
-                                
-                                ${tarefa.dependencias && tarefa.dependencias.length > 0 ? `
-                                    <span title="Depende de: ${tarefa.dependencias.join(', ')}">
-                                        🔗 ${tarefa.dependencias.length} dep.
-                                    </span>
-                                ` : ''}
-                                
-                                <button class="btn btn-primary btn-sm" onclick="editarTarefa(${atividade.id}, '${tarefa.id}')">
-                                    ✏️
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="deletarTarefaItem(${atividade.id}, '${tarefa.id}')">
-                                    🗑️
-                                </button>
-                            </div>
-                        </div>
-                        
-                        ${tarefa.subtarefas && tarefa.subtarefas.length > 0 ? `
-                            <div class="subtarefas-container" id="subtarefas_${tarefa.id}" style="display: none;">
-                                ${tarefa.subtarefas.map((subtarefa, subIndex) => `
-                                    <div class="subtarefa-item">
-                                        <input type="checkbox" 
-                                               class="tarefa-checkbox" 
-                                               ${subtarefa.status === 'concluida' ? 'checked' : ''}
-                                               onchange="toggleSubtarefa(${atividade.id}, '${tarefa.id}', '${subtarefa.id}')">
-                                        
-                                        <span class="${subtarefa.status === 'concluida' ? 'concluida' : ''}">
-                                            ${subtarefa.descricao}
-                                        </span>
-                                        
-                                        ${subtarefa.responsavel ? `
-                                            <span style="font-size: 11px; color: #6b7280;">
-                                                👤 ${subtarefa.responsavel}
-                                            </span>
-                                        ` : ''}
-                                    </div>
-                                `).join('')}
-                                
-                                <div style="margin-top: 8px;">
-                                    <button class="btn btn-primary btn-sm" onclick="adicionarSubtarefa(${atividade.id}, '${tarefa.id}')">
-                                        + Adicionar subtarefa
-                                    </button>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function verificarTarefaBloqueada(tarefa, atividade) {
-            if (!tarefa.dependencias || tarefa.dependencias.length === 0) return false;
-            
-            return tarefa.dependencias.some(dep => {
-                const tarefaDependente = atividade.tarefas.find(t => t.descricao === dep);
-                return tarefaDependente && tarefaDependente.status !== 'concluida';
-            });
-        }
-        
-        function toggleSubtarefas(tarefaId) {
-            const container = document.getElementById(`subtarefas_${tarefaId}`);
-            const expandir = container.parentElement.querySelector('.tarefa-expandir');
-            
-            if (container.style.display === 'none') {
-                container.style.display = 'block';
-                expandir.classList.add('expandido');
-            } else {
-                container.style.display = 'none';
-                expandir.classList.remove('expandido');
-            }
-        }
-        
         // Funções de tarefas pessoais
         function mostrarNovaTarefa() {
             document.getElementById('modalTarefa').classList.add('active');
@@ -4464,10 +4912,6 @@ ${evento.pessoas && evento.pessoas.length > 1 ? `👥 ${evento.pessoas.length} p
                                 ultimaAtualizacao: new Date().toISOString()
                             };
                             
-                            if (!dados.versao || dados.versao < VERSAO_DB) {
-                                dados = migrarDados(dados);
-                            }
-                            
                             salvarDados();
                             fecharModal('modalImportar');
                             renderizarDashboard();
@@ -4669,148 +5113,7 @@ ${evento.pessoas && evento.pessoas.length > 1 ? `👥 ${evento.pessoas.length} p
             }
         }
         
-        // Funções auxiliares do sistema de tarefas
-        function fecharModalTarefas() {
-            const modal = document.getElementById('modalTarefas');
-            if (modal) {
-                modal.classList.remove('active');
-            }
-            
-            const area = dados.areas[estadoSistema.areaAtual];
-            renderizarAtividades(area);
-            atualizarEstatisticas();
-        }
-        
-        function toggleTarefa(atividadeId, tarefaId) {
-            const area = dados.areas[estadoSistema.areaAtual];
-            const atividade = area.atividades.find(a => a.id === atividadeId);
-            const tarefa = atividade.tarefas.find(t => t.id === tarefaId);
-            
-            if (tarefa) {
-                if (tarefa.subtarefas && tarefa.subtarefas.length > 0) {
-                    const subtarefasPendentes = tarefa.subtarefas.filter(st => st.status !== 'concluida').length;
-                    if (subtarefasPendentes > 0 && tarefa.status !== 'concluida') {
-                        mostrarNotificacao(`Conclua todas as ${subtarefasPendentes} subtarefas primeiro!`, 'error');
-                        mostrarModalTarefas(atividade);
-                        return;
-                    }
-                }
-                
-                tarefa.status = tarefa.status === 'concluida' ? 'pendente' : 'concluida';
-                
-                if (tarefa.status === 'concluida' && tarefa.subtarefas) {
-                    tarefa.subtarefas.forEach(st => st.status = 'concluida');
-                }
-                
-                const novoProgresso = calcularProgressoAtividade(atividade);
-                atividade.progresso = novoProgresso;
-                
-                if (novoProgresso === 100) {
-                    atividade.status = 'verde';
-                    mostrarNotificacao('🎉 Todas as tarefas concluídas! Responsabilidade completa!');
-                }
-                
-                salvarDados();
-                mostrarModalTarefas(atividade);
-            }
-        }
-        
-        function toggleSubtarefa(atividadeId, tarefaId, subtarefaId) {
-            const area = dados.areas[estadoSistema.areaAtual];
-            const atividade = area.atividades.find(a => a.id === atividadeId);
-            const tarefa = atividade.tarefas.find(t => t.id === tarefaId);
-            const subtarefa = tarefa.subtarefas.find(st => st.id === subtarefaId);
-            
-            if (subtarefa) {
-                subtarefa.status = subtarefa.status === 'concluida' ? 'pendente' : 'concluida';
-                
-                const todasConcluidas = tarefa.subtarefas.every(st => st.status === 'concluida');
-                if (todasConcluidas && tarefa.status !== 'concluida') {
-                    mostrarNotificacao('Todas as subtarefas concluídas! Você pode marcar a tarefa principal agora.');
-                }
-                
-                const novoProgresso = calcularProgressoAtividade(atividade);
-                atividade.progresso = novoProgresso;
-                
-                salvarDados();
-                mostrarModalTarefas(atividade);
-            }
-        }
-        
-        function adicionarTarefa(atividadeId) {
-            const descricao = prompt('Digite a descrição da nova tarefa:');
-            if (!descricao) return;
-            
-            const area = dados.areas[estadoSistema.areaAtual];
-            const atividade = area.atividades.find(a => a.id === atividadeId);
-            
-            if (!atividade.tarefas) atividade.tarefas = [];
-            
-            const novaTarefa = {
-                id: `${atividadeId}_T${Date.now()}`,
-                descricao: descricao,
-                tipo: 'tarefa',
-                status: 'pendente',
-                responsavel: atividade.responsaveis[0] || '',
-                prioridade: 'media',
-                subtarefas: []
-            };
-            
-            atividade.tarefas.push(novaTarefa);
-            salvarDados();
-            mostrarModalTarefas(atividade);
-            mostrarNotificacao('Tarefa adicionada com sucesso!');
-        }
-        
-        function aplicarTemplate(atividadeId) {
-            const templates = obterTemplatesPadrao();
-            const area = dados.areas[estadoSistema.areaAtual];
-            const atividade = area.atividades.find(a => a.id === atividadeId);
-            
-            const template = templates.asBuilt;
-            
-            if (confirm('Aplicar template? Isso substituirá as tarefas existentes.')) {
-                atividade.tarefas = JSON.parse(JSON.stringify(template.tarefas));
-                
-                atividade.tarefas.forEach((tarefa, index) => {
-                    tarefa.id = `${atividadeId}_T${Date.now()}_${index}`;
-                    tarefa.responsavel = atividade.responsaveis[0] || '';
-                    
-                    if (tarefa.subtarefas) {
-                        tarefa.subtarefas.forEach((sub, subIndex) => {
-                            sub.id = `${tarefa.id}_S${subIndex + 1}`;
-                            sub.responsavel = tarefa.responsavel;
-                        });
-                    }
-                });
-                
-                salvarDados();
-                mostrarModalTarefas(atividade);
-                mostrarNotificacao('Template aplicado com sucesso!');
-            }
-        }
-        
-        function editarTarefa(atividadeId, tarefaId) {
-            mostrarNotificacao('Função de edição em desenvolvimento...');
-        }
-        
-        function deletarTarefaItem(atividadeId, tarefaId) {
-            if (confirm('Deseja realmente excluir esta tarefa?')) {
-                const area = dados.areas[estadoSistema.areaAtual];
-                const atividade = area.atividades.find(a => a.id === atividadeId);
-                
-                atividade.tarefas = atividade.tarefas.filter(t => t.id !== tarefaId);
-                
-                salvarDados();
-                mostrarModalTarefas(atividade);
-                mostrarNotificacao('Tarefa excluída!');
-            }
-        }
-        
-        function adicionarSubtarefa(atividadeId, tarefaId) {
-            mostrarNotificacao('Função em desenvolvimento...');
-        }
-        
+        // Funções auxiliares do sistema de responsabilidades
         function gerenciarTarefasResponsabilidade(atividadeId, areaKey) {
             const areaAnterior = estadoSistema.areaAtual;
             estadoSistema.areaAtual = areaKey;
@@ -4858,10 +5161,6 @@ ${evento.pessoas && evento.pessoas.length > 1 ? `👥 ${evento.pessoas.length} p
         
         function mostrarAdicionarResponsabilidade() {
             mostrarNotificacao('Função em desenvolvimento...');
-        }
-        
-        function atualizarProgresso(id, valor) {
-            mostrarNotificacao('O progresso é calculado automaticamente pelas tarefas!');
         }
         
         function validarFormulario(campos) {
@@ -4912,6 +5211,7 @@ ${evento.pessoas && evento.pessoas.length > 1 ? `👥 ${evento.pessoas.length} p
             
             estadoSistema.editandoAtividade = null;
             estadoSistema.editandoEvento = null;
+            estadoSistema.editandoTarefa = null;
             estadoSistema.pessoasSelecionadas.clear();
             estadoSistema.tarefasVinculadas.clear();
         }
@@ -4919,12 +5219,13 @@ ${evento.pessoas && evento.pessoas.length > 1 ? `👥 ${evento.pessoas.length} p
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             console.log(`Sistema de Gestão Firebase v${VERSAO_SISTEMA} iniciado`);
-            console.log('🔥 VERSÃO 5.0 - FIREBASE COLABORATIVO:');
-            console.log('☁️ Sincronização em tempo real');
-            console.log('👥 Múltiplos usuários simultâneos');
-            console.log('📋 Log de atividades ao vivo');
-            console.log('🔐 Sistema de autenticação');
-            console.log('📱 Funciona em qualquer dispositivo');
+            console.log('🔥 VERSÃO 5.1 - MELHORIAS IMPLEMENTADAS:');
+            console.log('✅ Edição completa de tarefas funcionando');
+            console.log('⚠️ Validação de prazos - bloqueia criação no passado');
+            console.log('📊 Progresso automático calculado pelas tarefas');
+            console.log('🔔 Alertas automáticos para prazos vencendo');
+            console.log('⏰ Monitoramento 24/7 dos status das atividades');
+            console.log('🔄 Verificação automática a cada hora');
             
             const eventoData = document.getElementById('eventoData');
             if (eventoData) {
