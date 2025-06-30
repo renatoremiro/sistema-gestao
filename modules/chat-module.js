@@ -1,6 +1,80 @@
 // ============================================
-// 💬 SISTEMA DE CHAT COMPLETO FINAL - TODOS OS PROBLEMAS CORRIGIDOS
+// 💬 SISTEMA DE CHAT COMPLETO FINAL - CORRIGIDO COM USUÁRIOS REAIS
 // ============================================
+
+// ✅ BASE DE DADOS DE USUÁRIOS REAIS
+const USUARIOS_SISTEMA = {
+    'bruabritto@biapo.com.br': {
+        nome: 'Bruna',
+        cargo: 'Arquiteta Trainee',
+        area: 'Documentação & Arquivo',
+        senha: 'Bruna@2025',
+        ativo: true
+    },
+    'isabella@biapo.com.br': {
+        nome: 'Isabella',
+        cargo: 'Coordenadora Geral',
+        area: 'Planejamento & Controle de Obra',
+        senha: 'Isabella@2025',
+        ativo: true
+    },
+    'renatoremiro@biapo.com.br': {
+        nome: 'Renato',
+        cargo: 'Coordenador',
+        area: 'Documentação & Arquivo',
+        senha: 'Renato@2025',
+        ativo: true
+    },
+    'redeinterna.obra3@gmail.com': {
+        nome: 'Juliana A.',
+        cargo: 'Estagiária de Arquitetura',
+        area: 'Documentação & Arquivo',
+        senha: 'Juliana@2025',
+        ativo: true
+    },
+    'eduardo@biapo.com.br': {
+        nome: 'Eduardo',
+        cargo: 'Coordenador Eng. Civil',
+        area: 'Produção & Qualidade',
+        senha: 'Eduardo@2025',
+        ativo: true
+    },
+    'carlosmendonca@biapo.com.br': {
+        nome: 'Beto',
+        cargo: 'Coordenador Arquiteto', // ✅ CORRIGIDO
+        area: 'Produção & Qualidade',
+        senha: 'Beto@2025',
+        ativo: true
+    },
+    'alex@biapo.com.br': {
+        nome: 'Alex',
+        cargo: 'Comprador',
+        area: 'Produção & Qualidade',
+        senha: 'Alex@2025',
+        ativo: true
+    },
+    'laracoutinho@biapo.com.br': {
+        nome: 'Lara',
+        cargo: 'Arquiteta Trainee',
+        area: 'Planejamento & Controle de Obra',
+        senha: 'Lara@2025',
+        ativo: true
+    },
+    'emanoelimoreira@biapo.com.br': {
+        nome: 'Manu',
+        cargo: 'Assistente de Arquitetura',
+        area: 'Produção & Qualidade',
+        senha: 'Manu@2025',
+        ativo: true
+    },
+    'estagio292@biapo.com.br': {
+        nome: 'Jean',
+        cargo: 'Estagiário de Eng. Civil',
+        area: 'Produção & Qualidade',
+        senha: 'Jean@2025',
+        ativo: true
+    }
+};
 
 class ChatSystem {
     constructor() {
@@ -13,7 +87,7 @@ class ChatSystem {
         this.isOpen = false;
         this.usuariosOnline = new Map();
         this.ultimasMensagens = new Map();
-        this.notificationListeners = new Map(); // ✅ NOVO: Para notificações
+        this.notificationListeners = new Map();
         
         this.aguardarInicializacao();
     }
@@ -44,7 +118,7 @@ class ChatSystem {
             this.carregarChats();
             this.monitorarUsuariosOnline();
             this.marcarUsuarioOnline();
-            this.iniciarNotificacoesGlobais(); // ✅ NOVO: Notificações
+            this.iniciarNotificacoesGlobais();
             
             console.log('✅ Sistema de Chat COMPLETO inicializado');
         } catch (error) {
@@ -71,7 +145,7 @@ class ChatSystem {
     }
 
     criarInterface() {
-        // ✅ REMOVER CAIXINHA SINCRONIZADO
+        // Remover indicador de sincronização
         const syncIndicator = document.getElementById('syncIndicator');
         if (syncIndicator) {
             syncIndicator.style.display = 'none';
@@ -224,6 +298,7 @@ class ChatSystem {
         });
     }
 
+    // ✅ FUNÇÃO CORRIGIDA - CARREGAMENTO DE CHATS PRIVADOS
     carregarChatsPrivados() {
         const container = document.getElementById('chatsPrivados');
         if (!container) return;
@@ -232,53 +307,55 @@ class ChatSystem {
             const chatsPrivados = snapshot.val() || {};
             container.innerHTML = '';
             
+            console.log('📂 Carregando chats privados:', chatsPrivados);
+            
             Object.entries(chatsPrivados).forEach(([chatId, chatData]) => {
                 if (chatData.participantes && chatData.participantes.includes(this.usuario.email)) {
                     const outroUsuario = chatData.participantes.find(p => p !== this.usuario.email);
                     const nomeOutro = this.getNomeUsuario(outroUsuario);
                     const statusOnline = this.usuariosOnline.has(outroUsuario);
-                    const naoLidas = this.mensagensNaoLidas.get(`privado-${chatId}`) || 0;
+                    const naoLidas = this.mensagensNaoLidas.get(chatId) || 0;
+                    
+                    console.log(`💬 Chat privado encontrado: ${nomeOutro} (${outroUsuario})`);
                     
                     container.innerHTML += `
-                        <div class="chat-room-item" data-room="privado-${chatId}" onclick="chatSystem.abrirChat('privado-${chatId}')">
+                        <div class="chat-room-item" data-room="${chatId}" onclick="chatSystem.abrirChat('${chatId}')">
                             <div class="room-info">
                                 <span class="room-icon">👤</span>
                                 <span class="room-name">${nomeOutro}</span>
                                 <span class="online-status ${statusOnline ? 'online' : 'offline'}">●</span>
                             </div>
-                            <span class="unread-count ${naoLidas > 0 ? '' : 'hidden'}" id="unread-privado-${chatId}">${naoLidas}</span>
+                            <span class="unread-count ${naoLidas > 0 ? '' : 'hidden'}" id="unread-${chatId}">${naoLidas}</span>
                         </div>
                     `;
                 }
             });
+            
+            console.log('✅ Chats privados carregados');
         });
     }
 
-    // ✅ NOVO: Sistema de notificações globais
+    // ✅ SISTEMA DE NOTIFICAÇÕES GLOBAIS
     iniciarNotificacoesGlobais() {
         console.log('🔔 Iniciando sistema de notificações...');
         
-        // Monitorar TODOS os chats para notificações
         this.monitorarChatParaNotificacoes('global');
         
-        // Monitorar chats de área
         Object.keys(this.areas).forEach(areaKey => {
             this.monitorarChatParaNotificacoes(`area-${areaKey}`);
         });
         
-        // Monitorar chats privados
         this.chatRef.child('privados').on('value', (snapshot) => {
             const chatsPrivados = snapshot.val() || {};
             Object.keys(chatsPrivados).forEach(chatId => {
                 const chatData = chatsPrivados[chatId];
                 if (chatData.participantes && chatData.participantes.includes(this.usuario.email)) {
-                    this.monitorarChatParaNotificacoes(`privado-${chatId}`);
+                    this.monitorarChatParaNotificacoes(chatId);
                 }
             });
         });
     }
 
-    // ✅ NOVO: Monitorar chat específico para notificações
     monitorarChatParaNotificacoes(chatId) {
         if (this.notificationListeners.has(chatId)) return;
         
@@ -288,7 +365,6 @@ class ChatSystem {
             const mensagem = snapshot.val();
             
             if (mensagem && mensagem.autor !== this.usuario.email) {
-                // Só notificar se não estiver no chat ativo
                 if (this.chatAtivo !== chatId) {
                     this.adicionarNotificacao(chatId);
                     this.mostrarNotificacaoVisual(mensagem, chatId);
@@ -301,12 +377,10 @@ class ChatSystem {
         console.log(`🔔 Monitorando notificações para: ${chatId}`);
     }
 
-    // ✅ NOVO: Adicionar notificação visual
     adicionarNotificacao(chatId) {
         const atual = this.mensagensNaoLidas.get(chatId) || 0;
         this.mensagensNaoLidas.set(chatId, atual + 1);
         
-        // Atualizar badge do chat específico
         const unreadEl = document.getElementById(`unread-${chatId.replace('/', '-')}`);
         if (unreadEl) {
             const count = this.mensagensNaoLidas.get(chatId);
@@ -314,15 +388,11 @@ class ChatSystem {
             unreadEl.classList.remove('hidden');
         }
         
-        // Atualizar badge total
         this.atualizarBadgeTotal();
-        
         console.log(`🔔 Notificação adicionada para ${chatId}: ${atual + 1}`);
     }
 
-    // ✅ NOVO: Mostrar notificação visual
     mostrarNotificacaoVisual(mensagem, chatId) {
-        // Criar notificação no canto da tela
         const notification = document.createElement('div');
         notification.className = 'chat-notification';
         notification.innerHTML = `
@@ -342,7 +412,6 @@ class ChatSystem {
         
         document.body.appendChild(notification);
         
-        // Remover após 5 segundos
         setTimeout(() => {
             if (notification.parentElement) {
                 notification.remove();
@@ -350,7 +419,6 @@ class ChatSystem {
         }, 5000);
     }
 
-    // ✅ NOVO: Obter nome do chat
     obterNomeChat(chatId) {
         if (chatId === 'global') return '🌐 Chat Geral';
         if (chatId.startsWith('area-')) {
@@ -371,10 +439,8 @@ class ChatSystem {
         console.log(`🔧 Abrindo chat: ${chatId}`);
         this.chatAtivo = chatId;
         
-        // Zerar notificações deste chat
         this.mensagensNaoLidas.set(chatId, 0);
         
-        // UI Updates
         document.querySelectorAll('.chat-room-item').forEach(item => {
             item.classList.remove('active');
         });
@@ -384,7 +450,6 @@ class ChatSystem {
             roomElement.classList.add('active');
         }
         
-        // Clear messages
         const messagesContainer = document.getElementById('chatMessages');
         if (messagesContainer) {
             messagesContainer.innerHTML = '<div class="welcome-message"><p>Carregando mensagens...</p></div>';
@@ -444,13 +509,11 @@ class ChatSystem {
         }
     }
 
-    // ✅ CARREGAMENTO DE MENSAGENS CORRIGIDO
     carregarMensagens(chatId) {
         console.log(`🔧 Carregando mensagens para: ${chatId}`);
         
         const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
         
-        // Carregar mensagens existentes
         messagesRef.once('value', (snapshot) => {
             const mensagens = snapshot.val() || {};
             const container = document.getElementById('chatMessages');
@@ -459,7 +522,6 @@ class ChatSystem {
                 container.innerHTML = '';
             }
             
-            // Criar cache das mensagens existentes
             this.ultimasMensagens.set(chatId, new Set());
             
             const mensagensArray = Object.values(mensagens).sort((a, b) => 
@@ -476,7 +538,6 @@ class ChatSystem {
             });
         });
         
-        // ✅ LISTENER EM TEMPO REAL para mensagens novas
         const listener = messagesRef.on('child_added', (snapshot) => {
             const mensagem = snapshot.val();
             const cache = this.ultimasMensagens.get(chatId) || new Set();
@@ -485,7 +546,6 @@ class ChatSystem {
                 console.log('📥 NOVA mensagem detectada:', mensagem);
                 cache.add(mensagem.id);
                 
-                // Só adicionar se estiver no chat ativo
                 if (this.chatAtivo === chatId) {
                     this.adicionarMensagemUI(mensagem);
                 }
@@ -496,7 +556,6 @@ class ChatSystem {
         console.log(`✅ Listener ativo para chat: ${chatId}`);
     }
 
-    // ✅ ENVIO DE MENSAGEM
     enviarMensagem() {
         const input = document.getElementById('chatInput');
         if (!input) return;
@@ -521,7 +580,6 @@ class ChatSystem {
         
         console.log('📤 Enviando mensagem:', mensagem);
         
-        // Salvar no Firebase
         this.chatRef.child(`mensagens/${this.chatAtivo}/${mensagemId}`).set(mensagem)
             .then(() => {
                 console.log('✅ Mensagem salva com sucesso!');
@@ -536,12 +594,10 @@ class ChatSystem {
             });
     }
 
-    // ✅ ADICIONAR MENSAGEM NA UI
     adicionarMensagemUI(mensagem) {
         const container = document.getElementById('chatMessages');
         if (!container || !mensagem) return;
         
-        // Verificar duplicata
         const mensagemExistente = container.querySelector(`[data-msg-id="${mensagem.id}"]`);
         if (mensagemExistente) {
             return;
@@ -567,11 +623,9 @@ class ChatSystem {
         
         container.appendChild(mensagemEl);
         
-        // Remover welcome message
         const welcome = container.querySelector('.welcome-message');
         if (welcome) welcome.remove();
         
-        // Scroll para baixo
         container.scrollTop = container.scrollHeight;
         
         console.log(`✅ Mensagem UI adicionada: "${mensagem.texto}"`);
@@ -602,7 +656,6 @@ class ChatSystem {
         }
     }
 
-    // ✅ NOVO: Limpar chat
     limparChat() {
         if (!confirm(`Deseja realmente limpar todas as mensagens do chat atual?\n\nEsta ação não pode ser desfeita.`)) {
             return;
@@ -614,13 +667,11 @@ class ChatSystem {
             .then(() => {
                 console.log('✅ Chat limpo com sucesso!');
                 
-                // Limpar UI
                 const container = document.getElementById('chatMessages');
                 if (container) {
                     container.innerHTML = '<div class="welcome-message"><p>Chat limpo!</p><p>Comece uma nova conversa.</p></div>';
                 }
                 
-                // Limpar cache
                 this.ultimasMensagens.set(this.chatAtivo, new Set());
                 
                 window.mostrarNotificacao('Chat limpo com sucesso!');
@@ -631,9 +682,31 @@ class ChatSystem {
             });
     }
 
-    // ========== CHAT PRIVADO CORRIGIDO ==========
-    novoPrivado() {
-        const usuarios = this.getTodosUsuarios();
+    // ✅ FUNÇÃO CORRIGIDA - OBTER TODOS OS USUÁRIOS REAIS
+    async getTodosUsuarios() {
+        console.log('👥 Obtendo usuários reais do sistema...');
+        
+        return new Promise((resolve) => {
+            // Usar base de dados de usuários reais
+            const usuarios = Object.entries(USUARIOS_SISTEMA)
+                .filter(([email, dados]) => dados.ativo)
+                .map(([email, dados]) => ({
+                    nome: dados.nome,
+                    email: email,
+                    cargo: dados.cargo,
+                    area: dados.area
+                }));
+            
+            console.log('✅ Usuários reais encontrados:', usuarios);
+            resolve(usuarios);
+        });
+    }
+
+    // ✅ FUNÇÃO CORRIGIDA - NOVO CHAT PRIVADO
+    async novoPrivado() {
+        console.log('📞 Iniciando novo chat privado...');
+        
+        const usuarios = await this.getTodosUsuarios();
         const usuariosDisponiveis = usuarios.filter(u => u.email !== this.usuario.email);
         
         if (usuariosDisponiveis.length === 0) {
@@ -641,16 +714,19 @@ class ChatSystem {
             return;
         }
         
-        const opcoes = usuariosDisponiveis.map(u => `${u.nome} (${u.email})`).join('\n');
-        const escolha = prompt(`Iniciar conversa privada com:\n\n${opcoes}\n\nDigite o email:`);
+        console.log('👥 Usuários disponíveis:', usuariosDisponiveis);
+        
+        const opcoes = usuariosDisponiveis.map(u => `${u.nome} - ${u.cargo} (${u.email})`).join('\n');
+        const escolha = prompt(`Iniciar conversa privada com:\n\n${opcoes}\n\nDigite o nome ou email:`);
         
         if (escolha) {
             const usuarioEscolhido = usuariosDisponiveis.find(u => 
-                u.email.toLowerCase() === escolha.toLowerCase() || 
+                u.email.toLowerCase().includes(escolha.toLowerCase()) || 
                 u.nome.toLowerCase().includes(escolha.toLowerCase())
             );
             
             if (usuarioEscolhido) {
+                console.log('✅ Usuário escolhido:', usuarioEscolhido);
                 this.iniciarChatPrivado(usuarioEscolhido.email);
             } else {
                 window.mostrarNotificacao('Usuário não encontrado', 'error');
@@ -658,30 +734,53 @@ class ChatSystem {
         }
     }
 
-    // ✅ CHAT PRIVADO CORRIGIDO - ID ÚNICO
+    // ✅ FUNÇÃO CORRIGIDA - INICIAR CHAT PRIVADO
     iniciarChatPrivado(emailDestino) {
-        // ✅ CORREÇÃO: Garantir que o ID seja sempre o mesmo
-        const participantes = [this.usuario.email, emailDestino].sort();
-        const chatId = `privado_${participantes[0].replace(/[@.]/g, '_')}_${participantes[1].replace(/[@.]/g, '_')}`;
+        console.log('🔧 Criando chat privado entre:', this.usuario.email, 'e', emailDestino);
         
-        console.log('🔧 Criando chat privado com ID:', chatId);
+        const participantes = [this.usuario.email, emailDestino].sort();
+        const chatId = `privado_${participantes[0].replace(/[@.-]/g, '_')}_${participantes[1].replace(/[@.-]/g, '_')}`;
+        
+        console.log('🆔 ID do chat privado:', chatId);
         
         const chatData = {
             participantes: participantes,
             criadoEm: new Date().toISOString(),
-            ultimaAtividade: new Date().toISOString()
+            ultimaAtividade: new Date().toISOString(),
+            criadoPor: this.usuario.email
         };
         
-        this.chatRef.child(`privados/${chatId}`).set(chatData).then(() => {
-            // Iniciar monitoramento deste chat
-            this.monitorarChatParaNotificacoes(chatId);
-            
-            this.carregarChatsPrivados();
-            this.abrirChat(chatId);
-            window.mostrarNotificacao('Conversa privada iniciada!');
-        }).catch(error => {
-            console.error('❌ Erro ao criar chat privado:', error);
-        });
+        this.chatRef.child(`privados/${chatId}`).set(chatData)
+            .then(() => {
+                console.log('✅ Chat privado criado no Firebase');
+                
+                this.monitorarChatParaNotificacoes(chatId);
+                
+                this.carregarChatsPrivados();
+                setTimeout(() => {
+                    this.abrirChat(chatId);
+                }, 500);
+                
+                window.mostrarNotificacao('Conversa privada iniciada!');
+            })
+            .catch(error => {
+                console.error('❌ Erro ao criar chat privado:', error);
+                window.mostrarNotificacao('Erro ao criar conversa privada', 'error');
+            });
+    }
+
+    // ✅ FUNÇÃO CORRIGIDA - OBTER NOME DO USUÁRIO
+    getNomeUsuario(email) {
+        console.log('👤 Buscando nome para email:', email);
+        
+        const usuario = USUARIOS_SISTEMA[email];
+        if (usuario) {
+            console.log('✅ Nome encontrado:', usuario.nome);
+            return usuario.nome;
+        } else {
+            console.log('⚠️ Nome não encontrado, usando fallback');
+            return email.split('@')[0];
+        }
     }
 
     // ========== USUÁRIOS ONLINE ==========
@@ -829,31 +928,6 @@ class ChatSystem {
         return membrosUnicos.size;
     }
 
-    getTodosUsuarios() {
-        if (!this.areas) return [];
-        
-        const usuarios = [];
-        Object.values(this.areas).forEach(area => {
-            if (area.equipe) {
-                area.equipe.forEach(membro => {
-                    if (!usuarios.find(u => u.nome === membro.nome)) {
-                        usuarios.push({
-                            nome: membro.nome,
-                            email: `${membro.nome.toLowerCase().replace(' ', '.')}@obra.com`
-                        });
-                    }
-                });
-            }
-        });
-        return usuarios;
-    }
-
-    getNomeUsuario(email) {
-        const usuarios = this.getTodosUsuarios();
-        const usuario = usuarios.find(u => u.email === email);
-        return usuario ? usuario.nome : email.split('@')[0];
-    }
-
     encontrarAtividade(id) {
         if (!this.areas) return null;
         
@@ -868,6 +942,103 @@ class ChatSystem {
 
     carregarChats() {
         console.log('✅ Chats carregados');
+    }
+}
+
+// ============================================
+// 🔧 SISTEMA DE CADASTRO DE USUÁRIOS
+// ============================================
+
+// ✅ FUNÇÃO PARA CADASTRAR TODOS OS USUÁRIOS NO FIREBASE AUTH
+async function cadastrarTodosUsuarios() {
+    console.log('🔧 Iniciando cadastro de usuários reais...');
+    
+    const resultados = [];
+    
+    for (const [email, dadosUsuario] of Object.entries(USUARIOS_SISTEMA)) {
+        try {
+            console.log(`📝 Cadastrando: ${dadosUsuario.nome} (${email})`);
+            
+            // Criar usuário no Firebase Auth
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, dadosUsuario.senha);
+            
+            // Atualizar perfil com nome real
+            await userCredential.user.updateProfile({
+                displayName: dadosUsuario.nome
+            });
+            
+            // Salvar vinculação no sistema
+            await window.database.ref(`vinculacoes/${email.replace(/[@.]/g, '_')}`).set({
+                nomeColaborador: dadosUsuario.nome,
+                cargoColaborador: dadosUsuario.cargo,
+                areaColaborador: dadosUsuario.area,
+                emailUsuario: email,
+                dataVinculacao: new Date().toISOString(),
+                ativo: true
+            });
+            
+            resultados.push(`✅ ${dadosUsuario.nome}: Cadastrado com sucesso`);
+            
+        } catch (error) {
+            if (error.code === 'auth/email-already-in-use') {
+                resultados.push(`⚠️ ${dadosUsuario.nome}: Email já cadastrado`);
+            } else {
+                resultados.push(`❌ ${dadosUsuario.nome}: Erro - ${error.message}`);
+            }
+        }
+        
+        // Aguardar um pouco entre cadastros
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    console.log('📋 RESULTADO DO CADASTRO:');
+    resultados.forEach(resultado => console.log(resultado));
+    
+    const resumo = resultados.join('\n');
+    alert(`CADASTRO DE USUÁRIOS CONCLUÍDO:\n\n${resumo}`);
+    
+    return resultados;
+}
+
+// ✅ FUNÇÃO PARA TESTAR O CHAT PRIVADO
+function testarChatPrivado() {
+    console.log('🧪 TESTANDO SISTEMA DE CHAT PRIVADO...');
+    
+    if (chatSystem && chatSystem.getTodosUsuarios) {
+        chatSystem.getTodosUsuarios().then(usuarios => {
+            console.log('👥 Usuários disponíveis:', usuarios);
+            console.log('📧 Emails válidos:', usuarios.map(u => u.email));
+        });
+    }
+    
+    if (window.database) {
+        window.database.ref('chat/privados').once('value', (snapshot) => {
+            console.log('💾 Chats privados no Firebase:', snapshot.val());
+        });
+    }
+    
+    console.log('👤 Usuário atual:', window.usuarioAtual?.email);
+    console.log('🏷️ Nome do usuário:', window.estadoSistema?.usuarioNome);
+}
+
+// ✅ FUNÇÃO PARA LIMPAR E RECRIAR ESTRUTURA DE CHAT PRIVADO
+function limparERecriarChatPrivado() {
+    if (confirm('Deseja limpar todos os chats privados e recriar a estrutura? Esta ação não pode ser desfeita.')) {
+        console.log('🗑️ Limpando estrutura de chat privado...');
+        
+        window.database.ref('chat/privados').remove()
+            .then(() => {
+                console.log('✅ Estrutura limpa com sucesso!');
+                
+                if (chatSystem && chatSystem.carregarChatsPrivados) {
+                    chatSystem.carregarChatsPrivados();
+                }
+                
+                window.mostrarNotificacao('Estrutura de chat privado limpa e recriada!');
+            })
+            .catch(error => {
+                console.error('❌ Erro ao limpar:', error);
+            });
     }
 }
 
@@ -890,7 +1061,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(inicializarChat, 3000);
 });
 
-// ✅ ESTILOS CORRIGIDOS + NOTIFICAÇÕES
+// ✅ EXPOSIÇÃO DAS FUNÇÕES GLOBALMENTE
+window.cadastrarTodosUsuarios = cadastrarTodosUsuarios;
+window.testarChatPrivado = testarChatPrivado;
+window.limparERecriarChatPrivado = limparERecriarChatPrivado;
+window.USUARIOS_SISTEMA = USUARIOS_SISTEMA;
+
+// ✅ ESTILOS PARA NOTIFICAÇÕES
 const style = document.createElement('style');
 style.textContent = `
     .sync-indicator.synced {
@@ -903,7 +1080,6 @@ style.textContent = `
         z-index: 1001 !important;
     }
     
-    /* ✅ NOVO: Estilos para notificações */
     .chat-notification {
         position: fixed;
         top: 80px;
@@ -950,7 +1126,6 @@ style.textContent = `
         }
     }
     
-    /* ✅ Melhorar badge de notificações */
     .unread-count {
         background: #ef4444 !important;
         color: white !important;
@@ -958,3 +1133,31 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ✅ INSTRUÇÕES DE USO
+console.log(`
+🔧 CHAT SYSTEM CORRIGIDO - INSTRUÇÕES:
+
+1️⃣ CADASTRAR USUÁRIOS:
+   digite: cadastrarTodosUsuarios()
+
+2️⃣ TESTAR CHAT PRIVADO:
+   digite: testarChatPrivado()
+
+3️⃣ LIMPAR E RECRIAR (se necessário):
+   digite: limparERecriarChatPrivado()
+
+4️⃣ CREDENCIAIS DOS USUÁRIOS:
+   - Bruna: bruabritto@biapo.com.br / Bruna@2025
+   - Isabella: isabella@biapo.com.br / Isabella@2025
+   - Renato: renatoremiro@biapo.com.br / Renato@2025
+   - Juliana: redeinterna.obra3@gmail.com / Juliana@2025
+   - Eduardo: eduardo@biapo.com.br / Eduardo@2025
+   - Beto: carlosmendonca@biapo.com.br / Beto@2025 (Coordenador Arquiteto)
+   - Alex: alex@biapo.com.br / Alex@2025
+   - Lara: laracoutinho@biapo.com.br / Lara@2025
+   - Manu: emanoelimoreira@biapo.com.br / Manu@2025
+   - Jean: estagio292@biapo.com.br / Jean@2025
+
+💡 Execute cadastrarTodosUsuarios() no console (F12) para criar todos os usuários!
+`);
