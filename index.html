@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.7)</title>
+    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.8+)</title>
     <style>
         * {
             margin: 0;
@@ -331,11 +331,12 @@
             gap: 4px;
         }
         
-        .evento-reuniao { background: #3b82f6; }
-        .evento-entrega { background: #10b981; }
-        .evento-prazo { background: #ef4444; }
-        .evento-marco { background: #8b5cf6; }
-        .evento-outro { background: #6b7280; }
+        /* ✅ CORES UNIFICADAS PARA EVENTOS E TAREFAS */
+        .evento-reuniao, .tarefa-reuniao { background: #3b82f6; }
+        .evento-entrega, .tarefa-entrega { background: #10b981; }
+        .evento-prazo, .tarefa-prazo { background: #ef4444; }
+        .evento-marco, .tarefa-marco { background: #8b5cf6; }
+        .evento-outro, .tarefa-outro { background: #6b7280; }
         
         .evento-dia-completo {
             background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
@@ -866,10 +867,56 @@
             75% { transform: translateX(5px); }
         }
 
-        /* Melhorias visuais v5.3 */
+        /* ✅ MELHORIAS VISUAIS v5.8 - CORES UNIFICADAS COM MELHOR VISIBILIDADE */
         .evento-pessoal {
-            background: #ddd6fe;
-            border-left: 3px solid #8b5cf6;
+            border-left: 4px solid;
+            position: relative;
+            color: #1f2937 !important; /* Texto escuro para melhor contraste */
+            font-weight: 500;
+        }
+
+        .evento-pessoal.tarefa-reuniao {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: #3b82f6;
+            box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .evento-pessoal.tarefa-entrega {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left-color: #10b981;
+            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .evento-pessoal.tarefa-prazo {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left-color: #ef4444;
+            box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .evento-pessoal.tarefa-marco {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            border-left-color: #8b5cf6;
+            box-shadow: 0 1px 3px rgba(139, 92, 246, 0.2);
+        }
+
+        .evento-pessoal.tarefa-outro {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-left-color: #6b7280;
+            box-shadow: 0 1px 3px rgba(107, 114, 128, 0.2);
+        }
+
+        /* Melhor visibilidade para texto dentro das tarefas pessoais */
+        .evento-pessoal .evento-header,
+        .evento-pessoal .evento-info {
+            color: #374151 !important;
+        }
+
+        /* Badge com melhor contraste */
+        .evento-pessoal .sincronizado-badge {
+            background: #1f2937;
+            color: #ffffff;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .sincronizado-badge {
@@ -881,6 +928,13 @@
             color: white;
             padding: 1px 4px;
             border-radius: 3px;
+        }
+
+        /* ✅ GRID DE HORÁRIOS - NOVO */
+        .horario-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
     </style>
 </head>
@@ -930,10 +984,10 @@
         
         <div class="header">
             <div>
-                <h1>Sistema de Gestão Otimizado</h1>
+                <h1>Sistema de Gestão Unificado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v5.7 Debug - Investigando Bug de Tarefas 🔍
+                    Sistema v5.8+ - Cores Unificadas + Visibilidade Melhorada ✨
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -997,12 +1051,20 @@
                 
                 <div id="calendario" class="calendario"></div>
                 
+                <!-- ✅ LEGENDA ATUALIZADA COM TAREFAS PESSOAIS -->
                 <div style="margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <span style="font-weight: bold; color: #374151;">📅 Eventos da Equipe:</span>
+                    </div>
                     <span><span class="status-indicator evento-reuniao"></span>Reunião</span>
                     <span><span class="status-indicator evento-entrega"></span>Entrega</span>
                     <span><span class="status-indicator evento-prazo"></span>Prazo</span>
                     <span><span class="status-indicator evento-marco"></span>Marco</span>
                     <span><span class="status-indicator evento-outro"></span>Outros</span>
+                    <div style="margin-left: 16px; display: flex; align-items: center; gap: 4px;">
+                        <span style="font-weight: bold; color: #374151;">👤 Tarefas Pessoais:</span>
+                        <span style="font-size: 10px; background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">mesmas cores + borda</span>
+                    </div>
                     <span><span class="status-indicator" style="background: #f59e0b;"></span>Feriado</span>
                 </div>
             </div>
@@ -1023,12 +1085,13 @@
             </div>
             
             <!-- Dica do sistema -->
-            <div style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #92400e;">
-                <strong>🔍 Sistema v5.7 - DEBUG ATIVO PARA INVESTIGAR BUG:</strong> 
-                <br><strong>🐛 Problema:</strong> Tarefas pessoais não aparecem na agenda após criação
-                <br><strong>🔧 Debug:</strong> Console (F12) mostra logs detalhados de criação e renderização
-                <br><strong>💡 Teste:</strong> Crie uma tarefa e veja os logs no console
-                <br><strong>🧰 Função:</strong> Digite <code>debugSistema()</code> no console para ver estrutura completa
+            <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
+                <strong>✅ Sistema v5.8 - UNIFICAÇÃO COMPLETA + VISIBILIDADE MELHORADA:</strong> 
+                <br><strong>🎨 Cores:</strong> Eventos e tarefas pessoais usam as mesmas cores por tipo
+                <br><strong>📋 Campos:</strong> Ambos têm tipo, título, horário início/fim, data e descrição
+                <br><strong>👁️ Visibilidade:</strong> Tarefas pessoais com texto escuro e gradientes para melhor leitura
+                <br><strong>📅 Legenda:</strong> Diferencia eventos da equipe (texto branco) vs tarefas pessoais (texto escuro + badge 👤)
+                <br><strong>🔧 Interface:</strong> Modais padronizados com bordas mais grossas e sombras nas tarefas pessoais
             </div>
             
             <!-- Cards das Áreas -->
@@ -1102,7 +1165,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                         <h3>📅 Agenda da Semana</h3>
                         <div style="font-size: 11px; color: #6b7280; text-align: right;">
-                            <div>📝 Tarefas pessoais</div>
+                            <div>📝 Tarefas pessoais (cores por tipo)</div>
                             <div>📅 Eventos do calendário</div>
                             <div>⏰ Prazos próximos</div>
                         </div>
@@ -1119,7 +1182,7 @@
         </div>
     </div>
     
-    <!-- Modal de Novo/Editar Evento (Simplificado) -->
+    <!-- Modal de Novo/Editar Evento (Atualizado) -->
     <div id="modalEvento" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <h3 style="margin-bottom: 24px;" id="modalEventoTitulo">Novo Evento</h3>
@@ -1150,9 +1213,15 @@
             
             <div class="form-group">
                 <label>Horário <span style="color: #ef4444;">*</span></label>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <input type="time" id="eventoHorarioInicio" value="09:00" required>
-                    <input type="time" id="eventoHorarioFim" value="10:00">
+                <div class="horario-grid">
+                    <div>
+                        <label style="font-size: 12px; margin-bottom: 4px;">Início</label>
+                        <input type="time" id="eventoHorarioInicio" value="09:00" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; margin-bottom: 4px;">Fim (opcional)</label>
+                        <input type="time" id="eventoHorarioFim" value="10:00">
+                    </div>
                 </div>
                 <span class="error-message hidden" id="eventoHorarioInicioError">Horário é obrigatório</span>
             </div>
@@ -1214,14 +1283,14 @@
         </div>
     </div>
     
-    <!-- Modal de Nova Tarefa -->
+    <!-- ✅ Modal de Nova Tarefa (Atualizado com campos unificados) -->
     <div id="modalTarefa" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 24px;">Nova Tarefa Pessoal</h3>
             
             <div class="form-group">
-                <label>Categoria da Tarefa <span style="color: #ef4444;">*</span></label>
-                <select id="tarefaCategoria">
+                <label>Tipo da Tarefa <span style="color: #ef4444;">*</span></label>
+                <select id="tarefaTipo">
                     <option value="reuniao">📅 Reunião</option>
                     <option value="entrega">📦 Entrega</option>
                     <option value="prazo">⏰ Prazo</option>
@@ -1231,12 +1300,19 @@
             </div>
             
             <div class="form-group">
+                <label>Título da Tarefa <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="tarefaTitulo" placeholder="Digite o título da tarefa" required>
+                <span class="error-message hidden" id="tarefaTituloError">Título é obrigatório</span>
+            </div>
+            
+            <div class="form-group">
                 <label>Tipo de Agendamento</label>
-                <select id="tarefaTipo" onchange="alternarTipoAgendamento()">
+                <select id="tarefaAgendamento" onchange="alternarTipoAgendamento()">
                     <option value="semanal">Dia da Semana</option>
                     <option value="data">Data Específica</option>
                 </select>
             </div>
+            
             <div class="form-group" id="grupoDiaSemana">
                 <label>Dia da Semana</label>
                 <select id="tarefaDia">
@@ -1247,21 +1323,33 @@
                     <option value="sexta">Sexta-feira</option>
                 </select>
             </div>
+            
             <div class="form-group hidden" id="grupoData">
                 <label>Data Específica <span style="color: #ef4444;">*</span></label>
                 <input type="date" id="tarefaDataEspecifica">
                 <span class="error-message hidden" id="tarefaDataError">Data é obrigatória</span>
             </div>
-            <div class="form-group">
-                <label>Descrição <span style="color: #ef4444;">*</span></label>
-                <input type="text" id="tarefaDescricao" placeholder="Digite a descrição da tarefa" required>
-                <span class="error-message hidden" id="tarefaDescricaoError">Descrição é obrigatória</span>
-            </div>
+            
             <div class="form-group">
                 <label>Horário <span style="color: #ef4444;">*</span></label>
-                <input type="time" id="tarefaHorario" required>
+                <div class="horario-grid">
+                    <div>
+                        <label style="font-size: 12px; margin-bottom: 4px;">Início</label>
+                        <input type="time" id="tarefaHorarioInicio" value="09:00" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; margin-bottom: 4px;">Fim (opcional)</label>
+                        <input type="time" id="tarefaHorarioFim" value="10:00">
+                    </div>
+                </div>
                 <span class="error-message hidden" id="tarefaHorarioError">Horário é obrigatório</span>
             </div>
+            
+            <div class="form-group">
+                <label>Descrição</label>
+                <textarea id="tarefaDescricao" rows="2" placeholder="Descrição opcional..."></textarea>
+            </div>
+            
             <div class="form-group">
                 <div class="checkbox-group">
                     <label>
@@ -1270,6 +1358,7 @@
                     </label>
                 </div>
             </div>
+            
             <div style="display: flex; gap: 8px; justify-content: flex-end;">
                 <button class="btn btn-secondary" onclick="fecharModal('modalTarefa')">Cancelar</button>
                 <button class="btn btn-primary" onclick="salvarTarefa()" id="btnSalvarTarefa">Salvar</button>
@@ -1277,13 +1366,30 @@
         </div>
     </div>
     
-    <!-- Modal de Editar Tarefa Pessoal -->
+    <!-- ✅ Modal de Editar Tarefa Pessoal (Atualizado) -->
     <div id="modalEditarTarefa" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 24px;">Editar Tarefa Pessoal</h3>
             <input type="hidden" id="editarTarefaId">
             <input type="hidden" id="editarTarefaDono">
             <input type="hidden" id="editarTarefaDia">
+            
+            <div class="form-group">
+                <label>Tipo da Tarefa <span style="color: #ef4444;">*</span></label>
+                <select id="editarTarefaTipoCategoria">
+                    <option value="reuniao">📅 Reunião</option>
+                    <option value="entrega">📦 Entrega</option>
+                    <option value="prazo">⏰ Prazo</option>
+                    <option value="marco">🎯 Marco</option>
+                    <option value="outro">📌 Outro</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Título da Tarefa <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="editarTarefaTitulo" placeholder="Digite o título da tarefa" required>
+                <span class="error-message hidden" id="editarTarefaTituloError">Título é obrigatório</span>
+            </div>
             
             <div class="form-group">
                 <label>Tipo de Agendamento</label>
@@ -1311,15 +1417,23 @@
             </div>
             
             <div class="form-group">
-                <label>Descrição <span style="color: #ef4444;">*</span></label>
-                <input type="text" id="editarTarefaDescricao" placeholder="Digite a descrição da tarefa" required>
-                <span class="error-message hidden" id="editarTarefaDescricaoError">Descrição é obrigatória</span>
+                <label>Horário <span style="color: #ef4444;">*</span></label>
+                <div class="horario-grid">
+                    <div>
+                        <label style="font-size: 12px; margin-bottom: 4px;">Início</label>
+                        <input type="time" id="editarTarefaHorarioInicio" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; margin-bottom: 4px;">Fim (opcional)</label>
+                        <input type="time" id="editarTarefaHorarioFim">
+                    </div>
+                </div>
+                <span class="error-message hidden" id="editarTarefaHorarioError">Horário é obrigatório</span>
             </div>
             
             <div class="form-group">
-                <label>Horário <span style="color: #ef4444;">*</span></label>
-                <input type="time" id="editarTarefaHorario" required>
-                <span class="error-message hidden" id="editarTarefaHorarioError">Horário é obrigatório</span>
+                <label>Descrição</label>
+                <textarea id="editarTarefaDescricaoTexto" rows="2" placeholder="Descrição opcional..."></textarea>
             </div>
             
             <div class="form-group">
@@ -1422,7 +1536,7 @@
         let intervaloPrazos = null;
         
         // Constantes e configurações
-        const VERSAO_SISTEMA = '5.7';
+        const VERSAO_SISTEMA = '5.8+';
         const VERSAO_DB = 5;
         const INTERVALO_VERIFICACAO_PRAZOS = 3600000; // 1 hora
         
@@ -1778,7 +1892,7 @@
                     }
                 }, 1000);
                 
-                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema otimizado pronto!`);
+                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v5.8+ - Visibilidade melhorada!`);
                 
             } catch (error) {
                 console.error('Erro na inicialização:', error);
@@ -1909,24 +2023,37 @@
                         descricao: "Revisão final do As Built antes da entrega"
                     }
                 ],
+                // ✅ AGENDAS COM ESTRUTURA UNIFICADA
                 agendas: {
                     "Renato": {
                         "segunda": [
                             {
                                 id: Date.now(),
-                                descricao: "Verificar projetos - 08:00",
+                                titulo: "Verificar projetos",
+                                tipo: "reuniao",
+                                horarioInicio: "08:00",
+                                horarioFim: "09:00",
+                                descricao: "Revisão dos projetos em andamento",
                                 mostrarNoCalendario: true
                             },
                             {
                                 id: Date.now() + 1,
-                                descricao: "Email importante - 09:30",
+                                titulo: "Email importante",
+                                tipo: "outro",
+                                horarioInicio: "09:30",
+                                horarioFim: "10:00",
+                                descricao: "Responder emails prioritários",
                                 mostrarNoCalendario: false
                             }
                         ],
                         "quarta": [
                             {
                                 id: Date.now() + 2,
-                                descricao: "Reunião coordenadores - 15:00",
+                                titulo: "Reunião coordenadores",
+                                tipo: "reuniao",
+                                horarioInicio: "15:00",
+                                horarioFim: "16:00",
+                                descricao: "Alinhamento semanal com coordenadores",
                                 mostrarNoCalendario: false
                             }
                         ],
@@ -1936,14 +2063,22 @@
                         "terca": [
                             {
                                 id: Date.now() + 3,
-                                descricao: "Atualizar BIM - 10:00",
+                                titulo: "Atualizar BIM",
+                                tipo: "marco",
+                                horarioInicio: "10:00",
+                                horarioFim: "12:00",
+                                descricao: "Atualizar modelo BIM com alterações",
                                 mostrarNoCalendario: true
                             }
                         ],
                         "sexta": [
                             {
                                 id: Date.now() + 4,
-                                descricao: "Relatório semanal - 16:00",
+                                titulo: "Relatório semanal",
+                                tipo: "entrega",
+                                horarioInicio: "16:00",
+                                horarioFim: "17:00",
+                                descricao: "Preparar relatório semanal de progresso",
                                 mostrarNoCalendario: false
                             }
                         ]
@@ -1952,7 +2087,11 @@
                         "segunda": [
                             {
                                 id: Date.now() + 5,
-                                descricao: "Planejamento semanal - 07:30",
+                                titulo: "Planejamento semanal",
+                                tipo: "reuniao",
+                                horarioInicio: "07:30",
+                                horarioFim: "08:30",
+                                descricao: "Planejamento estratégico da semana",
                                 mostrarNoCalendario: true
                             }
                         ]
@@ -2059,7 +2198,7 @@
                     let classesEvento = `evento evento-${evento.tipo}`;
                     
                     if (evento.origem === 'tarefa_pessoal') {
-                        classesEvento += ' evento-pessoal';
+                        classesEvento = `evento evento-pessoal tarefa-${evento.tipo}`;
                     }
                     
                     eventoDiv.className = classesEvento;
@@ -2073,21 +2212,24 @@
                         case 'outro': iconeTipo = '📌'; break;
                     }
                     
+                    // ✅ MELHOR VISIBILIDADE PARA TAREFAS PESSOAIS
+                    const corTexto = evento.origem === 'tarefa_pessoal' ? '#374151' : 'white';
+                    
                     let htmlEvento = `
-                        <div class="evento-header">
+                        <div class="evento-header" style="color: ${corTexto};">
                             <span>${iconeTipo} ${evento.horarioInicio || 'Todo dia'}</span>
                             ${evento.origem === 'tarefa_pessoal' ? '<span class="sincronizado-badge">👤</span>' : ''}
                         </div>
-                        <div style="font-weight: 500;">${evento.titulo}</div>
+                        <div style="font-weight: 500; color: ${corTexto};">${evento.titulo}</div>
                     `;
                     
                     if (evento.pessoas && evento.pessoas.length > 0) {
                         const labelPessoas = evento.tipo === 'reuniao' ? '👥' : '👤';
-                        htmlEvento += `<div class="evento-info">${labelPessoas} ${evento.pessoas.length} ${evento.pessoas.length > 1 ? 'pessoas' : 'pessoa'}</div>`;
+                        htmlEvento += `<div class="evento-info" style="color: ${corTexto};">${labelPessoas} ${evento.pessoas.length} ${evento.pessoas.length > 1 ? 'pessoas' : 'pessoa'}</div>`;
                     }
                     
                     if (evento.horarioFim) {
-                        htmlEvento += `<div class="evento-info">até ${evento.horarioFim}</div>`;
+                        htmlEvento += `<div class="evento-info" style="color: ${corTexto};">até ${evento.horarioFim}</div>`;
                     }
                     
                     eventoDiv.innerHTML = htmlEvento;
@@ -2139,6 +2281,7 @@
             document.getElementById('mesAno').textContent = `${meses[estadoSistema.mesAtual]} ${estadoSistema.anoAtual}`;
         }
         
+        // ✅ FUNÇÃO ATUALIZADA PARA SUPORTAR CORES POR TIPO
         function obterEventosDoDia(data) {
             if (!dados || !dados.eventos) return [];
             
@@ -2163,13 +2306,14 @@
                             if (filtrarTarefasParaCalendario(tarefa, nomePessoa)) {
                                 eventos.push({
                                     id: `tarefa_${tarefa.id}`,
-                                    titulo: tarefa.descricao.split(' - ')[0],
-                                    tipo: 'outro',
-                                    horarioInicio: tarefa.descricao.split(' - ')[1] || '',
+                                    titulo: tarefa.titulo || tarefa.descricao.split(' - ')[0],
+                                    tipo: tarefa.tipo || 'outro', // ✅ USAR TIPO DA TAREFA
+                                    horarioInicio: tarefa.horarioInicio || tarefa.descricao.split(' - ')[1] || '',
+                                    horarioFim: tarefa.horarioFim || null, // ✅ INCLUIR HORÁRIO FIM
                                     pessoas: [nomePessoa],
                                     origem: 'tarefa_pessoal',
                                     data: data,
-                                    descricao: `Tarefa pessoal de ${nomePessoa}`
+                                    descricao: tarefa.descricao || `Tarefa pessoal de ${nomePessoa}`
                                 });
                             }
                         });
@@ -2866,7 +3010,7 @@
             }
         }
         
-        // ========== AGENDA SEMANAL LIMPA E PROFISSIONAL ==========
+        // ========== AGENDA SEMANAL LIMPA E PROFISSIONAL - ATUALIZADA ==========
         function renderizarAgendaSemana(nome) {
             console.log('🔍 DEBUG RENDERIZAR AGENDA PARA:', nome);
             console.log('🔍 DEBUG DADOS.AGENDAS:', dados?.agendas);
@@ -2905,7 +3049,7 @@
                 
                 let temItens = false;
                 
-                // 1. TAREFAS PESSOAIS
+                // ✅ 1. TAREFAS PESSOAIS COM CORES POR TIPO
                 if (dados?.agendas?.[nome]?.[dia]) {
                     console.log(`✅ ENCONTRADAS ${dados.agendas[nome][dia].length} TAREFAS PARA ${dia}`);
                     dados.agendas[nome][dia].forEach(tarefa => {
@@ -2913,20 +3057,63 @@
                         
                         const tarefaDiv = document.createElement('div');
                         tarefaDiv.className = 'tarefa';
-                        tarefaDiv.style.background = tarefa.mostrarNoCalendario ? '#ddd6fe' : '#f3f4f6';
-                        tarefaDiv.style.borderLeft = tarefa.mostrarNoCalendario ? '3px solid #8b5cf6' : '3px solid #e5e7eb';
+                        
+                        // ✅ APLICAR CORES POR TIPO
+                        const tipoTarefa = tarefa.tipo || 'outro';
+                        let corFundo = '#f3f4f6';
+                        let corBorda = '#e5e7eb';
+                        
+                        switch(tipoTarefa) {
+                            case 'reuniao': 
+                                corFundo = '#dbeafe'; 
+                                corBorda = '#3b82f6'; 
+                                break;
+                            case 'entrega': 
+                                corFundo = '#d1fae5'; 
+                                corBorda = '#10b981'; 
+                                break;
+                            case 'prazo': 
+                                corFundo = '#fee2e2'; 
+                                corBorda = '#ef4444'; 
+                                break;
+                            case 'marco': 
+                                corFundo = '#ede9fe'; 
+                                corBorda = '#8b5cf6'; 
+                                break;
+                            case 'outro': 
+                                corFundo = '#f3f4f6'; 
+                                corBorda = '#6b7280'; 
+                                break;
+                        }
+                        
+                        tarefaDiv.style.background = corFundo;
+                        tarefaDiv.style.borderLeft = tarefa.mostrarNoCalendario ? `3px solid ${corBorda}` : `3px solid ${corBorda}`;
                         tarefaDiv.style.cursor = 'pointer';
                         
-                        const [descricao, horario] = tarefa.descricao.split(' - ');
+                        // ✅ USAR TÍTULO OU DESCRIÇÃO
+                        const titulo = tarefa.titulo || tarefa.descricao?.split(' - ')[0] || 'Sem título';
+                        const horarioInicio = tarefa.horarioInicio || tarefa.descricao?.split(' - ')[1] || '';
+                        const horarioFim = tarefa.horarioFim ? ` - ${tarefa.horarioFim}` : '';
                         
                         // Verificar se o usuário atual pode editar esta tarefa
                         const podeEditar = podeEditarTarefa(nome);
                         
+                        // ✅ ÍCONE POR TIPO
+                        let iconeTipo = '';
+                        switch(tipoTarefa) {
+                            case 'reuniao': iconeTipo = '📅'; break;
+                            case 'entrega': iconeTipo = '📦'; break;
+                            case 'prazo': iconeTipo = '⏰'; break;
+                            case 'marco': iconeTipo = '🎯'; break;
+                            case 'outro': iconeTipo = '📌'; break;
+                        }
+                        
                         tarefaDiv.innerHTML = `
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <div style="flex: 1;">
-                                    <strong style="font-size: 11px; color: #374151;">📝 ${descricao}</strong>
-                                    ${horario ? `<br><span style="font-size: 10px; color: #6b7280;">${horario}</span>` : ''}
+                                    <strong style="font-size: 11px; color: #374151;">${iconeTipo} ${titulo}</strong>
+                                    ${horarioInicio ? `<br><span style="font-size: 10px; color: #6b7280;">${horarioInicio}${horarioFim}</span>` : ''}
+                                    ${tarefa.descricao && tarefa.descricao !== titulo ? `<br><span style="font-size: 9px; color: #6b7280;">${tarefa.descricao}</span>` : ''}
                                     ${tarefa.mostrarNoCalendario ? '<br><span style="font-size: 9px; color: #8b5cf6;">📅 Visível no calendário</span>' : ''}
                                     ${podeEditar ? '<br><span style="font-size: 9px; color: #10b981;">✏️ Clique para editar</span>' : '<br><span style="font-size: 9px; color: #6b7280;">👤 Tarefa pessoal</span>'}
                                 </div>
@@ -3414,13 +3601,13 @@
             breadcrumbPath.innerHTML = links.join(' > ');
         }
         
-        // Funções de tarefas pessoais
+        // ========== FUNÇÕES DE TAREFAS PESSOAIS UNIFICADAS ==========
         function mostrarNovaTarefa() {
             document.getElementById('modalTarefa').classList.add('active');
         }
         
         function alternarTipoAgendamento() {
-            const tipo = document.getElementById('tarefaTipo').value;
+            const tipo = document.getElementById('tarefaAgendamento').value;
             if (tipo === 'semanal') {
                 document.getElementById('grupoDiaSemana').classList.remove('hidden');
                 document.getElementById('grupoData').classList.add('hidden');
@@ -3430,18 +3617,22 @@
             }
         }
         
+        // ✅ FUNÇÃO SALVAR TAREFA ATUALIZADA COM ESTRUTURA UNIFICADA
         function salvarTarefa() {
             const nome = estadoSistema.pessoaAtual;
-            const tipo = document.getElementById('tarefaTipo').value;
+            const tipo = document.getElementById('tarefaAgendamento').value;
+            const tipoCategoria = document.getElementById('tarefaTipo').value;
+            const titulo = document.getElementById('tarefaTitulo').value;
+            const horarioInicio = document.getElementById('tarefaHorarioInicio').value;
+            const horarioFim = document.getElementById('tarefaHorarioFim').value;
             const descricao = document.getElementById('tarefaDescricao').value;
-            const horario = document.getElementById('tarefaHorario').value;
             const mostrarNoCalendario = document.getElementById('tarefaCalendario').checked;
             
-            console.log('🔧 DEBUG SALVAR TAREFA:', {nome, tipo, descricao, horario, mostrarNoCalendario});
+            console.log('🔧 DEBUG SALVAR TAREFA:', {nome, tipo, tipoCategoria, titulo, horarioInicio, horarioFim, descricao, mostrarNoCalendario});
             
             if (!validarFormulario([
-                {id: 'tarefaDescricao'},
-                {id: 'tarefaHorario'}
+                {id: 'tarefaTitulo'},
+                {id: 'tarefaHorarioInicio'}
             ])) {
                 mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
                 return;
@@ -3456,9 +3647,14 @@
                 }
             }
             
+            // ✅ ESTRUTURA UNIFICADA COM EVENTOS
             const tarefaBase = {
                 id: Date.now(),
-                descricao: `${descricao} - ${horario}`,
+                titulo: titulo,
+                tipo: tipoCategoria, // ✅ PRESERVAR TIPO PARA CORES
+                horarioInicio: horarioInicio,
+                horarioFim: horarioFim || null,
+                descricao: descricao || `${titulo} - ${horarioInicio}`, // ✅ COMPATIBILIDADE COM SISTEMA ANTIGO
                 mostrarNoCalendario: mostrarNoCalendario
             };
             
@@ -3490,11 +3686,13 @@
                 const evento = {
                     id: Date.now(),
                     data: dataEspecifica,
-                    horarioInicio: horario,
-                    titulo: descricao,
-                    tipo: 'outro',
+                    horarioInicio: horarioInicio,
+                    horarioFim: horarioFim || null,
+                    titulo: titulo,
+                    tipo: tipoCategoria, // ✅ PRESERVAR TIPO
                     pessoas: [nome],
-                    origem: 'tarefa_pessoal'
+                    origem: 'tarefa_pessoal',
+                    descricao: descricao
                 };
                 dados.eventos.push(evento);
                 console.log('🔧 DEBUG EVENTO CRIADO:', evento);
@@ -3625,76 +3823,6 @@
             }
         }
         
-        // Funções de importação/exportação
-        function exportarDados() {
-            const dataExport = {
-                ...dados,
-                exportadoEm: new Date().toISOString(),
-                versao: VERSAO_SISTEMA
-            };
-            
-            const blob = new Blob([JSON.stringify(dataExport, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `backup-gestao-obra-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            mostrarNotificacao('Dados exportados com sucesso!');
-        }
-        
-        function mostrarImportar() {
-            document.getElementById('modalImportar').classList.add('active');
-        }
-        
-        function importarDados() {
-            const fileInput = document.getElementById('importFile');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                mostrarNotificacao('Selecione um arquivo!', 'error');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    if (importedData.areas && importedData.eventos) {
-                        const backup = {...dados};
-                        
-                        try {
-                            dados = {
-                                versao: importedData.versao || VERSAO_DB,
-                                areas: importedData.areas,
-                                eventos: importedData.eventos,
-                                agendas: importedData.agendas || {},
-                                feriados: importedData.feriados || {},
-                                statusPessoal: importedData.statusPessoal || {},
-                                ultimaAtualizacao: new Date().toISOString()
-                            };
-                            
-                            salvarDados();
-                            fecharModal('modalImportar');
-                            renderizarDashboard();
-                            mostrarNotificacao('Dados importados com sucesso!');
-                        } catch (erro) {
-                            dados = backup;
-                            throw erro;
-                        }
-                    } else {
-                        mostrarNotificacao('Arquivo inválido!', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erro ao importar:', error);
-                    mostrarNotificacao('Erro ao importar arquivo!', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
-        
         // Funções auxiliares do sistema de responsabilidades
         function mudarStatusResponsabilidade(atividadeId, areaKey, novoStatus) {
             const area = dados.areas[areaKey];
@@ -3713,25 +3841,8 @@
             editarAtividade(atividadeId);
         }
         
-        // ========== FUNÇÕES DE EDIÇÃO DE TAREFAS PESSOAIS ==========
+        // ========== FUNÇÕES DE EDIÇÃO DE TAREFAS PESSOAIS ATUALIZADAS ==========
         
-        /*
-        SISTEMA DE PERMISSÕES v5.4:
-        
-        📅 EVENTOS (podem ser editados por qualquer usuário):
-        - Criados no calendário principal
-        - Aparecem automaticamente na agenda de todos os participantes
-        - Qualquer usuário logado pode criar, editar ou deletar
-        - Ícone ✏️ sempre visível
-        
-        📝 TAREFAS PESSOAIS (só podem ser editadas pelo dono):
-        - Criadas na agenda individual de cada pessoa
-        - Só aparecem no calendário se marcado "mostrar no calendário"
-        - Apenas o dono da tarefa pode editar/deletar
-        - Interface mostra "✏️ Clique para editar" apenas para o dono
-        - Outros usuários veem "👤 Tarefa pessoal"
-        */
-
         // Abrir modal de edição de tarefa pessoal
         function editarTarefaPessoal(nomePessoa, dia, tarefaId) {
             // Verificar permissão - apenas o dono pode editar
@@ -3747,17 +3858,19 @@
                 return;
             }
             
-            // Separar descrição e horário
-            const [descricao, horario] = tarefa.descricao.split(' - ');
+            console.log('🔧 DEBUG EDITANDO TAREFA:', tarefa);
             
-            // Preencher modal
+            // ✅ USAR ESTRUTURA UNIFICADA
             document.getElementById('editarTarefaId').value = tarefaId;
             document.getElementById('editarTarefaDono').value = nomePessoa;
             document.getElementById('editarTarefaDia').value = dia;
+            document.getElementById('editarTarefaTipoCategoria').value = tarefa.tipo || 'outro';
+            document.getElementById('editarTarefaTitulo').value = tarefa.titulo || tarefa.descricao?.split(' - ')[0] || '';
             document.getElementById('editarTarefaTipo').value = 'semanal';
             document.getElementById('editarTarefaDiaSemana').value = dia;
-            document.getElementById('editarTarefaDescricao').value = descricao || tarefa.descricao;
-            document.getElementById('editarTarefaHorario').value = horario || '09:00';
+            document.getElementById('editarTarefaHorarioInicio').value = tarefa.horarioInicio || tarefa.descricao?.split(' - ')[1] || '09:00';
+            document.getElementById('editarTarefaHorarioFim').value = tarefa.horarioFim || '';
+            document.getElementById('editarTarefaDescricaoTexto').value = tarefa.descricao || '';
             document.getElementById('editarTarefaCalendario').checked = tarefa.mostrarNoCalendario || false;
             
             // Mostrar grupo correto
@@ -3779,19 +3892,22 @@
             }
         }
 
-        // Salvar edição de tarefa
+        // ✅ SALVAR EDIÇÃO COM ESTRUTURA UNIFICADA
         function salvarEdicaoTarefa() {
             const tarefaId = document.getElementById('editarTarefaId').value;
             const nomePessoa = document.getElementById('editarTarefaDono').value;
             const diaOriginal = document.getElementById('editarTarefaDia').value;
             const tipo = document.getElementById('editarTarefaTipo').value;
-            const descricao = document.getElementById('editarTarefaDescricao').value;
-            const horario = document.getElementById('editarTarefaHorario').value;
+            const tipoCategoria = document.getElementById('editarTarefaTipoCategoria').value;
+            const titulo = document.getElementById('editarTarefaTitulo').value;
+            const horarioInicio = document.getElementById('editarTarefaHorarioInicio').value;
+            const horarioFim = document.getElementById('editarTarefaHorarioFim').value;
+            const descricaoTexto = document.getElementById('editarTarefaDescricaoTexto').value;
             const mostrarNoCalendario = document.getElementById('editarTarefaCalendario').checked;
             
             if (!validarFormulario([
-                {id: 'editarTarefaDescricao'},
-                {id: 'editarTarefaHorario'}
+                {id: 'editarTarefaTitulo'},
+                {id: 'editarTarefaHorarioInicio'}
             ])) {
                 mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
                 return;
@@ -3818,10 +3934,14 @@
             if (tipo === 'semanal') {
                 const novoDia = document.getElementById('editarTarefaDiaSemana').value;
                 
-                // Criar tarefa atualizada
+                // ✅ CRIAR TAREFA ATUALIZADA COM ESTRUTURA UNIFICADA
                 const tarefaAtualizada = {
                     id: tarefaId, // Manter o mesmo ID
-                    descricao: `${descricao} - ${horario}`,
+                    titulo: titulo,
+                    tipo: tipoCategoria, // ✅ PRESERVAR TIPO PARA CORES
+                    horarioInicio: horarioInicio,
+                    horarioFim: horarioFim || null,
+                    descricao: descricaoTexto || `${titulo} - ${horarioInicio}`,
                     mostrarNoCalendario: mostrarNoCalendario
                 };
                 
@@ -3839,11 +3959,13 @@
                 const evento = {
                     id: Date.now(), // Novo ID para evento
                     data: dataEspecifica,
-                    horarioInicio: horario,
-                    titulo: descricao,
-                    tipo: 'outro',
+                    horarioInicio: horarioInicio,
+                    horarioFim: horarioFim || null,
+                    titulo: titulo,
+                    tipo: tipoCategoria, // ✅ PRESERVAR TIPO
                     pessoas: [nomePessoa],
-                    origem: 'tarefa_pessoal'
+                    origem: 'tarefa_pessoal',
+                    descricao: descricaoTexto
                 };
                 dados.eventos.push(evento);
             }
