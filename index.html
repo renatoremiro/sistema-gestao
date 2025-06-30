@@ -1161,11 +1161,11 @@
             
             <!-- Dica do sistema -->
             <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-                <strong>✅ Sistema v6.0 - ÍCONES CORRIGIDOS + RECORRÊNCIA + CHAT:</strong> 
-                <br><strong>🎨 Ícones:</strong> Badges com fundo branco translúcido (sem mais fundo preto)
-                <br><strong>🔄 Recorrência:</strong> Eventos e tarefas podem repetir (diário, quinzenal, mensal, bimestral)
-                <br><strong>📅 Visual:</strong> Eventos recorrentes têm borda tracejada e ícone 🔄
+                <strong>✅ Sistema v6.0 - CHAT INTEGRADO + VINCULAÇÃO DE USUÁRIOS:</strong> 
                 <br><strong>💬 Chat:</strong> Sistema completo de comunicação (Global, Áreas, Projetos, Privado)
+                <br><strong>🔗 Vinculação:</strong> Usuários agora são vinculados aos colaboradores da obra
+                <br><strong>👥 Permissões:</strong> Acesso baseado no perfil do colaborador vinculado
+                <br><strong>🔄 Recorrência:</strong> Eventos e tarefas podem repetir automaticamente
                 <br><strong>⚡ Performance:</strong> Melhorias na sincronização e responsividade
             </div>
             
@@ -1641,6 +1641,43 @@
         </div>
     </div>
     
+    <!-- ✅ NOVO: Modal de Vinculação de Usuário -->
+    <div id="modalVinculacao" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 24px;">🔗 Vincular Perfil</h3>
+            <p style="color: #6b7280; margin-bottom: 20px;">
+                Para acessar o sistema, você precisa vincular sua conta a um colaborador da obra.
+            </p>
+            
+            <div class="form-group">
+                <label>Selecione seu perfil na equipe <span style="color: #ef4444;">*</span></label>
+                <select id="vinculacaoColaborador" required>
+                    <option value="">Escolha seu nome...</option>
+                </select>
+                <span class="error-message hidden" id="vinculacaoColaboradorError">Selecione um colaborador</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Confirme seu cargo</label>
+                <input type="text" id="vinculacaoCargoConfirm" readonly style="background: #f9fafb;">
+            </div>
+            
+            <div class="form-group">
+                <label>Área de atuação</label>
+                <input type="text" id="vinculacaoAreaConfirm" readonly style="background: #f9fafb;">
+            </div>
+            
+            <div style="background: #dbeafe; padding: 12px; border-radius: 8px; margin: 16px 0; font-size: 13px;">
+                <strong>ℹ️ Importante:</strong> Esta vinculação determinará suas permissões no sistema e não pode ser alterada posteriormente. Entre em contato com o administrador se houver erro.
+            </div>
+            
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="cancelarVinculacao()">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmarVinculacao()" id="btnConfirmarVinculacao">Confirmar Vinculação</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -1719,6 +1756,128 @@
             });
         }
         
+        // ========== ✅ NOVA FUNÇÃO PARA INICIALIZAR VINCULAÇÕES DE USUÁRIOS ==========
+        function inicializarVinculacoes() {
+            database.ref('vinculacoes').once('value', (snapshot) => {
+                if (!snapshot.val()) {
+                    // Criar estrutura inicial de vinculações
+                    database.ref('vinculacoes').set({});
+                    console.log('✅ Estrutura de vinculações inicializada no Firebase');
+                }
+            });
+        }
+        
+        // ========== ✅ SISTEMA DE VINCULAÇÃO DE USUÁRIOS ==========
+        function mostrarModalVinculacao() {
+            const select = document.getElementById('vinculacaoColaborador');
+            select.innerHTML = '<option value="">Escolha seu nome...</option>';
+            
+            // Carregar todos os colaboradores do sistema
+            Object.values(dados.areas).forEach(area => {
+                area.equipe.forEach(membro => {
+                    const option = document.createElement('option');
+                    option.value = JSON.stringify({
+                        nome: membro.nome,
+                        cargo: membro.cargo,
+                        area: area.nome
+                    });
+                    option.textContent = `${membro.nome} - ${membro.cargo} (${area.nome})`;
+                    select.appendChild(option);
+                });
+            });
+            
+            document.getElementById('modalVinculacao').classList.add('active');
+        }
+        
+        function atualizarInfoVinculacao() {
+            const select = document.getElementById('vinculacaoColaborador');
+            const cargoInput = document.getElementById('vinculacaoCargoConfirm');
+            const areaInput = document.getElementById('vinculacaoAreaConfirm');
+            
+            if (select.value) {
+                const dadosColaborador = JSON.parse(select.value);
+                cargoInput.value = dadosColaborador.cargo;
+                areaInput.value = dadosColaborador.area;
+            } else {
+                cargoInput.value = '';
+                areaInput.value = '';
+            }
+        }
+        
+        function confirmarVinculacao() {
+            const select = document.getElementById('vinculacaoColaborador');
+            
+            if (!select.value) {
+                document.getElementById('vinculacaoColaborador').classList.add('input-error');
+                document.getElementById('vinculacaoColaboradorError').classList.remove('hidden');
+                mostrarNotificacao('Selecione um colaborador!', 'error');
+                return;
+            }
+            
+            const dadosColaborador = JSON.parse(select.value);
+            const email = usuarioAtual.email;
+            
+            // Verificar se o colaborador já está vinculado a outro usuário
+            database.ref('vinculacoes').once('value', (snapshot) => {
+                const vinculacoes = snapshot.val() || {};
+                
+                // Verificar se já existe vinculação para este colaborador
+                const vinculacaoExistente = Object.entries(vinculacoes).find(([emailVinc, dados]) => 
+                    dados.nomeColaborador === dadosColaborador.nome
+                );
+                
+                if (vinculacaoExistente && vinculacaoExistente[0] !== email) {
+                    mostrarNotificacao(`Colaborador ${dadosColaborador.nome} já está vinculado a outro usuário!`, 'error');
+                    return;
+                }
+                
+                // Salvar vinculação
+                const vinculacao = {
+                    nomeColaborador: dadosColaborador.nome,
+                    cargoColaborador: dadosColaborador.cargo,
+                    areaColaborador: dadosColaborador.area,
+                    emailUsuario: email,
+                    dataVinculacao: new Date().toISOString(),
+                    ativo: true
+                };
+                
+                database.ref(`vinculacoes/${email.replace(/[@.]/g, '_')}`).set(vinculacao).then(() => {
+                    // Atualizar o displayName do usuário
+                    usuarioAtual.updateProfile({
+                        displayName: dadosColaborador.nome
+                    }).then(() => {
+                        fecharModal('modalVinculacao');
+                        mostrarNotificacao(`✅ Vinculação realizada com sucesso! Bem-vindo(a), ${dadosColaborador.nome}!`);
+                        
+                        // Reinicializar o sistema com os novos dados
+                        setTimeout(() => {
+                            inicializarSistema();
+                        }, 1000);
+                    });
+                }).catch((error) => {
+                    console.error('Erro ao salvar vinculação:', error);
+                    mostrarNotificacao('Erro ao salvar vinculação!', 'error');
+                });
+            });
+        }
+        
+        function cancelarVinculacao() {
+            if (confirm('Sem a vinculação você não poderá acessar o sistema. Deseja realmente cancelar?')) {
+                auth.signOut();
+                fecharModal('modalVinculacao');
+                mostrarLogin();
+            }
+        }
+        
+        function verificarVinculacao(user) {
+            return new Promise((resolve) => {
+                database.ref(`vinculacoes/${user.email.replace(/[@.]/g, '_')}`).once('value', (snapshot) => {
+                    const vinculacao = snapshot.val();
+                    resolve(vinculacao);
+                });
+            });
+        }
+        
         // ========== FUNÇÕES DE AUTENTICAÇÃO ==========
         function mostrarLogin() {
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -1768,24 +1927,29 @@
                 return;
             }
             
-            const nome = prompt('Digite seu nome:');
-            if (!nome) return;
+            mostrarNotificacao('Criando conta...');
             
             auth.createUserWithEmailAndPassword(email, senha)
                 .then((userCredential) => {
-                    return userCredential.user.updateProfile({
-                        displayName: nome
-                    });
-                })
-                .then(() => {
-                    mostrarNotificacao('Conta criada com sucesso! Fazendo login...');
+                    usuarioAtual = userCredential.user;
+                    mostrarNotificacao('Conta criada! Agora você precisa se vincular a um colaborador...');
+                    
+                    // Carregar dados primeiro, depois mostrar modal de vinculação
+                    if (!dados) {
+                        dados = inicializarDados();
+                    }
+                    
                     setTimeout(() => {
-                        fazerLogin();
-                    }, 1500);
+                        mostrarModalVinculacao();
+                    }, 1000);
                 })
                 .catch((error) => {
                     console.error('Erro ao criar conta:', error);
-                    mostrarNotificacao('Erro ao criar conta: ' + error.message, 'error');
+                    if (error.code === 'auth/email-already-in-use') {
+                        mostrarNotificacao('Este email já está em uso! Tente fazer login.', 'error');
+                    } else {
+                        mostrarNotificacao('Erro ao criar conta: ' + error.message, 'error');
+                    }
                 });
         }
         
@@ -2032,41 +2196,62 @@
         function inicializarSistema() {
             esconderLogin();
             
-            estadoSistema.usuarioEmail = usuarioAtual.email;
-            estadoSistema.usuarioNome = usuarioAtual.displayName || usuarioAtual.email.split('@')[0];
-            
-            document.getElementById('usuarioInfo').textContent = `👤 ${estadoSistema.usuarioNome}`;
-            
-            try {
-                if (!dados) {
-                    dados = inicializarDados();
+            // ✅ VERIFICAR VINCULAÇÃO ANTES DE CONTINUAR
+            verificarVinculacao(usuarioAtual).then((vinculacao) => {
+                if (!vinculacao || !vinculacao.ativo) {
+                    // Usuário não está vinculado, mostrar modal de vinculação
+                    if (!dados) {
+                        dados = inicializarDados();
+                    }
+                    mostrarModalVinculacao();
+                    return;
                 }
                 
-                configurarSincronizacao();
-                iniciarVerificacaoPrazos();
+                // Usuário está vinculado, continuar inicialização normal
+                estadoSistema.usuarioEmail = usuarioAtual.email;
+                estadoSistema.usuarioNome = vinculacao.nomeColaborador;
                 
-                // ✅ NOVO: Inicializar estrutura do chat
-                inicializarEstruturaChat();
+                // Atualizar displayName se necessário
+                if (usuarioAtual.displayName !== vinculacao.nomeColaborador) {
+                    usuarioAtual.updateProfile({
+                        displayName: vinculacao.nomeColaborador
+                    });
+                }
                 
-                // ✅ NOVO: Expor variáveis globais para o módulo de chat
-                window.usuarioAtual = usuarioAtual;
-                window.dados = dados;
-                window.database = database;
+                document.getElementById('usuarioInfo').textContent = `👤 ${estadoSistema.usuarioNome}`;
                 
-                setTimeout(() => {
-                    renderizarDashboard();
-                    if (estadoSistema.pessoaAtual) {
-                        renderizarAgendaSemana(estadoSistema.pessoaAtual);
+                try {
+                    if (!dados) {
+                        dados = inicializarDados();
                     }
-                }, 1000);
-                
-                // ✅ ATUALIZADO: Mencionar chat na mensagem
-                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Ícones corrigidos + Recorrência + Chat 💬!`);
-                
-            } catch (error) {
-                console.error('Erro na inicialização:', error);
-                mostrarNotificacao('Erro na inicialização do sistema', 'error');
-            }
+                    
+                    configurarSincronizacao();
+                    iniciarVerificacaoPrazos();
+                    
+                    // ✅ NOVO: Inicializar estruturas
+                    inicializarEstruturaChat();
+                    inicializarVinculacoes();
+                    
+                    // ✅ NOVO: Expor variáveis globais para o módulo de chat
+                    window.usuarioAtual = usuarioAtual;
+                    window.dados = dados;
+                    window.database = database;
+                    
+                    setTimeout(() => {
+                        renderizarDashboard();
+                        if (estadoSistema.pessoaAtual) {
+                            renderizarAgendaSemana(estadoSistema.pessoaAtual);
+                        }
+                    }, 1000);
+                    
+                    // ✅ ATUALIZADO: Mencionar chat na mensagem
+                    mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Chat integrado + Vinculação de usuários!`);
+                    
+                } catch (error) {
+                    console.error('Erro na inicialização:', error);
+                    mostrarNotificacao('Erro na inicialização do sistema', 'error');
+                }
+            });
         }
         
         // ========== MONITORAR ESTADO DE AUTENTICAÇÃO ==========
@@ -2579,7 +2764,6 @@
                     let htmlEvento = `
                         <div class="evento-header" style="color: ${corTexto};">
                             <span>${iconeTipo} ${evento.horarioInicio || 'Todo dia'}</span>
-                            ${evento.origem === 'tarefa_pessoal' ? '<span class="sincronizado-badge">👤</span>' : ''}
                         </div>
                         <div style="font-weight: 500; color: ${corTexto};">${evento.titulo}</div>
                     `;
@@ -4517,6 +4701,12 @@
         
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
+            // ✅ NOVO: Event listener para vinculação de colaborador
+            const vinculacaoSelect = document.getElementById('vinculacaoColaborador');
+            if (vinculacaoSelect) {
+                vinculacaoSelect.addEventListener('change', atualizarInfoVinculacao);
+            }
+            
             // Atalhos de teclado
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 's') {
