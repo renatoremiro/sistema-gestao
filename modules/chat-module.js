@@ -1,5 +1,5 @@
 // ============================================
-// 💼 SISTEMA DE CHAT PROFISSIONAL - GESTÃO DE OBRA
+// 💼 SISTEMA DE CHAT PROFISSIONAL - VERSÃO CORRIGIDA
 // ============================================
 
 // ✅ BASE DE DADOS DE USUÁRIOS REAIS
@@ -86,24 +86,6 @@ const USUARIOS_SISTEMA = {
     }
 };
 
-// ✅ CONFIGURAÇÕES DE NOTIFICAÇÃO PROFISSIONAL
-const CONFIG_NOTIFICACOES = {
-    horarioComercial: { inicio: 8, fim: 18 },
-    nivelPrioridade: {
-        emergencia: { som: 'alto', persistir: true, cor: '#ef4444' },
-        urgente: { som: 'medio', persistir: false, cor: '#f59e0b' },
-        normal: { som: 'baixo', persistir: false, cor: '#3b82f6' },
-        info: { som: 'none', persistir: false, cor: '#6b7280' }
-    },
-    tiposChat: {
-        global: 'normal',
-        area: 'normal',
-        projeto: 'urgente',
-        privado: 'normal',
-        coordenacao: 'urgente'
-    }
-};
-
 class ChatSystemProfissional {
     constructor() {
         this.chatRef = null;
@@ -114,71 +96,165 @@ class ChatSystemProfissional {
         this.listeners = new Map();
         this.isOpen = false;
         this.usuariosOnline = new Map();
-        this.ultimasMensagens = new Map();
-        this.notificationListeners = new Map();
-        this.statusUsuario = 'online'; // online, ocupado, ausente, reuniao
+        this.statusUsuario = 'online';
         this.modoNaoPerturbe = false;
-        this.mensagensReagidas = new Map();
-        this.threadsAtivos = new Map();
+        this.inicializado = false;
+        this.tentativasInit = 0;
+        this.maxTentativas = 20; // 10 segundos
         
-        this.aguardarInicializacao();
+        console.log('🚀 Chat System Profissional - Iniciando...');
+        this.iniciarSistema();
     }
 
-    aguardarInicializacao() {
-        const verificar = () => {
+    // ✅ INICIALIZAÇÃO ROBUSTA
+    iniciarSistema() {
+        const verificarDependencias = () => {
+            this.tentativasInit++;
+            
             if (window.usuarioAtual && window.dados && window.database) {
                 this.usuario = window.usuarioAtual;
                 this.areas = window.dados.areas;
                 this.chatRef = window.database.ref('chat');
                 
-                console.log('✅ Chat System Profissional - Iniciando com usuário:', this.usuario.email);
+                console.log('✅ Chat System - Dependências encontradas!');
+                console.log('👤 Usuário:', this.usuario.email);
+                console.log('📁 Areas:', Object.keys(this.areas || {}));
+                
                 this.init();
-            } else {
-                console.log('⏳ Chat System - Aguardando sistema principal...');
-                setTimeout(verificar, 500);
+                return;
             }
+            
+            if (this.tentativasInit >= this.maxTentativas) {
+                console.error('❌ Chat System - Timeout na inicialização');
+                this.mostrarErroInicializacao();
+                return;
+            }
+            
+            console.log(`⏳ Chat System - Tentativa ${this.tentativasInit}/${this.maxTentativas}...`);
+            setTimeout(verificarDependencias, 500);
         };
-        verificar();
+        
+        verificarDependencias();
     }
 
     async init() {
-        this.criarInterface();
-        this.configurarEventListeners();
+        if (this.inicializado) return;
         
         try {
-            await this.inicializarFirebase();
-            this.carregarChats();
-            this.monitorarUsuariosOnline();
-            this.marcarUsuarioOnline();
-            this.iniciarNotificacoesInteligentes();
-            this.configurarModoNaoPerturbe();
+            console.log('🔧 Inicializando sistema de chat...');
             
-            console.log('✅ Sistema de Chat PROFISSIONAL inicializado');
+            // 1. Criar interface
+            this.criarInterface();
+            
+            // 2. Configurar Firebase
+            await this.inicializarFirebase();
+            
+            // 3. Configurar listeners
+            this.configurarEventListeners();
+            
+            // 4. Carregar chats
+            this.carregarChats();
+            
+            // 5. Marcar como online
+            this.marcarUsuarioOnline();
+            
+            // 6. Configurar notificações
+            this.configurarNotificacoes();
+            
+            this.inicializado = true;
+            console.log('✅ Chat System TOTALMENTE inicializado!');
+            
+            // Mostrar notificação de sucesso
+            if (window.mostrarNotificacao) {
+                window.mostrarNotificacao('💬 Chat profissional ativado!');
+            }
+            
         } catch (error) {
-            console.error('❌ Erro na inicialização:', error);
+            console.error('❌ Erro na inicialização do chat:', error);
+            this.mostrarErroInicializacao();
         }
     }
 
+    mostrarErroInicializacao() {
+        const errorHTML = `
+            <div id="chatErrorNotification" style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #ef4444;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            ">
+                <div style="font-weight: bold; margin-bottom: 4px;">❌ Chat Indisponível</div>
+                <div style="font-size: 14px;">Sistema principal não carregou completamente</div>
+                <button onclick="this.parentElement.remove()" style="
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    background: none;
+                    border: none;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 18px;
+                ">×</button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', errorHTML);
+        
+        // Remover automaticamente após 10 segundos
+        setTimeout(() => {
+            const notification = document.getElementById('chatErrorNotification');
+            if (notification) notification.remove();
+        }, 10000);
+    }
+
+    // ✅ FIREBASE INICIALIZAÇÃO SEGURA
     async inicializarFirebase() {
         try {
+            if (!this.chatRef) {
+                throw new Error('Referência do Firebase não disponível');
+            }
+            
             const snapshot = await this.chatRef.once('value');
             if (!snapshot.val()) {
                 console.log('🔧 Criando estrutura inicial do chat...');
                 await this.chatRef.set({
-                    mensagens: { global: {} },
+                    mensagens: { 
+                        global: {
+                            msg_inicial: {
+                                id: 'msg_inicial',
+                                autor: 'sistema@obra.com',
+                                nomeAutor: 'Sistema',
+                                texto: '🏗️ Bem-vindos ao chat da obra 292! Sistema de comunicação profissional ativo.',
+                                timestamp: new Date().toISOString(),
+                                chatId: 'global'
+                            }
+                        }
+                    },
                     usuariosOnline: {},
-                    privados: {},
-                    reacoes: {},
-                    threads: {}
+                    privados: {}
                 });
             }
+            console.log('✅ Firebase configurado');
         } catch (error) {
-            console.error('❌ Erro ao inicializar Firebase:', error);
+            console.error('❌ Erro Firebase:', error);
+            throw error;
         }
     }
 
+    // ✅ INTERFACE MELHORADA E ISOLADA
     criarInterface() {
-        // Remover indicador de sincronização
+        // Remover interface existente se houver
+        const existingToggle = document.getElementById('chatToggle');
+        const existingPanel = document.getElementById('chatPanel');
+        if (existingToggle) existingToggle.remove();
+        if (existingPanel) existingPanel.remove();
+
+        // Ocultar indicador de sincronização que pode conflitar
         const syncIndicator = document.getElementById('syncIndicator');
         if (syncIndicator) {
             syncIndicator.style.display = 'none';
@@ -207,7 +283,7 @@ class ChatSystemProfissional {
                     <div class="header-right">
                         <div class="header-controls">
                             <!-- Status do Usuário -->
-                            <div class="user-status" onclick="chatSystem.toggleStatusMenu()">
+                            <div class="user-status" onclick="window.chatSystem.toggleStatusMenu()">
                                 <div class="status-dot ${this.statusUsuario}" id="userStatusDot"></div>
                                 <span id="userStatusText">Online</span>
                                 <span class="dropdown-arrow">▼</span>
@@ -215,21 +291,21 @@ class ChatSystemProfissional {
                             
                             <!-- Menu de Status -->
                             <div id="statusMenu" class="status-menu hidden">
-                                <div class="status-option" onclick="chatSystem.setStatus('online')">
+                                <div class="status-option" onclick="window.chatSystem.setStatus('online')">
                                     <div class="status-dot online"></div>Online
                                 </div>
-                                <div class="status-option" onclick="chatSystem.setStatus('ocupado')">
+                                <div class="status-option" onclick="window.chatSystem.setStatus('ocupado')">
                                     <div class="status-dot ocupado"></div>Ocupado
                                 </div>
-                                <div class="status-option" onclick="chatSystem.setStatus('reuniao')">
+                                <div class="status-option" onclick="window.chatSystem.setStatus('reuniao')">
                                     <div class="status-dot reuniao"></div>Em Reunião
                                 </div>
-                                <div class="status-option" onclick="chatSystem.setStatus('ausente')">
+                                <div class="status-option" onclick="window.chatSystem.setStatus('ausente')">
                                     <div class="status-dot ausente"></div>Ausente
                                 </div>
                                 <div class="status-divider"></div>
-                                <div class="status-option" onclick="chatSystem.toggleNaoPerturbe()">
-                                    <span id="naoPerturbeIcon">🔕</span>
+                                <div class="status-option" onclick="window.chatSystem.toggleNaoPerturbe()">
+                                    <span id="naoPerturbeIcon">🔔</span>
                                     <span id="naoPerturbeText">Não Perturbe</span>
                                 </div>
                             </div>
@@ -238,98 +314,13 @@ class ChatSystemProfissional {
                                 <span id="usersOnlineCount">👥 0</span>
                             </div>
                             
-                            <button class="header-btn" onclick="chatSystem.abrirConfiguracoes()" title="Configurações">⚙️</button>
-                            <button class="header-btn" onclick="chatSystem.limparChat()" title="Limpar Chat">🗑️</button>
-                            <button class="header-btn" onclick="chatSystem.toggleChat()" title="Minimizar">−</button>
-                            <button class="header-btn close-btn" onclick="chatSystem.toggleChat()" title="Fechar">×</button>
+                            <button class="header-btn" onclick="window.chatSystem.limparChat()" title="Limpar Chat">🗑️</button>
+                            <button class="header-btn" onclick="window.chatSystem.toggleChat()" title="Fechar">×</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="chat-content-pro">
-                    <!-- Sidebar Profissional -->
-                    <div class="chat-sidebar-pro">
-                        <!-- Busca Avançada -->
-                        <div class="search-section-pro">
-                            <div class="search-input-container">
-                                <input type="text" id="chatSearchPro" placeholder="🔍 Buscar conversas, mensagens..." 
-                                       onkeyup="chatSystem.buscarConversas(this.value)">
-                                <button class="search-filter-btn" onclick="chatSystem.toggleFiltros()">⚙️</button>
-                            </div>
-                            
-                            <!-- Filtros de Busca -->
-                            <div id="searchFilters" class="search-filters hidden">
-                                <select id="filtroTempo">
-                                    <option value="all">Qualquer período</option>
-                                    <option value="today">Hoje</option>
-                                    <option value="week">Esta semana</option>
-                                    <option value="month">Este mês</option>
-                                </select>
-                                <select id="filtroPessoa">
-                                    <option value="all">Qualquer pessoa</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Lista de Conversas Profissional -->
-                        <div class="conversations-section">
-                            <!-- Chat Geral -->
-                            <div class="conversation-category">
-                                <div class="category-header">
-                                    <span class="category-icon">🌐</span>
-                                    <span class="category-title">Geral</span>
-                                </div>
-                                <div class="conversation-item active" data-room="global" onclick="chatSystem.abrirChat('global')">
-                                    <div class="conversation-info">
-                                        <div class="conversation-header">
-                                            <span class="conversation-icon">🌐</span>
-                                            <span class="conversation-name">Chat Geral</span>
-                                            <span class="conversation-time" id="time-global"></span>
-                                        </div>
-                                        <div class="conversation-preview" id="preview-global">Aguardando mensagens...</div>
-                                    </div>
-                                    <div class="conversation-meta">
-                                        <span class="unread-badge hidden" id="unread-global">0</span>
-                                        <div class="priority-indicator" id="priority-global"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Chats por Área -->
-                            <div class="conversation-category">
-                                <div class="category-header">
-                                    <span class="category-icon">📁</span>
-                                    <span class="category-title">Por Área</span>
-                                    <span class="category-count" id="areasCount">0</span>
-                                </div>
-                                <div id="chatsAreasPro"></div>
-                            </div>
-
-                            <!-- Chats de Projetos -->
-                            <div class="conversation-category">
-                                <div class="category-header">
-                                    <span class="category-icon">📋</span>
-                                    <span class="category-title">Projetos</span>
-                                    <span class="category-count" id="projetosCount">0</span>
-                                </div>
-                                <div id="chatsProjetosPro"></div>
-                            </div>
-
-                            <!-- Chats Privados -->
-                            <div class="conversation-category">
-                                <div class="category-header">
-                                    <span class="category-icon">👤</span>
-                                    <span class="category-title">Conversas Privadas</span>
-                                    <span class="category-count" id="privadosCount">0</span>
-                                </div>
-                                <div id="chatsPrivadosPro"></div>
-                                <button class="new-conversation-btn" onclick="chatSystem.novoPrivado()">
-                                    <span class="btn-icon">+</span>Nova Conversa
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Área Principal de Mensagens -->
                     <div class="chat-main-pro">
                         <!-- Info do Chat Ativo -->
@@ -341,19 +332,10 @@ class ChatSystemProfissional {
                                     <div class="chat-description">
                                         <span id="chatDescriptionPro">Comunicação geral da obra</span>
                                         <span class="members-info">
-                                            👥 <span id="membersCountPro">0</span> membros
-                                            <span id="onlineMembersInfo"></span>
+                                            👥 <span id="membersCountPro">10</span> membros
                                         </span>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Ações do Chat -->
-                            <div class="chat-actions">
-                                <button class="action-btn" onclick="chatSystem.fixarMensagem()" title="Mensagens Fixadas">📌</button>
-                                <button class="action-btn" onclick="chatSystem.abrirArquivos()" title="Arquivos Compartilhados">📎</button>
-                                <button class="action-btn" onclick="chatSystem.abrirBusca()" title="Buscar no Chat">🔍</button>
-                                <button class="action-btn" onclick="chatSystem.abrirDetalhes()" title="Detalhes do Chat">ℹ️</button>
                             </div>
                         </div>
 
@@ -361,40 +343,26 @@ class ChatSystemProfissional {
                         <div class="messages-container-pro" id="messagesContainerPro">
                             <div class="welcome-message-pro">
                                 <div class="welcome-icon">💼</div>
-                                <h3>Bem-vindo ao Chat Profissional</h3>
-                                <p>Sistema de comunicação corporativa da obra</p>
+                                <h3>Chat Profissional da Obra</h3>
+                                <p>Sistema de comunicação corporativa</p>
                                 <div class="welcome-tips">
                                     <div class="tip">💡 Use @nome para mencionar alguém</div>
                                     <div class="tip">📌 Clique em uma mensagem para reagir</div>
-                                    <div class="tip">🔍 Use a busca para encontrar conversas</div>
+                                    <div class="tip">🔍 Mensagens são salvas automaticamente</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Área de Input Profissional -->
                         <div class="input-area-pro">
-                            <!-- Indicador de Digitação -->
-                            <div id="typingIndicatorPro" class="typing-indicator-pro hidden">
-                                <div class="typing-dots">
-                                    <span></span><span></span><span></span>
-                                </div>
-                                <span id="typingText">Alguém está digitando...</span>
-                            </div>
-                            
                             <!-- Container de Input -->
-                            <div class="input-container-pro">
-                                <div class="input-toolbar">
-                                    <button class="toolbar-btn" onclick="chatSystem.anexarArquivo()" title="Anexar Arquivo">📎</button>
-                                    <button class="toolbar-btn" onclick="chatSystem.inserirEmoji()" title="Emoji">😊</button>
-                                    <button class="toolbar-btn" onclick="chatSystem.inserirMencao()" title="Mencionar">@</button>
-                                </div>
-                                
+                            <div class="input-container-pro">                                
                                 <div class="input-main">
                                     <textarea id="chatInputPro" placeholder="Digite sua mensagem..." 
-                                              onkeydown="chatSystem.handleKeyDown(event)"
-                                              oninput="chatSystem.handleTyping(event)"
+                                              onkeydown="window.chatSystem.handleKeyDown(event)"
+                                              oninput="window.chatSystem.handleTyping(event)"
                                               rows="1"></textarea>
-                                    <button id="sendBtnPro" class="send-btn-pro" onclick="chatSystem.enviarMensagem()">
+                                    <button id="sendBtnPro" class="send-btn-pro" onclick="window.chatSystem.enviarMensagem()">
                                         <span class="send-icon">📤</span>
                                     </button>
                                 </div>
@@ -408,45 +376,293 @@ class ChatSystemProfissional {
                     </div>
                 </div>
             </div>
-
-            <!-- Modal de Configurações -->
-            <div id="configModal" class="modal-pro hidden">
-                <div class="modal-content-pro">
-                    <div class="modal-header">
-                        <h3>⚙️ Configurações do Chat</h3>
-                        <button class="modal-close" onclick="chatSystem.fecharConfiguracoes()">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="config-section">
-                            <h4>🔔 Notificações</h4>
-                            <label><input type="checkbox" id="configSom"> Som nas notificações</label>
-                            <label><input type="checkbox" id="configDesktop"> Notificações desktop</label>
-                            <label><input type="checkbox" id="configHorario"> Respeitar horário comercial</label>
-                        </div>
-                        <div class="config-section">
-                            <h4>🎨 Aparência</h4>
-                            <label><input type="radio" name="theme" value="light"> Tema claro</label>
-                            <label><input type="radio" name="theme" value="dark"> Tema escuro</label>
-                            <label><input type="radio" name="theme" value="auto"> Automático</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
         `;
 
         document.body.insertAdjacentHTML('beforeend', chatHTML);
-        this.carregarChatsEspecificos();
-        this.preencherFiltrosPessoas();
+        console.log('✅ Interface criada');
     }
 
-    // ✅ SISTEMA DE STATUS PROFISSIONAL
+    // ✅ EVENT LISTENERS SEGUROS
+    configurarEventListeners() {
+        try {
+            // Toggle chat
+            const toggle = document.getElementById('chatToggle');
+            if (toggle) {
+                toggle.addEventListener('click', () => this.toggleChat());
+            }
+            
+            // Fechar menu de status ao clicar fora
+            document.addEventListener('click', (e) => {
+                const statusMenu = document.getElementById('statusMenu');
+                const userStatus = document.querySelector('.user-status');
+                
+                if (statusMenu && !statusMenu.contains(e.target) && !userStatus.contains(e.target)) {
+                    statusMenu.classList.add('hidden');
+                }
+            });
+            
+            console.log('✅ Event listeners configurados');
+        } catch (error) {
+            console.error('❌ Erro nos event listeners:', error);
+        }
+    }
+
+    // ✅ CARREGAMENTO DE CHATS FUNCIONAL
+    carregarChats() {
+        try {
+            this.abrirChat('global');
+            this.carregarMensagens('global');
+            console.log('✅ Chats carregados');
+        } catch (error) {
+            console.error('❌ Erro ao carregar chats:', error);
+        }
+    }
+
+    // ✅ ABRIR CHAT FUNCIONAL
+    abrirChat(chatId) {
+        this.chatAtivo = chatId;
+        this.configurarInfoChat(chatId);
+        this.carregarMensagens(chatId);
+        console.log(`📂 Chat aberto: ${chatId}`);
+    }
+
+    configurarInfoChat(chatId) {
+        const titleEl = document.getElementById('chatTitlePro');
+        const descEl = document.getElementById('chatDescriptionPro');
+        const avatarEl = document.getElementById('chatAvatar');
+        
+        if (chatId === 'global') {
+            if (titleEl) titleEl.textContent = 'Chat Geral';
+            if (descEl) descEl.textContent = 'Comunicação geral da obra';
+            if (avatarEl) avatarEl.textContent = '🌐';
+        }
+    }
+
+    // ✅ CARREGAMENTO DE MENSAGENS ROBUSTO
+    carregarMensagens(chatId) {
+        if (!this.chatRef) {
+            console.error('❌ ChatRef não disponível');
+            return;
+        }
+        
+        try {
+            const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
+            
+            // Carregar mensagens existentes
+            messagesRef.once('value', (snapshot) => {
+                const mensagens = snapshot.val() || {};
+                const container = document.getElementById('messagesContainerPro');
+                
+                if (container) {
+                    // Limpar mensagens antigas
+                    container.innerHTML = '';
+                }
+                
+                const mensagensArray = Object.values(mensagens).sort((a, b) => 
+                    new Date(a.timestamp) - new Date(b.timestamp)
+                );
+                
+                if (mensagensArray.length === 0) {
+                    this.mostrarWelcomeMessage();
+                } else {
+                    mensagensArray.forEach(mensagem => {
+                        this.adicionarMensagemUI(mensagem);
+                    });
+                }
+                
+                console.log(`✅ ${mensagensArray.length} mensagens carregadas para ${chatId}`);
+            });
+            
+            // Listener para novas mensagens
+            const listenerKey = `mensagens_${chatId}`;
+            if (this.listeners.has(listenerKey)) {
+                this.listeners.get(listenerKey).off();
+            }
+            
+            const newMessageListener = messagesRef.on('child_added', (snapshot) => {
+                const mensagem = snapshot.val();
+                if (mensagem && this.chatAtivo === chatId) {
+                    // Verificar se não é mensagem duplicada
+                    const container = document.getElementById('messagesContainerPro');
+                    const existente = container.querySelector(`[data-msg-id="${mensagem.id}"]`);
+                    
+                    if (!existente) {
+                        this.adicionarMensagemUI(mensagem);
+                        this.removerWelcomeMessage();
+                    }
+                }
+            });
+            
+            this.listeners.set(listenerKey, { off: () => messagesRef.off('child_added', newMessageListener) });
+            
+        } catch (error) {
+            console.error('❌ Erro ao carregar mensagens:', error);
+        }
+    }
+
+    mostrarWelcomeMessage() {
+        const container = document.getElementById('messagesContainerPro');
+        if (container) {
+            container.innerHTML = `
+                <div class="welcome-message-pro">
+                    <div class="welcome-icon">💼</div>
+                    <h3>Chat Profissional da Obra</h3>
+                    <p>Sistema de comunicação corporativa</p>
+                    <div class="welcome-tips">
+                        <div class="tip">💡 Use @nome para mencionar alguém</div>
+                        <div class="tip">📌 Mensagens são salvas automaticamente</div>
+                        <div class="tip">🔍 Histórico preservado no Firebase</div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    removerWelcomeMessage() {
+        const welcome = document.querySelector('.welcome-message-pro');
+        if (welcome) {
+            welcome.remove();
+        }
+    }
+
+    // ✅ ENVIO DE MENSAGEM FUNCIONAL
+    enviarMensagem() {
+        const input = document.getElementById('chatInputPro');
+        if (!input || !this.chatRef) return;
+        
+        const texto = input.value.trim();
+        if (!texto || !this.chatAtivo || !this.usuario) {
+            console.log('❌ Dados insuficientes para enviar');
+            return;
+        }
+        
+        const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
+        const mensagemId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        const mensagem = {
+            id: mensagemId,
+            autor: this.usuario.email,
+            nomeAutor: nomeUsuario,
+            texto: texto,
+            timestamp: new Date().toISOString(),
+            chatId: this.chatAtivo,
+            editado: false
+        };
+        
+        console.log('📤 Enviando mensagem:', { id: mensagemId, texto: texto.substring(0, 50) });
+        
+        this.chatRef.child(`mensagens/${this.chatAtivo}/${mensagemId}`).set(mensagem)
+            .then(() => {
+                console.log('✅ Mensagem enviada!');
+                input.value = '';
+                this.atualizarContadorCaracteres();
+                this.ajustarAlturaInput();
+                setTimeout(() => input.focus(), 100);
+            })
+            .catch((error) => {
+                console.error('❌ Erro ao enviar:', error);
+                if (window.mostrarNotificacao) {
+                    window.mostrarNotificacao('Erro ao enviar mensagem!', 'error');
+                }
+            });
+    }
+
+    // ✅ UI DE MENSAGEM MELHORADA
+    adicionarMensagemUI(mensagem) {
+        const container = document.getElementById('messagesContainerPro');
+        if (!container || !mensagem) return;
+        
+        // Verificar duplicata
+        const existente = container.querySelector(`[data-msg-id="${mensagem.id}"]`);
+        if (existente) return;
+        
+        const isPropia = mensagem.autor === this.usuario.email;
+        const usuarioInfo = USUARIOS_SISTEMA[mensagem.autor] || {};
+        
+        const mensagemEl = document.createElement('div');
+        mensagemEl.className = `message-pro ${isPropia ? 'own' : 'other'}`;
+        mensagemEl.setAttribute('data-msg-id', mensagem.id);
+        
+        const tempo = new Date(mensagem.timestamp);
+        const tempoFormatado = tempo.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const iniciais = mensagem.nomeAutor.split(' ').map(n => n[0]).join('').substring(0, 2);
+        
+        mensagemEl.innerHTML = `
+            <div class="message-avatar">
+                <div class="avatar-circle ${usuarioInfo.nivel || 'colaborador'}">
+                    ${iniciais}
+                </div>
+            </div>
+            
+            <div class="message-content-wrapper">
+                <div class="message-header-pro">
+                    <span class="message-author-pro">${isPropia ? 'Você' : mensagem.nomeAutor}</span>
+                    <span class="message-role">${usuarioInfo.cargo || ''}</span>
+                    <span class="message-time-pro">${tempoFormatado}</span>
+                </div>
+                
+                <div class="message-body-pro">
+                    <div class="message-text">${this.formatarMensagem(mensagem.texto)}</div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(mensagemEl);
+        
+        // Scroll suave para baixo
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth'
+        });
+        
+        console.log(`✅ Mensagem UI adicionada: ${mensagem.texto.substring(0, 30)}...`);
+    }
+
+    formatarMensagem(texto) {
+        return texto
+            .replace(/@(\w+)/g, '<span class="mention">@$1</span>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/\n/g, '<br>');
+    }
+
+    // ✅ FUNÇÕES DE UI
+    toggleChat() {
+        const panel = document.getElementById('chatPanel');
+        const toggle = document.getElementById('chatToggle');
+        
+        if (!panel || !toggle) return;
+        
+        if (this.isOpen) {
+            panel.classList.add('hidden');
+            this.isOpen = false;
+            console.log('📵 Chat fechado');
+        } else {
+            panel.classList.remove('hidden');
+            this.isOpen = true;
+            console.log('📱 Chat aberto');
+            
+            const input = document.getElementById('chatInputPro');
+            if (input) {
+                setTimeout(() => input.focus(), 200);
+            }
+        }
+    }
+
+    // ✅ STATUS DO USUÁRIO
     setStatus(novoStatus) {
         this.statusUsuario = novoStatus;
         this.atualizarStatusUI();
         this.salvarStatusOnline();
         
         // Fechar menu
-        document.getElementById('statusMenu').classList.add('hidden');
+        const menu = document.getElementById('statusMenu');
+        if (menu) menu.classList.add('hidden');
         
         const statusTextos = {
             online: 'Online',
@@ -455,7 +671,11 @@ class ChatSystemProfissional {
             ausente: 'Ausente'
         };
         
-        window.mostrarNotificacao(`Status alterado para: ${statusTextos[novoStatus]}`);
+        if (window.mostrarNotificacao) {
+            window.mostrarNotificacao(`Status: ${statusTextos[novoStatus]}`);
+        }
+        
+        console.log(`👤 Status alterado para: ${novoStatus}`);
     }
 
     atualizarStatusUI() {
@@ -478,7 +698,9 @@ class ChatSystemProfissional {
 
     toggleStatusMenu() {
         const menu = document.getElementById('statusMenu');
-        menu.classList.toggle('hidden');
+        if (menu) {
+            menu.classList.toggle('hidden');
+        }
     }
 
     toggleNaoPerturbe() {
@@ -488,432 +710,33 @@ class ChatSystemProfissional {
         const text = document.getElementById('naoPerturbeText');
         
         if (this.modoNaoPerturbe) {
-            icon.textContent = '🔕';
-            text.textContent = 'Não Perturbe (Ativo)';
-            window.mostrarNotificacao('Modo Não Perturbe ativado');
+            if (icon) icon.textContent = '🔕';
+            if (text) text.textContent = 'Não Perturbe (Ativo)';
+            if (window.mostrarNotificacao) {
+                window.mostrarNotificacao('Modo Não Perturbe ativado');
+            }
         } else {
-            icon.textContent = '🔔';
-            text.textContent = 'Não Perturbe';
-            window.mostrarNotificacao('Modo Não Perturbe desativado');
-        }
-    }
-
-    // ✅ SISTEMA DE NOTIFICAÇÕES INTELIGENTES
-    iniciarNotificacoesInteligentes() {
-        console.log('🔔 Iniciando notificações inteligentes...');
-        
-        // Verificar permissão para notificações desktop
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-        
-        this.monitorarChatParaNotificacoes('global');
-        
-        Object.keys(this.areas).forEach(areaKey => {
-            this.monitorarChatParaNotificacoes(`area-${areaKey}`);
-        });
-        
-        this.chatRef.child('privados').on('value', (snapshot) => {
-            const chatsPrivados = snapshot.val() || {};
-            Object.keys(chatsPrivados).forEach(chatId => {
-                const chatData = chatsPrivados[chatId];
-                if (chatData.participantes && chatData.participantes.includes(this.usuario.email)) {
-                    this.monitorarChatParaNotificacoes(chatId);
-                }
-            });
-        });
-    }
-
-    deveNotificar(mensagem, chatId) {
-        // Não notificar se for própria mensagem
-        if (mensagem.autor === this.usuario.email) return false;
-        
-        // Não notificar se estiver no chat ativo
-        if (this.chatAtivo === chatId) return false;
-        
-        // Respeitar modo não perturbe (exceto emergências)
-        if (this.modoNaoPerturbe && mensagem.prioridade !== 'emergencia') return false;
-        
-        // Verificar horário comercial
-        const agora = new Date();
-        const hora = agora.getHours();
-        const config = CONFIG_NOTIFICACOES.horarioComercial;
-        
-        if (hora < config.inicio || hora > config.fim) {
-            // Fora do horário: só urgente e emergência
-            return mensagem.prioridade === 'urgente' || mensagem.prioridade === 'emergencia';
-        }
-        
-        return true;
-    }
-
-    // ✅ CARREGAMENTO DE CHATS PROFISSIONAL
-    carregarChatsEspecificos() {
-        this.carregarChatsAreasProfissional();
-        this.carregarChatsProjetosProfissional();
-        this.carregarChatsPrivadosProfissional();
-    }
-
-    carregarChatsAreasProfissional() {
-        const container = document.getElementById('chatsAreasPro');
-        if (!container) return;
-        container.innerHTML = '';
-
-        let count = 0;
-        Object.entries(this.areas).forEach(([areaKey, area]) => {
-            const naoLidas = this.mensagensNaoLidas.get(`area-${areaKey}`) || 0;
-            const temMensagens = naoLidas > 0;
-            
-            container.innerHTML += `
-                <div class="conversation-item" data-room="area-${areaKey}" onclick="chatSystem.abrirChat('area-${areaKey}')">
-                    <div class="conversation-info">
-                        <div class="conversation-header">
-                            <span class="conversation-icon" style="color: ${area.cor}">📁</span>
-                            <span class="conversation-name">${area.nome}</span>
-                            <span class="conversation-time" id="time-area-${areaKey}"></span>
-                        </div>
-                        <div class="conversation-preview" id="preview-area-${areaKey}">
-                            ${area.equipe.length} membros da equipe
-                        </div>
-                    </div>
-                    <div class="conversation-meta">
-                        <span class="unread-badge ${naoLidas > 0 ? '' : 'hidden'}" id="unread-area-${areaKey}">${naoLidas}</span>
-                        <div class="priority-indicator" id="priority-area-${areaKey}"></div>
-                    </div>
-                </div>
-            `;
-            count++;
-        });
-        
-        document.getElementById('areasCount').textContent = count;
-    }
-
-    carregarChatsProjetosProfissional() {
-        const container = document.getElementById('chatsProjetosPro');
-        if (!container) return;
-        container.innerHTML = '';
-
-        let count = 0;
-        const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
-        
-        Object.entries(this.areas).forEach(([areaKey, area]) => {
-            area.atividades.forEach(atividade => {
-                if (atividade.responsaveis.includes(nomeUsuario)) {
-                    const naoLidas = this.mensagensNaoLidas.get(`projeto-${atividade.id}`) || 0;
-                    const prazo = new Date(atividade.prazo);
-                    const hoje = new Date();
-                    const diasRestantes = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
-                    
-                    let prioridadeClass = '';
-                    if (diasRestantes <= 3) prioridadeClass = 'urgente';
-                    else if (diasRestantes <= 7) prioridadeClass = 'atencao';
-                    
-                    container.innerHTML += `
-                        <div class="conversation-item ${prioridadeClass}" data-room="projeto-${atividade.id}" onclick="chatSystem.abrirChat('projeto-${atividade.id}')">
-                            <div class="conversation-info">
-                                <div class="conversation-header">
-                                    <span class="conversation-icon">📋</span>
-                                    <span class="conversation-name">${atividade.nome.substring(0, 25)}...</span>
-                                    <span class="conversation-time">${diasRestantes}d</span>
-                                </div>
-                                <div class="conversation-preview">
-                                    ${atividade.responsaveis.length} responsáveis
-                                </div>
-                            </div>
-                            <div class="conversation-meta">
-                                <span class="unread-badge ${naoLidas > 0 ? '' : 'hidden'}" id="unread-projeto-${atividade.id}">${naoLidas}</span>
-                                <div class="priority-indicator ${prioridadeClass}"></div>
-                            </div>
-                        </div>
-                    `;
-                    count++;
-                }
-            });
-        });
-        
-        document.getElementById('projetosCount').textContent = count;
-    }
-
-    carregarChatsPrivadosProfissional() {
-        const container = document.getElementById('chatsPrivadosPro');
-        if (!container) return;
-        
-        this.chatRef.child('privados').once('value', (snapshot) => {
-            const chatsPrivados = snapshot.val() || {};
-            container.innerHTML = '';
-            
-            let count = 0;
-            Object.entries(chatsPrivados).forEach(([chatId, chatData]) => {
-                if (chatData.participantes && chatData.participantes.includes(this.usuario.email)) {
-                    const outroUsuario = chatData.participantes.find(p => p !== this.usuario.email);
-                    const nomeOutro = this.getNomeUsuario(outroUsuario);
-                    const statusOnline = this.usuariosOnline.has(outroUsuario);
-                    const naoLidas = this.mensagensNaoLidas.get(chatId) || 0;
-                    
-                    container.innerHTML += `
-                        <div class="conversation-item" data-room="${chatId}" onclick="chatSystem.abrirChat('${chatId}')">
-                            <div class="conversation-info">
-                                <div class="conversation-header">
-                                    <span class="conversation-icon">👤</span>
-                                    <span class="conversation-name">${nomeOutro}</span>
-                                    <div class="user-status-mini">
-                                        <div class="status-dot-mini ${statusOnline ? 'online' : 'offline'}"></div>
-                                    </div>
-                                </div>
-                                <div class="conversation-preview">
-                                    ${statusOnline ? 'Online agora' : 'Última atividade recente'}
-                                </div>
-                            </div>
-                            <div class="conversation-meta">
-                                <span class="unread-badge ${naoLidas > 0 ? '' : 'hidden'}" id="unread-${chatId}">${naoLidas}</span>
-                            </div>
-                        </div>
-                    `;
-                    count++;
-                }
-            });
-            
-            document.getElementById('privadosCount').textContent = count;
-        });
-    }
-
-    // ✅ BUSCA AVANÇADA
-    buscarConversas(termo) {
-        if (!termo.trim()) {
-            // Mostrar todas as conversas
-            document.querySelectorAll('.conversation-item').forEach(item => {
-                item.style.display = 'flex';
-            });
-            return;
-        }
-        
-        const termoLower = termo.toLowerCase();
-        document.querySelectorAll('.conversation-item').forEach(item => {
-            const nome = item.querySelector('.conversation-name').textContent.toLowerCase();
-            const preview = item.querySelector('.conversation-preview').textContent.toLowerCase();
-            
-            if (nome.includes(termoLower) || preview.includes(termoLower)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
+            if (icon) icon.textContent = '🔔';
+            if (text) text.textContent = 'Não Perturbe';
+            if (window.mostrarNotificacao) {
+                window.mostrarNotificacao('Modo Não Perturbe desativado');
             }
-        });
-    }
-
-    toggleFiltros() {
-        const filtros = document.getElementById('searchFilters');
-        filtros.classList.toggle('hidden');
-    }
-
-    preencherFiltrosPessoas() {
-        const select = document.getElementById('filtroPessoa');
-        if (!select) return;
-        
-        select.innerHTML = '<option value="all">Qualquer pessoa</option>';
-        
-        Object.values(USUARIOS_SISTEMA).forEach(usuario => {
-            if (usuario.ativo) {
-                select.innerHTML += `<option value="${usuario.nome}">${usuario.nome}</option>`;
-            }
-        });
-    }
-
-    // ✅ ENVIO DE MENSAGEM PROFISSIONAL
-    enviarMensagem() {
-        const input = document.getElementById('chatInputPro');
-        if (!input) return;
-        
-        const texto = input.value.trim();
-        if (!texto || !this.chatAtivo || !this.usuario) {
-            console.log('❌ Dados insuficientes para enviar');
-            return;
         }
         
-        const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
-        const mensagemId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Detectar prioridade baseada no conteúdo
-        let prioridade = 'normal';
-        if (texto.toLowerCase().includes('urgente') || texto.toLowerCase().includes('emergência')) {
-            prioridade = 'urgente';
-        }
-        if (texto.toLowerCase().includes('emergencia') || texto.toLowerCase().includes('socorro')) {
-            prioridade = 'emergencia';
-        }
-        
-        const mensagem = {
-            id: mensagemId,
-            autor: this.usuario.email,
-            nomeAutor: nomeUsuario,
-            texto: texto,
-            timestamp: new Date().toISOString(),
-            chatId: this.chatAtivo,
-            prioridade: prioridade,
-            reacoes: {},
-            editado: false
-        };
-        
-        console.log('📤 Enviando mensagem profissional:', mensagem);
-        
-        this.chatRef.child(`mensagens/${this.chatAtivo}/${mensagemId}`).set(mensagem)
-            .then(() => {
-                console.log('✅ Mensagem enviada com sucesso!');
-                input.value = '';
-                this.atualizarContadorCaracteres();
-                this.ajustarAlturaInput();
-                setTimeout(() => input.focus(), 100);
-            })
-            .catch((error) => {
-                console.error('❌ Erro ao enviar:', error);
-                window.mostrarNotificacao('Erro ao enviar mensagem!', 'error');
-            });
+        console.log(`🔔 Não perturbe: ${this.modoNaoPerturbe}`);
     }
 
-    // ✅ UI DE MENSAGENS PROFISSIONAL
-    adicionarMensagemUIProfissional(mensagem) {
-        const container = document.getElementById('messagesContainerPro');
-        if (!container || !mensagem) return;
-        
-        // Verificar duplicata
-        const mensagemExistente = container.querySelector(`[data-msg-id="${mensagem.id}"]`);
-        if (mensagemExistente) return;
-        
-        const isPropia = mensagem.autor === this.usuario.email;
-        const usuarioInfo = USUARIOS_SISTEMA[mensagem.autor] || {};
-        
-        const mensagemEl = document.createElement('div');
-        mensagemEl.className = `message-pro ${isPropia ? 'own' : 'other'} ${mensagem.prioridade || 'normal'}`;
-        mensagemEl.setAttribute('data-msg-id', mensagem.id);
-        
-        const tempo = new Date(mensagem.timestamp);
-        const tempoFormatado = tempo.toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
-        const iniciais = mensagem.nomeAutor.split(' ').map(n => n[0]).join('').substring(0, 2);
-        
-        mensagemEl.innerHTML = `
-            <div class="message-avatar">
-                <div class="avatar-circle ${usuarioInfo.nivel || 'colaborador'}">
-                    ${iniciais}
-                </div>
-                <div class="status-dot-msg ${this.usuariosOnline.has(mensagem.autor) ? 'online' : 'offline'}"></div>
-            </div>
-            
-            <div class="message-content-wrapper">
-                <div class="message-header-pro">
-                    <span class="message-author-pro">${isPropia ? 'Você' : mensagem.nomeAutor}</span>
-                    <span class="message-role">${usuarioInfo.cargo || ''}</span>
-                    <span class="message-time-pro">${tempoFormatado}</span>
-                    ${mensagem.prioridade && mensagem.prioridade !== 'normal' ? 
-                        `<span class="priority-badge ${mensagem.prioridade}">${mensagem.prioridade.toUpperCase()}</span>` : ''}
-                </div>
-                
-                <div class="message-body-pro">
-                    <div class="message-text">${this.formatarMensagemProfissional(mensagem.texto)}</div>
-                    
-                    <!-- Reações -->
-                    <div class="message-reactions" id="reactions-${mensagem.id}">
-                        ${this.renderizarReacoes(mensagem.reacoes || {})}
-                    </div>
-                    
-                    <!-- Ações da Mensagem -->
-                    <div class="message-actions hidden">
-                        <button class="action-btn-mini" onclick="chatSystem.adicionarReacao('${mensagem.id}', '👍')" title="Curtir">👍</button>
-                        <button class="action-btn-mini" onclick="chatSystem.adicionarReacao('${mensagem.id}', '❤️')" title="Amar">❤️</button>
-                        <button class="action-btn-mini" onclick="chatSystem.adicionarReacao('${mensagem.id}', '😂')" title="Rir">😂</button>
-                        <button class="action-btn-mini" onclick="chatSystem.responderMensagem('${mensagem.id}')" title="Responder">↩️</button>
-                        <button class="action-btn-mini" onclick="chatSystem.copiarMensagem('${mensagem.id}')" title="Copiar">📋</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Adicionar eventos para mostrar ações
-        mensagemEl.addEventListener('mouseenter', () => {
-            mensagemEl.querySelector('.message-actions').classList.remove('hidden');
-        });
-        
-        mensagemEl.addEventListener('mouseleave', () => {
-            mensagemEl.querySelector('.message-actions').classList.add('hidden');
-        });
-        
-        container.appendChild(mensagemEl);
-        
-        // Remover welcome message
-        const welcome = container.querySelector('.welcome-message-pro');
-        if (welcome) welcome.remove();
-        
-        // Scroll suave para baixo
-        container.scrollTo({
-            top: container.scrollHeight,
-            behavior: 'smooth'
-        });
-        
-        console.log(`✅ Mensagem profissional adicionada: "${mensagem.texto}"`);
-    }
-
-    formatarMensagemProfissional(texto) {
-        return texto
-            .replace(/@(\w+)/g, '<span class="mention">@$1</span>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`(.*?)`/g, '<code>$1</code>');
-    }
-
-    renderizarReacoes(reacoes) {
-        if (!reacoes || Object.keys(reacoes).length === 0) return '';
-        
-        let html = '';
-        Object.entries(reacoes).forEach(([emoji, usuarios]) => {
-            if (usuarios.length > 0) {
-                const isReacted = usuarios.includes(this.usuario.email);
-                html += `
-                    <span class="reaction ${isReacted ? 'reacted' : ''}" 
-                          onclick="chatSystem.toggleReacao('${emoji}', '${mensagemId}')">
-                        ${emoji} ${usuarios.length}
-                    </span>
-                `;
-            }
-        });
-        
-        return html;
-    }
-
-    // ✅ SISTEMA DE REAÇÕES
-    adicionarReacao(mensagemId, emoji) {
-        const mensagemRef = this.chatRef.child(`mensagens/${this.chatAtivo}/${mensagemId}/reacoes/${emoji}`);
-        
-        mensagemRef.once('value', (snapshot) => {
-            const usuarios = snapshot.val() || [];
-            const userEmail = this.usuario.email;
-            
-            if (usuarios.includes(userEmail)) {
-                // Remover reação
-                const novaLista = usuarios.filter(email => email !== userEmail);
-                mensagemRef.set(novaLista.length > 0 ? novaLista : null);
-            } else {
-                // Adicionar reação
-                usuarios.push(userEmail);
-                mensagemRef.set(usuarios);
-            }
-        });
-    }
-
-    // ✅ FUNÇÕES AUXILIARES PROFISSIONAIS
+    // ✅ FUNÇÕES DE INPUT
     handleKeyDown(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             this.enviarMensagem();
         }
-        
         this.ajustarAlturaInput();
     }
 
     handleTyping(event) {
         this.atualizarContadorCaracteres();
-        // Aqui poderia implementar indicador de "está digitando"
     }
 
     atualizarContadorCaracteres() {
@@ -942,214 +765,116 @@ class ChatSystemProfissional {
         }
     }
 
-    // ✅ FUNÇÕES HERDADAS E ADAPTADAS (mantendo compatibilidade)
-    async getTodosUsuarios() {
-        return Object.entries(USUARIOS_SISTEMA)
-            .filter(([email, dados]) => dados.ativo)
-            .map(([email, dados]) => ({
-                nome: dados.nome,
-                email: email,
-                cargo: dados.cargo,
-                area: dados.area
-            }));
-    }
-
-    getNomeUsuario(email) {
-        const usuario = USUARIOS_SISTEMA[email];
-        return usuario ? usuario.nome : email.split('@')[0];
-    }
-
-    async novoPrivado() {
-        const usuarios = await this.getTodosUsuarios();
-        const usuariosDisponiveis = usuarios.filter(u => u.email !== this.usuario.email);
+    // ✅ FUNÇÕES DE MANUTENÇÃO
+    marcarUsuarioOnline() {
+        if (!this.chatRef || !this.usuario) return;
         
-        if (usuariosDisponiveis.length === 0) {
-            window.mostrarNotificacao('Nenhum usuário disponível', 'warning');
-            return;
-        }
-        
-        const opcoes = usuariosDisponiveis.map(u => `${u.nome} - ${u.cargo}`).join('\n');
-        const escolha = prompt(`Iniciar conversa privada com:\n\n${opcoes}\n\nDigite o nome:`);
-        
-        if (escolha) {
-            const usuarioEscolhido = usuariosDisponiveis.find(u => 
-                u.nome.toLowerCase().includes(escolha.toLowerCase())
-            );
+        try {
+            const userOnlineRef = this.chatRef.child(`usuariosOnline/${this.usuario.email.replace(/[@.]/g, '_')}`);
             
-            if (usuarioEscolhido) {
-                this.iniciarChatPrivado(usuarioEscolhido.email);
-            } else {
-                window.mostrarNotificacao('Usuário não encontrado', 'error');
-            }
-        }
-    }
-
-    iniciarChatPrivado(emailDestino) {
-        const participantes = [this.usuario.email, emailDestino].sort();
-        const chatId = `privado_${participantes[0].replace(/[@.-]/g, '_')}_${participantes[1].replace(/[@.-]/g, '_')}`;
-        
-        const chatData = {
-            participantes: participantes,
-            criadoEm: new Date().toISOString(),
-            ultimaAtividade: new Date().toISOString(),
-            criadoPor: this.usuario.email
-        };
-        
-        this.chatRef.child(`privados/${chatId}`).set(chatData)
-            .then(() => {
-                this.monitorarChatParaNotificacoes(chatId);
-                this.carregarChatsPrivadosProfissional();
-                setTimeout(() => this.abrirChat(chatId), 500);
-                window.mostrarNotificacao('Conversa privada iniciada!');
-            })
-            .catch(error => {
-                console.error('❌ Erro ao criar chat privado:', error);
-                window.mostrarNotificacao('Erro ao criar conversa privada', 'error');
+            userOnlineRef.set({
+                nome: window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0],
+                email: this.usuario.email,
+                status: this.statusUsuario,
+                ultimaAtividade: new Date().toISOString()
             });
-    }
-
-    // Implementar outras funções necessárias...
-    abrirChat(chatId) {
-        this.chatAtivo = chatId;
-        this.configurarInfoChatProfissional(chatId);
-        this.carregarMensagens(chatId);
-        this.marcarComoLido(chatId);
-        
-        // Atualizar UI
-        document.querySelectorAll('.conversation-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        const roomElement = document.querySelector(`[data-room="${chatId}"]`);
-        if (roomElement) {
-            roomElement.classList.add('active');
-        }
-    }
-
-    configurarInfoChatProfissional(chatId) {
-        const titleEl = document.getElementById('chatTitlePro');
-        const descEl = document.getElementById('chatDescriptionPro');
-        const membersEl = document.getElementById('membersCountPro');
-        const avatarEl = document.getElementById('chatAvatar');
-        
-        if (chatId === 'global') {
-            titleEl.textContent = 'Chat Geral';
-            descEl.textContent = 'Comunicação geral da obra';
-            membersEl.textContent = this.getTotalMembros();
-            avatarEl.textContent = '🌐';
-        }
-        // Adicionar outras configurações...
-    }
-
-    // Outras funções necessárias (carregarMensagens, toggleChat, etc.)
-    carregarMensagens(chatId) {
-        // Implementação similar à original, mas com UI profissional
-        const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
-        
-        messagesRef.once('value', (snapshot) => {
-            const mensagens = snapshot.val() || {};
-            const container = document.getElementById('messagesContainerPro');
             
+            // Remover quando desconectar
+            userOnlineRef.onDisconnect().remove();
+            
+            console.log('✅ Usuário marcado como online');
+        } catch (error) {
+            console.error('❌ Erro ao marcar online:', error);
+        }
+    }
+
+    salvarStatusOnline() {
+        if (!this.chatRef || !this.usuario) return;
+        
+        try {
+            this.chatRef.child(`usuariosOnline/${this.usuario.email.replace(/[@.]/g, '_')}/status`).set(this.statusUsuario);
+        } catch (error) {
+            console.error('❌ Erro ao salvar status:', error);
+        }
+    }
+
+    configurarNotificacoes() {
+        // Solicitar permissão para notificações
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                console.log(`🔔 Permissão de notificação: ${permission}`);
+            });
+        }
+    }
+
+    // ✅ FUNÇÕES AUXILIARES
+    limparChat() {
+        if (confirm('Deseja limpar o histórico do chat atual?')) {
+            const container = document.getElementById('messagesContainerPro');
             if (container) {
                 container.innerHTML = '';
+                this.mostrarWelcomeMessage();
             }
             
-            const mensagensArray = Object.values(mensagens).sort((a, b) => 
-                new Date(a.timestamp) - new Date(b.timestamp)
-            );
+            if (window.mostrarNotificacao) {
+                window.mostrarNotificacao('Chat limpo!');
+            }
             
-            mensagensArray.forEach(mensagem => {
-                this.adicionarMensagemUIProfissional(mensagem);
-            });
+            console.log('🗑️ Chat limpo');
+        }
+    }
+
+    destruir() {
+        // Limpar listeners
+        this.listeners.forEach(listener => {
+            if (listener && listener.off) {
+                listener.off();
+            }
         });
+        this.listeners.clear();
         
-        // Listener para novas mensagens...
-    }
-
-    toggleChat() {
-        const panel = document.getElementById('chatPanel');
+        // Remover elementos da UI
         const toggle = document.getElementById('chatToggle');
+        const panel = document.getElementById('chatPanel');
+        if (toggle) toggle.remove();
+        if (panel) panel.remove();
         
-        if (this.isOpen) {
-            panel.classList.add('hidden');
-            this.isOpen = false;
-        } else {
-            panel.classList.remove('hidden');
-            this.isOpen = true;
-            
-            const input = document.getElementById('chatInputPro');
-            if (input) {
-                setTimeout(() => input.focus(), 100);
-            }
-        }
+        console.log('🧹 Chat system destruído');
     }
-
-    // Funções de configuração
-    abrirConfiguracoes() {
-        document.getElementById('configModal').classList.remove('hidden');
-    }
-
-    fecharConfiguracoes() {
-        document.getElementById('configModal').classList.add('hidden');
-    }
-
-    // Implementar funções restantes conforme necessário...
-    configurarEventListeners() {
-        // Event listeners para o sistema profissional
-    }
-
-    getTotalMembros() {
-        return Object.keys(USUARIOS_SISTEMA).length;
-    }
-
-    marcarComoLido(chatId) {
-        this.mensagensNaoLidas.set(chatId, 0);
-        const unreadEl = document.getElementById(`unread-${chatId.replace('/', '-')}`);
-        if (unreadEl) {
-            unreadEl.classList.add('hidden');
-        }
-    }
-
-    // Funções placeholder para funcionalidades futuras
-    fixarMensagem() { console.log('Fixar mensagem - a implementar'); }
-    abrirArquivos() { console.log('Arquivos - a implementar'); }
-    abrirBusca() { console.log('Busca - a implementar'); }
-    abrirDetalhes() { console.log('Detalhes - a implementar'); }
-    anexarArquivo() { console.log('Anexar - a implementar'); }
-    inserirEmoji() { console.log('Emoji - a implementar'); }
-    inserirMencao() { console.log('Menção - a implementar'); }
-    limparChat() { console.log('Limpar - a implementar'); }
-    
-    carregarChats() {}
-    salvarStatusOnline() {}
-    configurarModoNaoPerturbe() {}
-    monitorarChatParaNotificacoes() {}
-    monitorarUsuariosOnline() {}
-    marcarUsuarioOnline() {}
 }
 
-// ========== INICIALIZAÇÃO ==========
+// ✅ INICIALIZAÇÃO GLOBAL SEGURA
 let chatSystem;
 
+function inicializarChatGlobal() {
+    if (chatSystem) {
+        console.log('⚠️ Chat system já existe, destruindo anterior...');
+        chatSystem.destruir();
+    }
+    
+    chatSystem = new ChatSystemProfissional();
+    window.chatSystem = chatSystem;
+    
+    return chatSystem;
+}
+
+// ✅ AGUARDAR DOM + DELAY PARA SISTEMA PRINCIPAL
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🔧 Inicializando Chat System PROFISSIONAL...');
+    console.log('📋 DOM carregado, aguardando sistema principal...');
     
-    const inicializarChat = () => {
-        if (window.usuarioAtual && window.dados && window.database) {
-            chatSystem = new ChatSystemProfissional();
-            window.chatSystem = chatSystem;
-            console.log('✅ Chat System PROFISSIONAL inicializado!');
-        } else {
-            setTimeout(inicializarChat, 1000);
-        }
-    };
-    
-    setTimeout(inicializarChat, 3000);
+    // Aguardar sistema principal estar pronto
+    setTimeout(() => {
+        inicializarChatGlobal();
+    }, 3000); // 3 segundos de delay
 });
 
-// ✅ FUNÇÕES DE CADASTRO E TESTE (mantidas da versão anterior)
+// ✅ EXPOR FUNÇÕES GLOBALMENTE
+window.inicializarChatGlobal = inicializarChatGlobal;
+window.USUARIOS_SISTEMA = USUARIOS_SISTEMA;
+
+// ✅ FUNÇÃO DE CADASTRO (mantida)
 async function cadastrarTodosUsuarios() {
-    console.log('🔧 Iniciando cadastro de usuários reais...');
+    console.log('🔧 Iniciando cadastro de usuários...');
     
     const resultados = [];
     
@@ -1170,30 +895,25 @@ async function cadastrarTodosUsuarios() {
                 ativo: true
             });
             
-            resultados.push(`✅ ${dadosUsuario.nome}: Cadastrado com sucesso`);
+            resultados.push(`✅ ${dadosUsuario.nome}: Cadastrado`);
             
         } catch (error) {
             if (error.code === 'auth/email-already-in-use') {
-                resultados.push(`⚠️ ${dadosUsuario.nome}: Email já cadastrado`);
+                resultados.push(`⚠️ ${dadosUsuario.nome}: Já existe`);
             } else {
-                resultados.push(`❌ ${dadosUsuario.nome}: Erro - ${error.message}`);
+                resultados.push(`❌ ${dadosUsuario.nome}: Erro`);
             }
         }
         
         await new Promise(resolve => setTimeout(resolve, 500));
     }
     
-    console.log('📋 RESULTADO DO CADASTRO:');
-    resultados.forEach(resultado => console.log(resultado));
-    
-    const resumo = resultados.join('\n');
-    alert(`CADASTRO DE USUÁRIOS CONCLUÍDO:\n\n${resumo}`);
+    console.log('📋 RESULTADO:', resultados);
+    alert(`CADASTRO CONCLUÍDO:\n\n${resultados.join('\n')}`);
     
     return resultados;
 }
 
-// Expor funções globalmente
 window.cadastrarTodosUsuarios = cadastrarTodosUsuarios;
-window.USUARIOS_SISTEMA = USUARIOS_SISTEMA;
 
-console.log('💼 Chat System PROFISSIONAL carregado - Execute cadastrarTodosUsuarios() se necessário');
+console.log('💼 Chat System PROFISSIONAL - Módulo carregado ✅');
