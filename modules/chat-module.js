@@ -1,5 +1,5 @@
 // ============================================
-// 💬 SISTEMA DE CHAT COMPLETO CORRIGIDO - GESTÃO DE OBRAS
+// 💬 SISTEMA DE CHAT FINAL CORRIGIDO - GESTÃO DE OBRAS
 // ============================================
 
 class ChatSystem {
@@ -12,9 +12,8 @@ class ChatSystem {
         this.listeners = new Map();
         this.isOpen = false;
         this.usuariosOnline = new Map();
-        this.conectado = false;
+        this.ultimasMensagens = new Map(); // ✅ CACHE para evitar duplicatas
         
-        // ✅ CORREÇÃO: Aguardar inicialização melhorada
         this.aguardarInicializacao();
     }
 
@@ -35,22 +34,22 @@ class ChatSystem {
         verificar();
     }
 
-    init() {
+    async init() {
         this.criarInterface();
         this.configurarEventListeners();
         
-        // ✅ CORREÇÃO: Inicializar Firebase primeiro
-        this.inicializarFirebase().then(() => {
+        try {
+            await this.inicializarFirebase();
             this.carregarChats();
-            this.monitorarConectividade();
             this.monitorarUsuariosOnline();
             this.marcarUsuarioOnline();
             
-            console.log('✅ Sistema de Chat CORRIGIDO inicializado');
-        });
+            console.log('✅ Sistema de Chat FINAL inicializado');
+        } catch (error) {
+            console.error('❌ Erro na inicialização:', error);
+        }
     }
 
-    // ✅ NOVA FUNÇÃO: Inicializar estrutura Firebase corretamente
     async inicializarFirebase() {
         try {
             const snapshot = await this.chatRef.once('value');
@@ -58,30 +57,19 @@ class ChatSystem {
                 console.log('🔧 Criando estrutura inicial do chat...');
                 await this.chatRef.set({
                     mensagens: {
-                        global: {
-                            msg_inicial: {
-                                id: 'msg_inicial',
-                                autor: 'sistema@obra.com',
-                                nomeAutor: 'Sistema',
-                                texto: '🏗️ Bem-vindos ao chat da obra 292! Sistema funcionando corretamente.',
-                                timestamp: new Date().toISOString(),
-                                chatId: 'global'
-                            }
-                        }
+                        global: {}
                     },
                     usuariosOnline: {},
                     privados: {}
                 });
-                console.log('✅ Estrutura do chat criada no Firebase');
             }
         } catch (error) {
             console.error('❌ Erro ao inicializar Firebase:', error);
         }
     }
 
-    // ========== INTERFACE (CORRIGIDA) ==========
     criarInterface() {
-        // ✅ REMOVER CAIXINHA SINCRONIZADO CHATA
+        // ✅ REMOVER CAIXINHA SINCRONIZADO
         const syncIndicator = document.getElementById('syncIndicator');
         if (syncIndicator) {
             syncIndicator.style.display = 'none';
@@ -182,13 +170,8 @@ class ChatSystem {
     }
 
     carregarChatsEspecificos() {
-        // Carregar chats por área
         this.carregarChatsAreas();
-        
-        // Carregar chats de projetos (atividades)
         this.carregarChatsProjetos();
-        
-        // Carregar chats privados
         this.carregarChatsPrivados();
     }
 
@@ -217,10 +200,8 @@ class ChatSystem {
         if (!container) return;
         container.innerHTML = '';
 
-        // Pegar atividades das áreas
         Object.entries(this.areas).forEach(([areaKey, area]) => {
             area.atividades.forEach(atividade => {
-                // ✅ CORREÇÃO: Usar nome do usuário vinculado
                 const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
                 
                 if (atividade.responsaveis.includes(nomeUsuario)) {
@@ -244,7 +225,6 @@ class ChatSystem {
         const container = document.getElementById('chatsPrivados');
         if (!container) return;
         
-        // Buscar conversas privadas existentes
         this.chatRef.child('privados').once('value', (snapshot) => {
             const chatsPrivados = snapshot.val() || {};
             container.innerHTML = '';
@@ -271,12 +251,12 @@ class ChatSystem {
         });
     }
 
-    // ========== GERENCIAMENTO DE CHATS (CORRIGIDO) ==========
+    // ========== CHAT MANAGEMENT ==========
     abrirChat(chatId) {
         console.log(`🔧 Abrindo chat: ${chatId}`);
         this.chatAtivo = chatId;
         
-        // Atualizar UI
+        // UI Updates
         document.querySelectorAll('.chat-room-item').forEach(item => {
             item.classList.remove('active');
         });
@@ -286,26 +266,18 @@ class ChatSystem {
             roomElement.classList.add('active');
         }
         
-        // Limpar mensagens
+        // Clear messages
         const messagesContainer = document.getElementById('chatMessages');
         if (messagesContainer) {
             messagesContainer.innerHTML = '<div class="welcome-message"><p>Carregando mensagens...</p></div>';
         }
         
-        // Configurar informações do chat
         this.configurarInfoChat(chatId);
-        
-        // ✅ CORREÇÃO: Parar listeners anteriores
         this.pararListenersAnteriores();
-        
-        // Carregar mensagens
         this.carregarMensagens(chatId);
-        
-        // Marcar como lido
         this.marcarComoLido(chatId);
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: Parar listeners anteriores
     pararListenersAnteriores() {
         this.listeners.forEach((ref, chatId) => {
             try {
@@ -354,75 +326,74 @@ class ChatSystem {
         }
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: Carregar mensagens com sincronização REAL
+    // ✅ FUNÇÃO PRINCIPAL CORRIGIDA - CARREGAMENTO E LISTENERS
     carregarMensagens(chatId) {
         console.log(`🔧 Carregando mensagens para: ${chatId}`);
         
         const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
         
-        // ✅ PRIMEIRO: Carregar mensagens existentes
+        // ✅ PRIMEIRO: Carregar mensagens existentes SEM listener
         messagesRef.once('value', (snapshot) => {
             const mensagens = snapshot.val() || {};
-            const messagesContainer = document.getElementById('chatMessages');
-            if (messagesContainer) {
-                messagesContainer.innerHTML = '';
+            const container = document.getElementById('chatMessages');
+            
+            if (container) {
+                container.innerHTML = '';
             }
             
-            // Ordenar mensagens por timestamp
-            const mensagensArray = Object.entries(mensagens).map(([key, msg]) => ({
-                ...msg,
-                firebaseKey: key
-            })).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            // Criar cache das mensagens existentes
+            this.ultimasMensagens.set(chatId, new Set());
             
-            console.log(`📥 Carregadas ${mensagensArray.length} mensagens existentes para ${chatId}`);
+            const mensagensArray = Object.values(mensagens).sort((a, b) => 
+                new Date(a.timestamp) - new Date(b.timestamp)
+            );
+            
+            console.log(`📥 ${mensagensArray.length} mensagens existentes carregadas`);
             
             mensagensArray.forEach(mensagem => {
-                this.adicionarMensagemUI(mensagem);
+                if (mensagem.id) {
+                    this.ultimasMensagens.get(chatId).add(mensagem.id);
+                    this.adicionarMensagemUI(mensagem);
+                }
             });
         });
         
-        // ✅ SEGUNDO: Escutar TODAS as mensagens novas em TEMPO REAL
-        const listener = messagesRef.on('child_added', (snapshot) => {
-            const mensagem = snapshot.val();
-            if (mensagem && mensagem.id) {
-                
-                // Verificar se já existe na UI (evitar duplicatas)
-                const container = document.getElementById('chatMessages');
-                const mensagemExistente = container && container.querySelector(`[data-msg-id="${mensagem.id}"]`);
-                
-                if (!mensagemExistente) {
-                    console.log(`📥 NOVA mensagem em tempo real:`, mensagem);
+        // ✅ SEGUNDO: Listener GLOBAL para TODAS as mudanças
+        const listener = messagesRef.on('value', (snapshot) => {
+            const todasMensagens = snapshot.val() || {};
+            const cache = this.ultimasMensagens.get(chatId) || new Set();
+            
+            // Verificar se há mensagens novas
+            Object.values(todasMensagens).forEach(mensagem => {
+                if (mensagem.id && !cache.has(mensagem.id)) {
+                    console.log('📥 NOVA MENSAGEM detectada:', mensagem);
+                    cache.add(mensagem.id);
                     this.adicionarMensagemUI(mensagem);
                     
-                    // ✅ NOTIFICAR SE NÃO FOR DO PRÓPRIO USUÁRIO
-                    if (mensagem.autor !== this.usuario.email && this.chatAtivo === mensagem.chatId) {
+                    // Som apenas para mensagens de outros
+                    if (mensagem.autor !== this.usuario.email) {
                         this.tocarSomNotificacao();
                     }
                 }
-            }
+            });
         });
         
-        // Salvar referência do listener
         this.listeners.set(chatId, messagesRef);
         console.log(`✅ Listener ativo para chat: ${chatId}`);
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: Enviar mensagem com FORÇA TOTAL
+    // ✅ ENVIO DE MENSAGEM SIMPLIFICADO
     enviarMensagem() {
         const input = document.getElementById('chatInput');
         if (!input) return;
         
         const texto = input.value.trim();
-        
         if (!texto || !this.chatAtivo || !this.usuario) {
-            console.log('❌ Dados insuficientes para enviar mensagem');
+            console.log('❌ Dados insuficientes para enviar');
             return;
         }
         
-        // ✅ USAR NOME DO USUÁRIO VINCULADO
         const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
-        
-        // ✅ ID ÚNICO GARANTIDO
         const mensagemId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
         const mensagem = {
@@ -434,64 +405,35 @@ class ChatSystem {
             chatId: this.chatAtivo
         };
         
-        console.log('📤 ENVIANDO mensagem:', mensagem);
+        console.log('📤 Enviando mensagem:', mensagem);
         
-        // ✅ FORÇA MÁXIMA: Push + Set para garantir
-        const novoMsgRef = this.chatRef.child(`mensagens/${this.chatAtivo}`).push();
-        
-        novoMsgRef.set(mensagem)
+        // ✅ SALVAR DIRETO com SET (mais simples)
+        this.chatRef.child(`mensagens/${this.chatAtivo}/${mensagemId}`).set(mensagem)
             .then(() => {
-                console.log('✅ Mensagem CONFIRMADA no Firebase com key:', novoMsgRef.key);
-                
-                // Limpar input
+                console.log('✅ Mensagem salva com sucesso!');
                 input.value = '';
                 const countEl = document.getElementById('characterCount');
                 if (countEl) countEl.textContent = '0/500';
-                
-                // Focar novamente
                 setTimeout(() => input.focus(), 100);
-                
-                // ✅ FORÇAR SINCRONIZAÇÃO
-                this.forcarSincronizacao();
             })
             .catch((error) => {
-                console.error('❌ ERRO ao salvar mensagem:', error);
-                window.mostrarNotificacao('Erro ao enviar mensagem: ' + error.message, 'error');
+                console.error('❌ Erro ao salvar:', error);
+                window.mostrarNotificacao('Erro ao enviar mensagem!', 'error');
             });
     }
 
-    // ✅ NOVA FUNÇÃO: Forçar sincronização
-    forcarSincronizacao() {
-        console.log('🔄 Forçando sincronização...');
-        
-        // Disparar evento customizado para outros listeners
-        window.dispatchEvent(new CustomEvent('chatMensagemEnviada', {
-            detail: { chatId: this.chatAtivo }
-        }));
-        
-        // Forçar re-sincronização dos listeners
-        setTimeout(() => {
-            const messagesRef = this.chatRef.child(`mensagens/${this.chatAtivo}`);
-            messagesRef.once('value', (snapshot) => {
-                console.log('🔄 Sincronização forçada - Total mensagens:', Object.keys(snapshot.val() || {}).length);
-            });
-        }, 500);
-    }
-
-    // ✅ FUNÇÃO CORRIGIDA: Adicionar mensagem UI melhorada
+    // ✅ ADICIONAR MENSAGEM NA UI
     adicionarMensagemUI(mensagem) {
         const container = document.getElementById('chatMessages');
         if (!container || !mensagem) return;
         
-        const isPropia = mensagem.autor === this.usuario.email;
-        
-        // ✅ VERIFICAR DUPLICATA POR ID
+        // Verificar duplicata
         const mensagemExistente = container.querySelector(`[data-msg-id="${mensagem.id}"]`);
         if (mensagemExistente) {
-            console.log('⚠️ Mensagem já existe na UI:', mensagem.id);
             return;
         }
         
+        const isPropia = mensagem.autor === this.usuario.email;
         const mensagemEl = document.createElement('div');
         mensagemEl.className = `message ${isPropia ? 'own' : 'other'}`;
         mensagemEl.setAttribute('data-msg-id', mensagem.id);
@@ -509,68 +451,24 @@ class ChatSystem {
             <div class="message-content">${this.formatarMensagem(mensagem.texto)}</div>
         `;
         
-        // ✅ INSERIR NA POSIÇÃO CORRETA (por timestamp)
-        const mensagensExistentes = Array.from(container.querySelectorAll('.message'));
-        const timestampMensagem = new Date(mensagem.timestamp).getTime();
+        container.appendChild(mensagemEl);
         
-        let inserido = false;
-        for (let i = mensagensExistentes.length - 1; i >= 0; i--) {
-            const msgEl = mensagensExistentes[i];
-            const msgTime = msgEl.querySelector('.message-time');
-            if (msgTime) {
-                const msgTimestamp = this.extrairTimestamp(msgTime.textContent, mensagem.timestamp);
-                if (timestampMensagem >= msgTimestamp) {
-                    msgEl.parentNode.insertBefore(mensagemEl, msgEl.nextSibling);
-                    inserido = true;
-                    break;
-                }
-            }
-        }
-        
-        if (!inserido) {
-            container.appendChild(mensagemEl);
-        }
-        
-        // Remover mensagem de boas-vindas
+        // Remover welcome message
         const welcome = container.querySelector('.welcome-message');
         if (welcome) welcome.remove();
         
         // Scroll para baixo
         container.scrollTop = container.scrollHeight;
         
-        console.log(`✅ Mensagem adicionada na UI: "${mensagem.texto}" por ${mensagem.nomeAutor}`);
-        
-        // ✅ ANIMAÇÃO SUAVE
-        mensagemEl.style.opacity = '0';
-        mensagemEl.style.transform = 'translateY(10px)';
-        setTimeout(() => {
-            mensagemEl.style.transition = 'all 0.3s ease';
-            mensagemEl.style.opacity = '1';
-            mensagemEl.style.transform = 'translateY(0)';
-        }, 50);
-    }
-
-    // ✅ NOVA FUNÇÃO: Extrair timestamp para ordenação
-    extrairTimestamp(timeText, fallbackISO) {
-        try {
-            const hoje = new Date();
-            const [hora, minuto] = timeText.split(':');
-            const timestamp = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), parseInt(hora), parseInt(minuto));
-            return timestamp.getTime();
-        } catch (error) {
-            return new Date(fallbackISO).getTime();
-        }
+        console.log(`✅ Mensagem UI adicionada: "${mensagem.texto}"`);
     }
 
     formatarMensagem(texto) {
-        // Formatar menções @usuario
         return texto.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
     }
 
-    // ✅ NOVA FUNÇÃO: Som de notificação
     tocarSomNotificacao() {
         try {
-            // Som simples usando Web Audio API
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -580,14 +478,13 @@ class ChatSystem {
             
             oscillator.frequency.value = 800;
             oscillator.type = 'sine';
-            
             gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
             
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.3);
         } catch (error) {
-            console.log('Som de notificação não disponível');
+            console.log('Som não disponível');
         }
     }
 
@@ -597,15 +494,12 @@ class ChatSystem {
         const usuariosDisponiveis = usuarios.filter(u => u.email !== this.usuario.email);
         
         if (usuariosDisponiveis.length === 0) {
-            window.mostrarNotificacao('Nenhum usuário disponível para conversa', 'warning');
+            window.mostrarNotificacao('Nenhum usuário disponível', 'warning');
             return;
         }
         
-        const opcoes = usuariosDisponiveis
-            .map(u => `${u.nome} (${u.email})`)
-            .join('\n');
-        
-        const escolha = prompt(`Iniciar conversa privada com:\n\n${opcoes}\n\nDigite o email do usuário:`);
+        const opcoes = usuariosDisponiveis.map(u => `${u.nome} (${u.email})`).join('\n');
+        const escolha = prompt(`Iniciar conversa privada com:\n\n${opcoes}\n\nDigite o email:`);
         
         if (escolha) {
             const usuarioEscolhido = usuariosDisponiveis.find(u => 
@@ -635,13 +529,10 @@ class ChatSystem {
             this.carregarChatsPrivados();
             this.abrirChat(`privado-${chatId}`);
             window.mostrarNotificacao('Conversa privada iniciada!');
-        }).catch(error => {
-            console.error('❌ Erro ao criar chat privado:', error);
-            window.mostrarNotificacao('Erro ao criar conversa privada', 'error');
         });
     }
 
-    // ========== USUÁRIOS ONLINE (CORRIGIDO) ==========
+    // ========== USUÁRIOS ONLINE ==========
     monitorarUsuariosOnline() {
         this.chatRef.child('usuariosOnline').on('value', (snapshot) => {
             const usuarios = snapshot.val() || {};
@@ -653,14 +544,14 @@ class ChatSystem {
                 const agora = new Date();
                 const diffMinutos = (agora - ultimaAtividade) / (1000 * 60);
                 
-                if (diffMinutos < 5) { // Considerado online se ativo nos últimos 5 min
+                if (diffMinutos < 5) {
                     this.usuariosOnline.set(data.email || emailKey.replace(/_/g, '@'), data);
                     count++;
                 }
             });
             
             const countEl = document.getElementById('usersOnlineCount');
-            if (countEl && this.conectado) {
+            if (countEl) {
                 countEl.textContent = `👥 ${count}`;
             }
         });
@@ -678,43 +569,18 @@ class ChatSystem {
                 nome: nomeUsuario,
                 ultimaAtividade: new Date().toISOString(),
                 status: 'online'
-            }).catch(error => {
-                console.error('❌ Erro ao atualizar status online:', error);
             });
         };
         
         atualizarStatus();
-        setInterval(atualizarStatus, 60000); // Atualizar a cada minuto
+        setInterval(atualizarStatus, 60000);
         
-        // Marcar como offline ao sair
         window.addEventListener('beforeunload', () => {
             this.chatRef.child(`usuariosOnline/${emailKey}`).remove();
         });
     }
 
-    // ✅ NOVA FUNÇÃO: Monitorar conectividade
-    monitorarConectividade() {
-        // Verificar se Firebase está conectado
-        const connectedRef = this.chatRef.root.child('.info/connected');
-        connectedRef.on('value', (snapshot) => {
-            this.conectado = snapshot.val();
-            console.log(this.conectado ? '🟢 Firebase CONECTADO' : '🔴 Firebase DESCONECTADO');
-            
-            const statusEl = document.getElementById('usersOnlineCount');
-            if (statusEl) {
-                if (this.conectado) {
-                    statusEl.style.background = '#10b981';
-                    statusEl.style.color = 'white';
-                } else {
-                    statusEl.style.background = '#ef4444';
-                    statusEl.style.color = 'white';
-                    statusEl.textContent = '🔴 Offline';
-                }
-            }
-        });
-    }
-
-    // ========== FUNCIONALIDADES AUXILIARES ==========
+    // ========== UTILITIES ==========
     marcarComoLido(chatId) {
         this.mensagensNaoLidas.set(chatId, 0);
         const unreadEl = document.getElementById(`unread-${chatId.replace('-', '-')}`);
@@ -781,7 +647,6 @@ class ChatSystem {
             this.enviarMensagem();
         }
         
-        // Atualizar contador de caracteres
         const input = event.target;
         const count = input.value.length;
         const countEl = document.getElementById('characterCount');
@@ -800,7 +665,6 @@ class ChatSystem {
         if (minimizeBtn) minimizeBtn.onclick = () => this.toggleChat();
     }
 
-    // ========== UTILITÁRIOS ==========
     getTotalMembros() {
         if (!this.areas) return 0;
         
@@ -851,39 +715,36 @@ class ChatSystem {
     }
 
     carregarChats() {
-        // Esta função agora é chamada pela inicializarFirebase()
         console.log('✅ Chats carregados');
     }
 }
 
-// ========== INICIALIZAÇÃO CORRIGIDA ==========
+// ========== INICIALIZAÇÃO ==========
 let chatSystem;
 
-// ✅ CORREÇÃO: Aguardar que o sistema principal esteja carregado
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔧 Inicializando sistema de chat...');
     
     const inicializarChat = () => {
         if (window.usuarioAtual && window.dados && window.database) {
             chatSystem = new ChatSystem();
-            window.chatSystem = chatSystem; // Expor globalmente
-            console.log('✅ Chat System inicializado com sucesso!');
+            window.chatSystem = chatSystem;
+            console.log('✅ Chat System FINAL inicializado!');
         } else {
             setTimeout(inicializarChat, 1000);
         }
     };
     
-    setTimeout(inicializarChat, 3000); // Aguardar 3 segundos para garantir que tudo carregou
+    setTimeout(inicializarChat, 3000);
 });
 
-// ✅ CORREÇÃO: Remover caixinha sincronizado no CSS também
+// ✅ ESTILOS CORRIGIDOS
 const style = document.createElement('style');
 style.textContent = `
     .sync-indicator.synced {
         display: none !important;
     }
     
-    /* Corrigir posicionamento do chat para não conflitar */
     .chat-toggle {
         bottom: 20px !important;
         right: 20px !important;
