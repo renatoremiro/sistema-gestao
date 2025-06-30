@@ -1,180 +1,147 @@
 /* ============================================
-   💼 CHAT PROFISSIONAL - ESTILOS CORRIGIDOS
+   💼 CHAT EMPRESARIAL - DESIGN PROFISSIONAL
+   Obra 292 - Museu Nacional
    ============================================ */
 
-/* ✅ ISOLAMENTO E RESET PARA EVITAR CONFLITOS */
-#chatToggle,
-#chatPanel,
-#chatToggle *,
-#chatPanel * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+/* ✅ RESET E ISOLAMENTO TOTAL */
+#chatEmpresarial,
+#panelChatEmp,
+#chatEmpresarial *,
+#panelChatEmp * {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', Roboto, Arial, sans-serif !important;
 }
 
-/* ✅ VARIÁVEIS CSS ESPECÍFICAS DO CHAT */
-.chat-toggle-pro,
-.chat-panel-pro {
-    --chat-primary: #2563eb;
-    --chat-primary-hover: #1d4ed8;
-    --chat-secondary: #64748b;
-    --chat-success: #10b981;
-    --chat-warning: #f59e0b;
-    --chat-danger: #ef4444;
+/* ✅ VARIÁVEIS EMPRESARIAIS */
+.chat-toggle-empresarial,
+.chat-panel-empresarial {
+    /* Cores Corporativas */
+    --corp-primary: #1e40af;
+    --corp-primary-dark: #1e3a8a;
+    --corp-secondary: #64748b;
+    --corp-success: #059669;
+    --corp-warning: #d97706;
+    --corp-danger: #dc2626;
     
-    --chat-bg-primary: #ffffff;
-    --chat-bg-secondary: #f8fafc;
-    --chat-bg-tertiary: #f1f5f9;
-    --chat-bg-hover: #e2e8f0;
+    /* Backgrounds */
+    --corp-bg-primary: #ffffff;
+    --corp-bg-secondary: #f8fafc;
+    --corp-bg-tertiary: #f1f5f9;
+    --corp-bg-hover: #e2e8f0;
     
-    --chat-text-primary: #0f172a;
-    --chat-text-secondary: #475569;
-    --chat-text-tertiary: #64748b;
-    --chat-text-inverse: #ffffff;
+    /* Textos */
+    --corp-text-primary: #0f172a;
+    --corp-text-secondary: #475569;
+    --corp-text-tertiary: #64748b;
+    --corp-text-inverse: #ffffff;
     
-    --chat-border: #e2e8f0;
-    --chat-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --chat-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --chat-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    /* Bordas e Sombras */
+    --corp-border: #e2e8f0;
+    --corp-border-light: #f1f5f9;
+    --corp-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --corp-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     
-    --chat-radius: 8px;
-    --chat-radius-lg: 12px;
-    --chat-radius-xl: 16px;
+    /* Raios */
+    --corp-radius: 6px;
+    --corp-radius-lg: 8px;
     
-    --chat-font-size-xs: 0.75rem;
-    --chat-font-size-sm: 0.875rem;
-    --chat-font-size-base: 1rem;
-    --chat-font-size-lg: 1.125rem;
+    /* Tamanhos de Fonte */
+    --corp-text-xs: 0.75rem;
+    --corp-text-sm: 0.875rem;
+    --corp-text-base: 1rem;
+    --corp-text-lg: 1.125rem;
     
-    /* Z-INDEX SEGUROS PARA NÃO CONFLITAR */
-    --chat-z-toggle: 9998;
-    --chat-z-panel: 9997;
-    --chat-z-modal: 9999;
+    /* Z-index Seguros */
+    --corp-z-toggle: 9995;
+    --corp-z-panel: 9994;
 }
 
-/* ✅ BOTÃO FLUTUANTE PROFISSIONAL - ISOLADO */
-.chat-toggle-pro {
+/* ✅ TOGGLE EMPRESARIAL - MINIMALISTA */
+.chat-toggle-empresarial {
     position: fixed !important;
     bottom: 24px !important;
     right: 24px !important;
-    width: 64px !important;
-    height: 64px !important;
+    width: 56px !important;
+    height: 56px !important;
+    background: var(--corp-primary) !important;
     border-radius: 50% !important;
-    background: linear-gradient(135deg, var(--chat-primary) 0%, var(--chat-primary-hover) 100%) !important;
-    box-shadow: var(--chat-shadow-lg) !important;
+    box-shadow: var(--corp-shadow-lg) !important;
+    cursor: pointer !important;
+    z-index: var(--corp-z-toggle) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    cursor: pointer !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: var(--chat-z-toggle) !important;
-    user-select: none !important;
-    border: 3px solid rgba(255, 255, 255, 0.2) !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
 }
 
-.chat-toggle-pro:hover {
-    transform: translateY(-2px) scale(1.05) !important;
-    box-shadow: var(--chat-shadow-xl) !important;
+.chat-toggle-empresarial:hover {
+    background: var(--corp-primary-dark) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3) !important;
 }
 
-.chat-toggle-pro:active {
-    transform: translateY(0) scale(0.98) !important;
-}
-
-.chat-toggle-pro .chat-icon-container {
+.chat-toggle-empresarial .chat-icon-wrapper {
     position: relative !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
 
-.chat-toggle-pro .chat-icon {
-    font-size: 28px !important;
-    color: var(--chat-text-inverse) !important;
-    transition: transform 0.2s !important;
+.chat-toggle-empresarial .chat-icon {
+    font-size: 24px !important;
+    color: var(--corp-text-inverse) !important;
     line-height: 1 !important;
 }
 
-.chat-toggle-pro:hover .chat-icon {
-    transform: scale(1.1) !important;
-}
-
-.chat-toggle-pro .chat-badge-pro {
+.chat-toggle-empresarial .chat-badge-emp {
     position: absolute !important;
     top: -8px !important;
     right: -8px !important;
-    background: var(--chat-danger) !important;
-    color: var(--chat-text-inverse) !important;
+    background: var(--corp-danger) !important;
+    color: var(--corp-text-inverse) !important;
     border-radius: 50% !important;
-    min-width: 24px !important;
-    height: 24px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    font-size: var(--corp-text-xs) !important;
+    font-weight: 600 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: var(--chat-font-size-xs) !important;
-    font-weight: 700 !important;
-    border: 2px solid var(--chat-bg-primary) !important;
-    animation: chat-pulse 2s infinite !important;
+    border: 2px solid var(--corp-bg-primary) !important;
 }
 
-.chat-toggle-pro .status-indicator-mini {
-    position: absolute !important;
-    bottom: -2px !important;
-    right: -2px !important;
-    width: 18px !important;
-    height: 18px !important;
-    border-radius: 50% !important;
-    border: 3px solid var(--chat-bg-primary) !important;
-}
-
-.chat-toggle-pro .status-indicator-mini.online { 
-    background: var(--chat-success) !important; 
-}
-.chat-toggle-pro .status-indicator-mini.ocupado { 
-    background: var(--chat-warning) !important; 
-}
-.chat-toggle-pro .status-indicator-mini.reuniao { 
-    background: var(--chat-danger) !important; 
-}
-.chat-toggle-pro .status-indicator-mini.ausente { 
-    background: var(--chat-secondary) !important; 
-}
-
-/* ✅ PAINEL PRINCIPAL PROFISSIONAL - ISOLADO */
-.chat-panel-pro {
+/* ✅ PAINEL PRINCIPAL EMPRESARIAL */
+.chat-panel-empresarial {
     position: fixed !important;
     bottom: 24px !important;
     right: 24px !important;
-    width: 480px !important;
-    height: 680px !important;
-    background: var(--chat-bg-primary) !important;
-    border-radius: var(--chat-radius-xl) !important;
-    box-shadow: var(--chat-shadow-xl) !important;
-    border: 1px solid var(--chat-border) !important;
+    width: 420px !important;
+    height: 600px !important;
+    background: var(--corp-bg-primary) !important;
+    border: 1px solid var(--corp-border) !important;
+    border-radius: var(--corp-radius-lg) !important;
+    box-shadow: var(--corp-shadow-lg) !important;
+    z-index: var(--corp-z-panel) !important;
     display: flex !important;
     flex-direction: column !important;
-    z-index: var(--chat-z-panel) !important;
     overflow: hidden !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    backdrop-filter: blur(10px) !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    font-size: var(--chat-font-size-base) !important;
-    line-height: 1.5 !important;
-    color: var(--chat-text-primary) !important;
+    transition: all 0.3s ease !important;
 }
 
-.chat-panel-pro.hidden {
-    transform: translateY(100%) scale(0.8) !important;
+.chat-panel-empresarial.hidden {
+    transform: translateY(100%) scale(0.95) !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
-/* ✅ HEADER PROFISSIONAL */
-.chat-panel-pro .chat-header-pro {
-    background: linear-gradient(135deg, var(--chat-primary) 0%, var(--chat-primary-hover) 100%) !important;
-    color: var(--chat-text-inverse) !important;
-    padding: 20px 24px !important;
+/* ✅ HEADER CORPORATIVO LIMPO */
+.chat-panel-empresarial .chat-header-corp {
+    background: var(--corp-primary) !important;
+    color: var(--corp-text-inverse) !important;
+    padding: 16px 20px !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
@@ -182,325 +149,208 @@
     flex-shrink: 0 !important;
 }
 
-.chat-panel-pro .header-left .chat-title-section h3 {
-    margin: 0 !important;
-    font-size: var(--chat-font-size-lg) !important;
+.chat-panel-empresarial .header-info h3 {
+    font-size: var(--corp-text-lg) !important;
     font-weight: 600 !important;
-    line-height: 1.2 !important;
-    color: var(--chat-text-inverse) !important;
+    margin: 0 !important;
+    color: var(--corp-text-inverse) !important;
 }
 
-.chat-panel-pro .header-left .subtitle {
-    font-size: var(--chat-font-size-sm) !important;
-    opacity: 0.8 !important;
+.chat-panel-empresarial .obra-info {
+    font-size: var(--corp-text-sm) !important;
+    opacity: 0.9 !important;
     margin-top: 2px !important;
-    color: var(--chat-text-inverse) !important;
+    display: block !important;
+    color: var(--corp-text-inverse) !important;
 }
 
-.chat-panel-pro .header-right {
-    display: flex !important;
-    align-items: center !important;
-    gap: 16px !important;
-}
-
-.chat-panel-pro .header-controls {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-
-/* ✅ STATUS DO USUÁRIO */
-.chat-panel-pro .user-status {
+.chat-panel-empresarial .header-actions {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
+}
+
+.chat-panel-empresarial .status-selector {
     background: rgba(255, 255, 255, 0.1) !important;
-    padding: 8px 12px !important;
-    border-radius: var(--chat-radius) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: var(--corp-radius) !important;
+    color: var(--corp-text-inverse) !important;
+    padding: 6px 10px !important;
+    font-size: var(--corp-text-sm) !important;
     cursor: pointer !important;
-    transition: all 0.2s !important;
-    position: relative !important;
-    font-size: var(--chat-font-size-sm) !important;
-    color: var(--chat-text-inverse) !important;
+    outline: none !important;
 }
 
-.chat-panel-pro .user-status:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
+.chat-panel-empresarial .status-selector:focus {
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-.chat-panel-pro .status-dot {
-    width: 12px !important;
-    height: 12px !important;
-    border-radius: 50% !important;
-    border: 2px solid var(--chat-text-inverse) !important;
-}
-
-.chat-panel-pro .status-dot.online { 
-    background: var(--chat-success) !important; 
-}
-.chat-panel-pro .status-dot.ocupado { 
-    background: var(--chat-warning) !important; 
-}
-.chat-panel-pro .status-dot.reuniao { 
-    background: var(--chat-danger) !important; 
-}
-.chat-panel-pro .status-dot.ausente { 
-    background: var(--chat-secondary) !important; 
-}
-
-.chat-panel-pro .dropdown-arrow {
-    font-size: var(--chat-font-size-xs) !important;
-    transition: transform 0.2s !important;
-    color: var(--chat-text-inverse) !important;
-}
-
-.chat-panel-pro .user-status:hover .dropdown-arrow {
-    transform: rotate(180deg) !important;
-}
-
-/* ✅ MENU DE STATUS */
-.chat-panel-pro .status-menu {
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: var(--chat-bg-primary) !important;
-    border: 1px solid var(--chat-border) !important;
-    border-radius: var(--chat-radius) !important;
-    box-shadow: var(--chat-shadow-lg) !important;
-    padding: 8px 0 !important;
-    z-index: 100 !important;
-    margin-top: 4px !important;
-}
-
-.chat-panel-pro .status-option {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 8px 16px !important;
-    cursor: pointer !important;
-    transition: background 0.2s !important;
-    color: var(--chat-text-primary) !important;
-    font-size: var(--chat-font-size-sm) !important;
-}
-
-.chat-panel-pro .status-option:hover {
-    background: var(--chat-bg-hover) !important;
-}
-
-.chat-panel-pro .status-divider {
-    height: 1px !important;
-    background: var(--chat-border) !important;
-    margin: 4px 0 !important;
-}
-
-.chat-panel-pro .users-online-pro {
-    background: rgba(255, 255, 255, 0.1) !important;
-    padding: 6px 12px !important;
-    border-radius: var(--chat-radius) !important;
-    font-size: var(--chat-font-size-sm) !important;
-    color: var(--chat-text-inverse) !important;
-}
-
-.chat-panel-pro .header-btn {
+.chat-panel-empresarial .btn-header {
     background: none !important;
     border: none !important;
-    color: var(--chat-text-inverse) !important;
-    font-size: 18px !important;
+    color: var(--corp-text-inverse) !important;
     cursor: pointer !important;
-    padding: 8px !important;
-    border-radius: var(--chat-radius) !important;
-    transition: all 0.2s !important;
+    padding: 6px !important;
+    border-radius: var(--corp-radius) !important;
+    font-size: 16px !important;
+    transition: background 0.2s !important;
+    width: 32px !important;
+    height: 32px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
-    line-height: 1 !important;
 }
 
-.chat-panel-pro .header-btn:hover {
+.chat-panel-empresarial .btn-header:hover {
     background: rgba(255, 255, 255, 0.1) !important;
-    transform: scale(1.05) !important;
 }
 
-.chat-panel-pro .header-btn.close-btn:hover {
-    background: var(--chat-danger) !important;
-    transform: scale(1.1) !important;
-}
-
-/* ✅ CONTEÚDO PRINCIPAL */
-.chat-panel-pro .chat-content-pro {
-    display: flex !important;
-    flex: 1 !important;
-    overflow: hidden !important;
-}
-
-/* ✅ ÁREA PRINCIPAL DE MENSAGENS */
-.chat-panel-pro .chat-main-pro {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
-}
-
-/* ✅ INFO DO CHAT ATIVO */
-.chat-panel-pro .chat-info-pro {
-    background: var(--chat-bg-secondary) !important;
-    padding: 16px 20px !important;
-    border-bottom: 1px solid var(--chat-border) !important;
+/* ✅ BARRA DE INFORMAÇÕES */
+.chat-panel-empresarial .chat-info-bar {
+    background: var(--corp-bg-secondary) !important;
+    padding: 12px 20px !important;
+    border-bottom: 1px solid var(--corp-border) !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     flex-shrink: 0 !important;
 }
 
-.chat-panel-pro .chat-header-info {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-
-.chat-panel-pro .chat-avatar {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    background: var(--chat-primary) !important;
-    color: var(--chat-text-inverse) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 18px !important;
+.chat-panel-empresarial .chat-title {
+    font-size: var(--corp-text-base) !important;
     font-weight: 600 !important;
-    flex-shrink: 0 !important;
+    color: var(--corp-text-primary) !important;
+    display: block !important;
 }
 
-.chat-panel-pro .chat-details h4 {
-    margin: 0 !important;
-    font-size: var(--chat-font-size-base) !important;
-    color: var(--chat-text-primary) !important;
-    font-weight: 600 !important;
-}
-
-.chat-panel-pro .chat-description {
+.chat-panel-empresarial .chat-members {
+    font-size: var(--corp-text-sm) !important;
+    color: var(--corp-text-secondary) !important;
     margin-top: 2px !important;
-    font-size: var(--chat-font-size-sm) !important;
-    color: var(--chat-text-secondary) !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
+    display: block !important;
 }
 
-.chat-panel-pro .members-info {
-    font-size: var(--chat-font-size-xs) !important;
-    color: var(--chat-text-tertiary) !important;
+.chat-panel-empresarial .user-info {
+    text-align: right !important;
 }
 
-/* ✅ CONTAINER DE MENSAGENS */
-.chat-panel-pro .messages-container-pro {
+.chat-panel-empresarial .user-name {
+    font-size: var(--corp-text-sm) !important;
+    font-weight: 600 !important;
+    color: var(--corp-text-primary) !important;
+    display: block !important;
+}
+
+.chat-panel-empresarial .user-role {
+    font-size: var(--corp-text-xs) !important;
+    color: var(--corp-text-tertiary) !important;
+    margin-top: 2px !important;
+    display: block !important;
+}
+
+/* ✅ CONTAINER DE MENSAGENS LIMPO */
+.chat-panel-empresarial .mensagens-container {
     flex: 1 !important;
     overflow-y: auto !important;
     padding: 16px 20px !important;
-    scroll-behavior: smooth !important;
+    background: var(--corp-bg-primary) !important;
 }
 
-/* ✅ MENSAGEM DE BOAS-VINDAS */
-.chat-panel-pro .welcome-message-pro {
+/* ✅ WELCOME MESSAGE CORPORATIVA */
+.chat-panel-empresarial .chat-welcome {
     text-align: center !important;
-    padding: 60px 20px !important;
-    color: var(--chat-text-secondary) !important;
+    padding: 40px 20px !important;
+    color: var(--corp-text-secondary) !important;
 }
 
-.chat-panel-pro .welcome-icon {
-    font-size: 48px !important;
-    margin-bottom: 16px !important;
-    line-height: 1 !important;
-}
-
-.chat-panel-pro .welcome-message-pro h3 {
-    margin: 0 0 8px 0 !important;
-    font-size: var(--chat-font-size-lg) !important;
-    color: var(--chat-text-primary) !important;
+.chat-panel-empresarial .welcome-header h4 {
+    font-size: var(--corp-text-lg) !important;
     font-weight: 600 !important;
+    color: var(--corp-text-primary) !important;
+    margin-bottom: 8px !important;
 }
 
-.chat-panel-pro .welcome-message-pro p {
-    margin: 0 0 24px 0 !important;
-    font-size: var(--chat-font-size-base) !important;
-    color: var(--chat-text-secondary) !important;
+.chat-panel-empresarial .welcome-header p {
+    font-size: var(--corp-text-base) !important;
+    color: var(--corp-text-secondary) !important;
+    margin-bottom: 24px !important;
 }
 
-.chat-panel-pro .welcome-tips {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
+.chat-panel-empresarial .guidelines {
+    text-align: left !important;
     max-width: 280px !important;
     margin: 0 auto !important;
 }
 
-.chat-panel-pro .tip {
-    background: var(--chat-bg-secondary) !important;
+.chat-panel-empresarial .guideline {
+    background: var(--corp-bg-secondary) !important;
     padding: 8px 12px !important;
-    border-radius: var(--chat-radius) !important;
-    font-size: var(--chat-font-size-sm) !important;
-    text-align: left !important;
-    color: var(--chat-text-secondary) !important;
+    border-radius: var(--corp-radius) !important;
+    margin-bottom: 6px !important;
+    font-size: var(--corp-text-sm) !important;
+    color: var(--corp-text-secondary) !important;
 }
 
-/* ✅ MENSAGENS PROFISSIONAIS */
-.chat-panel-pro .message-pro {
+/* ✅ MENSAGENS EMPRESARIAIS */
+.chat-panel-empresarial .mensagem-item {
     display: flex !important;
     gap: 12px !important;
     margin-bottom: 16px !important;
-    padding: 8px 0 !important;
-    transition: all 0.2s !important;
-    animation: chat-fadeInUp 0.3s ease !important;
+    animation: fadeInMessage 0.3s ease !important;
 }
 
-.chat-panel-pro .message-pro:hover {
-    background: var(--chat-bg-tertiary) !important;
-    border-radius: var(--chat-radius) !important;
-    padding: 8px !important;
-    margin: 0 -8px 16px -8px !important;
-}
-
-.chat-panel-pro .message-pro.own {
+.chat-panel-empresarial .mensagem-item.propria {
     flex-direction: row-reverse !important;
 }
 
-/* ✅ AVATAR DA MENSAGEM */
-.chat-panel-pro .message-avatar {
-    position: relative !important;
+.chat-panel-empresarial .mensagem-item.sistema {
+    justify-content: center !important;
+}
+
+/* ✅ AVATAR PROFISSIONAL */
+.chat-panel-empresarial .mensagem-avatar {
     flex-shrink: 0 !important;
 }
 
-.chat-panel-pro .avatar-circle {
+.chat-panel-empresarial .avatar-circle {
     width: 36px !important;
     height: 36px !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: var(--chat-font-size-sm) !important;
+    font-size: var(--corp-text-sm) !important;
     font-weight: 600 !important;
-    color: var(--chat-text-inverse) !important;
+    color: var(--corp-text-inverse) !important;
 }
 
-.chat-panel-pro .avatar-circle.coordenador {
-    background: linear-gradient(135deg, var(--chat-primary) 0%, var(--chat-primary-hover) 100%) !important;
+.chat-panel-empresarial .avatar-circle.nivel-coordenador {
+    background: var(--corp-primary) !important;
 }
 
-.chat-panel-pro .avatar-circle.colaborador {
-    background: linear-gradient(135deg, var(--chat-secondary) 0%, #475569 100%) !important;
+.chat-panel-empresarial .avatar-circle.nivel-senior {
+    background: var(--corp-success) !important;
+}
+
+.chat-panel-empresarial .avatar-circle.nivel-colaborador {
+    background: var(--corp-secondary) !important;
+}
+
+.chat-panel-empresarial .avatar-circle.nivel-assistente {
+    background: var(--corp-warning) !important;
+}
+
+.chat-panel-empresarial .avatar-circle.nivel-estagiario {
+    background: #6366f1 !important;
 }
 
 /* ✅ CONTEÚDO DA MENSAGEM */
-.chat-panel-pro .message-content-wrapper {
+.chat-panel-empresarial .mensagem-conteudo {
     flex: 1 !important;
     min-width: 0 !important;
 }
 
-.chat-panel-pro .message-header-pro {
+.chat-panel-empresarial .mensagem-header {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
@@ -508,149 +358,172 @@
     flex-wrap: wrap !important;
 }
 
-.chat-panel-pro .message-author-pro {
-    font-size: var(--chat-font-size-sm) !important;
+.chat-panel-empresarial .autor-nome {
+    font-size: var(--corp-text-sm) !important;
     font-weight: 600 !important;
-    color: var(--chat-text-primary) !important;
+    color: var(--corp-text-primary) !important;
 }
 
-.chat-panel-pro .message-role {
-    font-size: var(--chat-font-size-xs) !important;
-    color: var(--chat-text-tertiary) !important;
-    background: var(--chat-bg-tertiary) !important;
+.chat-panel-empresarial .autor-cargo {
+    font-size: var(--corp-text-xs) !important;
+    color: var(--corp-text-tertiary) !important;
+    background: var(--corp-bg-tertiary) !important;
     padding: 2px 6px !important;
-    border-radius: 4px !important;
+    border-radius: 3px !important;
 }
 
-.chat-panel-pro .message-time-pro {
-    font-size: var(--chat-font-size-xs) !important;
-    color: var(--chat-text-tertiary) !important;
+.chat-panel-empresarial .mensagem-tempo {
+    font-size: var(--corp-text-xs) !important;
+    color: var(--corp-text-tertiary) !important;
     margin-left: auto !important;
 }
 
-.chat-panel-pro .message-body-pro {
-    position: relative !important;
-}
-
-.chat-panel-pro .message-text {
-    font-size: var(--chat-font-size-sm) !important;
+.chat-panel-empresarial .mensagem-texto {
+    font-size: var(--corp-text-sm) !important;
     line-height: 1.5 !important;
-    color: var(--chat-text-primary) !important;
+    color: var(--corp-text-primary) !important;
     word-wrap: break-word !important;
-    word-break: break-word !important;
 }
 
-.chat-panel-pro .mention {
-    background: rgba(37, 99, 235, 0.1) !important;
-    color: var(--chat-primary) !important;
+.chat-panel-empresarial .mencao {
+    background: rgba(30, 64, 175, 0.1) !important;
+    color: var(--corp-primary) !important;
     padding: 2px 4px !important;
-    border-radius: 4px !important;
+    border-radius: 3px !important;
     font-weight: 600 !important;
 }
 
-/* ✅ ÁREA DE INPUT PROFISSIONAL */
-.chat-panel-pro .input-area-pro {
-    border-top: 1px solid var(--chat-border) !important;
-    background: var(--chat-bg-primary) !important;
+/* ✅ MENSAGEM DO SISTEMA */
+.chat-panel-empresarial .mensagem-sistema {
+    background: var(--corp-bg-secondary) !important;
+    border: 1px solid var(--corp-border) !important;
+    border-radius: var(--corp-radius) !important;
+    padding: 8px 12px !important;
+    text-align: center !important;
+    margin: 8px 0 !important;
+}
+
+.chat-panel-empresarial .sistema-texto {
+    font-size: var(--corp-text-sm) !important;
+    color: var(--corp-text-secondary) !important;
+    display: block !important;
+}
+
+.chat-panel-empresarial .sistema-tempo {
+    font-size: var(--corp-text-xs) !important;
+    color: var(--corp-text-tertiary) !important;
+    margin-top: 4px !important;
+    display: block !important;
+}
+
+/* ✅ SEÇÃO DE INPUT EMPRESARIAL */
+.chat-panel-empresarial .input-section {
+    border-top: 1px solid var(--corp-border) !important;
+    background: var(--corp-bg-primary) !important;
+    padding: 16px 20px !important;
     flex-shrink: 0 !important;
 }
 
-.chat-panel-pro .input-container-pro {
-    padding: 16px 20px !important;
-}
-
-.chat-panel-pro .input-main {
+.chat-panel-empresarial .input-wrapper {
     display: flex !important;
     gap: 8px !important;
     align-items: flex-end !important;
 }
 
-.chat-panel-pro #chatInputPro {
+.chat-panel-empresarial #inputMensagem {
     flex: 1 !important;
-    padding: 12px 16px !important;
-    border: 1px solid var(--chat-border) !important;
-    border-radius: var(--chat-radius-lg) !important;
-    font-size: var(--chat-font-size-sm) !important;
-    line-height: 1.5 !important;
-    background: var(--chat-bg-secondary) !important;
+    background: var(--corp-bg-secondary) !important;
+    border: 1px solid var(--corp-border) !important;
+    border-radius: var(--corp-radius) !important;
+    padding: 10px 12px !important;
+    font-size: var(--corp-text-sm) !important;
+    line-height: 1.4 !important;
     resize: none !important;
-    transition: all 0.2s !important;
-    font-family: inherit !important;
-    min-height: 44px !important;
-    max-height: 120px !important;
-    color: var(--chat-text-primary) !important;
+    transition: border-color 0.2s !important;
+    color: var(--corp-text-primary) !important;
+    min-height: 40px !important;
+    max-height: 100px !important;
 }
 
-.chat-panel-pro #chatInputPro:focus {
+.chat-panel-empresarial #inputMensagem:focus {
     outline: none !important;
-    border-color: var(--chat-primary) !important;
-    background: var(--chat-bg-primary) !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    border-color: var(--corp-primary) !important;
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1) !important;
 }
 
-.chat-panel-pro #chatInputPro::placeholder {
-    color: var(--chat-text-tertiary) !important;
+.chat-panel-empresarial #inputMensagem::placeholder {
+    color: var(--corp-text-tertiary) !important;
 }
 
-.chat-panel-pro .send-btn-pro {
-    background: var(--chat-primary) !important;
+.chat-panel-empresarial .btn-enviar {
+    background: var(--corp-primary) !important;
     border: none !important;
-    border-radius: 50% !important;
-    width: 44px !important;
-    height: 44px !important;
-    cursor: pointer !important;
-    transition: all 0.2s !important;
+    border-radius: var(--corp-radius) !important;
+    width: 40px !important;
+    height: 40px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
     flex-shrink: 0 !important;
 }
 
-.chat-panel-pro .send-btn-pro:hover {
-    background: var(--chat-primary-hover) !important;
-    transform: scale(1.05) !important;
+.chat-panel-empresarial .btn-enviar:hover {
+    background: var(--corp-primary-dark) !important;
 }
 
-.chat-panel-pro .send-btn-pro:active {
-    transform: scale(0.95) !important;
+.chat-panel-empresarial .btn-enviar span {
+    font-size: 16px !important;
+    color: var(--corp-text-inverse) !important;
 }
 
-.chat-panel-pro .send-icon {
-    font-size: 18px !important;
-    color: var(--chat-text-inverse) !important;
-    line-height: 1 !important;
-}
-
-.chat-panel-pro .input-info {
+.chat-panel-empresarial .input-footer {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     margin-top: 8px !important;
-    font-size: var(--chat-font-size-xs) !important;
-    color: var(--chat-text-tertiary) !important;
+    font-size: var(--corp-text-xs) !important;
+    color: var(--corp-text-tertiary) !important;
 }
 
-.chat-panel-pro .input-hints {
+.chat-panel-empresarial .char-counter {
+    font-weight: 500 !important;
+}
+
+.chat-panel-empresarial .input-hint {
     font-style: italic !important;
 }
 
-/* ✅ UTILIDADES */
-.chat-panel-pro .hidden,
-.chat-toggle-pro .hidden {
+/* ✅ SCROLLBAR EMPRESARIAL */
+.chat-panel-empresarial .mensagens-container::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+.chat-panel-empresarial .mensagens-container::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.chat-panel-empresarial .mensagens-container::-webkit-scrollbar-thumb {
+    background: var(--corp-border) !important;
+    border-radius: 2px !important;
+}
+
+.chat-panel-empresarial .mensagens-container::-webkit-scrollbar-thumb:hover {
+    background: var(--corp-text-tertiary) !important;
+}
+
+/* ✅ UTILITÁRIOS */
+.chat-panel-empresarial .hidden,
+.chat-toggle-empresarial .hidden {
     display: none !important;
 }
 
-/* ✅ ANIMAÇÕES ESPECÍFICAS DO CHAT */
-@keyframes chat-pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-@keyframes chat-fadeInUp {
+/* ✅ ANIMAÇÕES SUTIS */
+@keyframes fadeInMessage {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
     to {
         opacity: 1;
@@ -658,27 +531,9 @@
     }
 }
 
-/* ✅ SCROLLBAR PERSONALIZADA APENAS PARA O CHAT */
-.chat-panel-pro .messages-container-pro::-webkit-scrollbar {
-    width: 4px !important;
-}
-
-.chat-panel-pro .messages-container-pro::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-
-.chat-panel-pro .messages-container-pro::-webkit-scrollbar-thumb {
-    background: var(--chat-border) !important;
-    border-radius: 2px !important;
-}
-
-.chat-panel-pro .messages-container-pro::-webkit-scrollbar-thumb:hover {
-    background: var(--chat-text-tertiary) !important;
-}
-
-/* ✅ RESPONSIVIDADE ESPECÍFICA DO CHAT */
+/* ✅ RESPONSIVIDADE EMPRESARIAL */
 @media (max-width: 768px) {
-    .chat-panel-pro {
+    .chat-panel-empresarial {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
@@ -687,120 +542,68 @@
         width: 100% !important;
         height: 100% !important;
         border-radius: 0 !important;
-        max-width: none !important;
-        max-height: none !important;
+        border: none !important;
     }
     
-    .chat-toggle-pro {
+    .chat-toggle-empresarial {
         bottom: 20px !important;
         right: 20px !important;
-        width: 56px !important;
-        height: 56px !important;
+        width: 52px !important;
+        height: 52px !important;
     }
     
-    .chat-toggle-pro .chat-icon {
-        font-size: 24px !important;
+    .chat-toggle-empresarial .chat-icon {
+        font-size: 22px !important;
     }
     
-    .chat-panel-pro .input-container-pro {
+    .chat-panel-empresarial .input-section {
+        padding: 12px 16px !important;
+    }
+    
+    .chat-panel-empresarial .mensagens-container {
         padding: 12px 16px !important;
     }
 }
 
-/* ✅ MODO ESCURO AUTOMÁTICO */
+/* ✅ MODO ESCURO EMPRESARIAL */
 @media (prefers-color-scheme: dark) {
-    .chat-toggle-pro,
-    .chat-panel-pro {
-        --chat-bg-primary: #1e293b;
-        --chat-bg-secondary: #0f172a;
-        --chat-bg-tertiary: #334155;
-        --chat-bg-hover: #475569;
+    .chat-toggle-empresarial,
+    .chat-panel-empresarial {
+        --corp-bg-primary: #1e293b;
+        --corp-bg-secondary: #334155;
+        --corp-bg-tertiary: #475569;
+        --corp-bg-hover: #64748b;
         
-        --chat-text-primary: #f1f5f9;
-        --chat-text-secondary: #cbd5e1;
-        --chat-text-tertiary: #94a3b8;
+        --corp-text-primary: #f1f5f9;
+        --corp-text-secondary: #cbd5e1;
+        --corp-text-tertiary: #94a3b8;
         
-        --chat-border: #334155;
+        --corp-border: #475569;
+        --corp-border-light: #64748b;
     }
 }
 
-/* ✅ ESTADOS DE FOCO PARA ACESSIBILIDADE */
-.chat-panel-pro .header-btn:focus,
-.chat-panel-pro .user-status:focus,
-.chat-panel-pro .status-option:focus,
-.chat-panel-pro #chatInputPro:focus,
-.chat-panel-pro .send-btn-pro:focus {
-    outline: 2px solid var(--chat-primary) !important;
+/* ✅ FOCO E ACESSIBILIDADE */
+.chat-panel-empresarial .btn-header:focus,
+.chat-panel-empresarial .status-selector:focus,
+.chat-panel-empresarial #inputMensagem:focus,
+.chat-panel-empresarial .btn-enviar:focus,
+.chat-toggle-empresarial:focus {
+    outline: 2px solid var(--corp-primary) !important;
     outline-offset: 2px !important;
 }
 
-/* ✅ PERFORMANCE E OTIMIZAÇÕES */
-.chat-panel-pro,
-.chat-toggle-pro,
-.chat-panel-pro .message-pro {
+/* ✅ PERFORMANCE */
+.chat-panel-empresarial,
+.chat-toggle-empresarial,
+.chat-panel-empresarial .mensagem-item {
     will-change: transform !important;
-    contain: layout style paint !important;
-}
-
-/* ✅ CORREÇÃO DE CONFLITOS ESPECÍFICOS COM O SISTEMA PRINCIPAL */
-.chat-panel-pro button,
-.chat-toggle-pro button {
-    font-family: inherit !important;
-}
-
-.chat-panel-pro input,
-.chat-panel-pro textarea {
-    font-family: inherit !important;
-}
-
-.chat-panel-pro * {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-/* ✅ OVERRIDE PARA GARANTIR ISOLAMENTO TOTAL */
-#chatToggle,
-#chatPanel {
-    all: unset !important;
-}
-
-#chatToggle {
-    position: fixed !important;
-    bottom: 24px !important;
-    right: 24px !important;
-    width: 64px !important;
-    height: 64px !important;
-    border-radius: 50% !important;
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    z-index: 9998 !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-#chatPanel {
-    position: fixed !important;
-    bottom: 24px !important;
-    right: 24px !important;
-    width: 480px !important;
-    height: 680px !important;
-    background: #ffffff !important;
-    border-radius: 16px !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-    border: 1px solid #e2e8f0 !important;
-    z-index: 9997 !important;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
 }
 
 /* ✅ PRINT STYLES */
 @media print {
-    .chat-panel-pro,
-    .chat-toggle-pro {
+    .chat-panel-empresarial,
+    .chat-toggle-empresarial {
         display: none !important;
     }
 }
