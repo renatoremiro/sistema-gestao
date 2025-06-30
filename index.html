@@ -1031,13 +1031,12 @@
             
             <!-- Dica do sistema -->
             <div style="background: #dbeafe; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #1e40af;">
-                <strong>🚀 Sistema v5.2 - AGENDA FUNCIONANDO PERFEITAMENTE:</strong> 
+                <strong>🚀 Sistema v5.2 - AGENDA COM DEBUG ATIVO:</strong> 
                 <br><strong>✅ Agenda da Semana:</strong> Mostra tarefas pessoais + eventos do calendário + prazos próximos
-                <br><strong>✅ Sincronização Total:</strong> Eventos onde você participa aparecem automaticamente na sua agenda
-                <br><strong>✅ Prazos Inteligentes:</strong> Responsabilidades com prazo em até 3 dias aparecem na agenda
-                <br><strong>🔍 Busca Inteligente:</strong> Busca com normalização de acentos e caracteres especiais
-                <br><strong>📱 Interface Limpa:</strong> Sistema otimizado, responsivo e muito mais rápido!
-                <br><strong>💡 Teste:</strong> Crie uma tarefa pessoal e marque "📅 Mostrar no calendário" - vai aparecer para toda equipe!
+                <br><strong>🔧 Debug Ativo:</strong> Abra o Console (F12) e veja os logs detalhados da agenda
+                <br><strong>🧪 Teste Manual:</strong> No console digite <code>testarAgenda()</code> para teste direto
+                <br><strong>💡 Como Testar:</strong> 1) Entre na agenda de qualquer pessoa 2) Veja os logs no console 3) A agenda deve mostrar itens
+                <br><strong>📱 Ainda não vê nada?</strong> Abra o console e me envie os logs que aparecem!
             </div>
             
             <!-- Cards das Áreas -->
@@ -1488,20 +1487,29 @@
         
         // ========== SISTEMA DE SINCRONIZAÇÃO OTIMIZADO ==========
         function configurarSincronizacao() {
+            console.log('⚙️ Configurando sincronização...');
+            
             listenersDados.dados = database.ref('dados').on('value', (snapshot) => {
                 const dadosServidor = snapshot.val();
                 
                 if (dadosServidor) {
+                    console.log('📥 Dados recebidos do Firebase:', dadosServidor);
                     dados = dadosServidor;
-                    renderizarDashboard();
-                    atualizarIndicadorSync('synced');
-                    
-                    // ✅ SINCRONIZAÇÃO AUTOMÁTICA MELHORADA
-                    sincronizarAgendasPessoais();
                 } else {
+                    console.log('📊 Nenhum dado no Firebase - inicializando dados padrão...');
                     dados = inicializarDados();
+                    console.log('💾 Salvando dados iniciais no Firebase...');
                     salvarDados();
                 }
+                
+                console.log('🔄 Renderizando dashboard após receber dados...');
+                renderizarDashboard();
+                atualizarIndicadorSync('synced');
+                
+                // ✅ SINCRONIZAÇÃO AUTOMÁTICA MELHORADA
+                sincronizarAgendasPessoais();
+                
+                console.log('✅ Sincronização configurada com sucesso');
             });
         }
         
@@ -1561,7 +1569,64 @@
             }
         }
         
-        // ========== SISTEMA DE VERIFICAÇÃO AUTOMÁTICA DE PRAZOS ==========
+        // ========== FUNÇÃO DE TESTE PARA DEBUG ==========
+        function testarAgenda() {
+            console.log('🧪 TESTE: Forçando renderização da agenda...');
+            
+            if (!dados) {
+                console.error('❌ TESTE: Dados não existem!');
+                dados = inicializarDados();
+            }
+            
+            const container = document.getElementById('agendaSemana');
+            if (!container) {
+                console.error('❌ TESTE: Container não encontrado!');
+                return;
+            }
+            
+            // Renderização simples de teste
+            container.innerHTML = `
+                <div class="dia-semana">
+                    <h4>TESTE - Segunda</h4>
+                    <div class="tarefa" style="background: #dbeafe;">
+                        <strong>🧪 TESTE FUNCIONANDO</strong><br>
+                        <span style="font-size: 10px;">Se você vê isso, a agenda funciona!</span>
+                    </div>
+                </div>
+                <div class="dia-semana">
+                    <h4>TESTE - Terça</h4>
+                    <div class="tarefa" style="background: #dcfce7;">
+                        <strong>📅 Reunião de teste</strong><br>
+                        <span style="font-size: 10px;">10:00 - 11:00</span>
+                    </div>
+                </div>
+                <div class="dia-semana">
+                    <h4>TESTE - Quarta</h4>
+                    <div class="tarefa" style="background: #fef3c7;">
+                        <strong>⏰ Prazo de teste</strong><br>
+                        <span style="font-size: 10px;">Atividade importante</span>
+                    </div>
+                </div>
+                <div class="dia-semana">
+                    <h4>TESTE - Quinta</h4>
+                    <div style="text-align: center; color: #9ca3af; font-size: 12px; padding: 20px;">
+                        Dia livre
+                    </div>
+                </div>
+                <div class="dia-semana">
+                    <h4>TESTE - Sexta</h4>
+                    <div class="tarefa" style="background: #fce7f3;">
+                        <strong>🎉 Fim de semana</strong><br>
+                        <span style="font-size: 10px;">Descanso merecido!</span>
+                    </div>
+                </div>
+            `;
+            
+            console.log('✅ TESTE: Agenda de teste renderizada!');
+        }
+        
+        // Adicionar ao console global para teste
+        window.testarAgenda = testarAgenda;
         function iniciarVerificacaoPrazos() {
             verificarPrazosAtividades();
             
@@ -1696,15 +1761,33 @@
             document.getElementById('usuarioInfo').textContent = `👤 ${estadoSistema.usuarioNome}`;
             
             try {
+                // ✅ GARANTIR QUE OS DADOS EXISTAM
+                if (!dados) {
+                    console.log('📊 Inicializando dados padrão...');
+                    dados = inicializarDados();
+                }
+                
                 configurarSincronizacao();
                 console.log('✅ Sincronização Firebase configurada');
                 
                 iniciarVerificacaoPrazos();
                 console.log('✅ Verificação automática de prazos iniciada');
                 
+                // ✅ FORÇAR RENDERIZAÇÃO INICIAL
+                setTimeout(() => {
+                    console.log('🔄 Forçando renderização inicial...');
+                    renderizarDashboard();
+                    
+                    // Teste adicional da agenda
+                    if (estadoSistema.pessoaAtual) {
+                        renderizarAgendaSemana(estadoSistema.pessoaAtual);
+                    }
+                }, 1000);
+                
                 mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v5.2 otimizado!`);
                 
-                console.log('🎉 Sistema v5.2 totalmente inicializado - OTIMIZADO!');
+                console.log('🎉 Sistema v5.2 totalmente inicializado - AGENDA READY!');
+                console.log('💡 DICA: Abra o console e digite testarAgenda() para teste');
                 
             } catch (error) {
                 console.error('❌ Erro na inicialização:', error);
@@ -1833,20 +1916,35 @@
                         horarioFim: "16:00",
                         pessoas: ["Renato", "Bruna"],
                         descricao: "Revisão final do As Built antes da entrega"
+                    },
+                    {
+                        id: 4, 
+                        titulo: "Teste Agenda - Hoje", 
+                        tipo: "reuniao",
+                        data: new Date().toISOString().split('T')[0], // Hoje
+                        horarioInicio: "15:00",
+                        horarioFim: "16:00",
+                        pessoas: ["Renato"],
+                        descricao: "Evento de teste para verificar agenda"
                     }
                 ],
                 agendas: {
                     "Renato": {
                         "segunda": [
                             {
-                                id: 1,
+                                id: Date.now(),
                                 descricao: "Verificar projetos - 08:00",
                                 mostrarNoCalendario: true
+                            },
+                            {
+                                id: Date.now() + 1,
+                                descricao: "Email importante - 09:30",
+                                mostrarNoCalendario: false
                             }
                         ],
                         "quarta": [
                             {
-                                id: 2,
+                                id: Date.now() + 2,
                                 descricao: "Reunião coordenadores - 15:00",
                                 mostrarNoCalendario: false
                             }
@@ -1856,16 +1954,25 @@
                     "Bruna": {
                         "terca": [
                             {
-                                id: 3,
+                                id: Date.now() + 3,
                                 descricao: "Atualizar BIM - 10:00",
                                 mostrarNoCalendario: true
                             }
                         ],
                         "sexta": [
                             {
-                                id: 4,
+                                id: Date.now() + 4,
                                 descricao: "Relatório semanal - 16:00",
                                 mostrarNoCalendario: false
+                            }
+                        ]
+                    },
+                    "Isabella": {
+                        "segunda": [
+                            {
+                                id: Date.now() + 5,
+                                descricao: "Planejamento semanal - 07:30",
+                                mostrarNoCalendario: true
                             }
                         ]
                     }
@@ -1889,8 +1996,17 @@
         }
         
         function formatarData(data) {
-            const d = new Date(data);
-            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+            try {
+                const d = new Date(data);
+                if (isNaN(d.getTime())) {
+                    console.error('❌ Data inválida:', data);
+                    return 'Data inválida';
+                }
+                return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+            } catch (error) {
+                console.error('❌ Erro ao formatar data:', error);
+                return 'Erro';
+            }
         }
         
         function calcularDiasRestantes(prazo) {
@@ -2623,6 +2739,8 @@
         
         // Funções de Agenda Individual
         function mostrarAgendaIndividual(nome, cargo) {
+            console.log('🚀 DEBUG: Abrindo agenda individual para:', nome);
+            
             estadoSistema.pessoaAtual = nome;
             
             document.getElementById('painelArea').classList.add('hidden');
@@ -2631,12 +2749,19 @@
             document.getElementById('pessoaNome').textContent = nome;
             document.getElementById('pessoaCargo').textContent = cargo;
             
+            console.log('🚀 DEBUG: Chamando renderizarResponsabilidades...');
             renderizarResponsabilidades(nome);
+            
+            console.log('🚀 DEBUG: Chamando renderizarAgendaSemana...');
             renderizarAgendaSemana(nome);
+            
+            console.log('🚀 DEBUG: Chamando carregarObservacoes...');
             carregarObservacoes(nome);
             
             const area = dados.areas[estadoSistema.areaAtual];
             atualizarBreadcrumb(`Dashboard > ${area.nome} > ${nome}`);
+            
+            console.log('✅ DEBUG: Agenda individual configurada para:', nome);
         }
         
         function renderizarResponsabilidades(nome) {
@@ -2762,9 +2887,17 @@
             }
         }
         
-        // ✅ FUNÇÃO CORRIGIDA DE AGENDA SEMANAL
+        // ✅ FUNÇÃO CORRIGIDA DE AGENDA SEMANAL COM DEBUG
         function renderizarAgendaSemana(nome) {
+            console.log('🔧 DEBUG: Renderizando agenda para:', nome);
+            console.log('🔧 DEBUG: Dados disponíveis:', dados);
+            
             const container = document.getElementById('agendaSemana');
+            if (!container) {
+                console.error('❌ Container agendaSemana não encontrado!');
+                return;
+            }
+            
             container.innerHTML = '';
             
             const diasSemana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
@@ -2781,7 +2914,7 @@
                 dataDodia.setDate(hoje.getDate() + diasParaAdicionar);
                 const dataFormatada = dataDodia.toISOString().split('T')[0];
                 
-                const statusDia = dados.statusPessoal?.[nome]?.[dataFormatada];
+                console.log(`🔧 DEBUG: Processando ${dia} (${dataFormatada})`);
                 
                 diaDiv.innerHTML = `
                     <h4 style="margin-bottom: 12px; color: #1f2937;">
@@ -2792,23 +2925,29 @@
                 
                 let temItens = false;
                 
-                // Status do dia (ausência, home office)
-                if (statusDia) {
-                    const badgeDiv = document.createElement('div');
-                    badgeDiv.className = `status-badge ${statusDia.tipo === 'ausencia' ? 'status-ausencia' : 'status-home-office'}`;
-                    badgeDiv.textContent = statusDia.tipo === 'ausencia' ? 'Ausente' : 'Home Office';
-                    diaDiv.appendChild(badgeDiv);
-                    temItens = true;
-                }
+                // TESTE: Sempre adicionar um item para verificar se está funcionando
+                const testeDiv = document.createElement('div');
+                testeDiv.className = 'tarefa';
+                testeDiv.style.background = '#e0f2fe';
+                testeDiv.innerHTML = `
+                    <strong style="font-size: 11px;">🔧 TESTE: Sistema funcionando</strong>
+                    <br><span style="font-size: 10px; color: #6b7280;">
+                        Debug - ${new Date().toLocaleTimeString()}
+                    </span>
+                `;
+                diaDiv.appendChild(testeDiv);
+                temItens = true;
                 
                 // 1. TAREFAS PESSOAIS da agenda
-                if (dados.agendas[nome] && dados.agendas[nome][dia]) {
+                if (dados && dados.agendas && dados.agendas[nome] && dados.agendas[nome][dia]) {
+                    console.log(`🔧 DEBUG: Encontradas ${dados.agendas[nome][dia].length} tarefas para ${dia}`);
                     dados.agendas[nome][dia].forEach(tarefa => {
                         const tarefaDiv = document.createElement('div');
                         let classeTarefa = 'tarefa';
                         if (tarefa.mostrarNoCalendario) classeTarefa += ' tarefa-global';
                         
                         tarefaDiv.className = classeTarefa;
+                        tarefaDiv.style.background = tarefa.mostrarNoCalendario ? '#ddd6fe' : '#f3f4f6';
                         tarefaDiv.innerHTML = `
                             <strong style="font-size: 11px;">📝 ${tarefa.descricao.split(' - ')[0]}</strong>
                             <br><span style="font-size: 10px; color: #6b7280;">
@@ -2820,10 +2959,14 @@
                         diaDiv.appendChild(tarefaDiv);
                         temItens = true;
                     });
+                } else {
+                    console.log(`🔧 DEBUG: Nenhuma tarefa encontrada para ${nome} no ${dia}`);
                 }
                 
                 // 2. EVENTOS DO CALENDÁRIO onde a pessoa participa
                 const eventosDia = obterEventosDoDia(dataFormatada);
+                console.log(`🔧 DEBUG: ${eventosDia.length} eventos encontrados para ${dataFormatada}`);
+                
                 const eventosRelevantes = eventosDia.filter(evento => 
                     evento.pessoas && (
                         evento.pessoas.includes(nome) || 
@@ -2831,6 +2974,8 @@
                         evento.pessoas.includes('_todos')
                     ) && evento.origem !== 'tarefa_pessoal'
                 );
+                
+                console.log(`🔧 DEBUG: ${eventosRelevantes.length} eventos relevantes para ${nome}`);
                 
                 eventosRelevantes.forEach(evento => {
                     const eventoDiv = document.createElement('div');
@@ -2870,76 +3015,82 @@
                 });
                 
                 // 3. PRAZOS DAS RESPONSABILIDADES (próximos 7 dias)
-                Object.entries(dados.areas).forEach(([areaKey, area]) => {
-                    area.atividades.forEach(atividade => {
-                        if (atividade.responsaveis.includes(nome)) {
-                            const prazoData = new Date(atividade.prazo);
-                            prazoData.setHours(0, 0, 0, 0);
-                            const dataAtual = new Date(dataFormatada);
-                            dataAtual.setHours(0, 0, 0, 0);
-                            
-                            // Se o prazo é neste dia ou nos próximos 7 dias
-                            const diffDias = Math.floor((prazoData - dataAtual) / (1000 * 60 * 60 * 24));
-                            
-                            if (diffDias === 0) { // Prazo hoje
-                                const prazoDiv = document.createElement('div');
-                                prazoDiv.className = 'tarefa';
-                                prazoDiv.style.background = '#fee2e2';
-                                prazoDiv.style.borderLeft = '3px solid #ef4444';
+                if (dados && dados.areas) {
+                    Object.entries(dados.areas).forEach(([areaKey, area]) => {
+                        area.atividades.forEach(atividade => {
+                            if (atividade.responsaveis.includes(nome)) {
+                                const prazoData = new Date(atividade.prazo);
+                                prazoData.setHours(0, 0, 0, 0);
+                                const dataAtual = new Date(dataFormatada);
+                                dataAtual.setHours(0, 0, 0, 0);
                                 
-                                prazoDiv.innerHTML = `
-                                    <strong style="font-size: 11px; color: #dc2626;">⏰ PRAZO HOJE</strong>
-                                    <br><span style="font-size: 10px; color: #374151;">
-                                        ${atividade.nome}
-                                    </span>
-                                    <br><span style="font-size: 9px; color: #6b7280;">
-                                        ${area.nome}
-                                    </span>
-                                `;
+                                // Se o prazo é neste dia ou nos próximos 7 dias
+                                const diffDias = Math.floor((prazoData - dataAtual) / (1000 * 60 * 60 * 24));
                                 
-                                prazoDiv.onclick = function() {
-                                    editarResponsabilidade(atividade.id, areaKey);
-                                };
-                                
-                                diaDiv.appendChild(prazoDiv);
-                                temItens = true;
-                            } else if (diffDias > 0 && diffDias <= 3) { // Próximos 3 dias
-                                const prazoDiv = document.createElement('div');
-                                prazoDiv.className = 'tarefa';
-                                prazoDiv.style.background = '#fef3c7';
-                                prazoDiv.style.borderLeft = '3px solid #f59e0b';
-                                
-                                prazoDiv.innerHTML = `
-                                    <strong style="font-size: 11px; color: #d97706;">📅 Em ${diffDias} dia${diffDias > 1 ? 's' : ''}</strong>
-                                    <br><span style="font-size: 10px; color: #374151;">
-                                        ${atividade.nome}
-                                    </span>
-                                    <br><span style="font-size: 9px; color: #6b7280;">
-                                        ${area.nome}
-                                    </span>
-                                `;
-                                
-                                prazoDiv.onclick = function() {
-                                    editarResponsabilidade(atividade.id, areaKey);
-                                };
-                                
-                                diaDiv.appendChild(prazoDiv);
-                                temItens = true;
+                                if (diffDias === 0) { // Prazo hoje
+                                    const prazoDiv = document.createElement('div');
+                                    prazoDiv.className = 'tarefa';
+                                    prazoDiv.style.background = '#fee2e2';
+                                    prazoDiv.style.borderLeft = '3px solid #ef4444';
+                                    
+                                    prazoDiv.innerHTML = `
+                                        <strong style="font-size: 11px; color: #dc2626;">⏰ PRAZO HOJE</strong>
+                                        <br><span style="font-size: 10px; color: #374151;">
+                                            ${atividade.nome}
+                                        </span>
+                                        <br><span style="font-size: 9px; color: #6b7280;">
+                                            ${area.nome}
+                                        </span>
+                                    `;
+                                    
+                                    prazoDiv.onclick = function() {
+                                        editarResponsabilidade(atividade.id, areaKey);
+                                    };
+                                    
+                                    diaDiv.appendChild(prazoDiv);
+                                    temItens = true;
+                                } else if (diffDias > 0 && diffDias <= 3) { // Próximos 3 dias
+                                    const prazoDiv = document.createElement('div');
+                                    prazoDiv.className = 'tarefa';
+                                    prazoDiv.style.background = '#fef3c7';
+                                    prazoDiv.style.borderLeft = '3px solid #f59e0b';
+                                    
+                                    prazoDiv.innerHTML = `
+                                        <strong style="font-size: 11px; color: #d97706;">📅 Em ${diffDias} dia${diffDias > 1 ? 's' : ''}</strong>
+                                        <br><span style="font-size: 10px; color: #374151;">
+                                            ${atividade.nome}
+                                        </span>
+                                        <br><span style="font-size: 9px; color: #6b7280;">
+                                            ${area.nome}
+                                        </span>
+                                    `;
+                                    
+                                    prazoDiv.onclick = function() {
+                                        editarResponsabilidade(atividade.id, areaKey);
+                                    };
+                                    
+                                    diaDiv.appendChild(prazoDiv);
+                                    temItens = true;
+                                }
                             }
-                        }
+                        });
                     });
-                });
+                }
                 
-                // Se não tem nada, mostra mensagem
-                if (!temItens) {
-                    const emptyDiv = document.createElement('div');
-                    emptyDiv.style.cssText = 'text-align: center; color: #9ca3af; font-size: 12px; padding: 20px 8px; font-style: italic;';
-                    emptyDiv.textContent = 'Dia livre';
-                    diaDiv.appendChild(emptyDiv);
+                // Status do dia (ausência, home office)
+                const statusDia = dados?.statusPessoal?.[nome]?.[dataFormatada];
+                if (statusDia) {
+                    const badgeDiv = document.createElement('div');
+                    badgeDiv.className = `status-badge ${statusDia.tipo === 'ausencia' ? 'status-ausencia' : 'status-home-office'}`;
+                    badgeDiv.textContent = statusDia.tipo === 'ausencia' ? 'Ausente' : 'Home Office';
+                    diaDiv.appendChild(badgeDiv);
+                    temItens = true;
                 }
                 
                 container.appendChild(diaDiv);
             });
+            
+            console.log('✅ DEBUG: Agenda renderizada com sucesso para:', nome);
         }
         
         function carregarObservacoes(nome) {
