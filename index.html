@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Completo - Obra 292 (Firebase v6.0)</title>
+    <title>Sistema de Gestão Completo - Obra 292 (Firebase v6.0 + Chat)</title>
+    
+    <!-- ✅ NOVO: CSS do Sistema de Chat -->
+    <link rel="stylesheet" href="modules/chat-styles.css">
+    
     <style>
         * {
             margin: 0;
@@ -1047,10 +1051,10 @@
         
         <div class="header">
             <div>
-                <h1>Sistema de Gestão </h1>
+                <h1>Sistema de Gestão Unificado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v0.0 - ✨
+                    Sistema v6.0 - Ícones Corrigidos + Recorrência + Chat 💬 ✨
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -1060,6 +1064,10 @@
                     <span id="mesAno">Julho 2025</span>
                 </p>
                 <div style="margin-top: 8px;">
+                    <!-- ✅ NOVO: Botão do Chat -->
+                    <button class="btn btn-primary btn-sm" onclick="chatSystem?.toggleChat()" title="Abrir Chat da Obra">
+                        💬 Chat
+                    </button>
                     <button class="btn btn-warning btn-sm" onclick="mostrarMarcarFeriado()">
                         🎉 Feriados
                     </button>
@@ -1153,10 +1161,11 @@
             
             <!-- Dica do sistema -->
             <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-                <strong>✅ Sistema v6.0 - ÍCONES CORRIGIDOS + RECORRÊNCIA:</strong> 
+                <strong>✅ Sistema v6.0 - ÍCONES CORRIGIDOS + RECORRÊNCIA + CHAT:</strong> 
                 <br><strong>🎨 Ícones:</strong> Badges com fundo branco translúcido (sem mais fundo preto)
                 <br><strong>🔄 Recorrência:</strong> Eventos e tarefas podem repetir (diário, quinzenal, mensal, bimestral)
                 <br><strong>📅 Visual:</strong> Eventos recorrentes têm borda tracejada e ícone 🔄
+                <br><strong>💬 Chat:</strong> Sistema completo de comunicação (Global, Áreas, Projetos, Privado)
                 <br><strong>⚡ Performance:</strong> Melhorias na sincronização e responsividade
             </div>
             
@@ -1684,6 +1693,32 @@
         // Dados do Sistema
         let dados = null;
         
+        // ========== ✅ NOVA FUNÇÃO PARA INICIALIZAR ESTRUTURA DO CHAT ==========
+        function inicializarEstruturaChat() {
+            database.ref('chat').once('value', (snapshot) => {
+                if (!snapshot.val()) {
+                    // Criar estrutura inicial do chat
+                    database.ref('chat').set({
+                        mensagens: {
+                            global: {
+                                msg_inicial: {
+                                    id: 'msg_inicial',
+                                    autor: 'sistema@obra.com',
+                                    nomeAutor: 'Sistema',
+                                    texto: '🏗️ Bem-vindos ao chat da obra 292! Aqui você pode se comunicar com toda a equipe em tempo real. Use este espaço para coordenar atividades, esclarecer dúvidas e manter todos alinhados.',
+                                    timestamp: new Date().toISOString(),
+                                    chatId: 'global'
+                                }
+                            }
+                        },
+                        usuariosOnline: {},
+                        privados: {}
+                    });
+                    console.log('✅ Estrutura do chat inicializada no Firebase');
+                }
+            });
+        }
+        
         // ========== FUNÇÕES DE AUTENTICAÇÃO ==========
         function mostrarLogin() {
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -2010,6 +2045,14 @@
                 configurarSincronizacao();
                 iniciarVerificacaoPrazos();
                 
+                // ✅ NOVO: Inicializar estrutura do chat
+                inicializarEstruturaChat();
+                
+                // ✅ NOVO: Expor variáveis globais para o módulo de chat
+                window.usuarioAtual = usuarioAtual;
+                window.dados = dados;
+                window.database = database;
+                
                 setTimeout(() => {
                     renderizarDashboard();
                     if (estadoSistema.pessoaAtual) {
@@ -2017,7 +2060,8 @@
                     }
                 }, 1000);
                 
-                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Ícones corrigidos + Recorrência!`);
+                // ✅ ATUALIZADO: Mencionar chat na mensagem
+                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Ícones corrigidos + Recorrência + Chat 💬!`);
                 
             } catch (error) {
                 console.error('Erro na inicialização:', error);
@@ -4503,5 +4547,9 @@
             }
         });
     </script>
+    
+    <!-- ✅ NOVO: Script do módulo de chat -->
+    <script src="modules/chat-module.js"></script>
+    
 </body>
 </html>
