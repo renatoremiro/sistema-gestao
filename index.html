@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.5)</title>
+    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.7)</title>
     <style>
         * {
             margin: 0;
@@ -933,7 +933,7 @@
                 <h1>Sistema de Gestão Otimizado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v5.5 Limpo - Interface Simplificada 🧹
+                    Sistema v5.7 Debug - Investigando Bug de Tarefas 🔍
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -1004,7 +1004,6 @@
                     <span><span class="status-indicator evento-marco"></span>Marco</span>
                     <span><span class="status-indicator evento-outro"></span>Outros</span>
                     <span><span class="status-indicator" style="background: #f59e0b;"></span>Feriado</span>
-                    <span><span class="status-indicator" style="background: #8b5cf6;"></span>Tarefa Pessoal</span>
                 </div>
             </div>
             
@@ -1024,12 +1023,12 @@
             </div>
             
             <!-- Dica do sistema -->
-            <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-                <strong>✅ Sistema v5.5 - INTERFACE SIMPLIFICADA:</strong> 
-                <br><strong>📅 Eventos:</strong> Qualquer usuário pode criar, editar e deletar
-                <br><strong>📝 Tarefas Pessoais:</strong> Apenas o dono pode editar/deletar suas tarefas
-                <br><strong>🧹 Simplicidade:</strong> Removidas funcionalidades desnecessárias
-                <br><strong>💡 Navegação:</strong> Dashboard → Área → Pessoa → Agenda para gerenciar tudo
+            <div style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #92400e;">
+                <strong>🔍 Sistema v5.7 - DEBUG ATIVO PARA INVESTIGAR BUG:</strong> 
+                <br><strong>🐛 Problema:</strong> Tarefas pessoais não aparecem na agenda após criação
+                <br><strong>🔧 Debug:</strong> Console (F12) mostra logs detalhados de criação e renderização
+                <br><strong>💡 Teste:</strong> Crie uma tarefa e veja os logs no console
+                <br><strong>🧰 Função:</strong> Digite <code>debugSistema()</code> no console para ver estrutura completa
             </div>
             
             <!-- Cards das Áreas -->
@@ -1219,6 +1218,18 @@
     <div id="modalTarefa" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 24px;">Nova Tarefa Pessoal</h3>
+            
+            <div class="form-group">
+                <label>Categoria da Tarefa <span style="color: #ef4444;">*</span></label>
+                <select id="tarefaCategoria">
+                    <option value="reuniao">📅 Reunião</option>
+                    <option value="entrega">📦 Entrega</option>
+                    <option value="prazo">⏰ Prazo</option>
+                    <option value="marco">🎯 Marco</option>
+                    <option value="outro">📌 Outro</option>
+                </select>
+            </div>
+            
             <div class="form-group">
                 <label>Tipo de Agendamento</label>
                 <select id="tarefaTipo" onchange="alternarTipoAgendamento()">
@@ -1411,7 +1422,7 @@
         let intervaloPrazos = null;
         
         // Constantes e configurações
-        const VERSAO_SISTEMA = '5.5';
+        const VERSAO_SISTEMA = '5.7';
         const VERSAO_DB = 5;
         const INTERVALO_VERIFICACAO_PRAZOS = 3600000; // 1 hora
         
@@ -1654,18 +1665,22 @@
                         atividade.status = novoStatus;
                     }
 
-                    // Alertas de prazo
-                    const alertaKey = `${atividade.id}_${atividade.prazo}`;
-                    if (!estadoSistema.alertasPrazosExibidos.has(alertaKey)) {
-                        if (diasRestantes === 0) {
-                            mostrarAlertaPrazo(`⏰ PRAZO HOJE: ${atividade.nome}`, 'error');
-                            estadoSistema.alertasPrazosExibidos.add(alertaKey);
-                        } else if (diasRestantes === 1) {
-                            mostrarAlertaPrazo(`⚠️ Prazo amanhã: ${atividade.nome}`, 'warning');
-                            estadoSistema.alertasPrazosExibidos.add(alertaKey);
-                        } else if (diasRestantes === -1) {
-                            mostrarAlertaPrazo(`🚨 ATRASADO: ${atividade.nome}`, 'error');
-                            estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                    // ✅ CORREÇÃO: Alertas de prazo APENAS para responsáveis
+                    const usuarioEhResponsavel = atividade.responsaveis.includes(estadoSistema.usuarioNome);
+                    
+                    if (usuarioEhResponsavel) {
+                        const alertaKey = `${atividade.id}_${atividade.prazo}`;
+                        if (!estadoSistema.alertasPrazosExibidos.has(alertaKey)) {
+                            if (diasRestantes === 0) {
+                                mostrarAlertaPrazo(`⏰ PRAZO HOJE: ${atividade.nome}`, 'error');
+                                estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                            } else if (diasRestantes === 1) {
+                                mostrarAlertaPrazo(`⚠️ Prazo amanhã: ${atividade.nome}`, 'warning');
+                                estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                            } else if (diasRestantes === -1) {
+                                mostrarAlertaPrazo(`🚨 ATRASADO: ${atividade.nome}`, 'error');
+                                estadoSistema.alertasPrazosExibidos.add(alertaKey);
+                            }
                         }
                     }
                 });
@@ -2853,6 +2868,10 @@
         
         // ========== AGENDA SEMANAL LIMPA E PROFISSIONAL ==========
         function renderizarAgendaSemana(nome) {
+            console.log('🔍 DEBUG RENDERIZAR AGENDA PARA:', nome);
+            console.log('🔍 DEBUG DADOS.AGENDAS:', dados?.agendas);
+            console.log('🔍 DEBUG AGENDA DA PESSOA:', dados?.agendas?.[nome]);
+            
             const container = document.getElementById('agendaSemana');
             if (!container) return;
             
@@ -2862,6 +2881,9 @@
             const diasNomes = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
             
             diasSemana.forEach((dia, index) => {
+                console.log(`🔍 DEBUG PROCESSANDO DIA: ${dia}`);
+                console.log(`🔍 DEBUG TAREFAS NO DIA:`, dados?.agendas?.[nome]?.[dia]);
+                
                 const diaDiv = document.createElement('div');
                 diaDiv.className = 'dia-semana';
                 
@@ -2885,7 +2907,10 @@
                 
                 // 1. TAREFAS PESSOAIS
                 if (dados?.agendas?.[nome]?.[dia]) {
+                    console.log(`✅ ENCONTRADAS ${dados.agendas[nome][dia].length} TAREFAS PARA ${dia}`);
                     dados.agendas[nome][dia].forEach(tarefa => {
+                        console.log('📝 RENDERIZANDO TAREFA:', tarefa);
+                        
                         const tarefaDiv = document.createElement('div');
                         tarefaDiv.className = 'tarefa';
                         tarefaDiv.style.background = tarefa.mostrarNoCalendario ? '#ddd6fe' : '#f3f4f6';
@@ -2933,6 +2958,8 @@
                         diaDiv.appendChild(tarefaDiv);
                         temItens = true;
                     });
+                } else {
+                    console.log(`❌ NENHUMA TAREFA ENCONTRADA PARA ${nome} NO ${dia}`);
                 }
                 
                 // 2. EVENTOS DO CALENDÁRIO
@@ -3410,6 +3437,8 @@
             const horario = document.getElementById('tarefaHorario').value;
             const mostrarNoCalendario = document.getElementById('tarefaCalendario').checked;
             
+            console.log('🔧 DEBUG SALVAR TAREFA:', {nome, tipo, descricao, horario, mostrarNoCalendario});
+            
             if (!validarFormulario([
                 {id: 'tarefaDescricao'},
                 {id: 'tarefaHorario'}
@@ -3433,18 +3462,28 @@
                 mostrarNoCalendario: mostrarNoCalendario
             };
             
+            console.log('🔧 DEBUG TAREFA BASE:', tarefaBase);
+            
+            // ✅ CORREÇÃO: Garantir que a estrutura de agendas existe
+            if (!dados.agendas) {
+                dados.agendas = {};
+            }
             if (!dados.agendas[nome]) {
                 dados.agendas[nome] = {};
             }
             
             if (tipo === 'semanal') {
                 const dia = document.getElementById('tarefaDia').value;
+                console.log('🔧 DEBUG DIA SELECIONADO:', dia);
                 
                 if (!dados.agendas[nome][dia]) {
                     dados.agendas[nome][dia] = [];
                 }
                 
                 dados.agendas[nome][dia].push(tarefaBase);
+                console.log('🔧 DEBUG TAREFA SALVA EM:', `dados.agendas['${nome}']['${dia}']`);
+                console.log('🔧 DEBUG ESTRUTURA APÓS SALVAR:', dados.agendas[nome][dia]);
+                
             } else {
                 const dataEspecifica = document.getElementById('tarefaDataEspecifica').value;
                 
@@ -3458,10 +3497,14 @@
                     origem: 'tarefa_pessoal'
                 };
                 dados.eventos.push(evento);
+                console.log('🔧 DEBUG EVENTO CRIADO:', evento);
             }
             
             salvarDados();
             fecharModal('modalTarefa');
+            
+            // ✅ CORREÇÃO: Forçar re-renderização da agenda
+            console.log('🔧 DEBUG: Re-renderizando agenda para:', nome);
             renderizarAgendaSemana(nome);
             gerarCalendario();
             
@@ -3845,6 +3888,27 @@
         function podeEditarEvento() {
             return true; // Qualquer usuário logado pode editar eventos
         }
+        
+        // ========== FUNÇÃO DE DEBUG ==========
+        function debugSistema() {
+            console.log('🔍 DEBUG COMPLETO DO SISTEMA:');
+            console.log('📊 Estado do Sistema:', estadoSistema);
+            console.log('📁 Dados Completos:', dados);
+            console.log('📅 Agendas:', dados?.agendas);
+            
+            if (estadoSistema.pessoaAtual) {
+                console.log(`👤 Agenda de ${estadoSistema.pessoaAtual}:`, dados?.agendas?.[estadoSistema.pessoaAtual]);
+            }
+            
+            return {
+                estado: estadoSistema,
+                dados: dados,
+                agendas: dados?.agendas
+            };
+        }
+        
+        // Expor função de debug globalmente
+        window.debugSistema = debugSistema;
         
         function validarFormulario(campos) {
             let valido = true;
