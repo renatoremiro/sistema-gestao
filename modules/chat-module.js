@@ -1,5 +1,5 @@
 // ============================================
-// 💬 SISTEMA DE CHAT FINAL CORRIGIDO - GESTÃO DE OBRAS
+// 💬 SISTEMA DE CHAT COMPLETO FINAL - TODOS OS PROBLEMAS CORRIGIDOS
 // ============================================
 
 class ChatSystem {
@@ -12,7 +12,8 @@ class ChatSystem {
         this.listeners = new Map();
         this.isOpen = false;
         this.usuariosOnline = new Map();
-        this.ultimasMensagens = new Map(); // ✅ CACHE para evitar duplicatas
+        this.ultimasMensagens = new Map();
+        this.notificationListeners = new Map(); // ✅ NOVO: Para notificações
         
         this.aguardarInicializacao();
     }
@@ -43,8 +44,9 @@ class ChatSystem {
             this.carregarChats();
             this.monitorarUsuariosOnline();
             this.marcarUsuarioOnline();
+            this.iniciarNotificacoesGlobais(); // ✅ NOVO: Notificações
             
-            console.log('✅ Sistema de Chat FINAL inicializado');
+            console.log('✅ Sistema de Chat COMPLETO inicializado');
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
         }
@@ -88,6 +90,7 @@ class ChatSystem {
                     <h3>💬 Chat da Obra</h3>
                     <div class="chat-controls">
                         <span id="usersOnlineCount" class="users-online">👥 0</span>
+                        <button id="clearChatBtn" class="chat-btn" onclick="chatSystem.limparChat()" title="Limpar conversa">🗑️</button>
                         <button id="chatMinimize" class="chat-btn">−</button>
                         <button id="chatClose" class="chat-btn">×</button>
                     </div>
@@ -251,10 +254,125 @@ class ChatSystem {
         });
     }
 
+    // ✅ NOVO: Sistema de notificações globais
+    iniciarNotificacoesGlobais() {
+        console.log('🔔 Iniciando sistema de notificações...');
+        
+        // Monitorar TODOS os chats para notificações
+        this.monitorarChatParaNotificacoes('global');
+        
+        // Monitorar chats de área
+        Object.keys(this.areas).forEach(areaKey => {
+            this.monitorarChatParaNotificacoes(`area-${areaKey}`);
+        });
+        
+        // Monitorar chats privados
+        this.chatRef.child('privados').on('value', (snapshot) => {
+            const chatsPrivados = snapshot.val() || {};
+            Object.keys(chatsPrivados).forEach(chatId => {
+                const chatData = chatsPrivados[chatId];
+                if (chatData.participantes && chatData.participantes.includes(this.usuario.email)) {
+                    this.monitorarChatParaNotificacoes(`privado-${chatId}`);
+                }
+            });
+        });
+    }
+
+    // ✅ NOVO: Monitorar chat específico para notificações
+    monitorarChatParaNotificacoes(chatId) {
+        if (this.notificationListeners.has(chatId)) return;
+        
+        const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
+        
+        const listener = messagesRef.on('child_added', (snapshot) => {
+            const mensagem = snapshot.val();
+            
+            if (mensagem && mensagem.autor !== this.usuario.email) {
+                // Só notificar se não estiver no chat ativo
+                if (this.chatAtivo !== chatId) {
+                    this.adicionarNotificacao(chatId);
+                    this.mostrarNotificacaoVisual(mensagem, chatId);
+                    this.tocarSomNotificacao();
+                }
+            }
+        });
+        
+        this.notificationListeners.set(chatId, messagesRef);
+        console.log(`🔔 Monitorando notificações para: ${chatId}`);
+    }
+
+    // ✅ NOVO: Adicionar notificação visual
+    adicionarNotificacao(chatId) {
+        const atual = this.mensagensNaoLidas.get(chatId) || 0;
+        this.mensagensNaoLidas.set(chatId, atual + 1);
+        
+        // Atualizar badge do chat específico
+        const unreadEl = document.getElementById(`unread-${chatId.replace('/', '-')}`);
+        if (unreadEl) {
+            const count = this.mensagensNaoLidas.get(chatId);
+            unreadEl.textContent = count;
+            unreadEl.classList.remove('hidden');
+        }
+        
+        // Atualizar badge total
+        this.atualizarBadgeTotal();
+        
+        console.log(`🔔 Notificação adicionada para ${chatId}: ${atual + 1}`);
+    }
+
+    // ✅ NOVO: Mostrar notificação visual
+    mostrarNotificacaoVisual(mensagem, chatId) {
+        // Criar notificação no canto da tela
+        const notification = document.createElement('div');
+        notification.className = 'chat-notification';
+        notification.innerHTML = `
+            <div class="notification-header">
+                <strong>${this.obterNomeChat(chatId)}</strong>
+                <span class="notification-close" onclick="this.parentElement.parentElement.remove()">×</span>
+            </div>
+            <div class="notification-body">
+                <strong>${mensagem.nomeAutor}:</strong> ${mensagem.texto.substring(0, 50)}${mensagem.texto.length > 50 ? '...' : ''}
+            </div>
+        `;
+        
+        notification.onclick = () => {
+            this.abrirChat(chatId);
+            notification.remove();
+        };
+        
+        document.body.appendChild(notification);
+        
+        // Remover após 5 segundos
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // ✅ NOVO: Obter nome do chat
+    obterNomeChat(chatId) {
+        if (chatId === 'global') return '🌐 Chat Geral';
+        if (chatId.startsWith('area-')) {
+            const areaKey = chatId.replace('area-', '');
+            return `📁 ${this.areas[areaKey]?.nome || 'Área'}`;
+        }
+        if (chatId.startsWith('projeto-')) {
+            return '📋 Projeto';
+        }
+        if (chatId.startsWith('privado-')) {
+            return '👤 Conversa Privada';
+        }
+        return 'Chat';
+    }
+
     // ========== CHAT MANAGEMENT ==========
     abrirChat(chatId) {
         console.log(`🔧 Abrindo chat: ${chatId}`);
         this.chatAtivo = chatId;
+        
+        // Zerar notificações deste chat
+        this.mensagensNaoLidas.set(chatId, 0);
         
         // UI Updates
         document.querySelectorAll('.chat-room-item').forEach(item => {
@@ -326,13 +444,13 @@ class ChatSystem {
         }
     }
 
-    // ✅ FUNÇÃO PRINCIPAL CORRIGIDA - CARREGAMENTO E LISTENERS
+    // ✅ CARREGAMENTO DE MENSAGENS CORRIGIDO
     carregarMensagens(chatId) {
         console.log(`🔧 Carregando mensagens para: ${chatId}`);
         
         const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
         
-        // ✅ PRIMEIRO: Carregar mensagens existentes SEM listener
+        // Carregar mensagens existentes
         messagesRef.once('value', (snapshot) => {
             const mensagens = snapshot.val() || {};
             const container = document.getElementById('chatMessages');
@@ -358,31 +476,27 @@ class ChatSystem {
             });
         });
         
-        // ✅ SEGUNDO: Listener GLOBAL para TODAS as mudanças
-        const listener = messagesRef.on('value', (snapshot) => {
-            const todasMensagens = snapshot.val() || {};
+        // ✅ LISTENER EM TEMPO REAL para mensagens novas
+        const listener = messagesRef.on('child_added', (snapshot) => {
+            const mensagem = snapshot.val();
             const cache = this.ultimasMensagens.get(chatId) || new Set();
             
-            // Verificar se há mensagens novas
-            Object.values(todasMensagens).forEach(mensagem => {
-                if (mensagem.id && !cache.has(mensagem.id)) {
-                    console.log('📥 NOVA MENSAGEM detectada:', mensagem);
-                    cache.add(mensagem.id);
+            if (mensagem && mensagem.id && !cache.has(mensagem.id)) {
+                console.log('📥 NOVA mensagem detectada:', mensagem);
+                cache.add(mensagem.id);
+                
+                // Só adicionar se estiver no chat ativo
+                if (this.chatAtivo === chatId) {
                     this.adicionarMensagemUI(mensagem);
-                    
-                    // Som apenas para mensagens de outros
-                    if (mensagem.autor !== this.usuario.email) {
-                        this.tocarSomNotificacao();
-                    }
                 }
-            });
+            }
         });
         
         this.listeners.set(chatId, messagesRef);
         console.log(`✅ Listener ativo para chat: ${chatId}`);
     }
 
-    // ✅ ENVIO DE MENSAGEM SIMPLIFICADO
+    // ✅ ENVIO DE MENSAGEM
     enviarMensagem() {
         const input = document.getElementById('chatInput');
         if (!input) return;
@@ -407,7 +521,7 @@ class ChatSystem {
         
         console.log('📤 Enviando mensagem:', mensagem);
         
-        // ✅ SALVAR DIRETO com SET (mais simples)
+        // Salvar no Firebase
         this.chatRef.child(`mensagens/${this.chatAtivo}/${mensagemId}`).set(mensagem)
             .then(() => {
                 console.log('✅ Mensagem salva com sucesso!');
@@ -488,7 +602,36 @@ class ChatSystem {
         }
     }
 
-    // ========== CHAT PRIVADO ==========
+    // ✅ NOVO: Limpar chat
+    limparChat() {
+        if (!confirm(`Deseja realmente limpar todas as mensagens do chat atual?\n\nEsta ação não pode ser desfeita.`)) {
+            return;
+        }
+        
+        console.log(`🗑️ Limpando chat: ${this.chatAtivo}`);
+        
+        this.chatRef.child(`mensagens/${this.chatAtivo}`).remove()
+            .then(() => {
+                console.log('✅ Chat limpo com sucesso!');
+                
+                // Limpar UI
+                const container = document.getElementById('chatMessages');
+                if (container) {
+                    container.innerHTML = '<div class="welcome-message"><p>Chat limpo!</p><p>Comece uma nova conversa.</p></div>';
+                }
+                
+                // Limpar cache
+                this.ultimasMensagens.set(this.chatAtivo, new Set());
+                
+                window.mostrarNotificacao('Chat limpo com sucesso!');
+            })
+            .catch((error) => {
+                console.error('❌ Erro ao limpar chat:', error);
+                window.mostrarNotificacao('Erro ao limpar chat!', 'error');
+            });
+    }
+
+    // ========== CHAT PRIVADO CORRIGIDO ==========
     novoPrivado() {
         const usuarios = this.getTodosUsuarios();
         const usuariosDisponiveis = usuarios.filter(u => u.email !== this.usuario.email);
@@ -515,9 +658,13 @@ class ChatSystem {
         }
     }
 
+    // ✅ CHAT PRIVADO CORRIGIDO - ID ÚNICO
     iniciarChatPrivado(emailDestino) {
+        // ✅ CORREÇÃO: Garantir que o ID seja sempre o mesmo
         const participantes = [this.usuario.email, emailDestino].sort();
-        const chatId = participantes.join('_').replace(/[@.]/g, '_');
+        const chatId = `privado_${participantes[0].replace(/[@.]/g, '_')}_${participantes[1].replace(/[@.]/g, '_')}`;
+        
+        console.log('🔧 Criando chat privado com ID:', chatId);
         
         const chatData = {
             participantes: participantes,
@@ -526,9 +673,14 @@ class ChatSystem {
         };
         
         this.chatRef.child(`privados/${chatId}`).set(chatData).then(() => {
+            // Iniciar monitoramento deste chat
+            this.monitorarChatParaNotificacoes(chatId);
+            
             this.carregarChatsPrivados();
-            this.abrirChat(`privado-${chatId}`);
+            this.abrirChat(chatId);
             window.mostrarNotificacao('Conversa privada iniciada!');
+        }).catch(error => {
+            console.error('❌ Erro ao criar chat privado:', error);
         });
     }
 
@@ -583,7 +735,7 @@ class ChatSystem {
     // ========== UTILITIES ==========
     marcarComoLido(chatId) {
         this.mensagensNaoLidas.set(chatId, 0);
-        const unreadEl = document.getElementById(`unread-${chatId.replace('-', '-')}`);
+        const unreadEl = document.getElementById(`unread-${chatId.replace('/', '-')}`);
         if (unreadEl) {
             unreadEl.classList.add('hidden');
             unreadEl.textContent = '0';
@@ -723,13 +875,13 @@ class ChatSystem {
 let chatSystem;
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🔧 Inicializando sistema de chat...');
+    console.log('🔧 Inicializando sistema de chat COMPLETO...');
     
     const inicializarChat = () => {
         if (window.usuarioAtual && window.dados && window.database) {
             chatSystem = new ChatSystem();
             window.chatSystem = chatSystem;
-            console.log('✅ Chat System FINAL inicializado!');
+            console.log('✅ Chat System COMPLETO inicializado!');
         } else {
             setTimeout(inicializarChat, 1000);
         }
@@ -738,7 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(inicializarChat, 3000);
 });
 
-// ✅ ESTILOS CORRIGIDOS
+// ✅ ESTILOS CORRIGIDOS + NOTIFICAÇÕES
 const style = document.createElement('style');
 style.textContent = `
     .sync-indicator.synced {
@@ -749,6 +901,60 @@ style.textContent = `
         bottom: 20px !important;
         right: 20px !important;
         z-index: 1001 !important;
+    }
+    
+    /* ✅ NOVO: Estilos para notificações */
+    .chat-notification {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: white;
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        max-width: 300px;
+        z-index: 2000;
+        cursor: pointer;
+        animation: slideInRight 0.3s ease-out;
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+        font-size: 12px;
+        color: #3b82f6;
+    }
+    
+    .notification-close {
+        cursor: pointer;
+        font-weight: bold;
+        color: #6b7280;
+    }
+    
+    .notification-body {
+        font-size: 13px;
+        color: #374151;
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* ✅ Melhorar badge de notificações */
+    .unread-count {
+        background: #ef4444 !important;
+        color: white !important;
+        animation: pulse 2s infinite;
     }
 `;
 document.head.appendChild(style);
