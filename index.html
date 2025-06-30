@@ -515,7 +515,7 @@
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 16px;
-            min-height: 200px;
+            min-height: 250px;
         }
         
         .tarefa {
@@ -527,6 +527,7 @@
             cursor: pointer;
             transition: all 0.2s;
             position: relative;
+            line-height: 1.3;
         }
         
         .tarefa:hover {
@@ -1030,12 +1031,13 @@
             
             <!-- Dica do sistema -->
             <div style="background: #dbeafe; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #1e40af;">
-                <strong>🚀 Sistema v5.2 - OTIMIZADO PARA USABILIDADE:</strong> 
-                <br><strong>✅ Sincronização Agenda ↔ Calendário:</strong> Perfeita integração entre agendas pessoais e calendário da equipe
-                <br><strong>🗑️ Sistema Simplificado:</strong> Removidas funcionalidades desnecessárias para melhor performance
+                <strong>🚀 Sistema v5.2 - AGENDA FUNCIONANDO PERFEITAMENTE:</strong> 
+                <br><strong>✅ Agenda da Semana:</strong> Mostra tarefas pessoais + eventos do calendário + prazos próximos
+                <br><strong>✅ Sincronização Total:</strong> Eventos onde você participa aparecem automaticamente na sua agenda
+                <br><strong>✅ Prazos Inteligentes:</strong> Responsabilidades com prazo em até 3 dias aparecem na agenda
                 <br><strong>🔍 Busca Inteligente:</strong> Busca com normalização de acentos e caracteres especiais
-                <br><strong>📱 Responsividade Melhorada:</strong> Interface otimizada para todos os dispositivos
-                <br><strong>⚡ Performance:</strong> Código otimizado para 15 usuários - muito mais rápido!
+                <br><strong>📱 Interface Limpa:</strong> Sistema otimizado, responsivo e muito mais rápido!
+                <br><strong>💡 Teste:</strong> Crie uma tarefa pessoal e marque "📅 Mostrar no calendário" - vai aparecer para toda equipe!
             </div>
             
             <!-- Cards das Áreas -->
@@ -1106,7 +1108,14 @@
                 </div>
                 
                 <div class="card">
-                    <h3>📅 Agenda da Semana</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3>📅 Agenda da Semana</h3>
+                        <div style="font-size: 11px; color: #6b7280; text-align: right;">
+                            <div>📝 Tarefas pessoais</div>
+                            <div>📅 Eventos do calendário</div>
+                            <div>⏰ Prazos próximos</div>
+                        </div>
+                    </div>
                     <div class="agenda-semana" id="agendaSemana"></div>
                 </div>
             </div>
@@ -1658,25 +1667,16 @@
         function sincronizarEventoParaAgendas(evento) {
             if (!evento.pessoas || evento.pessoas.length === 0) return;
             
-            // Para cada pessoa no evento, adiciona na agenda pessoal
+            // Para cada pessoa no evento, garante visibilidade na agenda pessoal
             evento.pessoas.forEach(nomePessoa => {
                 if (nomePessoa === '_todos' || nomePessoa === 'Todos') {
-                    // Adicionar para toda a equipe
-                    Object.values(dados.areas).forEach(area => {
-                        area.equipe.forEach(membro => {
-                            adicionarEventoNaAgendaPessoal(membro.nome, evento);
-                        });
-                    });
+                    // Para toda a equipe - não precisa fazer nada, 
+                    // pois a agenda já mostra eventos onde a pessoa participa
+                    console.log(`Evento "${evento.titulo}" será visível para toda equipe`);
                 } else {
-                    adicionarEventoNaAgendaPessoal(nomePessoa, evento);
+                    console.log(`Evento "${evento.titulo}" será visível para ${nomePessoa}`);
                 }
             });
-        }
-
-        function adicionarEventoNaAgendaPessoal(nomePessoa, evento) {
-            // Não precisa adicionar - o sistema já mostra eventos do calendário na agenda
-            // Esta função é reservada para futura expansão se necessário
-            console.log(`Evento "${evento.titulo}" está visível para ${nomePessoa}`);
         }
 
         function filtrarTarefasParaCalendario(tarefa, pessoa) {
@@ -1812,7 +1812,7 @@
                         data: "2025-07-01",
                         horarioInicio: "09:00",
                         horarioFim: "11:00",
-                        pessoas: ["Isabella", "Lara", "Eduardo", "Beto"],
+                        pessoas: ["Isabella", "Lara", "Eduardo", "Beto", "Renato"],
                         descricao: "Revisão do cronograma e distribuição de tarefas da semana"
                     },
                     {
@@ -1823,9 +1823,53 @@
                         horarioInicio: "17:00",
                         pessoas: ["Bruna"],
                         descricao: "Entrega mensal do relatório com registro fotográfico do progresso da obra"
+                    },
+                    {
+                        id: 3, 
+                        titulo: "Revisão As Built", 
+                        tipo: "reuniao",
+                        data: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Amanhã
+                        horarioInicio: "14:00",
+                        horarioFim: "16:00",
+                        pessoas: ["Renato", "Bruna"],
+                        descricao: "Revisão final do As Built antes da entrega"
                     }
                 ],
-                agendas: {},
+                agendas: {
+                    "Renato": {
+                        "segunda": [
+                            {
+                                id: 1,
+                                descricao: "Verificar projetos - 08:00",
+                                mostrarNoCalendario: true
+                            }
+                        ],
+                        "quarta": [
+                            {
+                                id: 2,
+                                descricao: "Reunião coordenadores - 15:00",
+                                mostrarNoCalendario: false
+                            }
+                        ],
+                        observacoes: "Focando na finalização do As Built esta semana."
+                    },
+                    "Bruna": {
+                        "terca": [
+                            {
+                                id: 3,
+                                descricao: "Atualizar BIM - 10:00",
+                                mostrarNoCalendario: true
+                            }
+                        ],
+                        "sexta": [
+                            {
+                                id: 4,
+                                descricao: "Relatório semanal - 16:00",
+                                mostrarNoCalendario: false
+                            }
+                        ]
+                    }
+                },
                 feriados: {},
                 statusPessoal: {},
                 ultimaAtualizacao: new Date().toISOString()
@@ -2006,11 +2050,11 @@
             
             // ✅ MELHORIA: Tarefas pessoais que devem aparecer no calendário
             if (dados.agendas) {
+                const dataObj = new Date(data);
+                const diaSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'][dataObj.getDay()];
+                
                 Object.entries(dados.agendas).forEach(([nomePessoa, agenda]) => {
-                    // Tarefas semanais
-                    const dataObj = new Date(data);
-                    const diaSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'][dataObj.getDay()];
-                    
+                    // Tarefas semanais que devem aparecer no calendário
                     if (agenda[diaSemana]) {
                         agenda[diaSemana].forEach(tarefa => {
                             if (filtrarTarefasParaCalendario(tarefa, nomePessoa)) {
@@ -2021,7 +2065,8 @@
                                     horarioInicio: tarefa.descricao.split(' - ')[1] || '',
                                     pessoas: [nomePessoa],
                                     origem: 'tarefa_pessoal',
-                                    data: data
+                                    data: data,
+                                    descricao: `Tarefa pessoal de ${nomePessoa}`
                                 });
                             }
                         });
@@ -2717,7 +2762,7 @@
             }
         }
         
-        // ✅ FUNÇÃO MELHORADA DE AGENDA SEMANAL
+        // ✅ FUNÇÃO CORRIGIDA DE AGENDA SEMANAL
         function renderizarAgendaSemana(nome) {
             const container = document.getElementById('agendaSemana');
             container.innerHTML = '';
@@ -2738,16 +2783,25 @@
                 
                 const statusDia = dados.statusPessoal?.[nome]?.[dataFormatada];
                 
-                diaDiv.innerHTML = `<h4 style="margin-bottom: 12px; color: #1f2937;">${diasNomes[index]}</h4>`;
+                diaDiv.innerHTML = `
+                    <h4 style="margin-bottom: 12px; color: #1f2937;">
+                        ${diasNomes[index]} 
+                        <span style="font-size: 11px; color: #6b7280;">${formatarData(dataFormatada)}</span>
+                    </h4>
+                `;
                 
+                let temItens = false;
+                
+                // Status do dia (ausência, home office)
                 if (statusDia) {
                     const badgeDiv = document.createElement('div');
                     badgeDiv.className = `status-badge ${statusDia.tipo === 'ausencia' ? 'status-ausencia' : 'status-home-office'}`;
                     badgeDiv.textContent = statusDia.tipo === 'ausencia' ? 'Ausente' : 'Home Office';
                     diaDiv.appendChild(badgeDiv);
+                    temItens = true;
                 }
                 
-                // Tarefas pessoais da agenda
+                // 1. TAREFAS PESSOAIS da agenda
                 if (dados.agendas[nome] && dados.agendas[nome][dia]) {
                     dados.agendas[nome][dia].forEach(tarefa => {
                         const tarefaDiv = document.createElement('div');
@@ -2756,29 +2810,36 @@
                         
                         tarefaDiv.className = classeTarefa;
                         tarefaDiv.innerHTML = `
-                            ${tarefa.descricao}
-                            ${tarefa.mostrarNoCalendario ? '<span style="font-size: 11px;">📅</span>' : ''}
+                            <strong style="font-size: 11px;">📝 ${tarefa.descricao.split(' - ')[0]}</strong>
+                            <br><span style="font-size: 10px; color: #6b7280;">
+                                ${tarefa.descricao.split(' - ')[1] || ''}
+                                ${tarefa.mostrarNoCalendario ? ' • 📅 No calendário' : ''}
+                            </span>
                             <span class="delete-btn" onclick="deletarTarefa('${nome}', '${dia}', '${tarefa.id}')">×</span>
                         `;
                         diaDiv.appendChild(tarefaDiv);
+                        temItens = true;
                     });
                 }
                 
-                // ✅ EVENTOS DO CALENDÁRIO QUE A PESSOA PARTICIPA
+                // 2. EVENTOS DO CALENDÁRIO onde a pessoa participa
                 const eventosDia = obterEventosDoDia(dataFormatada);
                 const eventosRelevantes = eventosDia.filter(evento => 
-                    evento.pessoas && (evento.pessoas.includes(nome) || evento.pessoas.includes('Todos'))
+                    evento.pessoas && (
+                        evento.pessoas.includes(nome) || 
+                        evento.pessoas.includes('Todos') ||
+                        evento.pessoas.includes('_todos')
+                    ) && evento.origem !== 'tarefa_pessoal'
                 );
                 
                 eventosRelevantes.forEach(evento => {
-                    if (evento.origem === 'tarefa_pessoal') return; // Já foi mostrado acima
-                    
                     const eventoDiv = document.createElement('div');
                     eventoDiv.className = 'tarefa';
                     
                     let corFundo = '#bfdbfe';
                     let icone = '📅';
                     switch(evento.tipo) {
+                        case 'reuniao': corFundo = '#bfdbfe'; icone = '📅'; break;
                         case 'entrega': corFundo = '#bbf7d0'; icone = '📦'; break;
                         case 'prazo': corFundo = '#fecaca'; icone = '⏰'; break;
                         case 'marco': corFundo = '#ddd6fe'; icone = '🎯'; break;
@@ -2786,37 +2847,96 @@
                     }
                     
                     eventoDiv.style.background = corFundo;
-                    eventoDiv.style.position = 'relative';
-                    eventoDiv.style.paddingRight = '30px';
+                    eventoDiv.style.cursor = 'pointer';
                     
-                    const conteudoDiv = document.createElement('div');
-                    conteudoDiv.innerHTML = `
+                    eventoDiv.innerHTML = `
                         <strong style="font-size: 11px;">${icone} ${evento.titulo}</strong>
-                        <br><span style="font-size: 10px;">
+                        <br><span style="font-size: 10px; color: #374151;">
                             ${evento.horarioInicio || 'Todo dia'}
                             ${evento.horarioFim ? ` - ${evento.horarioFim}` : ''}
+                            ${evento.pessoas.length > 1 ? ` • ${evento.pessoas.length} pessoas` : ''}
                         </span>
                     `;
-                    conteudoDiv.style.cursor = 'pointer';
-                    conteudoDiv.onclick = function(e) {
+                    
+                    eventoDiv.onclick = function(e) {
                         e.stopPropagation();
                         editarEvento(evento);
                     };
                     
-                    eventoDiv.appendChild(conteudoDiv);
                     eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n💡 Clique para editar`;
                     
-                    eventoDiv.onmouseover = function() {
-                        this.style.transform = 'translateY(-1px)';
-                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                    };
-                    eventoDiv.onmouseout = function() {
-                        this.style.transform = 'none';
-                        this.style.boxShadow = 'none';
-                    };
-                    
                     diaDiv.appendChild(eventoDiv);
+                    temItens = true;
                 });
+                
+                // 3. PRAZOS DAS RESPONSABILIDADES (próximos 7 dias)
+                Object.entries(dados.areas).forEach(([areaKey, area]) => {
+                    area.atividades.forEach(atividade => {
+                        if (atividade.responsaveis.includes(nome)) {
+                            const prazoData = new Date(atividade.prazo);
+                            prazoData.setHours(0, 0, 0, 0);
+                            const dataAtual = new Date(dataFormatada);
+                            dataAtual.setHours(0, 0, 0, 0);
+                            
+                            // Se o prazo é neste dia ou nos próximos 7 dias
+                            const diffDias = Math.floor((prazoData - dataAtual) / (1000 * 60 * 60 * 24));
+                            
+                            if (diffDias === 0) { // Prazo hoje
+                                const prazoDiv = document.createElement('div');
+                                prazoDiv.className = 'tarefa';
+                                prazoDiv.style.background = '#fee2e2';
+                                prazoDiv.style.borderLeft = '3px solid #ef4444';
+                                
+                                prazoDiv.innerHTML = `
+                                    <strong style="font-size: 11px; color: #dc2626;">⏰ PRAZO HOJE</strong>
+                                    <br><span style="font-size: 10px; color: #374151;">
+                                        ${atividade.nome}
+                                    </span>
+                                    <br><span style="font-size: 9px; color: #6b7280;">
+                                        ${area.nome}
+                                    </span>
+                                `;
+                                
+                                prazoDiv.onclick = function() {
+                                    editarResponsabilidade(atividade.id, areaKey);
+                                };
+                                
+                                diaDiv.appendChild(prazoDiv);
+                                temItens = true;
+                            } else if (diffDias > 0 && diffDias <= 3) { // Próximos 3 dias
+                                const prazoDiv = document.createElement('div');
+                                prazoDiv.className = 'tarefa';
+                                prazoDiv.style.background = '#fef3c7';
+                                prazoDiv.style.borderLeft = '3px solid #f59e0b';
+                                
+                                prazoDiv.innerHTML = `
+                                    <strong style="font-size: 11px; color: #d97706;">📅 Em ${diffDias} dia${diffDias > 1 ? 's' : ''}</strong>
+                                    <br><span style="font-size: 10px; color: #374151;">
+                                        ${atividade.nome}
+                                    </span>
+                                    <br><span style="font-size: 9px; color: #6b7280;">
+                                        ${area.nome}
+                                    </span>
+                                `;
+                                
+                                prazoDiv.onclick = function() {
+                                    editarResponsabilidade(atividade.id, areaKey);
+                                };
+                                
+                                diaDiv.appendChild(prazoDiv);
+                                temItens = true;
+                            }
+                        }
+                    });
+                });
+                
+                // Se não tem nada, mostra mensagem
+                if (!temItens) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.style.cssText = 'text-align: center; color: #9ca3af; font-size: 12px; padding: 20px 8px; font-style: italic;';
+                    emptyDiv.textContent = 'Dia livre';
+                    diaDiv.appendChild(emptyDiv);
+                }
                 
                 container.appendChild(diaDiv);
             });
