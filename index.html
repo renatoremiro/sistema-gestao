@@ -1064,17 +1064,16 @@
                     <span id="mesAno">Julho 2025</span>
                 </p>
                 <div style="margin-top: 8px;">
-                    <!-- ✅ NOVO: Botão do Chat -->
-                    <button class="btn btn-primary btn-sm" onclick="chatSystem?.toggleChat()" title="Abrir Chat da Obra">
-                        💬 Chat
-                    </button>
-                    <button class="btn btn-warning btn-sm" onclick="mostrarMarcarFeriado()">
-                        🎉 Feriados
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="fazerLogout()">
-                        🚪 Sair
-                    </button>
-                </div>
+                 <button class="btn btn-primary btn-sm" onclick="chatSystem?.toggleChat()" title="Abrir Chat Profissional da Obra">
+        💼 Chat Profissional
+    </button>
+    <button class="btn btn-warning btn-sm" onclick="mostrarMarcarFeriado()">
+        🎉 Feriados
+    </button>
+    <button class="btn btn-danger btn-sm" onclick="fazerLogout()">
+        🚪 Sair
+    </button>
+</div>
             </div>
         </div>
         
@@ -1159,16 +1158,16 @@
                 </div>
             </div>
             
-            <!-- Dica do sistema -->
-            <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-                <strong>✅ Sistema v6.0 - CHAT INTEGRADO + VINCULAÇÃO DE USUÁRIOS:</strong> 
-                <br><strong>💬 Chat:</strong> Sistema completo de comunicação (Global, Áreas, Projetos, Privado)
-                <br><strong>🔗 Vinculação:</strong> Usuários agora são vinculados aos colaboradores da obra
-                <br><strong>👥 Permissões:</strong> Acesso baseado no perfil do colaborador vinculado
-                <br><strong>🔄 Recorrência:</strong> Eventos e tarefas podem repetir automaticamente
-                <br><strong>⚡ Performance:</strong> Melhorias na sincronização e responsividade
-            </div>
-            
+       <!-- Dica do sistema -->
+<div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
+    <strong>✅ Sistema v6.0 - CHAT PROFISSIONAL + USUÁRIOS REAIS:</strong> 
+    <br><strong>💼 Chat Profissional:</strong> Interface corporativa com notificações inteligentes
+    <br><strong>👥 Usuários Reais:</strong> Sistema vinculado aos emails reais dos colaboradores
+    <br><strong>🔔 Notificações:</strong> Sistema inteligente que respeita horário comercial
+    <br><strong>📱 Status:</strong> Online, Ocupado, Em Reunião, Ausente + Modo Não Perturbe
+    <br><strong>🎯 Produtividade:</strong> Reações, threads, busca avançada e mais
+    <br><strong>⚡ Performance:</strong> Interface otimizada e responsiva
+</div>
             <!-- Cards das Áreas -->
             <div class="grid" id="areasGrid"></div>
         </div>
@@ -2325,17 +2324,18 @@
                         nome: "Produção & Qualidade",
                         coordenador: "Beto / Eduardo",
                         cor: "#ef4444",
-                        equipe: [
-                            {nome: "Beto", cargo: "Arquiteto"},
-                            {nome: "Eduardo", cargo: "Coordenador Eng. Civil"},
-                            {nome: "Jean", cargo: "Estagiário de Eng. Civil"},
-                            {nome: "Nominato", cargo: "Almoxarifado"},
-                            {nome: "Alex", cargo: "Comprador"},
-                            {nome: "Manu", cargo: "Assistente de Arquitetura"},
-                            {nome: "Marcus", cargo: "Especialista Meio Ambiente"},
-                            {nome: "Juliana E.", cargo: "Técnica de Enfermagem"},
-                            {nome: "Carlos", cargo: "Técnico de Segurança"}
-                        ],
+                       equipe: [
+        {nome: "Beto", cargo: "Coordenador Arquiteto"}, // ✅ CORRIGIDO
+        {nome: "Eduardo", cargo: "Coordenador Eng. Civil"},
+        {nome: "Jean", cargo: "Estagiário de Eng. Civil"},
+        {nome: "Nominato", cargo: "Almoxarifado"},
+        {nome: "Alex", cargo: "Comprador"},
+        {nome: "Manu", cargo: "Assistente de Arquitetura"},
+        {nome: "Marcus", cargo: "Especialista Meio Ambiente"},
+        {nome: "Juliana E.", cargo: "Técnica de Enfermagem"},
+        {nome: "Carlos", cargo: "Técnico de Segurança"}
+    ],
+
                         atividades: [
                             {id: 14, nome: "Levantamento de Materiais", status: "verde", prazo: "2025-07-05", responsaveis: ["Jean", "Beto", "Eduardo"], progresso: 0, dataAdicionado: new Date().toISOString(), tarefas: []},
                             {id: 15, nome: "Certificação de Estoque", status: "verde", prazo: "2025-07-31", responsaveis: ["Nominato", "Jean", "Eduardo"], progresso: 0, dataAdicionado: new Date().toISOString(), tarefas: []},
@@ -4738,8 +4738,8 @@
         });
     </script>
     
-    <!-- ✅ NOVO: Script do módulo de chat -->
-    <script src="modules/chat-module.js"></script>
+    <!-- Script do chat profissional -->
+<script src="modules/chat-module.js"></script>
     
 </body>
 </html>
