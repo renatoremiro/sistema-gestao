@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.8+)</title>
+    <title>Sistema de Gestão Completo - Obra 292 (Firebase v6.0)</title>
     <style>
         * {
             margin: 0;
@@ -347,6 +347,27 @@
         .evento-multi-dia {
             border-left: 3px solid #1e40af;
             background: linear-gradient(to right, #3b82f6, #60a5fa);
+        }
+        
+        /* ✅ EVENTOS RECORRENTES - NOVO VISUAL */
+        .evento-recorrente {
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+        
+        .evento-recorrente::after {
+            content: '🔄';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            font-size: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .area-card {
@@ -867,7 +888,23 @@
             75% { transform: translateX(5px); }
         }
 
-        /* ✅ MELHORIAS VISUAIS v5.8 - CORES UNIFICADAS COM MELHOR VISIBILIDADE */
+        /* ✅ CORREÇÃO DOS ÍCONES PRETOS - MELHORADO */
+        .sincronizado-badge {
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: #6b7280 !important;
+            border: 1px solid #e5e7eb !important;
+            font-size: 8px !important;
+            padding: 2px 6px !important;
+            border-radius: 4px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-weight: 500 !important;
+            text-shadow: none !important;
+        }
+
+        /* ✅ MELHORIAS VISUAIS v6.0 - CORES UNIFICADAS COM MELHOR VISIBILIDADE */
         .evento-pessoal {
             border-left: 4px solid;
             position: relative;
@@ -911,30 +948,56 @@
             color: #374151 !important;
         }
 
-        /* Badge com melhor contraste */
-        .evento-pessoal .sincronizado-badge {
-            background: #1f2937;
-            color: #ffffff;
-            font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .sincronizado-badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            font-size: 8px;
-            background: #10b981;
-            color: white;
-            padding: 1px 4px;
-            border-radius: 3px;
-        }
-
         /* ✅ GRID DE HORÁRIOS - NOVO */
         .horario-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+        }
+
+        /* ✅ ESTILOS PARA RECORRÊNCIA - NOVO */
+        .recorrencia-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+            transition: all 0.3s;
+        }
+
+        .recorrencia-container.active {
+            background: #e0f2fe;
+            border-color: #0ea5e9;
+        }
+
+        .recorrencia-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .recorrencia-info {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #1e40af;
+            margin-top: 8px;
+        }
+
+        .recorrencia-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .recorrencia-toggle input[type="checkbox"] {
+            width: auto;
+            margin: 0;
         }
     </style>
 </head>
@@ -987,7 +1050,7 @@
                 <h1>Sistema de Gestão Unificado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v5.8+ - Cores Unificadas + Visibilidade Melhorada ✨
+                    Sistema v6.0 - Ícones Corrigidos + Recorrência ✨
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -1051,7 +1114,7 @@
                 
                 <div id="calendario" class="calendario"></div>
                 
-                <!-- ✅ LEGENDA ATUALIZADA COM TAREFAS PESSOAIS -->
+                <!-- ✅ LEGENDA ATUALIZADA COM TAREFAS PESSOAIS E RECORRÊNCIA -->
                 <div style="margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px;">
                     <div style="display: flex; align-items: center; gap: 4px;">
                         <span style="font-weight: bold; color: #374151;">📅 Eventos da Equipe:</span>
@@ -1064,6 +1127,10 @@
                     <div style="margin-left: 16px; display: flex; align-items: center; gap: 4px;">
                         <span style="font-weight: bold; color: #374151;">👤 Tarefas Pessoais:</span>
                         <span style="font-size: 10px; background: #e5e7eb; padding: 2px 6px; border-radius: 3px;">mesmas cores + borda</span>
+                    </div>
+                    <div style="margin-left: 16px; display: flex; align-items: center; gap: 4px;">
+                        <span style="font-weight: bold; color: #8b5cf6;">🔄 Recorrentes:</span>
+                        <span style="font-size: 10px; background: #ede9fe; padding: 2px 6px; border-radius: 3px;">borda tracejada</span>
                     </div>
                     <span><span class="status-indicator" style="background: #f59e0b;"></span>Feriado</span>
                 </div>
@@ -1086,12 +1153,11 @@
             
             <!-- Dica do sistema -->
             <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-                <strong>✅ Sistema v5.8 - UNIFICAÇÃO COMPLETA + VISIBILIDADE MELHORADA:</strong> 
-                <br><strong>🎨 Cores:</strong> Eventos e tarefas pessoais usam as mesmas cores por tipo
-                <br><strong>📋 Campos:</strong> Ambos têm tipo, título, horário início/fim, data e descrição
-                <br><strong>👁️ Visibilidade:</strong> Tarefas pessoais com texto escuro e gradientes para melhor leitura
-                <br><strong>📅 Legenda:</strong> Diferencia eventos da equipe (texto branco) vs tarefas pessoais (texto escuro + badge 👤)
-                <br><strong>🔧 Interface:</strong> Modais padronizados com bordas mais grossas e sombras nas tarefas pessoais
+                <strong>✅ Sistema v6.0 - ÍCONES CORRIGIDOS + RECORRÊNCIA:</strong> 
+                <br><strong>🎨 Ícones:</strong> Badges com fundo branco translúcido (sem mais fundo preto)
+                <br><strong>🔄 Recorrência:</strong> Eventos e tarefas podem repetir (diário, quinzenal, mensal, bimestral)
+                <br><strong>📅 Visual:</strong> Eventos recorrentes têm borda tracejada e ícone 🔄
+                <br><strong>⚡ Performance:</strong> Melhorias na sincronização e responsividade
             </div>
             
             <!-- Cards das Áreas -->
@@ -1167,6 +1233,7 @@
                         <div style="font-size: 11px; color: #6b7280; text-align: right;">
                             <div>📝 Tarefas pessoais (cores por tipo)</div>
                             <div>📅 Eventos do calendário</div>
+                            <div>🔄 Recorrências automáticas</div>
                             <div>⏰ Prazos próximos</div>
                         </div>
                     </div>
@@ -1182,9 +1249,9 @@
         </div>
     </div>
     
-    <!-- Modal de Novo/Editar Evento (Atualizado) -->
+    <!-- ✅ Modal de Novo/Editar Evento (Atualizado com Recorrência) -->
     <div id="modalEvento" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 600px;">
             <h3 style="margin-bottom: 24px;" id="modalEventoTitulo">Novo Evento</h3>
             <input type="hidden" id="eventoId">
             
@@ -1239,6 +1306,35 @@
                 <textarea id="eventoDescricao" rows="2" placeholder="Descrição opcional..."></textarea>
             </div>
             
+            <!-- ✅ NOVA SEÇÃO DE RECORRÊNCIA -->
+            <div class="form-group">
+                <div class="recorrencia-toggle" onclick="toggleRecorrenciaEvento()">
+                    <input type="checkbox" id="eventoRecorrencia">
+                    <label>🔄 Evento recorrente</label>
+                </div>
+                
+                <div id="eventoRecorrenciaContainer" class="recorrencia-container" style="display: none;">
+                    <div class="recorrencia-grid">
+                        <div>
+                            <label style="font-size: 12px; margin-bottom: 4px;">Tipo de Recorrência</label>
+                            <select id="eventoTipoRecorrencia">
+                                <option value="diaria">📅 Diária</option>
+                                <option value="quinzenal">📅 Quinzenal (14 dias)</option>
+                                <option value="mensal">📅 Mensal</option>
+                                <option value="bimestral">📅 Bimestral (2 meses)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; margin-bottom: 4px;">Repetições</label>
+                            <input type="number" id="eventoQuantidadeRecorrencia" min="1" max="365" value="4" placeholder="Quantas vezes?">
+                        </div>
+                    </div>
+                    <div class="recorrencia-info" id="eventoInfoRecorrencia">
+                        ℹ️ Este evento será criado 4 vezes, repetindo mensalmente
+                    </div>
+                </div>
+            </div>
+            
             <div style="display: flex; gap: 8px; justify-content: flex-end;">
                 <button class="btn btn-secondary" onclick="fecharModal('modalEvento')">Cancelar</button>
                 <button class="btn btn-primary" onclick="salvarEvento()" id="btnSalvarEvento">Salvar</button>
@@ -1283,9 +1379,9 @@
         </div>
     </div>
     
-    <!-- ✅ Modal de Nova Tarefa (Atualizado com campos unificados) -->
+    <!-- ✅ Modal de Nova Tarefa (Atualizado com Recorrência) -->
     <div id="modalTarefa" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 600px;">
             <h3 style="margin-bottom: 24px;">Nova Tarefa Pessoal</h3>
             
             <div class="form-group">
@@ -1356,6 +1452,35 @@
                         <input type="checkbox" id="tarefaCalendario">
                         📅 Mostrar no calendário da equipe
                     </label>
+                </div>
+            </div>
+            
+            <!-- ✅ NOVA SEÇÃO DE RECORRÊNCIA PARA TAREFAS -->
+            <div class="form-group">
+                <div class="recorrencia-toggle" onclick="toggleRecorrenciaTarefa()">
+                    <input type="checkbox" id="tarefaRecorrencia">
+                    <label>🔄 Tarefa recorrente</label>
+                </div>
+                
+                <div id="tarefaRecorrenciaContainer" class="recorrencia-container" style="display: none;">
+                    <div class="recorrencia-grid">
+                        <div>
+                            <label style="font-size: 12px; margin-bottom: 4px;">Tipo de Recorrência</label>
+                            <select id="tarefaTipoRecorrencia">
+                                <option value="diaria">📅 Diária</option>
+                                <option value="quinzenal">📅 Quinzenal (14 dias)</option>
+                                <option value="mensal">📅 Mensal</option>
+                                <option value="bimestral">📅 Bimestral (2 meses)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; margin-bottom: 4px;">Repetições</label>
+                            <input type="number" id="tarefaQuantidadeRecorrencia" min="1" max="365" value="4" placeholder="Quantas vezes?">
+                        </div>
+                    </div>
+                    <div class="recorrencia-info" id="tarefaInfoRecorrencia">
+                        ℹ️ Esta tarefa será criada 4 vezes, repetindo mensalmente
+                    </div>
                 </div>
             </div>
             
@@ -1536,8 +1661,8 @@
         let intervaloPrazos = null;
         
         // Constantes e configurações
-        const VERSAO_SISTEMA = '5.8+';
-        const VERSAO_DB = 5;
+        const VERSAO_SISTEMA = '6.0';
+        const VERSAO_DB = 6;
         const INTERVALO_VERIFICACAO_PRAZOS = 3600000; // 1 hora
         
         // Estado Global do Sistema
@@ -1892,7 +2017,7 @@
                     }
                 }, 1000);
                 
-                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v5.8+ - Visibilidade melhorada!`);
+                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Ícones corrigidos + Recorrência!`);
                 
             } catch (error) {
                 console.error('Erro na inicialização:', error);
@@ -2141,6 +2266,190 @@
                        .replace(/[\u0300-\u036f]/g, '');
         }
         
+        // ========== FUNÇÕES DE RECORRÊNCIA - NOVO ==========
+        
+        function toggleRecorrenciaEvento() {
+            const checkbox = document.getElementById('eventoRecorrencia');
+            const container = document.getElementById('eventoRecorrenciaContainer');
+            const tipoSelect = document.getElementById('eventoTipoRecorrencia');
+            const quantidadeInput = document.getElementById('eventoQuantidadeRecorrencia');
+            
+            if (checkbox.checked) {
+                container.style.display = 'block';
+                container.classList.add('active');
+                atualizarInfoRecorrenciaEvento();
+            } else {
+                container.style.display = 'none';
+                container.classList.remove('active');
+            }
+        }
+        
+        function toggleRecorrenciaTarefa() {
+            const checkbox = document.getElementById('tarefaRecorrencia');
+            const container = document.getElementById('tarefaRecorrenciaContainer');
+            
+            if (checkbox.checked) {
+                container.style.display = 'block';
+                container.classList.add('active');
+                atualizarInfoRecorrenciaTarefa();
+            } else {
+                container.style.display = 'none';
+                container.classList.remove('active');
+            }
+        }
+        
+        function atualizarInfoRecorrenciaEvento() {
+            const tipo = document.getElementById('eventoTipoRecorrencia').value;
+            const quantidade = document.getElementById('eventoQuantidadeRecorrencia').value || 4;
+            const info = document.getElementById('eventoInfoRecorrencia');
+            
+            const tipos = {
+                'diaria': 'diariamente',
+                'quinzenal': 'a cada 14 dias',
+                'mensal': 'mensalmente',
+                'bimestral': 'a cada 2 meses'
+            };
+            
+            info.textContent = `ℹ️ Este evento será criado ${quantidade} vezes, repetindo ${tipos[tipo]}`;
+        }
+        
+        function atualizarInfoRecorrenciaTarefa() {
+            const tipo = document.getElementById('tarefaTipoRecorrencia').value;
+            const quantidade = document.getElementById('tarefaQuantidadeRecorrencia').value || 4;
+            const info = document.getElementById('tarefaInfoRecorrencia');
+            
+            const tipos = {
+                'diaria': 'diariamente',
+                'quinzenal': 'a cada 14 dias',
+                'mensal': 'mensalmente',
+                'bimestral': 'a cada 2 meses'
+            };
+            
+            info.textContent = `ℹ️ Esta tarefa será criada ${quantidade} vezes, repetindo ${tipos[tipo]}`;
+        }
+        
+        function gerarEventosRecorrentes(eventoBase, tipoRecorrencia, quantidade) {
+            const eventos = [];
+            const dataInicial = new Date(eventoBase.data);
+            
+            for (let i = 0; i < quantidade; i++) {
+                const novaData = new Date(dataInicial);
+                
+                switch(tipoRecorrencia) {
+                    case 'diaria':
+                        novaData.setDate(dataInicial.getDate() + i);
+                        break;
+                    case 'quinzenal':
+                        novaData.setDate(dataInicial.getDate() + (i * 14));
+                        break;
+                    case 'mensal':
+                        novaData.setMonth(dataInicial.getMonth() + i);
+                        break;
+                    case 'bimestral':
+                        novaData.setMonth(dataInicial.getMonth() + (i * 2));
+                        break;
+                }
+                
+                const evento = {
+                    ...eventoBase,
+                    id: Date.now() + i,
+                    data: novaData.toISOString().split('T')[0],
+                    recorrente: true,
+                    serieRecorrencia: eventoBase.id,
+                    indiceRecorrencia: i
+                };
+                
+                eventos.push(evento);
+            }
+            
+            return eventos;
+        }
+        
+        function gerarTarefasRecorrentes(tarefaBase, tipoRecorrencia, quantidade, nomePessoa, diaInicial) {
+            const tarefas = [];
+            
+            for (let i = 0; i < quantidade; i++) {
+                // Para tarefas recorrentes, criamos versões com datas específicas
+                const dataInicial = obterProximaDataDoDia(diaInicial, i, tipoRecorrencia);
+                
+                const evento = {
+                    id: Date.now() + i,
+                    data: dataInicial,
+                    horarioInicio: tarefaBase.horarioInicio,
+                    horarioFim: tarefaBase.horarioFim,
+                    titulo: tarefaBase.titulo,
+                    tipo: tarefaBase.tipo,
+                    pessoas: [nomePessoa],
+                    origem: 'tarefa_pessoal',
+                    descricao: tarefaBase.descricao,
+                    recorrente: true,
+                    serieRecorrencia: tarefaBase.id,
+                    indiceRecorrencia: i
+                };
+                
+                tarefas.push(evento);
+            }
+            
+            return tarefas;
+        }
+        
+        function obterProximaDataDoDia(dia, incremento, tipoRecorrencia) {
+            const hoje = new Date();
+            const diasSemana = {
+                'segunda': 1, 'terca': 2, 'quarta': 3, 'quinta': 4, 'sexta': 5
+            };
+            
+            const diaSemanaNumero = diasSemana[dia];
+            const proximaData = new Date(hoje);
+            
+            // Encontrar a próxima ocorrência do dia da semana
+            const diasParaAdicionar = (diaSemanaNumero - hoje.getDay() + 7) % 7;
+            proximaData.setDate(hoje.getDate() + diasParaAdicionar);
+            
+            // Aplicar incremento baseado no tipo de recorrência
+            switch(tipoRecorrencia) {
+                case 'diaria':
+                    proximaData.setDate(proximaData.getDate() + incremento);
+                    break;
+                case 'quinzenal':
+                    proximaData.setDate(proximaData.getDate() + (incremento * 14));
+                    break;
+                case 'mensal':
+                    proximaData.setMonth(proximaData.getMonth() + incremento);
+                    break;
+                case 'bimestral':
+                    proximaData.setMonth(proximaData.getMonth() + (incremento * 2));
+                    break;
+            }
+            
+            return proximaData.toISOString().split('T')[0];
+        }
+        
+        // Event listeners para atualizar info ao mudar seleções
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listeners para eventos
+            const eventoTipoSelect = document.getElementById('eventoTipoRecorrencia');
+            const eventoQuantidadeInput = document.getElementById('eventoQuantidadeRecorrencia');
+            
+            if (eventoTipoSelect) {
+                eventoTipoSelect.addEventListener('change', atualizarInfoRecorrenciaEvento);
+            }
+            if (eventoQuantidadeInput) {
+                eventoQuantidadeInput.addEventListener('input', atualizarInfoRecorrenciaEvento);
+            }
+            
+            // Listeners para tarefas
+            const tarefaTipoSelect = document.getElementById('tarefaTipoRecorrencia');
+            const tarefaQuantidadeInput = document.getElementById('tarefaQuantidadeRecorrencia');
+            
+            if (tarefaTipoSelect) {
+                tarefaTipoSelect.addEventListener('change', atualizarInfoRecorrenciaTarefa);
+            }
+            if (tarefaQuantidadeInput) {
+                tarefaQuantidadeInput.addEventListener('input', atualizarInfoRecorrenciaTarefa);
+            }
+        });
+        
         // Funções de Calendário
         function gerarCalendario() {
             const calendario = document.getElementById('calendario');
@@ -2197,8 +2506,16 @@
                     const eventoDiv = document.createElement('div');
                     let classesEvento = `evento evento-${evento.tipo}`;
                     
+                    // ✅ VISUAL PARA EVENTOS RECORRENTES
+                    if (evento.recorrente) {
+                        classesEvento += ' evento-recorrente';
+                    }
+                    
                     if (evento.origem === 'tarefa_pessoal') {
                         classesEvento = `evento evento-pessoal tarefa-${evento.tipo}`;
+                        if (evento.recorrente) {
+                            classesEvento += ' evento-recorrente';
+                        }
                     }
                     
                     eventoDiv.className = classesEvento;
@@ -2232,6 +2549,11 @@
                         htmlEvento += `<div class="evento-info" style="color: ${corTexto};">até ${evento.horarioFim}</div>`;
                     }
                     
+                    // ✅ INDICADOR VISUAL DE RECORRÊNCIA
+                    if (evento.recorrente) {
+                        htmlEvento += `<div class="evento-info" style="color: ${corTexto};">🔄 Recorrente</div>`;
+                    }
+                    
                     eventoDiv.innerHTML = htmlEvento;
                     
                     eventoDiv.onclick = function(e) {
@@ -2249,7 +2571,8 @@
                     if (evento.origem === 'tarefa_pessoal') {
                         eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n👤 Tarefa pessoal de ${evento.pessoas[0]}\n💡 Para editar, acesse a agenda pessoal`;
                     } else {
-                        eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n✏️ Clique para editar (qualquer usuário pode editar)`;
+                        let titleExtra = evento.recorrente ? '\n🔄 Evento recorrente' : '';
+                        eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}${titleExtra}\n✏️ Clique para editar (qualquer usuário pode editar)`;
                     }
                     
                     if (evento.origem !== 'tarefa_pessoal') {
@@ -2555,6 +2878,12 @@
             document.getElementById('eventoHorarioInicio').value = '09:00';
             document.getElementById('eventoHorarioFim').value = '10:00';
             
+            // ✅ LIMPAR CAMPOS DE RECORRÊNCIA
+            document.getElementById('eventoRecorrencia').checked = false;
+            document.getElementById('eventoRecorrenciaContainer').style.display = 'none';
+            document.getElementById('eventoTipoRecorrencia').value = 'mensal';
+            document.getElementById('eventoQuantidadeRecorrencia').value = '4';
+            
             atualizarListaPessoas();
             
             document.getElementById('modalEvento').classList.add('active');
@@ -2636,6 +2965,7 @@
             atualizarListaPessoas();
         }
         
+        // ✅ FUNÇÃO SALVAR EVENTO ATUALIZADA COM RECORRÊNCIA
         function salvarEvento() {
             if (!validarFormulario([
                 {id: 'eventoData'},
@@ -2646,7 +2976,7 @@
                 return;
             }
             
-            const evento = {
+            const eventoBase = {
                 id: estadoSistema.editandoEvento || Date.now(),
                 titulo: document.getElementById('eventoTitulo').value,
                 tipo: document.getElementById('eventoTipo').value,
@@ -2657,18 +2987,36 @@
                 pessoas: Array.from(estadoSistema.pessoasSelecionadas)
             };
             
-            if (estadoSistema.editandoEvento) {
-                const index = dados.eventos.findIndex(e => e.id === estadoSistema.editandoEvento);
-                if (index !== -1) {
-                    dados.eventos[index] = evento;
-                    mostrarNotificacao('Evento atualizado com sucesso!');
-                }
-            } else {
-                dados.eventos.push(evento);
-                mostrarNotificacao('Evento criado com sucesso!');
-            }
+            const isRecorrente = document.getElementById('eventoRecorrencia').checked;
             
-            sincronizarEventoParaAgendas(evento);
+            if (isRecorrente && !estadoSistema.editandoEvento) {
+                // ✅ CRIAR EVENTOS RECORRENTES
+                const tipoRecorrencia = document.getElementById('eventoTipoRecorrencia').value;
+                const quantidade = parseInt(document.getElementById('eventoQuantidadeRecorrencia').value) || 4;
+                
+                const eventosRecorrentes = gerarEventosRecorrentes(eventoBase, tipoRecorrencia, quantidade);
+                
+                eventosRecorrentes.forEach(evento => {
+                    dados.eventos.push(evento);
+                    sincronizarEventoParaAgendas(evento);
+                });
+                
+                mostrarNotificacao(`${quantidade} eventos recorrentes criados com sucesso!`);
+            } else {
+                // ✅ EVENTO ÚNICO
+                if (estadoSistema.editandoEvento) {
+                    const index = dados.eventos.findIndex(e => e.id === estadoSistema.editandoEvento);
+                    if (index !== -1) {
+                        dados.eventos[index] = eventoBase;
+                        mostrarNotificacao('Evento atualizado com sucesso!');
+                    }
+                } else {
+                    dados.eventos.push(eventoBase);
+                    mostrarNotificacao('Evento criado com sucesso!');
+                }
+                
+                sincronizarEventoParaAgendas(eventoBase);
+            }
             
             salvarDados();
             fecharModal('modalEvento');
@@ -2693,6 +3041,11 @@
             document.getElementById('eventoData').value = evento.data;
             document.getElementById('eventoHorarioInicio').value = evento.horarioInicio || '09:00';
             document.getElementById('eventoHorarioFim').value = evento.horarioFim || '10:00';
+            
+            // ✅ DESABILITAR RECORRÊNCIA NA EDIÇÃO (para simplificar)
+            document.getElementById('eventoRecorrencia').checked = false;
+            document.getElementById('eventoRecorrencia').disabled = true;
+            document.getElementById('eventoRecorrenciaContainer').style.display = 'none';
             
             if (evento.pessoas) {
                 evento.pessoas.forEach(pessoa => {
@@ -3194,7 +3547,7 @@
                     eventoDiv.style.borderLeft = `3px solid ${corBorda}`;
                     eventoDiv.style.cursor = 'pointer';
                     
-                    eventoDiv.innerHTML = `
+                    let htmlEvento = `
                         <strong style="font-size: 11px; color: #374151;">${icone} ${evento.titulo}</strong>
                         <br><span style="font-size: 10px; color: #6b7280;">
                             ${evento.horarioInicio || 'Todo dia'}
@@ -3202,6 +3555,13 @@
                         </span>
                         ${evento.pessoas.length > 1 ? `<br><span style="font-size: 9px; color: #6b7280;">👥 ${evento.pessoas.length} pessoas</span>` : ''}
                     `;
+                    
+                    // ✅ INDICADOR VISUAL DE RECORRÊNCIA
+                    if (evento.recorrente) {
+                        htmlEvento += `<br><span style="font-size: 9px; color: #8b5cf6;">🔄 Recorrente</span>`;
+                    }
+                    
+                    eventoDiv.innerHTML = htmlEvento;
                     
                     eventoDiv.onclick = () => editarEvento(evento);
                     eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n💡 Clique para editar`;
@@ -3517,7 +3877,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <strong style="color: #374151;">${icone} ${evento.titulo}</strong>
                             <span style="background: #e5e7eb; padding: 2px 8px; border-radius: 12px; font-size: 11px; text-transform: capitalize;">
-                                ${evento.tipo}
+                                ${evento.tipo}${evento.recorrente ? ' 🔄' : ''}
                             </span>
                         </div>
                         <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
@@ -3603,6 +3963,12 @@
         
         // ========== FUNÇÕES DE TAREFAS PESSOAIS UNIFICADAS ==========
         function mostrarNovaTarefa() {
+            // ✅ LIMPAR CAMPOS DE RECORRÊNCIA
+            document.getElementById('tarefaRecorrencia').checked = false;
+            document.getElementById('tarefaRecorrenciaContainer').style.display = 'none';
+            document.getElementById('tarefaTipoRecorrencia').value = 'mensal';
+            document.getElementById('tarefaQuantidadeRecorrencia').value = '4';
+            
             document.getElementById('modalTarefa').classList.add('active');
         }
         
@@ -3617,7 +3983,7 @@
             }
         }
         
-        // ✅ FUNÇÃO SALVAR TAREFA ATUALIZADA COM ESTRUTURA UNIFICADA
+        // ✅ FUNÇÃO SALVAR TAREFA ATUALIZADA COM RECORRÊNCIA
         function salvarTarefa() {
             const nome = estadoSistema.pessoaAtual;
             const tipo = document.getElementById('tarefaAgendamento').value;
@@ -3627,8 +3993,9 @@
             const horarioFim = document.getElementById('tarefaHorarioFim').value;
             const descricao = document.getElementById('tarefaDescricao').value;
             const mostrarNoCalendario = document.getElementById('tarefaCalendario').checked;
+            const isRecorrente = document.getElementById('tarefaRecorrencia').checked;
             
-            console.log('🔧 DEBUG SALVAR TAREFA:', {nome, tipo, tipoCategoria, titulo, horarioInicio, horarioFim, descricao, mostrarNoCalendario});
+            console.log('🔧 DEBUG SALVAR TAREFA:', {nome, tipo, tipoCategoria, titulo, horarioInicio, horarioFim, descricao, mostrarNoCalendario, isRecorrente});
             
             if (!validarFormulario([
                 {id: 'tarefaTitulo'},
@@ -3676,9 +4043,25 @@
                     dados.agendas[nome][dia] = [];
                 }
                 
-                dados.agendas[nome][dia].push(tarefaBase);
-                console.log('🔧 DEBUG TAREFA SALVA EM:', `dados.agendas['${nome}']['${dia}']`);
-                console.log('🔧 DEBUG ESTRUTURA APÓS SALVAR:', dados.agendas[nome][dia]);
+                if (isRecorrente) {
+                    // ✅ CRIAR TAREFAS RECORRENTES (convertidas para eventos)
+                    const tipoRecorrencia = document.getElementById('tarefaTipoRecorrencia').value;
+                    const quantidade = parseInt(document.getElementById('tarefaQuantidadeRecorrencia').value) || 4;
+                    
+                    const tarefasRecorrentes = gerarTarefasRecorrentes(tarefaBase, tipoRecorrencia, quantidade, nome, dia);
+                    
+                    tarefasRecorrentes.forEach(evento => {
+                        dados.eventos.push(evento);
+                    });
+                    
+                    mostrarNotificacao(`${quantidade} tarefas recorrentes criadas como eventos!`);
+                } else {
+                    // ✅ TAREFA SEMANAL ÚNICA
+                    dados.agendas[nome][dia].push(tarefaBase);
+                    console.log('🔧 DEBUG TAREFA SALVA EM:', `dados.agendas['${nome}']['${dia}']`);
+                    console.log('🔧 DEBUG ESTRUTURA APÓS SALVAR:', dados.agendas[nome][dia]);
+                    mostrarNotificacao('Tarefa salva com sucesso!');
+                }
                 
             } else {
                 const dataEspecifica = document.getElementById('tarefaDataEspecifica').value;
@@ -3696,6 +4079,7 @@
                 };
                 dados.eventos.push(evento);
                 console.log('🔧 DEBUG EVENTO CRIADO:', evento);
+                mostrarNotificacao('Tarefa criada como evento!');
             }
             
             salvarDados();
@@ -3705,8 +4089,6 @@
             console.log('🔧 DEBUG: Re-renderizando agenda para:', nome);
             renderizarAgendaSemana(nome);
             gerarCalendario();
-            
-            mostrarNotificacao('Tarefa salva com sucesso!');
         }
 
         function deletarTarefa(nome, dia, tarefaId) {
@@ -4070,6 +4452,12 @@
             modal.querySelectorAll('.error-message').forEach(error => {
                 error.classList.add('hidden');
             });
+            
+            // ✅ REABILITAR CHECKBOX DE RECORRÊNCIA AO FECHAR
+            const eventoRecorrenciaCheckbox = document.getElementById('eventoRecorrencia');
+            if (eventoRecorrenciaCheckbox) {
+                eventoRecorrenciaCheckbox.disabled = false;
+            }
             
             estadoSistema.editandoAtividade = null;
             estadoSistema.editandoEvento = null;
