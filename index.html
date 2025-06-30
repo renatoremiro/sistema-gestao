@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.4)</title>
+    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.5)</title>
     <style>
         * {
             margin: 0;
@@ -933,7 +933,7 @@
                 <h1>Sistema de Gestão Otimizado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v5.4 Completo - Controle de Permissões ✅
+                    Sistema v5.5 Limpo - Interface Simplificada 🧹
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -943,12 +943,6 @@
                     <span id="mesAno">Julho 2025</span>
                 </p>
                 <div style="margin-top: 8px;">
-                    <button class="btn btn-success btn-sm" onclick="exportarDados()">
-                        📥 Exportar
-                    </button>
-                    <button class="btn btn-primary btn-sm" onclick="mostrarImportar()">
-                        📤 Importar
-                    </button>
                     <button class="btn btn-warning btn-sm" onclick="mostrarMarcarFeriado()">
                         🎉 Feriados
                     </button>
@@ -1031,10 +1025,10 @@
             
             <!-- Dica do sistema -->
             <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-                <strong>✅ Sistema v5.4 - CONTROLE DE PERMISSÕES ATIVO:</strong> 
+                <strong>✅ Sistema v5.5 - INTERFACE SIMPLIFICADA:</strong> 
                 <br><strong>📅 Eventos:</strong> Qualquer usuário pode criar, editar e deletar
                 <br><strong>📝 Tarefas Pessoais:</strong> Apenas o dono pode editar/deletar suas tarefas
-                <br><strong>🔒 Segurança:</strong> Interface mostra claramente o que você pode editar
+                <br><strong>🧹 Simplicidade:</strong> Removidas funcionalidades desnecessárias
                 <br><strong>💡 Navegação:</strong> Dashboard → Área → Pessoa → Agenda para gerenciar tudo
             </div>
             
@@ -1388,21 +1382,6 @@
         </div>
     </div>
     
-    <!-- Modal de Importar -->
-    <div id="modalImportar" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 24px;">Importar Dados</h3>
-            <div class="form-group">
-                <label>Selecione o arquivo JSON</label>
-                <input type="file" id="importFile" accept=".json">
-            </div>
-            <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                <button class="btn btn-secondary" onclick="fecharModal('modalImportar')">Cancelar</button>
-                <button class="btn btn-primary" onclick="importarDados()">Importar</button>
-            </div>
-        </div>
-    </div>
-    
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -1432,7 +1411,7 @@
         let intervaloPrazos = null;
         
         // Constantes e configurações
-        const VERSAO_SISTEMA = '5.4';
+        const VERSAO_SISTEMA = '5.5';
         const VERSAO_DB = 5;
         const INTERVALO_VERIFICACAO_PRAZOS = 3600000; // 1 hora
         
