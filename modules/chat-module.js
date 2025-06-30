@@ -1,5 +1,5 @@
 // ============================================
-// 💬 SISTEMA DE CHAT COMPLETO - GESTÃO DE OBRAS
+// 💬 SISTEMA DE CHAT CORRIGIDO - GESTÃO DE OBRAS
 // ============================================
 
 class ChatSystem {
@@ -13,7 +13,7 @@ class ChatSystem {
         this.isOpen = false;
         this.usuariosOnline = new Map();
         
-        // Aguardar inicialização do sistema principal
+        // ✅ CORREÇÃO: Aguardar inicialização melhorada
         this.aguardarInicializacao();
     }
 
@@ -23,8 +23,11 @@ class ChatSystem {
                 this.usuario = window.usuarioAtual;
                 this.areas = window.dados.areas;
                 this.chatRef = window.database.ref('chat');
+                
+                console.log('✅ Chat System - Iniciando com usuário:', this.usuario.email);
                 this.init();
             } else {
+                console.log('⏳ Chat System - Aguardando sistema principal...');
                 setTimeout(verificar, 500);
             }
         };
@@ -34,15 +37,54 @@ class ChatSystem {
     init() {
         this.criarInterface();
         this.configurarEventListeners();
-        this.carregarChats();
-        this.monitorarUsuariosOnline();
-        this.marcarUsuarioOnline();
         
-        console.log('✅ Sistema de Chat inicializado');
+        // ✅ CORREÇÃO: Inicializar Firebase primeiro
+        this.inicializarFirebase().then(() => {
+            this.carregarChats();
+            this.monitorarUsuariosOnline();
+            this.marcarUsuarioOnline();
+            
+            console.log('✅ Sistema de Chat CORRIGIDO inicializado');
+        });
     }
 
-    // ========== INTERFACE ==========
+    // ✅ NOVA FUNÇÃO: Inicializar estrutura Firebase corretamente
+    async inicializarFirebase() {
+        try {
+            const snapshot = await this.chatRef.once('value');
+            if (!snapshot.val()) {
+                console.log('🔧 Criando estrutura inicial do chat...');
+                await this.chatRef.set({
+                    mensagens: {
+                        global: {
+                            msg_inicial: {
+                                id: 'msg_inicial',
+                                autor: 'sistema@obra.com',
+                                nomeAutor: 'Sistema',
+                                texto: '🏗️ Bem-vindos ao chat da obra 292! Sistema funcionando corretamente.',
+                                timestamp: new Date().toISOString(),
+                                chatId: 'global'
+                            }
+                        }
+                    },
+                    usuariosOnline: {},
+                    privados: {}
+                });
+                console.log('✅ Estrutura do chat criada no Firebase');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao inicializar Firebase:', error);
+        }
+    }
+
+    // ========== INTERFACE (CORRIGIDA) ==========
     criarInterface() {
+        // ✅ REMOVER CAIXINHA SINCRONIZADO CHATA
+        const syncIndicator = document.getElementById('syncIndicator');
+        if (syncIndicator) {
+            syncIndicator.style.display = 'none';
+        }
+
         const chatHTML = `
             <!-- Botão Flutuante do Chat -->
             <div id="chatToggle" class="chat-toggle">
@@ -51,7 +93,7 @@ class ChatSystem {
             </div>
 
             <!-- Painel do Chat -->
-            <div id="chatPanel" class="chat-panel">
+            <div id="chatPanel" class="chat-panel hidden">
                 <div class="chat-header">
                     <h3>💬 Chat da Obra</h3>
                     <div class="chat-controls">
@@ -113,7 +155,7 @@ class ChatSystem {
                         <div class="chat-messages" id="chatMessages">
                             <div class="welcome-message">
                                 <p>👋 Bem-vindo ao chat da obra!</p>
-                                <p>Comece a conversar com sua equipe.</p>
+                                <p>Aguardando mensagens...</p>
                             </div>
                         </div>
 
@@ -150,6 +192,7 @@ class ChatSystem {
 
     carregarChatsAreas() {
         const container = document.getElementById('chatsAreas');
+        if (!container) return;
         container.innerHTML = '';
 
         Object.entries(this.areas).forEach(([areaKey, area]) => {
@@ -169,13 +212,16 @@ class ChatSystem {
 
     carregarChatsProjetos() {
         const container = document.getElementById('chatsProjetos');
+        if (!container) return;
         container.innerHTML = '';
 
         // Pegar atividades das áreas
         Object.entries(this.areas).forEach(([areaKey, area]) => {
             area.atividades.forEach(atividade => {
-                // Só mostrar atividades onde o usuário é responsável
-                if (atividade.responsaveis.includes(this.usuario.displayName || this.usuario.email.split('@')[0])) {
+                // ✅ CORREÇÃO: Usar nome do usuário vinculado
+                const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
+                
+                if (atividade.responsaveis.includes(nomeUsuario)) {
                     const naoLidas = this.mensagensNaoLidas.get(`projeto-${atividade.id}`) || 0;
                     
                     container.innerHTML += `
@@ -194,6 +240,7 @@ class ChatSystem {
 
     carregarChatsPrivados() {
         const container = document.getElementById('chatsPrivados');
+        if (!container) return;
         
         // Buscar conversas privadas existentes
         this.chatRef.child('privados').once('value', (snapshot) => {
@@ -222,21 +269,32 @@ class ChatSystem {
         });
     }
 
-    // ========== GERENCIAMENTO DE CHATS ==========
+    // ========== GERENCIAMENTO DE CHATS (CORRIGIDO) ==========
     abrirChat(chatId) {
+        console.log(`🔧 Abrindo chat: ${chatId}`);
         this.chatAtivo = chatId;
         
         // Atualizar UI
         document.querySelectorAll('.chat-room-item').forEach(item => {
             item.classList.remove('active');
         });
-        document.querySelector(`[data-room="${chatId}"]`).classList.add('active');
+        
+        const roomElement = document.querySelector(`[data-room="${chatId}"]`);
+        if (roomElement) {
+            roomElement.classList.add('active');
+        }
         
         // Limpar mensagens
-        document.getElementById('chatMessages').innerHTML = '';
+        const messagesContainer = document.getElementById('chatMessages');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = '<div class="welcome-message"><p>Carregando mensagens...</p></div>';
+        }
         
         // Configurar informações do chat
         this.configurarInfoChat(chatId);
+        
+        // ✅ CORREÇÃO: Parar listeners anteriores
+        this.pararListenersAnteriores();
         
         // Carregar mensagens
         this.carregarMensagens(chatId);
@@ -245,10 +303,23 @@ class ChatSystem {
         this.marcarComoLido(chatId);
     }
 
+    // ✅ NOVA FUNÇÃO: Parar listeners anteriores
+    pararListenersAnteriores() {
+        this.listeners.forEach((ref, chatId) => {
+            if (ref && typeof ref.off === 'function') {
+                ref.off();
+                console.log(`🔧 Listener removido para: ${chatId}`);
+            }
+        });
+        this.listeners.clear();
+    }
+
     configurarInfoChat(chatId) {
         const titleEl = document.getElementById('chatTitle');
         const descEl = document.getElementById('chatDescription');
         const membersEl = document.getElementById('membersCount');
+        
+        if (!titleEl || !descEl || !membersEl) return;
         
         if (chatId === 'global') {
             titleEl.textContent = '🌐 Chat Geral';
@@ -257,15 +328,19 @@ class ChatSystem {
         } else if (chatId.startsWith('area-')) {
             const areaKey = chatId.replace('area-', '');
             const area = this.areas[areaKey];
-            titleEl.textContent = `📁 ${area.nome}`;
-            descEl.textContent = `Chat da área ${area.nome}`;
-            membersEl.textContent = area.equipe.length;
+            if (area) {
+                titleEl.textContent = `📁 ${area.nome}`;
+                descEl.textContent = `Chat da área ${area.nome}`;
+                membersEl.textContent = area.equipe.length;
+            }
         } else if (chatId.startsWith('projeto-')) {
             const projetoId = chatId.replace('projeto-', '');
             const atividade = this.encontrarAtividade(projetoId);
-            titleEl.textContent = `📋 ${atividade?.nome || 'Projeto'}`;
-            descEl.textContent = 'Chat do projeto/atividade';
-            membersEl.textContent = atividade?.responsaveis?.length || 0;
+            if (atividade) {
+                titleEl.textContent = `📋 ${atividade.nome}`;
+                descEl.textContent = 'Chat do projeto/atividade';
+                membersEl.textContent = atividade.responsaveis?.length || 0;
+            }
         } else if (chatId.startsWith('privado-')) {
             titleEl.textContent = '👤 Conversa Privada';
             descEl.textContent = 'Mensagem direta';
@@ -273,52 +348,108 @@ class ChatSystem {
         }
     }
 
+    // ✅ FUNÇÃO CORRIGIDA: Carregar mensagens com listener funcional
     carregarMensagens(chatId) {
-        if (this.listeners.has(chatId)) {
-            this.listeners.get(chatId).off();
-        }
+        console.log(`🔧 Carregando mensagens para: ${chatId}`);
         
         const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
-        const listener = messagesRef.limitToLast(50).on('child_added', (snapshot) => {
-            const mensagem = snapshot.val();
-            this.adicionarMensagemUI(mensagem);
+        
+        // ✅ CORREÇÃO: Primeiro carregar mensagens existentes
+        messagesRef.limitToLast(50).once('value', (snapshot) => {
+            const mensagens = snapshot.val() || {};
+            const messagesContainer = document.getElementById('chatMessages');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '';
+            }
+            
+            // Ordenar mensagens por timestamp
+            const mensagensOrdenadas = Object.values(mensagens).sort((a, b) => 
+                new Date(a.timestamp) - new Date(b.timestamp)
+            );
+            
+            mensagensOrdenadas.forEach(mensagem => {
+                this.adicionarMensagemUI(mensagem);
+            });
+            
+            console.log(`✅ ${mensagensOrdenadas.length} mensagens carregadas para ${chatId}`);
         });
         
+        // ✅ CORREÇÃO: Escutar novas mensagens
+        const listener = messagesRef.limitToLast(1).on('child_added', (snapshot) => {
+            const mensagem = snapshot.val();
+            if (mensagem && mensagem.timestamp) {
+                // Verificar se é uma mensagem nova (não carregada inicialmente)
+                const agora = Date.now();
+                const timestampMensagem = new Date(mensagem.timestamp).getTime();
+                
+                if (agora - timestampMensagem < 10000) { // Mensagem dos últimos 10 segundos
+                    console.log('📥 Nova mensagem recebida:', mensagem);
+                    this.adicionarMensagemUI(mensagem);
+                }
+            }
+        });
+        
+        // Salvar referência do listener
         this.listeners.set(chatId, messagesRef);
     }
 
+    // ✅ FUNÇÃO CORRIGIDA: Enviar mensagem com verificações
     enviarMensagem() {
         const input = document.getElementById('chatInput');
+        if (!input) return;
+        
         const texto = input.value.trim();
         
-        if (!texto || !this.chatAtivo) return;
+        if (!texto || !this.chatAtivo || !this.usuario) {
+            console.log('❌ Dados insuficientes para enviar mensagem');
+            return;
+        }
+        
+        // ✅ CORREÇÃO: Usar nome do usuário vinculado
+        const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
         
         const mensagem = {
-            id: Date.now().toString(),
+            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             autor: this.usuario.email,
-            nomeAutor: this.usuario.displayName || this.usuario.email.split('@')[0],
+            nomeAutor: nomeUsuario,
             texto: texto,
             timestamp: new Date().toISOString(),
             chatId: this.chatAtivo
         };
         
-        // Salvar no Firebase
-        this.chatRef.child(`mensagens/${this.chatAtivo}`).push(mensagem);
+        console.log('📤 Enviando mensagem:', mensagem);
         
-        // Limpar input
-        input.value = '';
-        document.getElementById('characterCount').textContent = '0/500';
-        
-        // Focar novamente no input
-        input.focus();
+        // ✅ CORREÇÃO: Salvar no Firebase com tratamento de erro
+        this.chatRef.child(`mensagens/${this.chatAtivo}`).push(mensagem)
+            .then(() => {
+                console.log('✅ Mensagem salva no Firebase');
+                // Limpar input apenas após confirmação
+                input.value = '';
+                document.getElementById('characterCount').textContent = '0/500';
+                input.focus();
+            })
+            .catch((error) => {
+                console.error('❌ Erro ao salvar mensagem:', error);
+                window.mostrarNotificacao('Erro ao enviar mensagem!', 'error');
+            });
     }
 
+    // ✅ FUNÇÃO CORRIGIDA: Adicionar mensagem na UI
     adicionarMensagemUI(mensagem) {
         const container = document.getElementById('chatMessages');
+        if (!container || !mensagem) return;
+        
         const isPropia = mensagem.autor === this.usuario.email;
+        
+        // ✅ CORREÇÃO: Verificar se mensagem já existe
+        const mensagemExistente = container.querySelector(`[data-msg-id="${mensagem.id}"]`);
+        if (mensagemExistente) {
+            return; // Mensagem já existe
+        }
         
         const mensagemEl = document.createElement('div');
         mensagemEl.className = `message ${isPropia ? 'own' : 'other'}`;
+        mensagemEl.setAttribute('data-msg-id', mensagem.id);
         
         const tempo = new Date(mensagem.timestamp).toLocaleTimeString('pt-BR', {
             hour: '2-digit',
@@ -341,11 +472,205 @@ class ChatSystem {
         
         // Scroll para baixo
         container.scrollTop = container.scrollHeight;
+        
+        console.log('✅ Mensagem adicionada na UI:', mensagem.texto);
     }
 
     formatarMensagem(texto) {
         // Formatar menções @usuario
         return texto.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+    }
+
+    // ========== USUÁRIOS ONLINE (CORRIGIDO) ==========
+    monitorarUsuariosOnline() {
+        this.chatRef.child('usuariosOnline').on('value', (snapshot) => {
+            const usuarios = snapshot.val() || {};
+            this.usuariosOnline.clear();
+            
+            let count = 0;
+            Object.entries(usuarios).forEach(([emailKey, data]) => {
+                const ultimaAtividade = new Date(data.ultimaAtividade);
+                const agora = new Date();
+                const diffMinutos = (agora - ultimaAtividade) / (1000 * 60);
+                
+                if (diffMinutos < 5) { // Considerado online se ativo nos últimos 5 min
+                    this.usuariosOnline.set(data.email || emailKey.replace(/_/g, '@'), data);
+                    count++;
+                }
+            });
+            
+            const countEl = document.getElementById('usersOnlineCount');
+            if (countEl) {
+                countEl.textContent = `👥 ${count}`;
+            }
+        });
+    }
+
+    marcarUsuarioOnline() {
+        if (!this.usuario) return;
+        
+        const emailKey = this.usuario.email.replace(/[@.]/g, '_');
+        const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
+        
+        const atualizarStatus = () => {
+            this.chatRef.child(`usuariosOnline/${emailKey}`).set({
+                email: this.usuario.email,
+                nome: nomeUsuario,
+                ultimaAtividade: new Date().toISOString(),
+                status: 'online'
+            }).catch(error => {
+                console.error('❌ Erro ao atualizar status online:', error);
+            });
+        };
+        
+        atualizarStatus();
+        setInterval(atualizarStatus, 60000); // Atualizar a cada minuto
+        
+        // Marcar como offline ao sair
+        window.addEventListener('beforeunload', () => {
+            this.chatRef.child(`usuariosOnline/${emailKey}`).remove();
+        });
+    }
+
+    // ========== FUNCIONALIDADES AUXILIARES ==========
+    marcarComoLido(chatId) {
+        this.mensagensNaoLidas.set(chatId, 0);
+        const unreadEl = document.getElementById(`unread-${chatId.replace('-', '-')}`);
+        if (unreadEl) {
+            unreadEl.classList.add('hidden');
+            unreadEl.textContent = '0';
+        }
+        this.atualizarBadgeTotal();
+    }
+
+    atualizarBadgeTotal() {
+        const total = Array.from(this.mensagensNaoLidas.values()).reduce((a, b) => a + b, 0);
+        const badge = document.getElementById('chatBadge');
+        
+        if (badge) {
+            if (total > 0) {
+                badge.classList.remove('hidden');
+                badge.textContent = total > 99 ? '99+' : total;
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    }
+
+    filtrarConversas(termo) {
+        const salas = document.querySelectorAll('.chat-room-item');
+        salas.forEach(sala => {
+            const nome = sala.querySelector('.room-name');
+            if (nome) {
+                const nomeTexto = nome.textContent.toLowerCase();
+                if (nomeTexto.includes(termo.toLowerCase())) {
+                    sala.style.display = 'flex';
+                } else {
+                    sala.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    toggleChat() {
+        const panel = document.getElementById('chatPanel');
+        const toggle = document.getElementById('chatToggle');
+        
+        if (!panel || !toggle) return;
+        
+        if (this.isOpen) {
+            panel.classList.add('hidden');
+            toggle.classList.remove('open');
+            this.isOpen = false;
+        } else {
+            panel.classList.remove('hidden');
+            toggle.classList.add('open');
+            this.isOpen = true;
+            
+            const input = document.getElementById('chatInput');
+            if (input) {
+                setTimeout(() => input.focus(), 100);
+            }
+        }
+    }
+
+    handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            this.enviarMensagem();
+        }
+        
+        // Atualizar contador de caracteres
+        const input = event.target;
+        const count = input.value.length;
+        const countEl = document.getElementById('characterCount');
+        if (countEl) {
+            countEl.textContent = `${count}/500`;
+        }
+    }
+
+    configurarEventListeners() {
+        const toggleBtn = document.getElementById('chatToggle');
+        const closeBtn = document.getElementById('chatClose');
+        const minimizeBtn = document.getElementById('chatMinimize');
+        
+        if (toggleBtn) toggleBtn.onclick = () => this.toggleChat();
+        if (closeBtn) closeBtn.onclick = () => this.toggleChat();
+        if (minimizeBtn) minimizeBtn.onclick = () => this.toggleChat();
+    }
+
+    // ========== UTILITÁRIOS ==========
+    getTotalMembros() {
+        if (!this.areas) return 0;
+        
+        const membrosUnicos = new Set();
+        Object.values(this.areas).forEach(area => {
+            if (area.equipe) {
+                area.equipe.forEach(membro => membrosUnicos.add(membro.nome));
+            }
+        });
+        return membrosUnicos.size;
+    }
+
+    getTodosUsuarios() {
+        if (!this.areas) return [];
+        
+        const usuarios = [];
+        Object.values(this.areas).forEach(area => {
+            if (area.equipe) {
+                area.equipe.forEach(membro => {
+                    if (!usuarios.find(u => u.nome === membro.nome)) {
+                        usuarios.push({
+                            nome: membro.nome,
+                            email: `${membro.nome.toLowerCase().replace(' ', '.')}@obra.com`
+                        });
+                    }
+                });
+            }
+        });
+        return usuarios;
+    }
+
+    getNomeUsuario(email) {
+        const usuarios = this.getTodosUsuarios();
+        const usuario = usuarios.find(u => u.email === email);
+        return usuario ? usuario.nome : email.split('@')[0];
+    }
+
+    encontrarAtividade(id) {
+        if (!this.areas) return null;
+        
+        for (const area of Object.values(this.areas)) {
+            if (area.atividades) {
+                const atividade = area.atividades.find(a => a.id == id);
+                if (atividade) return atividade;
+            }
+        }
+        return null;
+    }
+
+    carregarChats() {
+        // Esta função agora é chamada pela inicializarFirebase()
+        console.log('✅ Chats carregados');
     }
 
     // ========== CHAT PRIVADO ==========
@@ -392,178 +717,38 @@ class ChatSystem {
             this.carregarChatsPrivados();
             this.abrirChat(`privado-${chatId}`);
             window.mostrarNotificacao('Conversa privada iniciada!');
-        });
-    }
-
-    // ========== USUÁRIOS ONLINE ==========
-    monitorarUsuariosOnline() {
-        this.chatRef.child('usuariosOnline').on('value', (snapshot) => {
-            const usuarios = snapshot.val() || {};
-            this.usuariosOnline.clear();
-            
-            let count = 0;
-            Object.entries(usuarios).forEach(([email, data]) => {
-                const ultimaAtividade = new Date(data.ultimaAtividade);
-                const agora = new Date();
-                const diffMinutos = (agora - ultimaAtividade) / (1000 * 60);
-                
-                if (diffMinutos < 5) { // Considerado online se ativo nos últimos 5 min
-                    this.usuariosOnline.set(email, data);
-                    count++;
-                }
-            });
-            
-            document.getElementById('usersOnlineCount').textContent = `👥 ${count}`;
-        });
-    }
-
-    marcarUsuarioOnline() {
-        if (!this.usuario) return;
-        
-        const atualizarStatus = () => {
-            this.chatRef.child(`usuariosOnline/${this.usuario.email.replace(/[@.]/g, '_')}`).set({
-                nome: this.usuario.displayName || this.usuario.email.split('@')[0],
-                ultimaAtividade: new Date().toISOString(),
-                status: 'online'
-            });
-        };
-        
-        atualizarStatus();
-        setInterval(atualizarStatus, 60000); // Atualizar a cada minuto
-        
-        // Marcar como offline ao sair
-        window.addEventListener('beforeunload', () => {
-            this.chatRef.child(`usuariosOnline/${this.usuario.email.replace(/[@.]/g, '_')}`).remove();
-        });
-    }
-
-    // ========== FUNCIONALIDADES AUXILIARES ==========
-    marcarComoLido(chatId) {
-        this.mensagensNaoLidas.set(chatId, 0);
-        const unreadEl = document.getElementById(`unread-${chatId.replace('-', '-')}`);
-        if (unreadEl) {
-            unreadEl.classList.add('hidden');
-            unreadEl.textContent = '0';
-        }
-        this.atualizarBadgeTotal();
-    }
-
-    atualizarBadgeTotal() {
-        const total = Array.from(this.mensagensNaoLidas.values()).reduce((a, b) => a + b, 0);
-        const badge = document.getElementById('chatBadge');
-        
-        if (total > 0) {
-            badge.classList.remove('hidden');
-            badge.textContent = total > 99 ? '99+' : total;
-        } else {
-            badge.classList.add('hidden');
-        }
-    }
-
-    filtrarConversas(termo) {
-        const salas = document.querySelectorAll('.chat-room-item');
-        salas.forEach(sala => {
-            const nome = sala.querySelector('.room-name').textContent.toLowerCase();
-            if (nome.includes(termo.toLowerCase())) {
-                sala.style.display = 'flex';
-            } else {
-                sala.style.display = 'none';
-            }
-        });
-    }
-
-    toggleChat() {
-        const panel = document.getElementById('chatPanel');
-        const toggle = document.getElementById('chatToggle');
-        
-        if (this.isOpen) {
-            panel.classList.add('hidden');
-            toggle.classList.remove('open');
-            this.isOpen = false;
-        } else {
-            panel.classList.remove('hidden');
-            toggle.classList.add('open');
-            this.isOpen = true;
-            document.getElementById('chatInput').focus();
-        }
-    }
-
-    handleKeyPress(event) {
-        if (event.key === 'Enter') {
-            this.enviarMensagem();
-        }
-        
-        // Atualizar contador de caracteres
-        const input = event.target;
-        const count = input.value.length;
-        document.getElementById('characterCount').textContent = `${count}/500`;
-    }
-
-    configurarEventListeners() {
-        document.getElementById('chatToggle').onclick = () => this.toggleChat();
-        document.getElementById('chatClose').onclick = () => this.toggleChat();
-        document.getElementById('chatMinimize').onclick = () => this.toggleChat();
-    }
-
-    // ========== UTILITÁRIOS ==========
-    getTotalMembros() {
-        const membrosUnicos = new Set();
-        Object.values(this.areas).forEach(area => {
-            area.equipe.forEach(membro => membrosUnicos.add(membro.nome));
-        });
-        return membrosUnicos.size;
-    }
-
-    getTodosUsuarios() {
-        const usuarios = [];
-        Object.values(this.areas).forEach(area => {
-            area.equipe.forEach(membro => {
-                if (!usuarios.find(u => u.nome === membro.nome)) {
-                    usuarios.push({
-                        nome: membro.nome,
-                        email: `${membro.nome.toLowerCase().replace(' ', '.')}@obra.com` // Email simulado
-                    });
-                }
-            });
-        });
-        return usuarios;
-    }
-
-    getNomeUsuario(email) {
-        const usuarios = this.getTodosUsuarios();
-        const usuario = usuarios.find(u => u.email === email);
-        return usuario ? usuario.nome : email.split('@')[0];
-    }
-
-    encontrarAtividade(id) {
-        for (const area of Object.values(this.areas)) {
-            const atividade = area.atividades.find(a => a.id == id);
-            if (atividade) return atividade;
-        }
-        return null;
-    }
-
-    carregarChats() {
-        // Inicializar estrutura no Firebase se não existir
-        this.chatRef.once('value', (snapshot) => {
-            if (!snapshot.val()) {
-                this.chatRef.set({
-                    mensagens: {},
-                    usuariosOnline: {},
-                    privados: {}
-                });
-            }
+        }).catch(error => {
+            console.error('❌ Erro ao criar chat privado:', error);
+            window.mostrarNotificacao('Erro ao criar conversa privada', 'error');
         });
     }
 }
 
-// ========== INICIALIZAÇÃO ==========
+// ========== INICIALIZAÇÃO CORRIGIDA ==========
 let chatSystem;
 
-// Aguardar que o sistema principal esteja carregado
+// ✅ CORREÇÃO: Aguardar que o sistema principal esteja carregado
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        chatSystem = new ChatSystem();
-        window.chatSystem = chatSystem; // Expor globalmente
-    }, 2000);
+    console.log('🔧 Inicializando sistema de chat...');
+    
+    const inicializarChat = () => {
+        if (window.usuarioAtual && window.dados && window.database) {
+            chatSystem = new ChatSystem();
+            window.chatSystem = chatSystem; // Expor globalmente
+            console.log('✅ Chat System inicializado com sucesso!');
+        } else {
+            setTimeout(inicializarChat, 1000);
+        }
+    };
+    
+    setTimeout(inicializarChat, 3000); // Aguardar 3 segundos para garantir que tudo carregou
 });
+
+// ✅ CORREÇÃO: Remover caixinha sincronizado no CSS também
+const style = document.createElement('style');
+style.textContent = `
+    .sync-indicator.synced {
+        display: none !important;
+    }
+`;
+document.head.appendChild(style);
