@@ -1,5 +1,5 @@
 // ============================================
-// 💬 SISTEMA DE CHAT CORRIGIDO - GESTÃO DE OBRAS
+// 💬 SISTEMA DE CHAT COMPLETO CORRIGIDO - GESTÃO DE OBRAS
 // ============================================
 
 class ChatSystem {
@@ -12,6 +12,7 @@ class ChatSystem {
         this.listeners = new Map();
         this.isOpen = false;
         this.usuariosOnline = new Map();
+        this.conectado = false;
         
         // ✅ CORREÇÃO: Aguardar inicialização melhorada
         this.aguardarInicializacao();
@@ -41,6 +42,7 @@ class ChatSystem {
         // ✅ CORREÇÃO: Inicializar Firebase primeiro
         this.inicializarFirebase().then(() => {
             this.carregarChats();
+            this.monitorarConectividade();
             this.monitorarUsuariosOnline();
             this.marcarUsuarioOnline();
             
@@ -303,12 +305,16 @@ class ChatSystem {
         this.marcarComoLido(chatId);
     }
 
-    // ✅ NOVA FUNÇÃO: Parar listeners anteriores
+    // ✅ FUNÇÃO CORRIGIDA: Parar listeners anteriores
     pararListenersAnteriores() {
         this.listeners.forEach((ref, chatId) => {
-            if (ref && typeof ref.off === 'function') {
-                ref.off();
-                console.log(`🔧 Listener removido para: ${chatId}`);
+            try {
+                if (ref && typeof ref.off === 'function') {
+                    ref.off();
+                    console.log(`🔧 Listener removido para: ${chatId}`);
+                }
+            } catch (error) {
+                console.error('Erro ao remover listener:', error);
             }
         });
         this.listeners.clear();
@@ -348,14 +354,14 @@ class ChatSystem {
         }
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: Carregar mensagens com listener funcional
+    // ✅ FUNÇÃO CORRIGIDA: Carregar mensagens com sincronização REAL
     carregarMensagens(chatId) {
         console.log(`🔧 Carregando mensagens para: ${chatId}`);
         
         const messagesRef = this.chatRef.child(`mensagens/${chatId}`);
         
-        // ✅ CORREÇÃO: Primeiro carregar mensagens existentes
-        messagesRef.limitToLast(50).once('value', (snapshot) => {
+        // ✅ PRIMEIRO: Carregar mensagens existentes
+        messagesRef.once('value', (snapshot) => {
             const mensagens = snapshot.val() || {};
             const messagesContainer = document.getElementById('chatMessages');
             if (messagesContainer) {
@@ -363,37 +369,45 @@ class ChatSystem {
             }
             
             // Ordenar mensagens por timestamp
-            const mensagensOrdenadas = Object.values(mensagens).sort((a, b) => 
-                new Date(a.timestamp) - new Date(b.timestamp)
-            );
+            const mensagensArray = Object.entries(mensagens).map(([key, msg]) => ({
+                ...msg,
+                firebaseKey: key
+            })).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             
-            mensagensOrdenadas.forEach(mensagem => {
+            console.log(`📥 Carregadas ${mensagensArray.length} mensagens existentes para ${chatId}`);
+            
+            mensagensArray.forEach(mensagem => {
                 this.adicionarMensagemUI(mensagem);
             });
-            
-            console.log(`✅ ${mensagensOrdenadas.length} mensagens carregadas para ${chatId}`);
         });
         
-        // ✅ CORREÇÃO: Escutar novas mensagens
-        const listener = messagesRef.limitToLast(1).on('child_added', (snapshot) => {
+        // ✅ SEGUNDO: Escutar TODAS as mensagens novas em TEMPO REAL
+        const listener = messagesRef.on('child_added', (snapshot) => {
             const mensagem = snapshot.val();
-            if (mensagem && mensagem.timestamp) {
-                // Verificar se é uma mensagem nova (não carregada inicialmente)
-                const agora = Date.now();
-                const timestampMensagem = new Date(mensagem.timestamp).getTime();
+            if (mensagem && mensagem.id) {
                 
-                if (agora - timestampMensagem < 10000) { // Mensagem dos últimos 10 segundos
-                    console.log('📥 Nova mensagem recebida:', mensagem);
+                // Verificar se já existe na UI (evitar duplicatas)
+                const container = document.getElementById('chatMessages');
+                const mensagemExistente = container && container.querySelector(`[data-msg-id="${mensagem.id}"]`);
+                
+                if (!mensagemExistente) {
+                    console.log(`📥 NOVA mensagem em tempo real:`, mensagem);
                     this.adicionarMensagemUI(mensagem);
+                    
+                    // ✅ NOTIFICAR SE NÃO FOR DO PRÓPRIO USUÁRIO
+                    if (mensagem.autor !== this.usuario.email && this.chatAtivo === mensagem.chatId) {
+                        this.tocarSomNotificacao();
+                    }
                 }
             }
         });
         
         // Salvar referência do listener
         this.listeners.set(chatId, messagesRef);
+        console.log(`✅ Listener ativo para chat: ${chatId}`);
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: Enviar mensagem com verificações
+    // ✅ FUNÇÃO CORRIGIDA: Enviar mensagem com FORÇA TOTAL
     enviarMensagem() {
         const input = document.getElementById('chatInput');
         if (!input) return;
@@ -405,11 +419,14 @@ class ChatSystem {
             return;
         }
         
-        // ✅ CORREÇÃO: Usar nome do usuário vinculado
+        // ✅ USAR NOME DO USUÁRIO VINCULADO
         const nomeUsuario = window.estadoSistema?.usuarioNome || this.usuario.displayName || this.usuario.email.split('@')[0];
         
+        // ✅ ID ÚNICO GARANTIDO
+        const mensagemId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
         const mensagem = {
-            id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: mensagemId,
             autor: this.usuario.email,
             nomeAutor: nomeUsuario,
             texto: texto,
@@ -417,34 +434,62 @@ class ChatSystem {
             chatId: this.chatAtivo
         };
         
-        console.log('📤 Enviando mensagem:', mensagem);
+        console.log('📤 ENVIANDO mensagem:', mensagem);
         
-        // ✅ CORREÇÃO: Salvar no Firebase com tratamento de erro
-        this.chatRef.child(`mensagens/${this.chatAtivo}`).push(mensagem)
+        // ✅ FORÇA MÁXIMA: Push + Set para garantir
+        const novoMsgRef = this.chatRef.child(`mensagens/${this.chatAtivo}`).push();
+        
+        novoMsgRef.set(mensagem)
             .then(() => {
-                console.log('✅ Mensagem salva no Firebase');
-                // Limpar input apenas após confirmação
+                console.log('✅ Mensagem CONFIRMADA no Firebase com key:', novoMsgRef.key);
+                
+                // Limpar input
                 input.value = '';
-                document.getElementById('characterCount').textContent = '0/500';
-                input.focus();
+                const countEl = document.getElementById('characterCount');
+                if (countEl) countEl.textContent = '0/500';
+                
+                // Focar novamente
+                setTimeout(() => input.focus(), 100);
+                
+                // ✅ FORÇAR SINCRONIZAÇÃO
+                this.forcarSincronizacao();
             })
             .catch((error) => {
-                console.error('❌ Erro ao salvar mensagem:', error);
-                window.mostrarNotificacao('Erro ao enviar mensagem!', 'error');
+                console.error('❌ ERRO ao salvar mensagem:', error);
+                window.mostrarNotificacao('Erro ao enviar mensagem: ' + error.message, 'error');
             });
     }
 
-    // ✅ FUNÇÃO CORRIGIDA: Adicionar mensagem na UI
+    // ✅ NOVA FUNÇÃO: Forçar sincronização
+    forcarSincronizacao() {
+        console.log('🔄 Forçando sincronização...');
+        
+        // Disparar evento customizado para outros listeners
+        window.dispatchEvent(new CustomEvent('chatMensagemEnviada', {
+            detail: { chatId: this.chatAtivo }
+        }));
+        
+        // Forçar re-sincronização dos listeners
+        setTimeout(() => {
+            const messagesRef = this.chatRef.child(`mensagens/${this.chatAtivo}`);
+            messagesRef.once('value', (snapshot) => {
+                console.log('🔄 Sincronização forçada - Total mensagens:', Object.keys(snapshot.val() || {}).length);
+            });
+        }, 500);
+    }
+
+    // ✅ FUNÇÃO CORRIGIDA: Adicionar mensagem UI melhorada
     adicionarMensagemUI(mensagem) {
         const container = document.getElementById('chatMessages');
         if (!container || !mensagem) return;
         
         const isPropia = mensagem.autor === this.usuario.email;
         
-        // ✅ CORREÇÃO: Verificar se mensagem já existe
+        // ✅ VERIFICAR DUPLICATA POR ID
         const mensagemExistente = container.querySelector(`[data-msg-id="${mensagem.id}"]`);
         if (mensagemExistente) {
-            return; // Mensagem já existe
+            console.log('⚠️ Mensagem já existe na UI:', mensagem.id);
+            return;
         }
         
         const mensagemEl = document.createElement('div');
@@ -464,21 +509,136 @@ class ChatSystem {
             <div class="message-content">${this.formatarMensagem(mensagem.texto)}</div>
         `;
         
-        container.appendChild(mensagemEl);
+        // ✅ INSERIR NA POSIÇÃO CORRETA (por timestamp)
+        const mensagensExistentes = Array.from(container.querySelectorAll('.message'));
+        const timestampMensagem = new Date(mensagem.timestamp).getTime();
         
-        // Remover mensagem de boas-vindas se existir
+        let inserido = false;
+        for (let i = mensagensExistentes.length - 1; i >= 0; i--) {
+            const msgEl = mensagensExistentes[i];
+            const msgTime = msgEl.querySelector('.message-time');
+            if (msgTime) {
+                const msgTimestamp = this.extrairTimestamp(msgTime.textContent, mensagem.timestamp);
+                if (timestampMensagem >= msgTimestamp) {
+                    msgEl.parentNode.insertBefore(mensagemEl, msgEl.nextSibling);
+                    inserido = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!inserido) {
+            container.appendChild(mensagemEl);
+        }
+        
+        // Remover mensagem de boas-vindas
         const welcome = container.querySelector('.welcome-message');
         if (welcome) welcome.remove();
         
         // Scroll para baixo
         container.scrollTop = container.scrollHeight;
         
-        console.log('✅ Mensagem adicionada na UI:', mensagem.texto);
+        console.log(`✅ Mensagem adicionada na UI: "${mensagem.texto}" por ${mensagem.nomeAutor}`);
+        
+        // ✅ ANIMAÇÃO SUAVE
+        mensagemEl.style.opacity = '0';
+        mensagemEl.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+            mensagemEl.style.transition = 'all 0.3s ease';
+            mensagemEl.style.opacity = '1';
+            mensagemEl.style.transform = 'translateY(0)';
+        }, 50);
+    }
+
+    // ✅ NOVA FUNÇÃO: Extrair timestamp para ordenação
+    extrairTimestamp(timeText, fallbackISO) {
+        try {
+            const hoje = new Date();
+            const [hora, minuto] = timeText.split(':');
+            const timestamp = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), parseInt(hora), parseInt(minuto));
+            return timestamp.getTime();
+        } catch (error) {
+            return new Date(fallbackISO).getTime();
+        }
     }
 
     formatarMensagem(texto) {
         // Formatar menções @usuario
         return texto.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+    }
+
+    // ✅ NOVA FUNÇÃO: Som de notificação
+    tocarSomNotificacao() {
+        try {
+            // Som simples usando Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } catch (error) {
+            console.log('Som de notificação não disponível');
+        }
+    }
+
+    // ========== CHAT PRIVADO ==========
+    novoPrivado() {
+        const usuarios = this.getTodosUsuarios();
+        const usuariosDisponiveis = usuarios.filter(u => u.email !== this.usuario.email);
+        
+        if (usuariosDisponiveis.length === 0) {
+            window.mostrarNotificacao('Nenhum usuário disponível para conversa', 'warning');
+            return;
+        }
+        
+        const opcoes = usuariosDisponiveis
+            .map(u => `${u.nome} (${u.email})`)
+            .join('\n');
+        
+        const escolha = prompt(`Iniciar conversa privada com:\n\n${opcoes}\n\nDigite o email do usuário:`);
+        
+        if (escolha) {
+            const usuarioEscolhido = usuariosDisponiveis.find(u => 
+                u.email.toLowerCase() === escolha.toLowerCase() || 
+                u.nome.toLowerCase().includes(escolha.toLowerCase())
+            );
+            
+            if (usuarioEscolhido) {
+                this.iniciarChatPrivado(usuarioEscolhido.email);
+            } else {
+                window.mostrarNotificacao('Usuário não encontrado', 'error');
+            }
+        }
+    }
+
+    iniciarChatPrivado(emailDestino) {
+        const participantes = [this.usuario.email, emailDestino].sort();
+        const chatId = participantes.join('_').replace(/[@.]/g, '_');
+        
+        const chatData = {
+            participantes: participantes,
+            criadoEm: new Date().toISOString(),
+            ultimaAtividade: new Date().toISOString()
+        };
+        
+        this.chatRef.child(`privados/${chatId}`).set(chatData).then(() => {
+            this.carregarChatsPrivados();
+            this.abrirChat(`privado-${chatId}`);
+            window.mostrarNotificacao('Conversa privada iniciada!');
+        }).catch(error => {
+            console.error('❌ Erro ao criar chat privado:', error);
+            window.mostrarNotificacao('Erro ao criar conversa privada', 'error');
+        });
     }
 
     // ========== USUÁRIOS ONLINE (CORRIGIDO) ==========
@@ -500,7 +660,7 @@ class ChatSystem {
             });
             
             const countEl = document.getElementById('usersOnlineCount');
-            if (countEl) {
+            if (countEl && this.conectado) {
                 countEl.textContent = `👥 ${count}`;
             }
         });
@@ -529,6 +689,28 @@ class ChatSystem {
         // Marcar como offline ao sair
         window.addEventListener('beforeunload', () => {
             this.chatRef.child(`usuariosOnline/${emailKey}`).remove();
+        });
+    }
+
+    // ✅ NOVA FUNÇÃO: Monitorar conectividade
+    monitorarConectividade() {
+        // Verificar se Firebase está conectado
+        const connectedRef = this.chatRef.root.child('.info/connected');
+        connectedRef.on('value', (snapshot) => {
+            this.conectado = snapshot.val();
+            console.log(this.conectado ? '🟢 Firebase CONECTADO' : '🔴 Firebase DESCONECTADO');
+            
+            const statusEl = document.getElementById('usersOnlineCount');
+            if (statusEl) {
+                if (this.conectado) {
+                    statusEl.style.background = '#10b981';
+                    statusEl.style.color = 'white';
+                } else {
+                    statusEl.style.background = '#ef4444';
+                    statusEl.style.color = 'white';
+                    statusEl.textContent = '🔴 Offline';
+                }
+            }
         });
     }
 
@@ -672,56 +854,6 @@ class ChatSystem {
         // Esta função agora é chamada pela inicializarFirebase()
         console.log('✅ Chats carregados');
     }
-
-    // ========== CHAT PRIVADO ==========
-    novoPrivado() {
-        const usuarios = this.getTodosUsuarios();
-        const usuariosDisponiveis = usuarios.filter(u => u.email !== this.usuario.email);
-        
-        if (usuariosDisponiveis.length === 0) {
-            window.mostrarNotificacao('Nenhum usuário disponível para conversa', 'warning');
-            return;
-        }
-        
-        const opcoes = usuariosDisponiveis
-            .map(u => `${u.nome} (${u.email})`)
-            .join('\n');
-        
-        const escolha = prompt(`Iniciar conversa privada com:\n\n${opcoes}\n\nDigite o email do usuário:`);
-        
-        if (escolha) {
-            const usuarioEscolhido = usuariosDisponiveis.find(u => 
-                u.email.toLowerCase() === escolha.toLowerCase() || 
-                u.nome.toLowerCase().includes(escolha.toLowerCase())
-            );
-            
-            if (usuarioEscolhido) {
-                this.iniciarChatPrivado(usuarioEscolhido.email);
-            } else {
-                window.mostrarNotificacao('Usuário não encontrado', 'error');
-            }
-        }
-    }
-
-    iniciarChatPrivado(emailDestino) {
-        const participantes = [this.usuario.email, emailDestino].sort();
-        const chatId = participantes.join('_').replace(/[@.]/g, '_');
-        
-        const chatData = {
-            participantes: participantes,
-            criadoEm: new Date().toISOString(),
-            ultimaAtividade: new Date().toISOString()
-        };
-        
-        this.chatRef.child(`privados/${chatId}`).set(chatData).then(() => {
-            this.carregarChatsPrivados();
-            this.abrirChat(`privado-${chatId}`);
-            window.mostrarNotificacao('Conversa privada iniciada!');
-        }).catch(error => {
-            console.error('❌ Erro ao criar chat privado:', error);
-            window.mostrarNotificacao('Erro ao criar conversa privada', 'error');
-        });
-    }
 }
 
 // ========== INICIALIZAÇÃO CORRIGIDA ==========
@@ -749,6 +881,13 @@ const style = document.createElement('style');
 style.textContent = `
     .sync-indicator.synced {
         display: none !important;
+    }
+    
+    /* Corrigir posicionamento do chat para não conflitar */
+    .chat-toggle {
+        bottom: 20px !important;
+        right: 20px !important;
+        z-index: 1001 !important;
     }
 `;
 document.head.appendChild(style);
