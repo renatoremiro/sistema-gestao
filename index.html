@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.2)</title>
+    <title>Sistema de Gestão Completo - Obra 292 (Firebase v5.4)</title>
     <style>
         * {
             margin: 0;
@@ -866,7 +866,7 @@
             75% { transform: translateX(5px); }
         }
 
-        /* Melhorias visuais v5.2 */
+        /* Melhorias visuais v5.3 */
         .evento-pessoal {
             background: #ddd6fe;
             border-left: 3px solid #8b5cf6;
@@ -933,7 +933,7 @@
                 <h1>Sistema de Gestão Otimizado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v5.2 Otimizado - Foco em Usabilidade 🚀
+                    Sistema v5.4 Completo - Controle de Permissões ✅
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -1030,13 +1030,12 @@
             </div>
             
             <!-- Dica do sistema -->
-            <div style="background: #dbeafe; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #1e40af;">
-                <strong>🚀 Sistema v5.2 - AGENDA COM DEBUG ATIVO:</strong> 
-                <br><strong>✅ Agenda da Semana:</strong> Mostra tarefas pessoais + eventos do calendário + prazos próximos
-                <br><strong>🔧 Debug Ativo:</strong> Abra o Console (F12) e veja os logs detalhados da agenda
-                <br><strong>🧪 Teste Manual:</strong> No console digite <code>testarAgenda()</code> para teste direto
-                <br><strong>💡 Como Testar:</strong> 1) Entre na agenda de qualquer pessoa 2) Veja os logs no console 3) A agenda deve mostrar itens
-                <br><strong>📱 Ainda não vê nada?</strong> Abra o console e me envie os logs que aparecem!
+            <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
+                <strong>✅ Sistema v5.4 - CONTROLE DE PERMISSÕES ATIVO:</strong> 
+                <br><strong>📅 Eventos:</strong> Qualquer usuário pode criar, editar e deletar
+                <br><strong>📝 Tarefas Pessoais:</strong> Apenas o dono pode editar/deletar suas tarefas
+                <br><strong>🔒 Segurança:</strong> Interface mostra claramente o que você pode editar
+                <br><strong>💡 Navegação:</strong> Dashboard → Área → Pessoa → Agenda para gerenciar tudo
             </div>
             
             <!-- Cards das Áreas -->
@@ -1273,6 +1272,68 @@
         </div>
     </div>
     
+    <!-- Modal de Editar Tarefa Pessoal -->
+    <div id="modalEditarTarefa" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 24px;">Editar Tarefa Pessoal</h3>
+            <input type="hidden" id="editarTarefaId">
+            <input type="hidden" id="editarTarefaDono">
+            <input type="hidden" id="editarTarefaDia">
+            
+            <div class="form-group">
+                <label>Tipo de Agendamento</label>
+                <select id="editarTarefaTipo" onchange="alternarTipoAgendamentoEdicao()">
+                    <option value="semanal">Dia da Semana</option>
+                    <option value="data">Data Específica</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="editarGrupoDiaSemana">
+                <label>Dia da Semana</label>
+                <select id="editarTarefaDiaSemana">
+                    <option value="segunda">Segunda-feira</option>
+                    <option value="terca">Terça-feira</option>
+                    <option value="quarta">Quarta-feira</option>
+                    <option value="quinta">Quinta-feira</option>
+                    <option value="sexta">Sexta-feira</option>
+                </select>
+            </div>
+            
+            <div class="form-group hidden" id="editarGrupoData">
+                <label>Data Específica <span style="color: #ef4444;">*</span></label>
+                <input type="date" id="editarTarefaDataEspecifica">
+                <span class="error-message hidden" id="editarTarefaDataError">Data é obrigatória</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Descrição <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="editarTarefaDescricao" placeholder="Digite a descrição da tarefa" required>
+                <span class="error-message hidden" id="editarTarefaDescricaoError">Descrição é obrigatória</span>
+            </div>
+            
+            <div class="form-group">
+                <label>Horário <span style="color: #ef4444;">*</span></label>
+                <input type="time" id="editarTarefaHorario" required>
+                <span class="error-message hidden" id="editarTarefaHorarioError">Horário é obrigatório</span>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="editarTarefaCalendario">
+                        📅 Mostrar no calendário da equipe
+                    </label>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="deletarTarefaPessoal()">🗑️ Excluir</button>
+                <button class="btn btn-secondary" onclick="fecharModal('modalEditarTarefa')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarEdicaoTarefa()" id="btnSalvarEdicaoTarefa">Salvar</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Modal de Marcar Status -->
     <div id="modalStatus" class="modal">
         <div class="modal-content">
@@ -1371,7 +1432,7 @@
         let intervaloPrazos = null;
         
         // Constantes e configurações
-        const VERSAO_SISTEMA = '5.2';
+        const VERSAO_SISTEMA = '5.4';
         const VERSAO_DB = 5;
         const INTERVALO_VERIFICACAO_PRAZOS = 3600000; // 1 hora
         
@@ -1487,29 +1548,19 @@
         
         // ========== SISTEMA DE SINCRONIZAÇÃO OTIMIZADO ==========
         function configurarSincronizacao() {
-            console.log('⚙️ Configurando sincronização...');
-            
             listenersDados.dados = database.ref('dados').on('value', (snapshot) => {
                 const dadosServidor = snapshot.val();
                 
                 if (dadosServidor) {
-                    console.log('📥 Dados recebidos do Firebase:', dadosServidor);
                     dados = dadosServidor;
                 } else {
-                    console.log('📊 Nenhum dado no Firebase - inicializando dados padrão...');
                     dados = inicializarDados();
-                    console.log('💾 Salvando dados iniciais no Firebase...');
                     salvarDados();
                 }
                 
-                console.log('🔄 Renderizando dashboard após receber dados...');
                 renderizarDashboard();
                 atualizarIndicadorSync('synced');
-                
-                // ✅ SINCRONIZAÇÃO AUTOMÁTICA MELHORADA
                 sincronizarAgendasPessoais();
-                
-                console.log('✅ Sincronização configurada com sucesso');
             });
         }
         
@@ -1544,19 +1595,34 @@
             }
         }
         
-        // ========== FUNÇÕES DE SALVAMENTO FIREBASE ==========
+        // ========== FUNÇÕES DE SALVAMENTO FIREBASE OTIMIZADAS ==========
+        let salvandoTimeout = null;
+        let dadosParaSalvar = null;
+
         function salvarDados() {
             if (!usuarioAtual) return;
+            
+            // Debounce para evitar múltiplas chamadas
+            clearTimeout(salvandoTimeout);
+            dadosParaSalvar = {...dados};
+            
+            salvandoTimeout = setTimeout(() => {
+                executarSalvamento();
+            }, 500); // Aguarda 500ms antes de salvar
+        }
+
+        function executarSalvamento() {
+            if (!dadosParaSalvar) return;
             
             try {
                 atualizarIndicadorSync('syncing');
                 
-                dados.ultimaAtualizacao = new Date().toISOString();
-                dados.ultimoUsuario = usuarioAtual.email;
+                dadosParaSalvar.ultimaAtualizacao = new Date().toISOString();
+                dadosParaSalvar.ultimoUsuario = usuarioAtual.email;
                 
-                database.ref('dados').set(dados).then(() => {
-                    console.log('Dados salvos no Firebase');
+                database.ref('dados').set(dadosParaSalvar).then(() => {
                     atualizarIndicadorSync('synced');
+                    dadosParaSalvar = null;
                 }).catch((error) => {
                     console.error('Erro ao salvar:', error);
                     atualizarIndicadorSync('error');
@@ -1568,65 +1634,14 @@
                 mostrarNotificacao('Erro ao salvar dados!', 'error');
             }
         }
-        
-        // ========== FUNÇÃO DE TESTE PARA DEBUG ==========
-        function testarAgenda() {
-            console.log('🧪 TESTE: Forçando renderização da agenda...');
-            
-            if (!dados) {
-                console.error('❌ TESTE: Dados não existem!');
-                dados = inicializarDados();
-            }
-            
-            const container = document.getElementById('agendaSemana');
-            if (!container) {
-                console.error('❌ TESTE: Container não encontrado!');
-                return;
-            }
-            
-            // Renderização simples de teste
-            container.innerHTML = `
-                <div class="dia-semana">
-                    <h4>TESTE - Segunda</h4>
-                    <div class="tarefa" style="background: #dbeafe;">
-                        <strong>🧪 TESTE FUNCIONANDO</strong><br>
-                        <span style="font-size: 10px;">Se você vê isso, a agenda funciona!</span>
-                    </div>
-                </div>
-                <div class="dia-semana">
-                    <h4>TESTE - Terça</h4>
-                    <div class="tarefa" style="background: #dcfce7;">
-                        <strong>📅 Reunião de teste</strong><br>
-                        <span style="font-size: 10px;">10:00 - 11:00</span>
-                    </div>
-                </div>
-                <div class="dia-semana">
-                    <h4>TESTE - Quarta</h4>
-                    <div class="tarefa" style="background: #fef3c7;">
-                        <strong>⏰ Prazo de teste</strong><br>
-                        <span style="font-size: 10px;">Atividade importante</span>
-                    </div>
-                </div>
-                <div class="dia-semana">
-                    <h4>TESTE - Quinta</h4>
-                    <div style="text-align: center; color: #9ca3af; font-size: 12px; padding: 20px;">
-                        Dia livre
-                    </div>
-                </div>
-                <div class="dia-semana">
-                    <h4>TESTE - Sexta</h4>
-                    <div class="tarefa" style="background: #fce7f3;">
-                        <strong>🎉 Fim de semana</strong><br>
-                        <span style="font-size: 10px;">Descanso merecido!</span>
-                    </div>
-                </div>
-            `;
-            
-            console.log('✅ TESTE: Agenda de teste renderizada!');
+
+        // Função para salvar imediatamente (para casos críticos)
+        function salvarDadosImediato() {
+            clearTimeout(salvandoTimeout);
+            dadosParaSalvar = {...dados};
+            executarSalvamento();
         }
         
-        // Adicionar ao console global para teste
-        window.testarAgenda = testarAgenda;
         function iniciarVerificacaoPrazos() {
             verificarPrazosAtividades();
             
@@ -1658,7 +1673,6 @@
 
                     if (novoStatus !== statusAnterior) {
                         atividade.status = novoStatus;
-                        console.log(`Status da atividade "${atividade.nome}" alterado automaticamente de ${statusAnterior} para ${novoStatus}`);
                     }
 
                     // Alertas de prazo
@@ -1725,8 +1739,6 @@
             
             // Atualiza agenda da pessoa atual se estiver visualizando
             renderizarAgendaSemana(estadoSistema.pessoaAtual);
-            
-            console.log('✅ Agendas sincronizadas automaticamente');
         }
 
         function sincronizarEventoParaAgendas(evento) {
@@ -1737,9 +1749,8 @@
                 if (nomePessoa === '_todos' || nomePessoa === 'Todos') {
                     // Para toda a equipe - não precisa fazer nada, 
                     // pois a agenda já mostra eventos onde a pessoa participa
-                    console.log(`Evento "${evento.titulo}" será visível para toda equipe`);
                 } else {
-                    console.log(`Evento "${evento.titulo}" será visível para ${nomePessoa}`);
+                    // Pessoa específica
                 }
             });
         }
@@ -1751,8 +1762,6 @@
         
         // ========== INICIALIZAÇÃO DO SISTEMA ==========
         function inicializarSistema() {
-            console.log('🚀 Iniciando Sistema de Gestão v5.2 Otimizado...');
-            
             esconderLogin();
             
             estadoSistema.usuarioEmail = usuarioAtual.email;
@@ -1761,36 +1770,24 @@
             document.getElementById('usuarioInfo').textContent = `👤 ${estadoSistema.usuarioNome}`;
             
             try {
-                // ✅ GARANTIR QUE OS DADOS EXISTAM
                 if (!dados) {
-                    console.log('📊 Inicializando dados padrão...');
                     dados = inicializarDados();
                 }
                 
                 configurarSincronizacao();
-                console.log('✅ Sincronização Firebase configurada');
-                
                 iniciarVerificacaoPrazos();
-                console.log('✅ Verificação automática de prazos iniciada');
                 
-                // ✅ FORÇAR RENDERIZAÇÃO INICIAL
                 setTimeout(() => {
-                    console.log('🔄 Forçando renderização inicial...');
                     renderizarDashboard();
-                    
-                    // Teste adicional da agenda
                     if (estadoSistema.pessoaAtual) {
                         renderizarAgendaSemana(estadoSistema.pessoaAtual);
                     }
                 }, 1000);
                 
-                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v5.2 otimizado!`);
-                
-                console.log('🎉 Sistema v5.2 totalmente inicializado - AGENDA READY!');
-                console.log('💡 DICA: Abra o console e digite testarAgenda() para teste');
+                mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema otimizado pronto!`);
                 
             } catch (error) {
-                console.error('❌ Erro na inicialização:', error);
+                console.error('Erro na inicialização:', error);
                 mostrarNotificacao('Erro na inicialização do sistema', 'error');
             }
         }
@@ -1916,16 +1913,6 @@
                         horarioFim: "16:00",
                         pessoas: ["Renato", "Bruna"],
                         descricao: "Revisão final do As Built antes da entrega"
-                    },
-                    {
-                        id: 4, 
-                        titulo: "Teste Agenda - Hoje", 
-                        tipo: "reuniao",
-                        data: new Date().toISOString().split('T')[0], // Hoje
-                        horarioInicio: "15:00",
-                        horarioFim: "16:00",
-                        pessoas: ["Renato"],
-                        descricao: "Evento de teste para verificar agenda"
                     }
                 ],
                 agendas: {
@@ -1999,12 +1986,10 @@
             try {
                 const d = new Date(data);
                 if (isNaN(d.getTime())) {
-                    console.error('❌ Data inválida:', data);
                     return 'Data inválida';
                 }
                 return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
             } catch (error) {
-                console.error('❌ Erro ao formatar data:', error);
                 return 'Erro';
             }
         }
@@ -2079,7 +2064,6 @@
                     const eventoDiv = document.createElement('div');
                     let classesEvento = `evento evento-${evento.tipo}`;
                     
-                    // ✅ MELHORIA: Diferenciação visual para tarefas pessoais
                     if (evento.origem === 'tarefa_pessoal') {
                         classesEvento += ' evento-pessoal';
                     }
@@ -2118,10 +2102,19 @@
                         e.stopPropagation();
                         if (evento.origem !== 'tarefa_pessoal') {
                             editarEvento(evento);
+                        } else {
+                            // Para tarefas pessoais no calendário, só pode editar o dono
+                            if (podeEditarTarefa(evento.pessoas[0])) {
+                                mostrarNotificacao('Para editar, vá à agenda pessoal da pessoa', 'warning');
+                            }
                         }
                     };
                     
-                    eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}${evento.origem === 'tarefa_pessoal' ? '\n👤 Tarefa pessoal' : '\n✏️ Clique para editar'}`;
+                    if (evento.origem === 'tarefa_pessoal') {
+                        eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n👤 Tarefa pessoal de ${evento.pessoas[0]}\n💡 Para editar, acesse a agenda pessoal`;
+                    } else {
+                        eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n✏️ Clique para editar (qualquer usuário pode editar)`;
+                    }
                     
                     if (evento.origem !== 'tarefa_pessoal') {
                         const deleteBtn = document.createElement('span');
@@ -2164,7 +2157,7 @@
                 }
             });
             
-            // ✅ MELHORIA: Tarefas pessoais que devem aparecer no calendário
+            // Tarefas pessoais que devem aparecer no calendário
             if (dados.agendas) {
                 const dataObj = new Date(data);
                 const diaSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'][dataObj.getDay()];
@@ -2537,7 +2530,6 @@
                 mostrarNotificacao('Evento criado com sucesso!');
             }
             
-            // ✅ SINCRONIZAÇÃO MELHORADA
             sincronizarEventoParaAgendas(evento);
             
             salvarDados();
@@ -2737,10 +2729,8 @@
             }
         }
         
-        // Funções de Agenda Individual
+        // ========== AGENDA INDIVIDUAL LIMPA E OTIMIZADA ==========
         function mostrarAgendaIndividual(nome, cargo) {
-            console.log('🚀 DEBUG: Abrindo agenda individual para:', nome);
-            
             estadoSistema.pessoaAtual = nome;
             
             document.getElementById('painelArea').classList.add('hidden');
@@ -2749,21 +2739,15 @@
             document.getElementById('pessoaNome').textContent = nome;
             document.getElementById('pessoaCargo').textContent = cargo;
             
-            console.log('🚀 DEBUG: Chamando renderizarResponsabilidades...');
             renderizarResponsabilidades(nome);
-            
-            console.log('🚀 DEBUG: Chamando renderizarAgendaSemana...');
             renderizarAgendaSemana(nome);
-            
-            console.log('🚀 DEBUG: Chamando carregarObservacoes...');
             carregarObservacoes(nome);
             
             const area = dados.areas[estadoSistema.areaAtual];
             atualizarBreadcrumb(`Dashboard > ${area.nome} > ${nome}`);
-            
-            console.log('✅ DEBUG: Agenda individual configurada para:', nome);
         }
         
+        // ========== SISTEMA DE RESPONSABILIDADES OTIMIZADO ==========
         function renderizarResponsabilidades(nome) {
             const lista = document.getElementById('responsabilidadesLista');
             lista.innerHTML = '';
@@ -2814,7 +2798,7 @@
                 
                 const diasRestantes = calcularDiasRestantes(atividade.prazo);
                 
-                div.style.cssText = `padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 12px; border-radius: 8px; ${diasRestantes < 0 ? 'border-color: #ef4444; background: #fee2e2;' : diasRestantes <= 3 ? 'border-color: #f59e0b; background: #fef3c7;' : ''}`;
+                div.style.cssText = `padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 12px; border-radius: 8px; transition: all 0.2s; ${diasRestantes < 0 ? 'border-color: #ef4444; background: #fee2e2;' : diasRestantes <= 3 ? 'border-color: #f59e0b; background: #fef3c7;' : ''}`;
                 
                 let prazoTexto = '';
                 if (diasRestantes < 0) {
@@ -2841,7 +2825,7 @@
                     </div>
                     <div style="font-size: 13px; color: #6b7280;">
                         ${areaNome}<br>
-                        Prazo: ${formatarData(atividade.prazo)} <span style="font-weight: bold;">${prazoTexto}</span><br>
+                        Prazo: ${formatarData(atividade.prazo)} <span style="font-weight: bold; color: ${diasRestantes < 0 ? '#ef4444' : diasRestantes <= 3 ? '#f59e0b' : '#10b981'};">${prazoTexto}</span><br>
                         Responsáveis: ${atividade.responsaveis.join(', ')}
                     </div>
                     <div style="margin-top: 8px;">
@@ -2868,6 +2852,7 @@
                     contador.textContent = totalReal;
                 }
                 contador.style.background = totalReal > 5 ? '#fbbf24' : '#e5e7eb';
+                contador.style.color = totalReal > 5 ? 'white' : '#374151';
             }
             
             if (totalResponsabilidades === 0) {
@@ -2887,16 +2872,10 @@
             }
         }
         
-        // ✅ FUNÇÃO CORRIGIDA DE AGENDA SEMANAL COM DEBUG
+        // ========== AGENDA SEMANAL LIMPA E PROFISSIONAL ==========
         function renderizarAgendaSemana(nome) {
-            console.log('🔧 DEBUG: Renderizando agenda para:', nome);
-            console.log('🔧 DEBUG: Dados disponíveis:', dados);
-            
             const container = document.getElementById('agendaSemana');
-            if (!container) {
-                console.error('❌ Container agendaSemana não encontrado!');
-                return;
-            }
+            if (!container) return;
             
             container.innerHTML = '';
             
@@ -2907,6 +2886,7 @@
                 const diaDiv = document.createElement('div');
                 diaDiv.className = 'dia-semana';
                 
+                // Calcular data do dia
                 const hoje = new Date();
                 const diaSemanaAtual = hoje.getDay();
                 const diasParaAdicionar = index + 1 - diaSemanaAtual;
@@ -2914,59 +2894,70 @@
                 dataDodia.setDate(hoje.getDate() + diasParaAdicionar);
                 const dataFormatada = dataDodia.toISOString().split('T')[0];
                 
-                console.log(`🔧 DEBUG: Processando ${dia} (${dataFormatada})`);
-                
+                // Header do dia
                 diaDiv.innerHTML = `
-                    <h4 style="margin-bottom: 12px; color: #1f2937;">
+                    <h4 style="margin-bottom: 12px; color: #1f2937; font-size: 14px;">
                         ${diasNomes[index]} 
-                        <span style="font-size: 11px; color: #6b7280;">${formatarData(dataFormatada)}</span>
+                        <span style="font-size: 11px; color: #6b7280; font-weight: normal;">${formatarData(dataFormatada)}</span>
                     </h4>
                 `;
                 
                 let temItens = false;
                 
-                // TESTE: Sempre adicionar um item para verificar se está funcionando
-                const testeDiv = document.createElement('div');
-                testeDiv.className = 'tarefa';
-                testeDiv.style.background = '#e0f2fe';
-                testeDiv.innerHTML = `
-                    <strong style="font-size: 11px;">🔧 TESTE: Sistema funcionando</strong>
-                    <br><span style="font-size: 10px; color: #6b7280;">
-                        Debug - ${new Date().toLocaleTimeString()}
-                    </span>
-                `;
-                diaDiv.appendChild(testeDiv);
-                temItens = true;
-                
-                // 1. TAREFAS PESSOAIS da agenda
-                if (dados && dados.agendas && dados.agendas[nome] && dados.agendas[nome][dia]) {
-                    console.log(`🔧 DEBUG: Encontradas ${dados.agendas[nome][dia].length} tarefas para ${dia}`);
+                // 1. TAREFAS PESSOAIS
+                if (dados?.agendas?.[nome]?.[dia]) {
                     dados.agendas[nome][dia].forEach(tarefa => {
                         const tarefaDiv = document.createElement('div');
-                        let classeTarefa = 'tarefa';
-                        if (tarefa.mostrarNoCalendario) classeTarefa += ' tarefa-global';
-                        
-                        tarefaDiv.className = classeTarefa;
+                        tarefaDiv.className = 'tarefa';
                         tarefaDiv.style.background = tarefa.mostrarNoCalendario ? '#ddd6fe' : '#f3f4f6';
+                        tarefaDiv.style.borderLeft = tarefa.mostrarNoCalendario ? '3px solid #8b5cf6' : '3px solid #e5e7eb';
+                        tarefaDiv.style.cursor = 'pointer';
+                        
+                        const [descricao, horario] = tarefa.descricao.split(' - ');
+                        
+                        // Verificar se o usuário atual pode editar esta tarefa
+                        const podeEditar = podeEditarTarefa(nome);
+                        
                         tarefaDiv.innerHTML = `
-                            <strong style="font-size: 11px;">📝 ${tarefa.descricao.split(' - ')[0]}</strong>
-                            <br><span style="font-size: 10px; color: #6b7280;">
-                                ${tarefa.descricao.split(' - ')[1] || ''}
-                                ${tarefa.mostrarNoCalendario ? ' • 📅 No calendário' : ''}
-                            </span>
-                            <span class="delete-btn" onclick="deletarTarefa('${nome}', '${dia}', '${tarefa.id}')">×</span>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div style="flex: 1;">
+                                    <strong style="font-size: 11px; color: #374151;">📝 ${descricao}</strong>
+                                    ${horario ? `<br><span style="font-size: 10px; color: #6b7280;">${horario}</span>` : ''}
+                                    ${tarefa.mostrarNoCalendario ? '<br><span style="font-size: 9px; color: #8b5cf6;">📅 Visível no calendário</span>' : ''}
+                                    ${podeEditar ? '<br><span style="font-size: 9px; color: #10b981;">✏️ Clique para editar</span>' : '<br><span style="font-size: 9px; color: #6b7280;">👤 Tarefa pessoal</span>'}
+                                </div>
+                                ${podeEditar ? `<span class="delete-btn" onclick="deletarTarefa('${nome}', '${dia}', '${tarefa.id}')" style="font-size: 12px; color: #ef4444; cursor: pointer; opacity: 0; transition: opacity 0.2s;">×</span>` : ''}
+                            </div>
                         `;
+                        
+                        // Adicionar evento de clique para edição (apenas se pode editar)
+                        if (podeEditar) {
+                            tarefaDiv.onclick = (e) => {
+                                e.stopPropagation();
+                                editarTarefaPessoal(nome, dia, tarefa.id);
+                            };
+                            
+                            // Mostrar delete btn no hover
+                            tarefaDiv.addEventListener('mouseenter', () => {
+                                const deleteBtn = tarefaDiv.querySelector('.delete-btn');
+                                if (deleteBtn) deleteBtn.style.opacity = '1';
+                            });
+                            tarefaDiv.addEventListener('mouseleave', () => {
+                                const deleteBtn = tarefaDiv.querySelector('.delete-btn');
+                                if (deleteBtn) deleteBtn.style.opacity = '0';
+                            });
+                        } else {
+                            tarefaDiv.style.cursor = 'default';
+                            tarefaDiv.title = `Tarefa pessoal de ${nome}`;
+                        }
+                        
                         diaDiv.appendChild(tarefaDiv);
                         temItens = true;
                     });
-                } else {
-                    console.log(`🔧 DEBUG: Nenhuma tarefa encontrada para ${nome} no ${dia}`);
                 }
                 
-                // 2. EVENTOS DO CALENDÁRIO onde a pessoa participa
+                // 2. EVENTOS DO CALENDÁRIO
                 const eventosDia = obterEventosDoDia(dataFormatada);
-                console.log(`🔧 DEBUG: ${eventosDia.length} eventos encontrados para ${dataFormatada}`);
-                
                 const eventosRelevantes = eventosDia.filter(evento => 
                     evento.pessoas && (
                         evento.pessoas.includes(nome) || 
@@ -2975,47 +2966,59 @@
                     ) && evento.origem !== 'tarefa_pessoal'
                 );
                 
-                console.log(`🔧 DEBUG: ${eventosRelevantes.length} eventos relevantes para ${nome}`);
-                
                 eventosRelevantes.forEach(evento => {
                     const eventoDiv = document.createElement('div');
                     eventoDiv.className = 'tarefa';
                     
-                    let corFundo = '#bfdbfe';
-                    let icone = '📅';
+                    let corFundo = '#e5e7eb';
+                    let corBorda = '#6b7280';
+                    let icone = '📌';
+                    
                     switch(evento.tipo) {
-                        case 'reuniao': corFundo = '#bfdbfe'; icone = '📅'; break;
-                        case 'entrega': corFundo = '#bbf7d0'; icone = '📦'; break;
-                        case 'prazo': corFundo = '#fecaca'; icone = '⏰'; break;
-                        case 'marco': corFundo = '#ddd6fe'; icone = '🎯'; break;
-                        case 'outro': corFundo = '#e5e7eb'; icone = '📌'; break;
+                        case 'reuniao': 
+                            corFundo = '#dbeafe'; 
+                            corBorda = '#3b82f6'; 
+                            icone = '📅'; 
+                            break;
+                        case 'entrega': 
+                            corFundo = '#d1fae5'; 
+                            corBorda = '#10b981'; 
+                            icone = '📦'; 
+                            break;
+                        case 'prazo': 
+                            corFundo = '#fee2e2'; 
+                            corBorda = '#ef4444'; 
+                            icone = '⏰'; 
+                            break;
+                        case 'marco': 
+                            corFundo = '#ede9fe'; 
+                            corBorda = '#8b5cf6'; 
+                            icone = '🎯'; 
+                            break;
                     }
                     
                     eventoDiv.style.background = corFundo;
+                    eventoDiv.style.borderLeft = `3px solid ${corBorda}`;
                     eventoDiv.style.cursor = 'pointer';
                     
                     eventoDiv.innerHTML = `
-                        <strong style="font-size: 11px;">${icone} ${evento.titulo}</strong>
-                        <br><span style="font-size: 10px; color: #374151;">
+                        <strong style="font-size: 11px; color: #374151;">${icone} ${evento.titulo}</strong>
+                        <br><span style="font-size: 10px; color: #6b7280;">
                             ${evento.horarioInicio || 'Todo dia'}
                             ${evento.horarioFim ? ` - ${evento.horarioFim}` : ''}
-                            ${evento.pessoas.length > 1 ? ` • ${evento.pessoas.length} pessoas` : ''}
                         </span>
+                        ${evento.pessoas.length > 1 ? `<br><span style="font-size: 9px; color: #6b7280;">👥 ${evento.pessoas.length} pessoas</span>` : ''}
                     `;
                     
-                    eventoDiv.onclick = function(e) {
-                        e.stopPropagation();
-                        editarEvento(evento);
-                    };
-                    
+                    eventoDiv.onclick = () => editarEvento(evento);
                     eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n💡 Clique para editar`;
                     
                     diaDiv.appendChild(eventoDiv);
                     temItens = true;
                 });
                 
-                // 3. PRAZOS DAS RESPONSABILIDADES (próximos 7 dias)
-                if (dados && dados.areas) {
+                // 3. PRAZOS DAS RESPONSABILIDADES
+                if (dados?.areas) {
                     Object.entries(dados.areas).forEach(([areaKey, area]) => {
                         area.atividades.forEach(atividade => {
                             if (atividade.responsaveis.includes(nome)) {
@@ -3024,51 +3027,41 @@
                                 const dataAtual = new Date(dataFormatada);
                                 dataAtual.setHours(0, 0, 0, 0);
                                 
-                                // Se o prazo é neste dia ou nos próximos 7 dias
                                 const diffDias = Math.floor((prazoData - dataAtual) / (1000 * 60 * 60 * 24));
                                 
-                                if (diffDias === 0) { // Prazo hoje
+                                if (diffDias === 0) {
+                                    // Prazo hoje
                                     const prazoDiv = document.createElement('div');
                                     prazoDiv.className = 'tarefa';
                                     prazoDiv.style.background = '#fee2e2';
                                     prazoDiv.style.borderLeft = '3px solid #ef4444';
+                                    prazoDiv.style.cursor = 'pointer';
                                     
                                     prazoDiv.innerHTML = `
                                         <strong style="font-size: 11px; color: #dc2626;">⏰ PRAZO HOJE</strong>
-                                        <br><span style="font-size: 10px; color: #374151;">
-                                            ${atividade.nome}
-                                        </span>
-                                        <br><span style="font-size: 9px; color: #6b7280;">
-                                            ${area.nome}
-                                        </span>
+                                        <br><span style="font-size: 10px; color: #374151;">${atividade.nome}</span>
+                                        <br><span style="font-size: 9px; color: #6b7280;">${area.nome}</span>
                                     `;
                                     
-                                    prazoDiv.onclick = function() {
-                                        editarResponsabilidade(atividade.id, areaKey);
-                                    };
-                                    
+                                    prazoDiv.onclick = () => editarResponsabilidade(atividade.id, areaKey);
                                     diaDiv.appendChild(prazoDiv);
                                     temItens = true;
-                                } else if (diffDias > 0 && diffDias <= 3) { // Próximos 3 dias
+                                    
+                                } else if (diffDias > 0 && diffDias <= 3) {
+                                    // Próximos 3 dias
                                     const prazoDiv = document.createElement('div');
                                     prazoDiv.className = 'tarefa';
                                     prazoDiv.style.background = '#fef3c7';
                                     prazoDiv.style.borderLeft = '3px solid #f59e0b';
+                                    prazoDiv.style.cursor = 'pointer';
                                     
                                     prazoDiv.innerHTML = `
                                         <strong style="font-size: 11px; color: #d97706;">📅 Em ${diffDias} dia${diffDias > 1 ? 's' : ''}</strong>
-                                        <br><span style="font-size: 10px; color: #374151;">
-                                            ${atividade.nome}
-                                        </span>
-                                        <br><span style="font-size: 9px; color: #6b7280;">
-                                            ${area.nome}
-                                        </span>
+                                        <br><span style="font-size: 10px; color: #374151;">${atividade.nome}</span>
+                                        <br><span style="font-size: 9px; color: #6b7280;">${area.nome}</span>
                                     `;
                                     
-                                    prazoDiv.onclick = function() {
-                                        editarResponsabilidade(atividade.id, areaKey);
-                                    };
-                                    
+                                    prazoDiv.onclick = () => editarResponsabilidade(atividade.id, areaKey);
                                     diaDiv.appendChild(prazoDiv);
                                     temItens = true;
                                 }
@@ -3077,24 +3070,40 @@
                     });
                 }
                 
-                // Status do dia (ausência, home office)
+                // 4. STATUS DO DIA (ausência, home office)
                 const statusDia = dados?.statusPessoal?.[nome]?.[dataFormatada];
                 if (statusDia) {
-                    const badgeDiv = document.createElement('div');
-                    badgeDiv.className = `status-badge ${statusDia.tipo === 'ausencia' ? 'status-ausencia' : 'status-home-office'}`;
-                    badgeDiv.textContent = statusDia.tipo === 'ausencia' ? 'Ausente' : 'Home Office';
-                    diaDiv.appendChild(badgeDiv);
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'tarefa';
+                    statusDiv.style.background = statusDia.tipo === 'ausencia' ? '#fee2e2' : '#dbeafe';
+                    statusDiv.style.borderLeft = statusDia.tipo === 'ausencia' ? '3px solid #ef4444' : '3px solid #3b82f6';
+                    
+                    const iconeStatus = statusDia.tipo === 'ausencia' ? '❌' : '🏠';
+                    const textoStatus = statusDia.tipo === 'ausencia' ? 'Ausente' : 'Home Office';
+                    
+                    statusDiv.innerHTML = `
+                        <strong style="font-size: 11px; color: #374151;">${iconeStatus} ${textoStatus}</strong>
+                        ${statusDia.observacao ? `<br><span style="font-size: 10px; color: #6b7280;">${statusDia.observacao}</span>` : ''}
+                    `;
+                    
+                    diaDiv.appendChild(statusDiv);
                     temItens = true;
+                }
+                
+                // Mensagem se não há itens
+                if (!temItens) {
+                    const vazioDiv = document.createElement('div');
+                    vazioDiv.style.cssText = 'text-align: center; color: #9ca3af; font-size: 12px; padding: 20px 8px; font-style: italic;';
+                    vazioDiv.textContent = 'Dia livre';
+                    diaDiv.appendChild(vazioDiv);
                 }
                 
                 container.appendChild(diaDiv);
             });
-            
-            console.log('✅ DEBUG: Agenda renderizada com sucesso para:', nome);
         }
         
         function carregarObservacoes(nome) {
-            const observacoes = dados.agendas[nome]?.observacoes || '';
+            const observacoes = dados.agendas?.[nome]?.observacoes || '';
             document.getElementById('observacoesPessoais').value = observacoes;
         }
         
@@ -3105,6 +3114,277 @@
             }
             dados.agendas[nome].observacoes = document.getElementById('observacoesPessoais').value;
             salvarDados();
+        }
+        
+        // ========== SISTEMA DE BUSCA OTIMIZADO ==========
+        let timeoutBusca = null;
+
+        // Debounce reduzido para melhor UX
+        function buscarGlobalDebounced() {
+            clearTimeout(timeoutBusca);
+            timeoutBusca = setTimeout(buscarGlobal, 150); // Reduzido de 300ms para 150ms
+        }
+
+        // Função de busca otimizada
+        function buscarGlobal() {
+            const termo = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!termo) {
+                renderizarDashboard();
+                return;
+            }
+            
+            const resultados = [];
+            const termoNormalizado = normalizarTexto(termo);
+            
+            // Cache para evitar recalcular pessoas múltiplas vezes
+            const pessoasCache = new Map();
+            
+            // Busca em atividades (otimizada)
+            Object.entries(dados.areas).forEach(([areaKey, area]) => {
+                area.atividades.forEach(atividade => {
+                    const match = normalizarTexto(atividade.nome).includes(termoNormalizado) ||
+                                 atividade.responsaveis.some(r => normalizarTexto(r).includes(termoNormalizado));
+                    
+                    if (match) {
+                        resultados.push({
+                            tipo: 'atividade',
+                            area: area.nome,
+                            areaKey: areaKey,
+                            atividade: atividade,
+                            relevancia: calcularRelevancia(atividade.nome, termo)
+                        });
+                    }
+                });
+            });
+            
+            // Busca em eventos (otimizada)
+            dados.eventos.forEach(evento => {
+                const match = normalizarTexto(evento.titulo).includes(termoNormalizado) ||
+                             (evento.pessoas && evento.pessoas.some(p => normalizarTexto(p).includes(termoNormalizado)));
+                
+                if (match) {
+                    resultados.push({
+                        tipo: 'evento',
+                        evento: evento,
+                        relevancia: calcularRelevancia(evento.titulo, termo)
+                    });
+                }
+            });
+            
+            // Busca em pessoas (otimizada e sem duplicatas)
+            Object.values(dados.areas).forEach(area => {
+                area.equipe.forEach(membro => {
+                    if (!pessoasCache.has(membro.nome)) {
+                        const match = normalizarTexto(membro.nome).includes(termoNormalizado) || 
+                                     normalizarTexto(membro.cargo).includes(termoNormalizado);
+                        
+                        if (match) {
+                            pessoasCache.set(membro.nome, {
+                                nome: membro.nome,
+                                cargo: membro.cargo,
+                                area: area.nome,
+                                relevancia: calcularRelevancia(membro.nome, termo)
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Adicionar pessoas aos resultados
+            pessoasCache.forEach(pessoa => {
+                resultados.push({
+                    tipo: 'pessoa',
+                    pessoa: pessoa,
+                    relevancia: pessoa.relevancia
+                });
+            });
+            
+            // Ordenar por relevância
+            resultados.sort((a, b) => b.relevancia - a.relevancia);
+            
+            mostrarResultadosBusca(resultados, termo);
+        }
+
+        // Função para calcular relevância da busca
+        function calcularRelevancia(texto, termo) {
+            const textoNorm = normalizarTexto(texto);
+            const termoNorm = normalizarTexto(termo);
+            
+            // Pontuação por match exato
+            if (textoNorm === termoNorm) return 100;
+            
+            // Pontuação por início
+            if (textoNorm.startsWith(termoNorm)) return 80;
+            
+            // Pontuação por inclusão
+            if (textoNorm.includes(termoNorm)) return 60;
+            
+            // Pontuação por palavras
+            const palavras = termoNorm.split(' ');
+            let pontos = 0;
+            palavras.forEach(palavra => {
+                if (textoNorm.includes(palavra)) pontos += 20;
+            });
+            
+            return pontos;
+        }
+
+        // Função otimizada para mostrar resultados
+        function mostrarResultadosBusca(resultados, termo) {
+            const grid = document.getElementById('areasGrid');
+            grid.innerHTML = '';
+            
+            const cardResultados = document.createElement('div');
+            cardResultados.className = 'card';
+            cardResultados.style.gridColumn = 'span 3';
+            
+            // Header dos resultados
+            cardResultados.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>🔍 Resultados: "${termo}"</h3>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="background: #e5e7eb; padding: 4px 12px; border-radius: 20px; font-size: 13px;">
+                            ${resultados.length} resultado${resultados.length !== 1 ? 's' : ''}
+                        </span>
+                        <button class="btn btn-secondary btn-sm" onclick="limparBusca()">✕ Limpar</button>
+                    </div>
+                </div>
+            `;
+            
+            if (resultados.length === 0) {
+                cardResultados.innerHTML += `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p style="font-size: 48px; margin-bottom: 16px;">🔍</p>
+                        <p>Nenhum resultado encontrado para "${termo}"</p>
+                        <p style="font-size: 14px; margin-top: 8px;">Tente usar termos diferentes ou verifique a ortografia</p>
+                    </div>
+                `;
+            } else {
+                // Agrupar resultados por tipo
+                const atividades = resultados.filter(r => r.tipo === 'atividade').slice(0, 10); // Limitar para performance
+                const eventos = resultados.filter(r => r.tipo === 'evento').slice(0, 10);
+                const pessoas = resultados.filter(r => r.tipo === 'pessoa').slice(0, 10);
+                
+                // Renderizar cada tipo
+                renderizarResultadosAtividades(cardResultados, atividades);
+                renderizarResultadosEventos(cardResultados, eventos);
+                renderizarResultadosPessoas(cardResultados, pessoas);
+            }
+            
+            grid.appendChild(cardResultados);
+        }
+
+        // Funções auxiliares para renderizar resultados por tipo
+        function renderizarResultadosAtividades(container, atividades) {
+            if (atividades.length === 0) return;
+            
+            container.innerHTML += '<h4 style="margin: 20px 0 12px 0; color: #374151;">📋 Atividades</h4>';
+            
+            atividades.forEach(res => {
+                const diasRestantes = calcularDiasRestantes(res.atividade.prazo);
+                const urgente = diasRestantes <= 3 ? 'style="border-left: 3px solid #ef4444;"' : '';
+                
+                container.innerHTML += `
+                    <div ${urgente} style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" 
+                         onclick="abrirAreaAtividade('${res.areaKey}', ${res.atividade.id})"
+                         onmouseover="this.style.background='#f9fafb'"
+                         onmouseout="this.style.background='white'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #374151;">${res.atividade.nome}</strong>
+                            <span class="status-indicator status-${res.atividade.status}"></span>
+                        </div>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                            📁 ${res.area} | 👥 ${res.atividade.responsaveis.join(', ')}
+                            <br>📅 ${formatarData(res.atividade.prazo)} 
+                            ${diasRestantes <= 0 ? '<span style="color: #ef4444; font-weight: bold;">(VENCIDO)</span>' :
+                              diasRestantes <= 3 ? '<span style="color: #f59e0b; font-weight: bold;">(URGENTE)</span>' :
+                              `(${diasRestantes} dias)`}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarResultadosEventos(container, eventos) {
+            if (eventos.length === 0) return;
+            
+            container.innerHTML += '<h4 style="margin: 20px 0 12px 0; color: #374151;">📅 Eventos</h4>';
+            
+            eventos.forEach(res => {
+                const evento = res.evento;
+                const icones = {reuniao: '📅', entrega: '📦', prazo: '⏰', marco: '🎯', outro: '📌'};
+                const icone = icones[evento.tipo] || '📌';
+                
+                container.innerHTML += `
+                    <div style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                         onclick="editarEvento({id: ${evento.id}})"
+                         onmouseover="this.style.background='#f9fafb'"
+                         onmouseout="this.style.background='white'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #374151;">${icone} ${evento.titulo}</strong>
+                            <span style="background: #e5e7eb; padding: 2px 8px; border-radius: 12px; font-size: 11px; text-transform: capitalize;">
+                                ${evento.tipo}
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                            📅 ${formatarData(evento.data)} ${evento.horarioInicio ? `às ${evento.horarioInicio}` : ''} 
+                            | 👥 ${evento.pessoas ? evento.pessoas.length : 0} pessoa${evento.pessoas?.length !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarResultadosPessoas(container, pessoas) {
+            if (pessoas.length === 0) return;
+            
+            container.innerHTML += '<h4 style="margin: 20px 0 12px 0; color: #374151;">👥 Pessoas</h4>';
+            
+            pessoas.forEach(res => {
+                container.innerHTML += `
+                    <div style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                         onmouseover="this.style.background='#f9fafb'"
+                         onmouseout="this.style.background='white'">
+                        <strong style="color: #374151;">👤 ${res.pessoa.nome}</strong>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                            💼 ${res.pessoa.cargo} | 📁 ${res.pessoa.area}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function limparBusca() {
+            document.getElementById('searchInput').value = '';
+            renderizarDashboard();
+        }
+        
+        function abrirAreaAtividade(areaKey, atividadeId) {
+            mostrarArea(areaKey);
+            setTimeout(() => {
+                const elemento = document.querySelector(`[data-atividade-id="${atividadeId}"]`);
+                if (elemento) {
+                    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    elemento.style.border = '2px solid #3b82f6';
+                    setTimeout(() => {
+                        elemento.style.border = '1px solid #e5e7eb';
+                    }, 2000);
+                }
+            }, 100);
+        }
+        
+        function filtrarStatus(status, elemento) {
+            estadoSistema.filtroAtual = status;
+            
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            elemento.classList.add('active');
+            
+            if (estadoSistema.areaAtual) {
+                renderizarAtividades(dados.areas[estadoSistema.areaAtual]);
+            }
         }
         
         // Outras funções auxiliares
@@ -3393,199 +3673,6 @@
             reader.readAsText(file);
         }
         
-        // ========== FUNÇÕES DE BUSCA MELHORADAS ==========
-        let timeoutBusca = null;
-        
-        function buscarGlobalDebounced() {
-            clearTimeout(timeoutBusca);
-            timeoutBusca = setTimeout(buscarGlobal, 300);
-        }
-        
-        function buscarGlobal() {
-            const termo = document.getElementById('searchInput').value.toLowerCase().trim();
-            
-            if (!termo) {
-                renderizarDashboard();
-                return;
-            }
-            
-            let resultados = [];
-            const termoNormalizado = normalizarTexto(termo);
-            
-            // ✅ BUSCA MELHORADA COM NORMALIZAÇÃO
-            Object.entries(dados.areas).forEach(([areaKey, area]) => {
-                area.atividades.forEach(atividade => {
-                    const nomeNormalizado = normalizarTexto(atividade.nome);
-                    const responsaveisNormalizados = atividade.responsaveis.map(r => normalizarTexto(r));
-                    
-                    const match = nomeNormalizado.includes(termoNormalizado) ||
-                                 responsaveisNormalizados.some(r => r.includes(termoNormalizado));
-                    
-                    if (match) {
-                        resultados.push({
-                            tipo: 'atividade',
-                            area: area.nome,
-                            areaKey: areaKey,
-                            atividade: atividade
-                        });
-                    }
-                });
-            });
-            
-            dados.eventos.forEach(evento => {
-                const tituloNormalizado = normalizarTexto(evento.titulo);
-                const pessoasNormalizadas = evento.pessoas ? evento.pessoas.map(p => normalizarTexto(p)) : [];
-                
-                if (tituloNormalizado.includes(termoNormalizado) ||
-                    pessoasNormalizadas.some(p => p.includes(termoNormalizado))) {
-                    resultados.push({
-                        tipo: 'evento',
-                        evento: evento
-                    });
-                }
-            });
-            
-            const pessoasEncontradas = new Set();
-            Object.values(dados.areas).forEach(area => {
-                area.equipe.forEach(membro => {
-                    const nomeNormalizado = normalizarTexto(membro.nome);
-                    const cargoNormalizado = normalizarTexto(membro.cargo);
-                    
-                    if (nomeNormalizado.includes(termoNormalizado) || 
-                        cargoNormalizado.includes(termoNormalizado)) {
-                        pessoasEncontradas.add({
-                            nome: membro.nome,
-                            cargo: membro.cargo,
-                            area: area.nome
-                        });
-                    }
-                });
-            });
-            
-            pessoasEncontradas.forEach(pessoa => {
-                resultados.push({
-                    tipo: 'pessoa',
-                    pessoa: pessoa
-                });
-            });
-            
-            mostrarResultadosBusca(resultados, termo);
-        }
-        
-        function mostrarResultadosBusca(resultados, termo) {
-            const grid = document.getElementById('areasGrid');
-            grid.innerHTML = '';
-            
-            const cardResultados = document.createElement('div');
-            cardResultados.className = 'card';
-            cardResultados.style.gridColumn = 'span 3';
-            
-            cardResultados.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>🔍 Resultados da busca: "${termo}"</h3>
-                    <button class="btn btn-secondary btn-sm" onclick="limparBusca()">Limpar busca</button>
-                </div>
-                <p style="color: #6b7280; margin-bottom: 16px;">${resultados.length} resultados encontrados</p>
-            `;
-            
-            if (resultados.length === 0) {
-                cardResultados.innerHTML += `
-                    <div style="text-align: center; padding: 40px; color: #6b7280;">
-                        <p style="font-size: 48px; margin-bottom: 16px;">🔍</p>
-                        <p>Nenhum resultado encontrado para "${termo}"</p>
-                    </div>
-                `;
-            } else {
-                const atividades = resultados.filter(r => r.tipo === 'atividade');
-                const eventos = resultados.filter(r => r.tipo === 'evento');
-                const pessoas = resultados.filter(r => r.tipo === 'pessoa');
-                
-                if (atividades.length > 0) {
-                    cardResultados.innerHTML += '<h4 style="margin-top: 20px; margin-bottom: 12px;">📋 Atividades</h4>';
-                    atividades.forEach(res => {
-                        const diasRestantes = calcularDiasRestantes(res.atividade.prazo);
-                        cardResultados.innerHTML += `
-                            <div style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px; cursor: pointer;" 
-                                 onclick="abrirAreaAtividade('${res.areaKey}', ${res.atividade.id})">
-                                <strong>${res.atividade.nome}</strong>
-                                <span class="status-indicator status-${res.atividade.status}" style="float: right;"></span>
-                                <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
-                                    ${res.area} | Responsáveis: ${res.atividade.responsaveis.join(', ')}
-                                    <br>Prazo: ${formatarData(res.atividade.prazo)} (${diasRestantes} dias)
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                if (eventos.length > 0) {
-                    cardResultados.innerHTML += '<h4 style="margin-top: 20px; margin-bottom: 12px;">📅 Eventos</h4>';
-                    eventos.forEach(res => {
-                        cardResultados.innerHTML += `
-                            <div style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px;">
-                                <strong>${res.evento.titulo}</strong>
-                                <span class="evento evento-${res.evento.tipo}" style="float: right; padding: 4px 8px;">
-                                    ${res.evento.tipo}
-                                </span>
-                                <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
-                                    ${formatarData(res.evento.data)} ${res.evento.horarioInicio ? `às ${res.evento.horarioInicio}` : ''} | 
-                                    ${res.evento.pessoas ? res.evento.pessoas.length : 0} pessoa(s)
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                if (pessoas.length > 0) {
-                    cardResultados.innerHTML += '<h4 style="margin-top: 20px; margin-bottom: 12px;">👥 Pessoas</h4>';
-                    pessoas.forEach(res => {
-                        cardResultados.innerHTML += `
-                            <div style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px;">
-                                <strong>${res.pessoa.nome}</strong>
-                                <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
-                                    ${res.pessoa.cargo} | ${res.pessoa.area}
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-            }
-            
-            grid.appendChild(cardResultados);
-        }
-        
-        function limparBusca() {
-            document.getElementById('searchInput').value = '';
-            renderizarDashboard();
-        }
-        
-        function abrirAreaAtividade(areaKey, atividadeId) {
-            mostrarArea(areaKey);
-            setTimeout(() => {
-                const elemento = document.querySelector(`[data-atividade-id="${atividadeId}"]`);
-                if (elemento) {
-                    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    elemento.style.border = '2px solid #3b82f6';
-                    setTimeout(() => {
-                        elemento.style.border = '1px solid #e5e7eb';
-                    }, 2000);
-                }
-            }, 100);
-        }
-        
-        function filtrarStatus(status, elemento) {
-            estadoSistema.filtroAtual = status;
-            
-            document.querySelectorAll('.filter-pill').forEach(pill => {
-                pill.classList.remove('active');
-            });
-            elemento.classList.add('active');
-            
-            if (estadoSistema.areaAtual) {
-                renderizarAtividades(dados.areas[estadoSistema.areaAtual]);
-            }
-        }
-        
         // Funções auxiliares do sistema de responsabilidades
         function mudarStatusResponsabilidade(atividadeId, areaKey, novoStatus) {
             const area = dados.areas[areaKey];
@@ -3602,6 +3689,182 @@
             const areaTemp = estadoSistema.areaAtual;
             estadoSistema.areaAtual = areaKey;
             editarAtividade(atividadeId);
+        }
+        
+        // ========== FUNÇÕES DE EDIÇÃO DE TAREFAS PESSOAIS ==========
+        
+        /*
+        SISTEMA DE PERMISSÕES v5.4:
+        
+        📅 EVENTOS (podem ser editados por qualquer usuário):
+        - Criados no calendário principal
+        - Aparecem automaticamente na agenda de todos os participantes
+        - Qualquer usuário logado pode criar, editar ou deletar
+        - Ícone ✏️ sempre visível
+        
+        📝 TAREFAS PESSOAIS (só podem ser editadas pelo dono):
+        - Criadas na agenda individual de cada pessoa
+        - Só aparecem no calendário se marcado "mostrar no calendário"
+        - Apenas o dono da tarefa pode editar/deletar
+        - Interface mostra "✏️ Clique para editar" apenas para o dono
+        - Outros usuários veem "👤 Tarefa pessoal"
+        */
+
+        // Abrir modal de edição de tarefa pessoal
+        function editarTarefaPessoal(nomePessoa, dia, tarefaId) {
+            // Verificar permissão - apenas o dono pode editar
+            if (estadoSistema.pessoaAtual !== nomePessoa) {
+                mostrarNotificacao('Você só pode editar suas próprias tarefas!', 'error');
+                return;
+            }
+            
+            // Buscar a tarefa
+            const tarefa = dados.agendas?.[nomePessoa]?.[dia]?.find(t => t.id == tarefaId);
+            if (!tarefa) {
+                mostrarNotificacao('Tarefa não encontrada!', 'error');
+                return;
+            }
+            
+            // Separar descrição e horário
+            const [descricao, horario] = tarefa.descricao.split(' - ');
+            
+            // Preencher modal
+            document.getElementById('editarTarefaId').value = tarefaId;
+            document.getElementById('editarTarefaDono').value = nomePessoa;
+            document.getElementById('editarTarefaDia').value = dia;
+            document.getElementById('editarTarefaTipo').value = 'semanal';
+            document.getElementById('editarTarefaDiaSemana').value = dia;
+            document.getElementById('editarTarefaDescricao').value = descricao || tarefa.descricao;
+            document.getElementById('editarTarefaHorario').value = horario || '09:00';
+            document.getElementById('editarTarefaCalendario').checked = tarefa.mostrarNoCalendario || false;
+            
+            // Mostrar grupo correto
+            alternarTipoAgendamentoEdicao();
+            
+            // Abrir modal
+            document.getElementById('modalEditarTarefa').classList.add('active');
+        }
+
+        // Alternar tipo de agendamento na edição
+        function alternarTipoAgendamentoEdicao() {
+            const tipo = document.getElementById('editarTarefaTipo').value;
+            if (tipo === 'semanal') {
+                document.getElementById('editarGrupoDiaSemana').classList.remove('hidden');
+                document.getElementById('editarGrupoData').classList.add('hidden');
+            } else {
+                document.getElementById('editarGrupoDiaSemana').classList.add('hidden');
+                document.getElementById('editarGrupoData').classList.remove('hidden');
+            }
+        }
+
+        // Salvar edição de tarefa
+        function salvarEdicaoTarefa() {
+            const tarefaId = document.getElementById('editarTarefaId').value;
+            const nomePessoa = document.getElementById('editarTarefaDono').value;
+            const diaOriginal = document.getElementById('editarTarefaDia').value;
+            const tipo = document.getElementById('editarTarefaTipo').value;
+            const descricao = document.getElementById('editarTarefaDescricao').value;
+            const horario = document.getElementById('editarTarefaHorario').value;
+            const mostrarNoCalendario = document.getElementById('editarTarefaCalendario').checked;
+            
+            if (!validarFormulario([
+                {id: 'editarTarefaDescricao'},
+                {id: 'editarTarefaHorario'}
+            ])) {
+                mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+            
+            // Verificar permissão novamente
+            if (estadoSistema.pessoaAtual !== nomePessoa) {
+                mostrarNotificacao('Permissão negada!', 'error');
+                return;
+            }
+            
+            if (tipo === 'data') {
+                if (!document.getElementById('editarTarefaDataEspecifica').value) {
+                    document.getElementById('editarTarefaDataEspecifica').classList.add('input-error');
+                    document.getElementById('editarTarefaDataError').classList.remove('hidden');
+                    mostrarNotificacao('Selecione uma data!', 'error');
+                    return;
+                }
+            }
+            
+            // Remover tarefa original
+            dados.agendas[nomePessoa][diaOriginal] = dados.agendas[nomePessoa][diaOriginal].filter(t => t.id != tarefaId);
+            
+            if (tipo === 'semanal') {
+                const novoDia = document.getElementById('editarTarefaDiaSemana').value;
+                
+                // Criar tarefa atualizada
+                const tarefaAtualizada = {
+                    id: tarefaId, // Manter o mesmo ID
+                    descricao: `${descricao} - ${horario}`,
+                    mostrarNoCalendario: mostrarNoCalendario
+                };
+                
+                // Garantir que o array do dia existe
+                if (!dados.agendas[nomePessoa][novoDia]) {
+                    dados.agendas[nomePessoa][novoDia] = [];
+                }
+                
+                dados.agendas[nomePessoa][novoDia].push(tarefaAtualizada);
+            } else {
+                // Converter para evento
+                const dataEspecifica = document.getElementById('editarTarefaDataEspecifica').value;
+                
+                // Remover da agenda pessoal e criar evento
+                const evento = {
+                    id: Date.now(), // Novo ID para evento
+                    data: dataEspecifica,
+                    horarioInicio: horario,
+                    titulo: descricao,
+                    tipo: 'outro',
+                    pessoas: [nomePessoa],
+                    origem: 'tarefa_pessoal'
+                };
+                dados.eventos.push(evento);
+            }
+            
+            salvarDados();
+            fecharModal('modalEditarTarefa');
+            renderizarAgendaSemana(nomePessoa);
+            gerarCalendario();
+            
+            mostrarNotificacao('Tarefa atualizada com sucesso!');
+        }
+
+        // Deletar tarefa pessoal (através do modal de edição)
+        function deletarTarefaPessoal() {
+            const tarefaId = document.getElementById('editarTarefaId').value;
+            const nomePessoa = document.getElementById('editarTarefaDono').value;
+            const dia = document.getElementById('editarTarefaDia').value;
+            
+            // Verificar permissão
+            if (estadoSistema.pessoaAtual !== nomePessoa) {
+                mostrarNotificacao('Permissão negada!', 'error');
+                return;
+            }
+            
+            if (confirm('Deseja realmente excluir esta tarefa?')) {
+                dados.agendas[nomePessoa][dia] = dados.agendas[nomePessoa][dia].filter(t => t.id != tarefaId);
+                
+                salvarDados();
+                fecharModal('modalEditarTarefa');
+                renderizarAgendaSemana(nomePessoa);
+                
+                mostrarNotificacao('Tarefa excluída!');
+            }
+        }
+
+        // Verificar se usuário pode editar tarefa
+        function podeEditarTarefa(nomeDono) {
+            return estadoSistema.pessoaAtual === nomeDono;
+        }
+
+        // Verificar se usuário pode editar evento (todos podem)
+        function podeEditarEvento() {
+            return true; // Qualquer usuário logado pode editar eventos
         }
         
         function validarFormulario(campos) {
@@ -3646,20 +3909,18 @@
             estadoSistema.editandoAtividade = null;
             estadoSistema.editandoEvento = null;
             estadoSistema.pessoasSelecionadas.clear();
+            
+            // Limpar campos específicos do modal de editar tarefa
+            if (modalId === 'modalEditarTarefa') {
+                document.getElementById('editarTarefaId').value = '';
+                document.getElementById('editarTarefaDono').value = '';
+                document.getElementById('editarTarefaDia').value = '';
+            }
         }
         
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            console.log(`🏗️ Sistema de Gestão Firebase v${VERSAO_SISTEMA} iniciado`);
-            console.log('🚀 VERSÃO 5.2 - SISTEMA OTIMIZADO PARA USABILIDADE:');
-            console.log('✅ Sincronização Agenda ↔ Calendário funcionando perfeitamente');
-            console.log('✅ Sistema simplificado - removidas funcionalidades desnecessárias');
-            console.log('✅ Busca inteligente com normalização de acentos');
-            console.log('✅ Interface responsiva melhorada');
-            console.log('✅ Performance otimizada para 15 usuários');
-            console.log('✅ Código limpo e organizado');
-            console.log('🎉 TODAS AS MELHORIAS DE USABILIDADE IMPLEMENTADAS!');
-            
+            // Atalhos de teclado
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.key === 's') {
                     e.preventDefault();
