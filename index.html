@@ -8,6 +8,9 @@
     <!-- ✅ NOVO: CSS do Sistema de Chat -->
     <link rel="stylesheet" href="modules/chat-styles.css">
     
+    <!-- ✅ NOVO: jsPDF para geração de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -235,6 +238,7 @@
             font-size: 12px;
         }
         
+        /* ✅ CALENDÁRIO ULTRA COMPACTO - SEM SCROLL */
         .calendario {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -245,13 +249,14 @@
         .dia {
             background: white;
             border: 1px solid #e5e7eb;
-            padding: 12px;
-            min-height: 120px;
+            padding: 8px;
+            min-height: 90px; /* ✅ ALTURA MÍNIMA REDUZIDA */
+            max-height: 90px; /* ✅ ALTURA FIXA BAIXA */
+            overflow: hidden; /* ✅ SEM SCROLL */
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
             position: relative;
-            overflow: visible;
         }
         
         .dia:hover {
@@ -275,64 +280,70 @@
         
         .dia-numero {
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 4px; /* ✅ AINDA MAIS REDUZIDO */
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            padding-bottom: 2px;
+            font-size: 12px; /* ✅ NÚMERO MENOR */
         }
         
         .feriado-label {
-            font-size: 10px;
+            font-size: 8px; /* ✅ REDUZIDO */
             background: #f59e0b;
             color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 1px 4px; /* ✅ REDUZIDO */
+            border-radius: 3px;
         }
         
-        .evento {
+        /* ✅ MINI-EVENTOS ULTRA COMPACTOS */
+        .mini-evento {
             background: #3b82f6;
             color: white;
-            padding: 6px 8px;
-            border-radius: 6px;
-            margin-top: 6px;
-            font-size: 11px;
+            padding: 2px 4px; /* ✅ SUPER REDUZIDO */
+            border-radius: 3px;
+            margin-top: 2px;
+            font-size: 8px; /* ✅ FONTE MUITO PEQUENA */
             cursor: pointer;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 2px;
-            position: relative;
             transition: all 0.2s;
             user-select: none;
+            line-height: 1;
+            height: 14px; /* ✅ ALTURA FIXA MINI */
         }
         
-        .evento:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            z-index: 10;
+        .mini-evento:hover {
+            transform: scale(1.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            z-index: 15;
         }
         
-        .evento:hover::before {
-            content: '✏️';
-            position: absolute;
-            right: -20px;
-            top: 0;
-            opacity: 0.7;
-            font-size: 12px;
-        }
-        
-        .evento-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .evento-info {
-            font-size: 9px;
-            opacity: 0.9;
+        /* ✅ INDICADOR DE MAIS EVENTOS MINI */
+        .mais-eventos-mini {
+            background: #6b7280;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 7px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 2px;
+            transition: all 0.2s;
+            height: 12px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
+        }
+        
+        .mais-eventos-mini:hover {
+            background: #4b5563;
+            transform: scale(1.05);
         }
         
         /* ✅ CORES UNIFICADAS PARA EVENTOS E TAREFAS */
@@ -345,30 +356,30 @@
         .evento-dia-completo {
             background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             margin: 2px -4px;
-            padding: 6px 8px;
+            padding: 4px 6px; /* ✅ REDUZIDO */
         }
         
         .evento-multi-dia {
-            border-left: 3px solid #1e40af;
+            border-left: 2px solid #1e40af; /* ✅ REDUZIDO */
             background: linear-gradient(to right, #3b82f6, #60a5fa);
         }
         
-        /* ✅ EVENTOS RECORRENTES - NOVO VISUAL */
+        /* ✅ EVENTOS RECORRENTES - SEM BORDAS TRACEJADAS */
         .evento-recorrente {
-            border: 2px dashed rgba(255, 255, 255, 0.5);
             position: relative;
+            /* ✅ REMOVIDO: border: 2px dashed rgba(255, 255, 255, 0.5); */
         }
         
         .evento-recorrente::after {
             content: '🔄';
             position: absolute;
-            top: -2px;
-            left: -2px;
-            font-size: 8px;
+            top: -1px; /* ✅ AJUSTADO */
+            left: -1px; /* ✅ AJUSTADO */
+            font-size: 7px; /* ✅ REDUZIDO */
             background: rgba(0, 0, 0, 0.6);
             border-radius: 50%;
-            width: 14px;
-            height: 14px;
+            width: 12px; /* ✅ REDUZIDO */
+            height: 12px; /* ✅ REDUZIDO */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -652,8 +663,8 @@
             }
             
             .dia {
-                min-height: 80px;
-                padding: 8px;
+                max-height: 120px; /* ✅ REDUZIDO PARA MOBILE */
+                padding: 6px;
                 font-size: 11px;
             }
             
@@ -892,27 +903,13 @@
             75% { transform: translateX(5px); }
         }
 
-        /* ✅ CORREÇÃO DOS ÍCONES PRETOS - MELHORADO */
-        .sincronizado-badge {
-            background: rgba(255, 255, 255, 0.95) !important;
-            color: #6b7280 !important;
-            border: 1px solid #e5e7eb !important;
-            font-size: 8px !important;
-            padding: 2px 6px !important;
-            border-radius: 4px !important;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            font-weight: 500 !important;
-            text-shadow: none !important;
-        }
-
+        /* ✅ REMOVIDO COMPLETAMENTE: Badge "Sincronizado" e similares */
+        
         /* ✅ MELHORIAS VISUAIS v6.0 - CORES UNIFICADAS COM MELHOR VISIBILIDADE */
         .evento-pessoal {
             border-left: 4px solid;
             position: relative;
-            color: #1f2937 !important; /* Texto escuro para melhor contraste */
+            color: #1f2937 !important;
             font-weight: 500;
         }
 
@@ -1003,6 +1000,113 @@
             width: auto;
             margin: 0;
         }
+
+        /* ✅ NOVOS ESTILOS PARA BOTÕES PDF */
+        .btn-pdf {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-pdf:hover {
+            background: #b91c1c;
+        }
+
+        /* ✅ MODAL DE DETALHES DO EVENTO */
+        .modal-evento-detalhes {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-evento-detalhes.active {
+            display: flex;
+        }
+
+        .modal-evento-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .evento-detalhes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .evento-detalhes-titulo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .evento-detalhes-tipo {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .evento-detalhes-info {
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        .evento-detalhes-info:last-child {
+            border-bottom: none;
+        }
+
+        .evento-detalhes-label {
+            font-weight: 600;
+            color: #6b7280;
+            margin-right: 8px;
+        }
+
+        .evento-detalhes-acoes {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        /* Responsividade do modal */
+        @media (max-width: 768px) {
+            .dia {
+                min-height: 70px;
+                max-height: 70px;
+                padding: 6px;
+            }
+            
+            .mini-evento {
+                font-size: 7px;
+                height: 12px;
+                padding: 1px 3px;
+            }
+            
+            .mais-eventos-mini {
+                font-size: 6px;
+                height: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1054,7 +1158,7 @@
                 <h1>Sistema de Gestão Unificado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v6.0 - Ícones Corrigidos + Recorrência + Chat 💬 ✨
+                    Sistema v6.0 - Calendário Otimizado + PDFs + Chat 💬 ✨
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -1115,13 +1219,17 @@
                     <div style="display: flex; gap: 8px;">
                         <button class="btn btn-secondary btn-sm" onclick="mudarMes(-1)">◀ Anterior</button>
                         <button class="btn btn-primary btn-sm" onclick="mostrarNovoEvento()">+ Novo Evento</button>
+                        <!-- ✅ NOVO: Botão PDF Calendário -->
+                        <button class="btn btn-pdf btn-sm" onclick="gerarPDFCalendario()" title="Gerar PDF A3 do Calendário">
+                            📄 PDF Calendário
+                        </button>
                         <button class="btn btn-secondary btn-sm" onclick="mudarMes(1)">Próximo ▶</button>
                     </div>
                 </div>
                 
                 <div id="calendario" class="calendario"></div>
                 
-                <!-- ✅ LEGENDA ATUALIZADA COM TAREFAS PESSOAIS E RECORRÊNCIA -->
+                <!-- ✅ LEGENDA ATUALIZADA -->
                 <div style="margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px;">
                     <div style="display: flex; align-items: center; gap: 4px;">
                         <span style="font-weight: bold; color: #374151;">📅 Eventos da Equipe:</span>
@@ -1137,7 +1245,7 @@
                     </div>
                     <div style="margin-left: 16px; display: flex; align-items: center; gap: 4px;">
                         <span style="font-weight: bold; color: #8b5cf6;">🔄 Recorrentes:</span>
-                        <span style="font-size: 10px; background: #ede9fe; padding: 2px 6px; border-radius: 3px;">borda tracejada</span>
+                        <span style="font-size: 10px; background: #ede9fe; padding: 2px 6px; border-radius: 3px;">ícone 🔄</span>
                     </div>
                     <span><span class="status-indicator" style="background: #f59e0b;"></span>Feriado</span>
                 </div>
@@ -1160,13 +1268,13 @@
             
        <!-- Dica do sistema -->
 <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-    <strong>✅ Sistema v6.0 - CHAT PROFISSIONAL + USUÁRIOS REAIS:</strong> 
-    <br><strong>💼 Chat Profissional:</strong> Interface corporativa com notificações inteligentes
-    <br><strong>👥 Usuários Reais:</strong> Sistema vinculado aos emails reais dos colaboradores
-    <br><strong>🔔 Notificações:</strong> Sistema inteligente que respeita horário comercial
-    <br><strong>📱 Status:</strong> Online, Ocupado, Em Reunião, Ausente + Modo Não Perturbe
-    <br><strong>🎯 Produtividade:</strong> Reações, threads, busca avançada e mais
-    <br><strong>⚡ Performance:</strong> Interface otimizada e responsiva
+    <strong>✅ Sistema v6.0 - MINI-EVENTOS + MODAL DE DETALHES:</strong> 
+    <br><strong>📅 Calendário:</strong> Mini-eventos compactos (ícone + horário), clique para detalhes completos
+    <br><strong>🎯 Visual:</strong> Células baixas (90px), sem scroll, máximo 5 eventos + indicador "+X"
+    <br><strong>📄 PDFs:</strong> Gerar calendário mensal A3 e agenda semanal A4
+    <br><strong>💬 Chat:</strong> Sistema profissional integrado com notificações
+    <br><strong>👥 Usuários:</strong> Sistema vinculado aos emails reais dos colaboradores
+    <br><strong>⚡ Performance:</strong> Interface ultra otimizada e clean
 </div>
             <!-- Cards das Áreas -->
             <div class="grid" id="areasGrid"></div>
@@ -1238,11 +1346,17 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                         <h3>📅 Agenda da Semana</h3>
-                        <div style="font-size: 11px; color: #6b7280; text-align: right;">
-                            <div>📝 Tarefas pessoais (cores por tipo)</div>
-                            <div>📅 Eventos do calendário</div>
-                            <div>🔄 Recorrências automáticas</div>
-                            <div>⏰ Prazos próximos</div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <!-- ✅ NOVO: Botão PDF Agenda -->
+                            <button class="btn btn-pdf btn-sm" onclick="gerarPDFAgenda()" title="Gerar PDF A4 da Agenda">
+                                📄 PDF Agenda
+                            </button>
+                            <div style="font-size: 11px; color: #6b7280; text-align: right;">
+                                <div>📝 Tarefas pessoais (cores por tipo)</div>
+                                <div>📅 Eventos do calendário</div>
+                                <div>🔄 Recorrências automáticas</div>
+                                <div>⏰ Prazos próximos</div>
+                            </div>
                         </div>
                     </div>
                     <div class="agenda-semana" id="agendaSemana"></div>
@@ -1709,6 +1823,7 @@
         const VERSAO_SISTEMA = '6.0';
         const VERSAO_DB = 6;
         const INTERVALO_VERIFICACAO_PRAZOS = 3600000; // 1 hora
+        const MAX_EVENTOS_VISIVEIS = 3; // ✅ NOVO: Máximo de eventos visíveis por dia
         
         // Estado Global do Sistema
         let estadoSistema = {
@@ -1728,6 +1843,264 @@
         
         // Dados do Sistema
         let dados = null;
+        
+        // ========== ✅ FUNÇÕES PARA GERAÇÃO DE PDFs ==========
+        
+        // Gerar PDF do calendário mensal (A3)
+        function gerarPDFCalendario() {
+            if (!window.jsPDF) {
+                mostrarNotificacao('Biblioteca jsPDF não carregada!', 'error');
+                return;
+            }
+            
+            mostrarNotificacao('Gerando PDF do calendário...');
+            
+            try {
+                const { jsPDF } = window.jsPDF;
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: 'a3'
+                });
+                
+                // Configurações
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 20;
+                const titleHeight = 25;
+                
+                // Título
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                const titulo = `Calendário - ${meses[estadoSistema.mesAtual]} ${estadoSistema.anoAtual}`;
+                
+                doc.setFontSize(20);
+                doc.text(titulo, pageWidth / 2, margin + 10, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.text('🏗️ Sistema de Gestão - Obra 292 (Museu Nacional)', pageWidth / 2, margin + 18, { align: 'center' });
+                
+                // Grid do calendário
+                const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                const cellWidth = (pageWidth - 2 * margin) / 7;
+                const cellHeight = 25;
+                const startY = margin + titleHeight + 10;
+                
+                // Headers dos dias da semana
+                doc.setFontSize(10);
+                diasSemana.forEach((dia, index) => {
+                    const x = margin + index * cellWidth;
+                    doc.rect(x, startY, cellWidth, cellHeight);
+                    doc.text(dia, x + cellWidth / 2, startY + cellHeight / 2, { align: 'center' });
+                });
+                
+                // Calcular dias do mês
+                const primeiroDia = new Date(estadoSistema.anoAtual, estadoSistema.mesAtual, 1);
+                const ultimoDia = new Date(estadoSistema.anoAtual, estadoSistema.mesAtual + 1, 0);
+                const primeiroDiaSemana = primeiroDia.getDay();
+                
+                let diaAtual = 1;
+                let linha = 1;
+                
+                // Preencher calendário
+                for (let semana = 0; semana < 6; semana++) {
+                    for (let diaSem = 0; diaSem < 7; diaSem++) {
+                        const x = margin + diaSem * cellWidth;
+                        const y = startY + linha * cellHeight;
+                        
+                        doc.rect(x, y, cellWidth, cellHeight);
+                        
+                        if ((semana === 0 && diaSem >= primeiroDiaSemana && diaAtual <= ultimoDia.getDate()) ||
+                            (semana > 0 && diaAtual <= ultimoDia.getDate())) {
+                            
+                            // Número do dia
+                            doc.setFontSize(8);
+                            doc.text(diaAtual.toString(), x + 2, y + 8);
+                            
+                            // Verificar eventos do dia
+                            const dataCompleta = `${estadoSistema.anoAtual}-${String(estadoSistema.mesAtual + 1).padStart(2, '0')}-${String(diaAtual).padStart(2, '0')}`;
+                            const eventosDia = obterEventosDoDia(dataCompleta);
+                            
+                            // Adicionar eventos (máximo 3)
+                            const eventosLimitados = eventosDia.slice(0, 3);
+                            eventosLimitados.forEach((evento, index) => {
+                                doc.setFontSize(6);
+                                const eventoY = y + 12 + (index * 4);
+                                const textoEvento = `${evento.horarioInicio || ''} ${evento.titulo}`.substring(0, 20);
+                                doc.text(textoEvento, x + 1, eventoY);
+                            });
+                            
+                            if (eventosDia.length > 3) {
+                                doc.setFontSize(6);
+                                doc.text(`+${eventosDia.length - 3} mais`, x + 1, y + 24);
+                            }
+                            
+                            diaAtual++;
+                        }
+                    }
+                    linha++;
+                    
+                    if (diaAtual > ultimoDia.getDate()) break;
+                }
+                
+                // Rodapé
+                doc.setFontSize(8);
+                const dataGeracao = new Date().toLocaleDateString('pt-BR');
+                doc.text(`Gerado em: ${dataGeracao} | Usuário: ${estadoSistema.usuarioNome}`, margin, pageHeight - 10);
+                
+                // Salvar PDF
+                const nomeArquivo = `calendario_${meses[estadoSistema.mesAtual]}_${estadoSistema.anoAtual}.pdf`;
+                doc.save(nomeArquivo);
+                
+                mostrarNotificacao('PDF do calendário gerado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                mostrarNotificacao('Erro ao gerar PDF do calendário!', 'error');
+            }
+        }
+        
+        // Gerar PDF da agenda semanal (A4)
+        function gerarPDFAgenda() {
+            if (!estadoSistema.pessoaAtual) {
+                mostrarNotificacao('Nenhuma pessoa selecionada!', 'error');
+                return;
+            }
+            
+            if (!window.jsPDF) {
+                mostrarNotificacao('Biblioteca jsPDF não carregada!', 'error');
+                return;
+            }
+            
+            mostrarNotificacao('Gerando PDF da agenda...');
+            
+            try {
+                const { jsPDF } = window.jsPDF;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // Configurações
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                
+                // Título
+                doc.setFontSize(16);
+                doc.text(`Agenda Semanal - ${estadoSistema.pessoaAtual}`, pageWidth / 2, margin + 10, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.text('🏗️ Sistema de Gestão - Obra 292 (Museu Nacional)', pageWidth / 2, margin + 18, { align: 'center' });
+                
+                // Dados da semana
+                const diasSemana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
+                const diasNomes = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+                
+                let currentY = margin + 35;
+                
+                diasSemana.forEach((dia, index) => {
+                    // Cabeçalho do dia
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(diasNomes[index], margin, currentY);
+                    currentY += 8;
+                    
+                    // Linha separadora
+                    doc.setLineWidth(0.5);
+                    doc.line(margin, currentY, pageWidth - margin, currentY);
+                    currentY += 5;
+                    
+                    // Tarefas do dia
+                    let temItens = false;
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(9);
+                    
+                    // Tarefas pessoais
+                    if (dados?.agendas?.[estadoSistema.pessoaAtual]?.[dia]) {
+                        dados.agendas[estadoSistema.pessoaAtual][dia].forEach(tarefa => {
+                            const titulo = tarefa.titulo || tarefa.descricao?.split(' - ')[0] || 'Sem título';
+                            const horario = tarefa.horarioInicio || '';
+                            const textoTarefa = `• ${horario} - ${titulo}`;
+                            
+                            doc.text(textoTarefa, margin + 5, currentY);
+                            currentY += 5;
+                            temItens = true;
+                        });
+                    }
+                    
+                    // Eventos do calendário
+                    const hoje = new Date();
+                    const diaSemanaAtual = hoje.getDay();
+                    const diasParaAdicionar = index + 1 - diaSemanaAtual;
+                    const dataDodia = new Date(hoje);
+                    dataDodia.setDate(hoje.getDate() + diasParaAdicionar);
+                    const dataFormatada = dataDodia.toISOString().split('T')[0];
+                    
+                    const eventosDia = obterEventosDoDia(dataFormatada);
+                    const eventosRelevantes = eventosDia.filter(evento => 
+                        evento.pessoas && (
+                            evento.pessoas.includes(estadoSistema.pessoaAtual) || 
+                            evento.pessoas.includes('Todos') ||
+                            evento.pessoas.includes('_todos')
+                        ) && evento.origem !== 'tarefa_pessoal'
+                    );
+                    
+                    eventosRelevantes.forEach(evento => {
+                        const textoEvento = `• ${evento.horarioInicio || 'Todo dia'} - ${evento.titulo} (Evento)`;
+                        doc.text(textoEvento, margin + 5, currentY);
+                        currentY += 5;
+                        temItens = true;
+                    });
+                    
+                    if (!temItens) {
+                        doc.setFont(undefined, 'italic');
+                        doc.text('Dia livre', margin + 5, currentY);
+                        doc.setFont(undefined, 'normal');
+                        currentY += 5;
+                    }
+                    
+                    currentY += 8; // Espaço entre dias
+                    
+                    // Verificar se precisa de nova página
+                    if (currentY > pageHeight - 40) {
+                        doc.addPage();
+                        currentY = margin;
+                    }
+                });
+                
+                // Observações pessoais
+                const observacoes = dados?.agendas?.[estadoSistema.pessoaAtual]?.observacoes;
+                if (observacoes) {
+                    currentY += 10;
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Observações:', margin, currentY);
+                    currentY += 8;
+                    
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    const linhasObservacoes = doc.splitTextToSize(observacoes, pageWidth - 2 * margin);
+                    doc.text(linhasObservacoes, margin, currentY);
+                }
+                
+                // Rodapé
+                doc.setFontSize(8);
+                const dataGeracao = new Date().toLocaleDateString('pt-BR');
+                doc.text(`Gerado em: ${dataGeracao}`, margin, pageHeight - 10);
+                
+                // Salvar PDF
+                const nomeArquivo = `agenda_${estadoSistema.pessoaAtual.replace(/\s+/g, '_')}_semana.pdf`;
+                doc.save(nomeArquivo);
+                
+                mostrarNotificacao('PDF da agenda gerado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF da agenda:', error);
+                mostrarNotificacao('Erro ao gerar PDF da agenda!', 'error');
+            }
+        }
         
         // ========== ✅ NOVA FUNÇÃO PARA INICIALIZAR ESTRUTURA DO CHAT ==========
         function inicializarEstruturaChat() {
@@ -2243,8 +2616,8 @@
                         }
                     }, 1000);
                     
-                    // ✅ ATUALIZADO: Mencionar chat na mensagem
-                    mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Chat integrado + Vinculação de usuários!`);
+                    // ✅ ATUALIZADO: Mencionar otimizações
+                    mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Calendário otimizado + PDFs!`);
                     
                 } catch (error) {
                     console.error('Erro na inicialização:', error);
@@ -2731,91 +3104,26 @@
                     return horaA.localeCompare(horaB);
                 });
                 
-                eventosDia.forEach(evento => {
-                    const eventoDiv = document.createElement('div');
-                    let classesEvento = `evento evento-${evento.tipo}`;
-                    
-                    // ✅ VISUAL PARA EVENTOS RECORRENTES
-                    if (evento.recorrente) {
-                        classesEvento += ' evento-recorrente';
-                    }
-                    
-                    if (evento.origem === 'tarefa_pessoal') {
-                        classesEvento = `evento evento-pessoal tarefa-${evento.tipo}`;
-                        if (evento.recorrente) {
-                            classesEvento += ' evento-recorrente';
-                        }
-                    }
-                    
-                    eventoDiv.className = classesEvento;
-                    
-                    let iconeTipo = '';
-                    switch(evento.tipo) {
-                        case 'reuniao': iconeTipo = '📅'; break;
-                        case 'entrega': iconeTipo = '📦'; break;
-                        case 'prazo': iconeTipo = '⏰'; break;
-                        case 'marco': iconeTipo = '🎯'; break;
-                        case 'outro': iconeTipo = '📌'; break;
-                    }
-                    
-                    // ✅ MELHOR VISIBILIDADE PARA TAREFAS PESSOAIS
-                    const corTexto = evento.origem === 'tarefa_pessoal' ? '#374151' : 'white';
-                    
-                    let htmlEvento = `
-                        <div class="evento-header" style="color: ${corTexto};">
-                            <span>${iconeTipo} ${evento.horarioInicio || 'Todo dia'}</span>
-                        </div>
-                        <div style="font-weight: 500; color: ${corTexto};">${evento.titulo}</div>
-                    `;
-                    
-                    if (evento.pessoas && evento.pessoas.length > 0) {
-                        const labelPessoas = evento.tipo === 'reuniao' ? '👥' : '👤';
-                        htmlEvento += `<div class="evento-info" style="color: ${corTexto};">${labelPessoas} ${evento.pessoas.length} ${evento.pessoas.length > 1 ? 'pessoas' : 'pessoa'}</div>`;
-                    }
-                    
-                    if (evento.horarioFim) {
-                        htmlEvento += `<div class="evento-info" style="color: ${corTexto};">até ${evento.horarioFim}</div>`;
-                    }
-                    
-                    // ✅ INDICADOR VISUAL DE RECORRÊNCIA
-                    if (evento.recorrente) {
-                        htmlEvento += `<div class="evento-info" style="color: ${corTexto};">🔄 Recorrente</div>`;
-                    }
-                    
-                    eventoDiv.innerHTML = htmlEvento;
-                    
-                    eventoDiv.onclick = function(e) {
-                        e.stopPropagation();
-                        if (evento.origem !== 'tarefa_pessoal') {
-                            editarEvento(evento);
-                        } else {
-                            // Para tarefas pessoais no calendário, só pode editar o dono
-                            if (podeEditarTarefa(evento.pessoas[0])) {
-                                mostrarNotificacao('Para editar, vá à agenda pessoal da pessoa', 'warning');
-                            }
-                        }
-                    };
-                    
-                    if (evento.origem === 'tarefa_pessoal') {
-                        eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n👤 Tarefa pessoal de ${evento.pessoas[0]}\n💡 Para editar, acesse a agenda pessoal`;
-                    } else {
-                        let titleExtra = evento.recorrente ? '\n🔄 Evento recorrente' : '';
-                        eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}${titleExtra}\n✏️ Clique para editar (qualquer usuário pode editar)`;
-                    }
-                    
-                    if (evento.origem !== 'tarefa_pessoal') {
-                        const deleteBtn = document.createElement('span');
-                        deleteBtn.className = 'delete-btn';
-                        deleteBtn.innerHTML = '×';
-                        deleteBtn.onclick = function(e) {
-                            e.stopPropagation();
-                            deletarEvento(evento.id);
-                        };
-                        eventoDiv.appendChild(deleteBtn);
-                    }
-                    
-                    diaDiv.appendChild(eventoDiv);
+                // ✅ NOVO: Sistema de mini-eventos ultra compactos
+                const eventosVisiveis = eventosDia.slice(0, 5); // ✅ MAIS EVENTOS VISÍVEIS
+                const eventosOcultos = eventosDia.slice(5);
+                
+                eventosVisiveis.forEach(evento => {
+                    const miniEventoDiv = criarMiniEvento(evento);
+                    diaDiv.appendChild(miniEventoDiv);
                 });
+                
+                // ✅ INDICADOR "MAIS EVENTOS" MINI
+                if (eventosOcultos.length > 0) {
+                    const maisEventosDiv = document.createElement('div');
+                    maisEventosDiv.className = 'mais-eventos-mini';
+                    maisEventosDiv.textContent = `+${eventosOcultos.length}`;
+                    maisEventosDiv.onclick = (e) => {
+                        e.stopPropagation();
+                        mostrarListaEventosOcultos(eventosDia, data);
+                    };
+                    diaDiv.appendChild(maisEventosDiv);
+                }
                 
                 diaDiv.onclick = (e) => {
                     if (e.target === diaDiv || e.target.classList.contains('dia-numero')) {
@@ -2830,6 +3138,232 @@
             const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                           'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
             document.getElementById('mesAno').textContent = `${meses[estadoSistema.mesAtual]} ${estadoSistema.anoAtual}`;
+        }
+        
+        // ✅ NOVA FUNÇÃO PARA CRIAR MINI-EVENTO COMPACTO
+        function criarMiniEvento(evento) {
+            const miniEventoDiv = document.createElement('div');
+            let classesEvento = `mini-evento evento-${evento.tipo}`;
+            
+            if (evento.origem === 'tarefa_pessoal') {
+                classesEvento = `mini-evento evento-pessoal tarefa-${evento.tipo}`;
+            }
+            
+            miniEventoDiv.className = classesEvento;
+            
+            let iconeTipo = '';
+            switch(evento.tipo) {
+                case 'reuniao': iconeTipo = '📅'; break;
+                case 'entrega': iconeTipo = '📦'; break;
+                case 'prazo': iconeTipo = '⏰'; break;
+                case 'marco': iconeTipo = '🎯'; break;
+                case 'outro': iconeTipo = '📌'; break;
+            }
+            
+            // ✅ FORMATO SUPER COMPACTO: APENAS ÍCONE + HORÁRIO
+            miniEventoDiv.innerHTML = `${iconeTipo} ${evento.horarioInicio || '∙'}`;
+            
+            // ✅ ADICIONAR INDICADOR DE RECORRÊNCIA
+            if (evento.recorrente) {
+                miniEventoDiv.innerHTML += ' 🔄';
+            }
+            
+            // ✅ CLICK ABRE MODAL DE DETALHES
+            miniEventoDiv.onclick = function(e) {
+                e.stopPropagation();
+                mostrarDetalhesEvento(evento);
+            };
+            
+            // ✅ TOOLTIP NO HOVER
+            miniEventoDiv.title = `${evento.titulo} - Clique para detalhes`;
+            
+            return miniEventoDiv;
+        }
+        
+        // ✅ NOVA FUNÇÃO PARA MOSTRAR DETALHES DO EVENTO
+        function mostrarDetalhesEvento(evento) {
+            // Criar modal se não existir
+            let modal = document.getElementById('modalEventoDetalhes');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modalEventoDetalhes';
+                modal.className = 'modal-evento-detalhes';
+                document.body.appendChild(modal);
+            }
+            
+            const tiposIcones = {
+                'reuniao': '📅 Reunião',
+                'entrega': '📦 Entrega', 
+                'prazo': '⏰ Prazo',
+                'marco': '🎯 Marco',
+                'outro': '📌 Outro'
+            };
+            
+            const tipoTexto = tiposIcones[evento.tipo] || '📌 Outro';
+            
+            const coresBackgroundTipo = {
+                'reuniao': '#dbeafe',
+                'entrega': '#d1fae5',
+                'prazo': '#fee2e2',
+                'marco': '#ede9fe',
+                'outro': '#f3f4f6'
+            };
+            
+            const corFundo = coresBackgroundTipo[evento.tipo] || '#f3f4f6';
+            
+            modal.innerHTML = `
+                <div class="modal-evento-content">
+                    <div class="evento-detalhes-header">
+                        <h3 class="evento-detalhes-titulo">${evento.titulo}</h3>
+                        <span class="evento-detalhes-tipo" style="background: ${corFundo}; color: #374151;">
+                            ${tipoTexto}
+                        </span>
+                    </div>
+                    
+                    <div class="evento-detalhes-info">
+                        <span class="evento-detalhes-label">📅 Data:</span>
+                        ${formatarData(evento.data)}
+                    </div>
+                    
+                    <div class="evento-detalhes-info">
+                        <span class="evento-detalhes-label">⏰ Horário:</span>
+                        ${evento.horarioInicio || 'Todo dia'}${evento.horarioFim ? ` - ${evento.horarioFim}` : ''}
+                    </div>
+                    
+                    ${evento.pessoas && evento.pessoas.length > 0 ? `
+                    <div class="evento-detalhes-info">
+                        <span class="evento-detalhes-label">👥 Participantes:</span>
+                        ${evento.pessoas.join(', ')}
+                    </div>
+                    ` : ''}
+                    
+                    ${evento.descricao ? `
+                    <div class="evento-detalhes-info">
+                        <span class="evento-detalhes-label">📝 Descrição:</span>
+                        ${evento.descricao}
+                    </div>
+                    ` : ''}
+                    
+                    ${evento.recorrente ? `
+                    <div class="evento-detalhes-info">
+                        <span class="evento-detalhes-label">🔄 Recorrência:</span>
+                        Evento recorrente
+                    </div>
+                    ` : ''}
+                    
+                    ${evento.origem === 'tarefa_pessoal' ? `
+                    <div class="evento-detalhes-info">
+                        <span class="evento-detalhes-label">👤 Tipo:</span>
+                        Tarefa pessoal de ${evento.pessoas[0]}
+                    </div>
+                    ` : ''}
+                    
+                    <div class="evento-detalhes-acoes">
+                        <button class="btn btn-secondary btn-sm" onclick="fecharDetalhesEvento()">Fechar</button>
+                        ${evento.origem !== 'tarefa_pessoal' ? `
+                        <button class="btn btn-primary btn-sm" onclick="editarEvento({id: ${evento.id}}); fecharDetalhesEvento()">✏️ Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deletarEvento(${evento.id}); fecharDetalhesEvento()">🗑️ Excluir</button>
+                        ` : `
+                        <button class="btn btn-warning btn-sm" onclick="fecharDetalhesEvento()">💡 Edite na agenda pessoal</button>
+                        `}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+            
+            // Fechar ao clicar fora
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    fecharDetalhesEvento();
+                }
+            };
+        }
+        
+        function fecharDetalhesEvento() {
+            const modal = document.getElementById('modalEventoDetalhes');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+        
+        // ✅ NOVA FUNÇÃO PARA MOSTRAR LISTA DE EVENTOS OCULTOS EM MODAL
+        function mostrarListaEventosOcultos(todosEventos, data) {
+            let modal = document.getElementById('modalListaEventos');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modalListaEventos';
+                modal.className = 'modal-evento-detalhes';
+                document.body.appendChild(modal);
+            }
+            
+            const dataFormatada = formatarData(data);
+            
+            let htmlEventos = '';
+            todosEventos.forEach(evento => {
+                const tiposIcones = {
+                    'reuniao': '📅',
+                    'entrega': '📦', 
+                    'prazo': '⏰',
+                    'marco': '🎯',
+                    'outro': '📌'
+                };
+                
+                const icone = tiposIcones[evento.tipo] || '📌';
+                const horario = evento.horarioInicio || 'Todo dia';
+                const recorrente = evento.recorrente ? ' 🔄' : '';
+                const pessoal = evento.origem === 'tarefa_pessoal' ? ' 👤' : '';
+                
+                htmlEventos += `
+                    <div style="padding: 8px; margin: 4px 0; background: #f8fafc; border-radius: 6px; cursor: pointer; transition: all 0.2s;" 
+                         onclick="mostrarDetalhesEvento({id: ${evento.id}, titulo: '${evento.titulo}', tipo: '${evento.tipo}', data: '${evento.data}', horarioInicio: '${evento.horarioInicio || ''}', horarioFim: '${evento.horarioFim || ''}', pessoas: ${JSON.stringify(evento.pessoas || [])}, descricao: '${evento.descricao || ''}', recorrente: ${evento.recorrente || false}, origem: '${evento.origem || ''}'});"
+                         onmouseover="this.style.background='#e5e7eb'"
+                         onmouseout="this.style.background='#f8fafc'">
+                        <div style="font-weight: 500; color: #374151;">
+                            ${icone} ${horario} - ${evento.titulo}${recorrente}${pessoal}
+                        </div>
+                        ${evento.pessoas && evento.pessoas.length > 0 ? `
+                        <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
+                            👥 ${evento.pessoas.join(', ')}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            modal.innerHTML = `
+                <div class="modal-evento-content">
+                    <div class="evento-detalhes-header">
+                        <h3 class="evento-detalhes-titulo">📅 Eventos de ${dataFormatada}</h3>
+                        <span style="color: #6b7280; font-size: 14px;">${todosEventos.length} evento${todosEventos.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${htmlEventos}
+                    </div>
+                    
+                    <div class="evento-detalhes-acoes">
+                        <button class="btn btn-secondary btn-sm" onclick="fecharListaEventos()">Fechar</button>
+                        <button class="btn btn-primary btn-sm" onclick="fecharListaEventos(); document.getElementById('eventoData').value = '${data}'; mostrarNovoEvento();">+ Novo Evento</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+            
+            // Fechar ao clicar fora
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    fecharListaEventos();
+                }
+            };
+        }
+        
+        function fecharListaEventos() {
+            const modal = document.getElementById('modalListaEventos');
+            if (modal) {
+                modal.classList.remove('active');
+            }
         }
         
         // ✅ FUNÇÃO ATUALIZADA PARA SUPORTAR CORES POR TIPO
@@ -4739,7 +5273,7 @@
     </script>
     
     <!-- Script do chat profissional -->
-<script src="modules/chat-module.js"></script>
+    <script src="modules/chat-module.js"></script>
     
 </body>
 </html>
