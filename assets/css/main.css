@@ -1,0 +1,501 @@
+/* ========== 🎨 SISTEMA DE GESTÃO v6.2 - CSS PRINCIPAL ========== */
+
+/* ✅ RESET E BASE */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f3f4f6;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ========== 🔐 SISTEMA DE LOGIN ========== */
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.login-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1f2937;
+}
+
+/* ========== 🔔 SISTEMA DE NOTIFICAÇÕES ========== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 2000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.active {
+    display: flex;
+}
+
+.notification.error {
+    background: #ef4444;
+}
+
+.notification.warning {
+    background: #f59e0b;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* ========== 📋 NAVEGAÇÃO E HEADER ========== */
+.breadcrumb {
+    background: #e5e7eb;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.breadcrumb span {
+    color: #6b7280;
+}
+
+.breadcrumb a {
+    color: #3b82f6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.header {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.back-btn {
+    color: #3b82f6;
+    cursor: pointer;
+    margin-bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}
+
+/* ========== 📦 CARDS E LAYOUT ========== */
+.card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.area-card {
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.area-card:hover {
+    transform: translateY(-4px);
+    border-color: #3b82f6;
+}
+
+/* ========== 🔘 BOTÕES ========== */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-pdf {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-pdf:hover {
+    background: #b91c1c;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.btn-template {
+    background: #8b5cf6;
+    color: white;
+}
+
+.btn-template:hover {
+    background: #7c3aed;
+}
+
+/* ========== 📊 ESTATÍSTICAS ========== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.resumo-numero {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.resumo-box {
+    text-align: center;
+    padding: 24px;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    transition: width 0.3s;
+}
+
+/* ========== 🎨 INDICADORES DE STATUS ========== */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-verde { background: #10b981; }
+.status-amarelo { background: #f59e0b; }
+.status-vermelho { background: #ef4444; }
+
+.status-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #1f2937;
+    color: white;
+}
+
+.status-ausencia {
+    background: #ef4444;
+}
+
+.status-home-office {
+    background: #3b82f6;
+}
+
+/* ========== 🔍 BUSCA E FILTROS ========== */
+.search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.filter-pills {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.filter-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.filter-pill.active {
+    background: #3b82f6;
+    color: white;
+}
+
+/* ========== 📝 FORMULÁRIOS ========== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.horario-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* ========== ❌ VALIDAÇÃO E ERROS ========== */
+.input-error {
+    border-color: #ef4444 !important;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.prazo-invalido {
+    background: #fee2e2;
+    border-color: #ef4444;
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* ========== 🔄 LOADING ========== */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f4f6;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== 🖥️ MODAIS ========== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 32px;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ========== 🏗️ ÁREAS DE TRABALHO ========== */
+.agenda-semana {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.dia-semana {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 250px;
+}
+
+/* ========== 📱 RESPONSIVIDADE ========== */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .agenda-semana {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        padding: 20px;
+        margin: 10px;
+    }
+}
