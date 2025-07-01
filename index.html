@@ -320,7 +320,7 @@
             border-radius: 3px;
         }
         
-        /* ✅ MINI-EVENTOS OTIMIZADOS - FONTE LEGÍVEL E TÍTULOS COMPLETOS */
+        /* ✅ MINI-EVENTOS ULTRA COMPACTOS COM TÍTULOS */
         .mini-evento {
             background: #3b82f6;
             color: white;
@@ -346,18 +346,18 @@
             z-index: 15;
         }
         
-        /* ✅ INDICADOR DE MAIS EVENTOS - FONTE LEGÍVEL */
+        /* ✅ INDICADOR DE MAIS EVENTOS MINI ATUALIZADO */
         .mais-eventos-mini {
             background: #6b7280;
             color: white;
             padding: 1px 4px;
             border-radius: 3px;
-            font-size: 9px; /* ✅ FONTE AUMENTADA PARA MELHOR LEGIBILIDADE */
+            ffont-size: 9px; /* ✅ FONTE AUMENTADA PARA MELHOR LEGIBILIDADE */
             text-align: center;
             cursor: pointer;
             margin-top: 2px;
             transition: all 0.2s;
-            height: 18px; /* ✅ ALTURA AUMENTADA PARA ACOMODAR FONTE MAIOR */
+            height: 14px; /* ✅ ALTURA AJUSTADA */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -397,7 +397,7 @@
             position: absolute;
             top: -1px; /* ✅ AJUSTADO */
             left: -1px; /* ✅ AJUSTADO */
-            font-size: 8px; /* ✅ FONTE LIGEIRAMENTE AUMENTADA */
+            font-size: 9px; /* ✅ AJUSTADO PARA MELHOR LEGIBILIDADE */
             background: rgba(0, 0, 0, 0.6);
             border-radius: 50%;
             width: 14px; /* ✅ TAMANHO AUMENTADO */
@@ -685,21 +685,9 @@
             }
             
             .dia {
-                min-height: 80px;
-                max-height: 80px;
+                max-height: 120px; /* ✅ REDUZIDO PARA MOBILE */
                 padding: 6px;
                 font-size: 11px;
-            }
-            
-            .mini-evento {
-                font-size: 8px; /* ✅ FONTE LIGEIRAMENTE MENOR NO MOBILE MAS AINDA LEGÍVEL */
-                height: 18px; /* ✅ ALTURA AJUSTADA PARA MOBILE */
-                padding: 1px 3px;
-            }
-            
-            .mais-eventos-mini {
-                font-size: 8px; /* ✅ FONTE LIGEIRAMENTE MENOR NO MOBILE */
-                height: 16px; /* ✅ ALTURA AJUSTADA PARA MOBILE */
             }
             
             .header {
@@ -1123,8 +1111,20 @@
         /* Responsividade do modal */
         @media (max-width: 768px) {
             .dia {
-                max-height: 110px; /* ✅ REDUZIDO PARA MOBILE MAS AINDA ADEQUADO */
+                min-height: 70px;
+                max-height: 70px;
                 padding: 6px;
+            }
+            
+            .mini-evento {
+                font-size: 8px; /* ✅ FONTE LIGEIRAMENTE MENOR NO MOBILE MAS AINDA LEGÍVEL */
+    height: 18px; /* ✅ ALTURA AJUSTADA PARA MOBILE */
+    padding: 1px 3px;
+}
+            
+            .mais-eventos-mini {
+                font-size: 8px; /* ✅ FONTE LIGEIRAMENTE MENOR NO MOBILE */
+                height: 16px; /* ✅ ALTURA AJUSTADA PARA MOBILE */
             }
         }
     </style>
@@ -1172,7 +1172,7 @@
                 <h1>Sistema de Gestão Unificado</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    Sistema v6.0 - Calendário Legível + PDFs + Chat 💬 ✨
+                    Sistema v6.0 - Calendário Otimizado + PDFs + Chat 💬 ✨
                     <span id="usuarioInfo" style="margin-left: 16px; font-weight: bold;"></span>
                 </p>
             </div>
@@ -1282,9 +1282,9 @@
             
        <!-- Dica do sistema -->
 <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-    <strong>✅ Sistema v6.0 - MINI-EVENTOS COM TÍTULOS COMPLETOS + CHAT OTIMIZADO:</strong> 
-    <br><strong>📅 Calendário:</strong> Mini-eventos legíveis (ícone + horário + título completo), clique para detalhes completos
-    <br><strong>🎯 Visual:</strong> Células 100px, fonte 9px legível, títulos completos visíveis
+    <strong>✅ Sistema v6.0 - MINI-EVENTOS COM TÍTULOS + CHAT OTIMIZADO:</strong> 
+    <br><strong>📅 Calendário:</strong> Mini-eventos compactos (ícone + horário + título), clique para detalhes completos
+    <br><strong>🎯 Visual:</strong> Células baixas (90px), sem scroll, máximo 5 eventos + indicador "+X"
     <br><strong>📄 PDFs:</strong> Gerar calendário mensal A3 e agenda semanal A4
     <br><strong>💬 Chat:</strong> Sistema otimizado, botão circular discreto no canto
     <br><strong>👥 Usuários:</strong> Sistema vinculado aos emails reais dos colaboradores
@@ -2605,7 +2605,7 @@
                     }, 1000);
                     
                     // ✅ ATUALIZADO: Mencionar otimizações e melhorias
-                    mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Calendário com fonte legível + Títulos completos!`);
+                    mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Calendário otimizado + Chat discreto!`);
                     
                 } catch (error) {
                     console.error('Erro na inicialização:', error);
@@ -3074,7 +3074,7 @@
                     maisEventosDiv.textContent = `+${eventosOcultos.length}`;
                     maisEventosDiv.onclick = (e) => {
                         e.stopPropagation();
-                        mostrarListaEventosOcultos(eventosDia, dataCompleta);
+                        mostrarListaEventosOcultos(eventosDia, data);
                     };
                     diaDiv.appendChild(maisEventosDiv);
                 }
@@ -3115,7 +3115,7 @@
             }
             
             // ✅ FORMATO MELHORADO: ÍCONE + HORÁRIO + TÍTULO COMPLETO
-            miniEventoDiv.innerHTML = `${iconeTipo} ${evento.horarioInicio || '∙'} ${evento.titulo}`;
+miniEventoDiv.innerHTML = `${iconeTipo} ${evento.horarioInicio || '∙'} ${evento.titulo}`;
             
             // ✅ ADICIONAR INDICADOR DE RECORRÊNCIA
             if (evento.recorrente) {
@@ -3474,31 +3474,1648 @@
             document.getElementById('dataAtual').textContent = hoje.toLocaleDateString('pt-BR', opcoes);
         }
         
-        // Função para salvar observações
-        function salvarObservacoes() {
-            const nome = estadoSistema.pessoaAtual;
-            const observacoes = document.getElementById('observacoesPessoais').value;
+        // Funções de Navegação
+        function mostrarArea(areaKey) {
+            estadoSistema.areaAtual = areaKey;
+            const area = dados.areas[areaKey];
             
+            document.getElementById('dashboardExecutivo').classList.add('hidden');
+            document.getElementById('painelArea').classList.remove('hidden');
+            document.getElementById('agendaIndividual').classList.add('hidden');
+            
+            document.getElementById('areaNome').textContent = area.nome;
+            document.getElementById('areaCoordenador').textContent = `Coordenador: ${area.coordenador}`;
+            
+            renderizarEquipe(area);
+            renderizarAtividades(area);
+            
+            atualizarBreadcrumb(`Dashboard > ${area.nome}`);
+        }
+        
+        function renderizarEquipe(area) {
+            const lista = document.getElementById('equipeLista');
+            lista.innerHTML = '';
+            
+            area.equipe.forEach(membro => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 12px; background: #f9fafb; margin-bottom: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;';
+                div.onmouseover = () => div.style.background = '#e5e7eb';
+                div.onmouseout = () => div.style.background = '#f9fafb';
+                div.onclick = () => mostrarAgendaIndividual(membro.nome, membro.cargo);
+                
+                div.innerHTML = `
+                    <strong>${membro.nome}</strong><br>
+                    <span style="color: #6b7280; font-size: 14px;">${membro.cargo}</span>
+                    <span style="float: right; color: #3b82f6;">→</span>
+                `;
+                
+                lista.appendChild(div);
+            });
+        }
+        
+        function renderizarAtividades(area) {
+            const lista = document.getElementById('atividadesLista');
+            lista.innerHTML = '';
+            
+            const atividadesFiltradas = estadoSistema.filtroAtual === 'todos' 
+                ? area.atividades 
+                : area.atividades.filter(a => a.status === estadoSistema.filtroAtual);
+            
+            atividadesFiltradas.forEach(atividade => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 12px; border-radius: 8px;';
+                
+                const diasRestantes = calcularDiasRestantes(atividade.prazo);
+                
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="status-indicator status-${atividade.status}"></span>
+                            <strong>${atividade.nome}</strong>
+                            ${diasRestantes < 0 ? '<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px;">ATRASADO</span>' : 
+                              diasRestantes === 0 ? '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px;">HOJE</span>' :
+                              diasRestantes <= 3 ? '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px;">URGENTE</span>' : ''}
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-sm" onclick="editarAtividade(${atividade.id})">✏️ Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletarAtividade(${atividade.id})">Excluir</button>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #6b7280; margin-top: 8px;">
+                        ${atividade.responsaveis.join(', ')} - Prazo: ${formatarData(atividade.prazo)}
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <select onchange="mudarStatus(${atividade.id}, this.value)" style="padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            <option value="verde" ${atividade.status === 'verde' ? 'selected' : ''}>🟢 Em Dia</option>
+                            <option value="amarelo" ${atividade.status === 'amarelo' ? 'selected' : ''}>🟡 Atenção</option>
+                            <option value="vermelho" ${atividade.status === 'vermelho' ? 'selected' : ''}>🔴 Atraso</option>
+                        </select>
+                    </div>
+                `;
+                
+                lista.appendChild(div);
+            });
+            
+            if (atividadesFiltradas.length === 0) {
+                lista.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p>Nenhuma atividade encontrada.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function voltarDashboard() {
+            document.getElementById('painelArea').classList.add('hidden');
+            document.getElementById('agendaIndividual').classList.add('hidden');
+            document.getElementById('dashboardExecutivo').classList.remove('hidden');
+            document.getElementById('breadcrumb').classList.add('hidden');
+            renderizarDashboard();
+        }
+        
+        
+        // Funções de Eventos Simplificados
+        function mostrarNovoEvento() {
+            estadoSistema.editandoEvento = null;
+            estadoSistema.pessoasSelecionadas.clear();
+            
+            document.getElementById('modalEventoTitulo').textContent = 'Novo Evento';
+            document.getElementById('eventoId').value = '';
+            
+            // Limpar campos
+            document.getElementById('eventoTipo').value = 'reuniao';
+            document.getElementById('eventoTitulo').value = '';
+            document.getElementById('eventoDescricao').value = '';
+            document.getElementById('eventoHorarioInicio').value = '09:00';
+            document.getElementById('eventoHorarioFim').value = '10:00';
+            
+            // ✅ LIMPAR CAMPOS DE RECORRÊNCIA
+            document.getElementById('eventoRecorrencia').checked = false;
+            document.getElementById('eventoRecorrenciaContainer').style.display = 'none';
+            document.getElementById('eventoTipoRecorrencia').value = 'mensal';
+            document.getElementById('eventoQuantidadeRecorrencia').value = '4';
+            
+            atualizarListaPessoas();
+            
+            document.getElementById('modalEvento').classList.add('active');
+        }
+        
+        function preencherSelectResponsaveis() {
+            const select = document.getElementById('eventoPessoas');
+            if (!select || !dados) return;
+            
+            select.innerHTML = '<option value="">Selecionar pessoa...</option>';
+            
+            const membrosUnicos = new Map();
+            Object.values(dados.areas).forEach(area => {
+                area.equipe.forEach(membro => {
+                    if (!membrosUnicos.has(membro.nome)) {
+                        membrosUnicos.set(membro.nome, {
+                            nome: membro.nome,
+                            cargo: membro.cargo,
+                            area: area.nome
+                        });
+                    }
+                });
+            });
+            
+            const optionTodos = document.createElement('option');
+            optionTodos.value = '_todos';
+            optionTodos.textContent = '🌐 Toda Equipe';
+            select.appendChild(optionTodos);
+            
+            Array.from(membrosUnicos.values())
+                .sort((a, b) => a.nome.localeCompare(b.nome))
+                .forEach(membro => {
+                    const option = document.createElement('option');
+                    option.value = membro.nome;
+                    option.textContent = `${membro.nome} - ${membro.cargo}`;
+                    select.appendChild(option);
+                });
+        }
+        
+        function adicionarPessoa() {
+            const select = document.getElementById('eventoPessoas');
+            const valor = select.value;
+            
+            if (!valor) return;
+            
+            if (valor === '_todos') {
+                const membrosUnicos = new Set();
+                Object.values(dados.areas).forEach(area => {
+                    area.equipe.forEach(membro => {
+                        membrosUnicos.add(membro.nome);
+                    });
+                });
+                membrosUnicos.forEach(nome => estadoSistema.pessoasSelecionadas.add(nome));
+            } else {
+                estadoSistema.pessoasSelecionadas.add(valor);
+            }
+            
+            select.value = '';
+            atualizarListaPessoas();
+        }
+        
+        function atualizarListaPessoas() {
+            const container = document.getElementById('pessoasSelecionadas');
+            container.innerHTML = '';
+            
+            Array.from(estadoSistema.pessoasSelecionadas).sort().forEach(pessoa => {
+                const chip = document.createElement('div');
+                chip.style.cssText = 'background: #e5e7eb; padding: 4px 12px; border-radius: 16px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; margin: 2px;';
+                chip.innerHTML = `
+                    ${pessoa}
+                    <span style="cursor: pointer; color: #6b7280; font-weight: bold;" onclick="removerPessoa('${pessoa}')">×</span>
+                `;
+                container.appendChild(chip);
+            });
+        }
+        
+        function removerPessoa(nome) {
+            estadoSistema.pessoasSelecionadas.delete(nome);
+            atualizarListaPessoas();
+        }
+        
+        // ✅ FUNÇÃO SALVAR EVENTO ATUALIZADA COM RECORRÊNCIA
+        function salvarEvento() {
+            if (!validarFormulario([
+                {id: 'eventoData'},
+                {id: 'eventoTitulo'},
+                {id: 'eventoHorarioInicio'}
+            ])) {
+                mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+            
+            const eventoBase = {
+                id: estadoSistema.editandoEvento || Date.now(),
+                titulo: document.getElementById('eventoTitulo').value,
+                tipo: document.getElementById('eventoTipo').value,
+                descricao: document.getElementById('eventoDescricao').value,
+                data: document.getElementById('eventoData').value,
+                horarioInicio: document.getElementById('eventoHorarioInicio').value,
+                horarioFim: document.getElementById('eventoHorarioFim').value,
+                pessoas: Array.from(estadoSistema.pessoasSelecionadas)
+            };
+            
+            const isRecorrente = document.getElementById('eventoRecorrencia').checked;
+            
+            if (isRecorrente && !estadoSistema.editandoEvento) {
+                // ✅ CRIAR EVENTOS RECORRENTES
+                const tipoRecorrencia = document.getElementById('eventoTipoRecorrencia').value;
+                const quantidade = parseInt(document.getElementById('eventoQuantidadeRecorrencia').value) || 4;
+                
+                const eventosRecorrentes = gerarEventosRecorrentes(eventoBase, tipoRecorrencia, quantidade);
+                
+                eventosRecorrentes.forEach(evento => {
+                    dados.eventos.push(evento);
+                    sincronizarEventoParaAgendas(evento);
+                });
+                
+                mostrarNotificacao(`${quantidade} eventos recorrentes criados com sucesso!`);
+            } else {
+                // ✅ EVENTO ÚNICO
+                if (estadoSistema.editandoEvento) {
+                    const index = dados.eventos.findIndex(e => e.id === estadoSistema.editandoEvento);
+                    if (index !== -1) {
+                        dados.eventos[index] = eventoBase;
+                        mostrarNotificacao('Evento atualizado com sucesso!');
+                    }
+                } else {
+                    dados.eventos.push(eventoBase);
+                    mostrarNotificacao('Evento criado com sucesso!');
+                }
+                
+                sincronizarEventoParaAgendas(eventoBase);
+            }
+            
+            salvarDados();
+            fecharModal('modalEvento');
+            gerarCalendario();
+            atualizarEstatisticas();
+            
+            // Atualizar agenda se estiver visualizando
+            if (estadoSistema.pessoaAtual) {
+                renderizarAgendaSemana(estadoSistema.pessoaAtual);
+            }
+        }
+        
+        function editarEvento(evento) {
+            estadoSistema.editandoEvento = evento.id;
+            estadoSistema.pessoasSelecionadas.clear();
+            
+            document.getElementById('modalEventoTitulo').textContent = 'Editar Evento';
+            document.getElementById('eventoId').value = evento.id;
+            document.getElementById('eventoTipo').value = evento.tipo;
+            document.getElementById('eventoTitulo').value = evento.titulo;
+            document.getElementById('eventoDescricao').value = evento.descricao || '';
+            document.getElementById('eventoData').value = evento.data;
+            document.getElementById('eventoHorarioInicio').value = evento.horarioInicio || '09:00';
+            document.getElementById('eventoHorarioFim').value = evento.horarioFim || '10:00';
+            
+            // ✅ DESABILITAR RECORRÊNCIA NA EDIÇÃO (para simplificar)
+            document.getElementById('eventoRecorrencia').checked = false;
+            document.getElementById('eventoRecorrencia').disabled = true;
+            document.getElementById('eventoRecorrenciaContainer').style.display = 'none';
+            
+            if (evento.pessoas) {
+                evento.pessoas.forEach(pessoa => {
+                    estadoSistema.pessoasSelecionadas.add(pessoa);
+                });
+            }
+            
+            atualizarListaPessoas();
+            document.getElementById('modalEvento').classList.add('active');
+        }
+        
+        function deletarEvento(id) {
+            if (confirm('Deseja realmente excluir este evento?')) {
+                dados.eventos = dados.eventos.filter(e => e.id !== id);
+                
+                salvarDados();
+                gerarCalendario();
+                atualizarEstatisticas();
+                
+                // Atualizar agenda se estiver visualizando
+                if (estadoSistema.pessoaAtual) {
+                    renderizarAgendaSemana(estadoSistema.pessoaAtual);
+                }
+                
+                mostrarNotificacao('Evento excluído!');
+            }
+        }
+        
+        // Funções de Atividades
+        function mostrarNovaAtividade() {
+            estadoSistema.editandoAtividade = null;
+            document.getElementById('modalAtividadeTitulo').textContent = 'Nova Atividade';
+            document.getElementById('atividadeId').value = '';
+            
+            const select = document.getElementById('atividadeResponsaveis');
+            select.innerHTML = '';
+            
+            const membrosMap = new Map();
+            Object.entries(dados.areas).forEach(([areaKey, areaItem]) => {
+                areaItem.equipe.forEach(membro => {
+                    if (!membrosMap.has(membro.nome)) {
+                        membrosMap.set(membro.nome, []);
+                    }
+                    membrosMap.get(membro.nome).push(areaItem.nome);
+                });
+            });
+            
+            Array.from(membrosMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).forEach(([nomeMembro, areas]) => {
+                const option = document.createElement('option');
+                option.value = nomeMembro;
+                option.textContent = `${nomeMembro} (${areas.join(', ')})`;
+                if (estadoSistema.areaAtual && dados.areas[estadoSistema.areaAtual].equipe.some(m => m.nome === nomeMembro)) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            document.getElementById('modalAtividade').classList.add('active');
+        }
+        
+        function editarAtividade(id) {
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === id);
+            
+            if (atividade) {
+                estadoSistema.editandoAtividade = id;
+                
+                document.getElementById('modalAtividadeTitulo').textContent = 'Editar Atividade';
+                document.getElementById('atividadeId').value = id;
+                document.getElementById('atividadeNome').value = atividade.nome;
+                document.getElementById('atividadePrazo').value = atividade.prazo;
+                document.getElementById('atividadeStatus').value = atividade.status;
+                
+                const select = document.getElementById('atividadeResponsaveis');
+                select.innerHTML = '';
+                
+                const membrosMap = new Map();
+                Object.entries(dados.areas).forEach(([areaKey, areaItem]) => {
+                    areaItem.equipe.forEach(membro => {
+                        if (!membrosMap.has(membro.nome)) {
+                            membrosMap.set(membro.nome, []);
+                        }
+                        membrosMap.get(membro.nome).push(areaItem.nome);
+                    });
+                });
+                
+                Array.from(membrosMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).forEach(([nomeMembro, areas]) => {
+                    const option = document.createElement('option');
+                    option.value = nomeMembro;
+                    option.textContent = `${nomeMembro} (${areas.join(', ')})`;
+                    option.selected = atividade.responsaveis.includes(nomeMembro);
+                    select.appendChild(option);
+                });
+                
+                document.getElementById('modalAtividade').classList.add('active');
+            }
+        }
+        
+        function salvarAtividade() {
+            const responsaveisSelect = document.getElementById('atividadeResponsaveis');
+            
+            if (!validarFormulario([
+                {id: 'atividadeNome'},
+                {id: 'atividadePrazo'},
+                {id: 'atividadeResponsaveis', tipo: 'select'}
+            ])) {
+                mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+
+            // Validar prazo
+            if (!validarPrazoAtividade()) {
+                return;
+            }
+            
+            const area = dados.areas[estadoSistema.areaAtual];
+            const responsaveis = Array.from(responsaveisSelect.selectedOptions).map(opt => opt.value);
+            
+            const atividadeData = {
+                nome: document.getElementById('atividadeNome').value,
+                prazo: document.getElementById('atividadePrazo').value,
+                responsaveis: responsaveis,
+                status: document.getElementById('atividadeStatus').value
+            };
+            
+            if (estadoSistema.editandoAtividade) {
+                const index = area.atividades.findIndex(a => a.id === estadoSistema.editandoAtividade);
+                if (index !== -1) {
+                    area.atividades[index] = {
+                        ...area.atividades[index],
+                        ...atividadeData
+                    };
+                }
+            } else {
+                const novaAtividade = {
+                    id: Date.now(),
+                    ...atividadeData,
+                    progresso: 0,
+                    dataAdicionado: new Date().toISOString(),
+                    tarefas: []
+                };
+                
+                area.atividades.push(novaAtividade);
+            }
+            
+            salvarDados();
+            fecharModal('modalAtividade');
+            renderizarAtividades(area);
+            atualizarEstatisticas();
+            mostrarNotificacao('Atividade salva com sucesso!');
+        }
+        
+        function deletarAtividade(id) {
+            if (confirm('Deseja realmente excluir esta atividade?')) {
+                const area = dados.areas[estadoSistema.areaAtual];
+                area.atividades = area.atividades.filter(a => a.id !== id);
+                
+                salvarDados();
+                renderizarAtividades(area);
+                atualizarEstatisticas();
+                mostrarNotificacao('Atividade excluída!');
+            }
+        }
+        
+        function mudarStatus(id, novoStatus) {
+            const area = dados.areas[estadoSistema.areaAtual];
+            const atividade = area.atividades.find(a => a.id === id);
+            if (atividade) {
+                atividade.status = novoStatus;
+                salvarDados();
+                atualizarEstatisticas();
+            }
+        }
+        
+        // ========== AGENDA INDIVIDUAL LIMPA E OTIMIZADA ==========
+        function mostrarAgendaIndividual(nome, cargo) {
+            estadoSistema.pessoaAtual = nome;
+            
+            document.getElementById('painelArea').classList.add('hidden');
+            document.getElementById('agendaIndividual').classList.remove('hidden');
+            
+            document.getElementById('pessoaNome').textContent = nome;
+            document.getElementById('pessoaCargo').textContent = cargo;
+            
+            renderizarResponsabilidades(nome);
+            renderizarAgendaSemana(nome);
+            carregarObservacoes(nome);
+            
+            const area = dados.areas[estadoSistema.areaAtual];
+            atualizarBreadcrumb(`Dashboard > ${area.nome} > ${nome}`);
+        }
+        
+        // ========== SISTEMA DE RESPONSABILIDADES OTIMIZADO ==========
+        function renderizarResponsabilidades(nome) {
+            const lista = document.getElementById('responsabilidadesLista');
+            lista.innerHTML = '';
+            let totalResponsabilidades = 0;
+            let responsabilidades = [];
+            
+            Object.entries(dados.areas).forEach(([areaKey, area]) => {
+                area.atividades.forEach(atividade => {
+                    if (atividade.responsaveis.includes(nome)) {
+                        totalResponsabilidades++;
+                        responsabilidades.push({
+                            atividade: atividade,
+                            areaKey: areaKey,
+                            areaNome: area.nome,
+                            prazoData: new Date(atividade.prazo)
+                        });
+                    }
+                });
+            });
+            
+            responsabilidades.sort((a, b) => a.prazoData - b.prazoData);
+            
+            const filtro = document.getElementById('filtroResponsabilidades')?.value || 'todas';
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            const responsabilidadesFiltradas = responsabilidades.filter(({atividade}) => {
+                const prazo = new Date(atividade.prazo);
+                prazo.setHours(0, 0, 0, 0);
+                const diasRestantes = Math.floor((prazo - hoje) / (1000 * 60 * 60 * 24));
+                
+                switch(filtro) {
+                    case 'urgentes':
+                        return diasRestantes <= 3 && diasRestantes >= 0;
+                    case 'atrasadas':
+                        return diasRestantes < 0;
+                    case 'emdia':
+                        return atividade.status === 'verde';
+                    case 'atencao':
+                        return atividade.status === 'amarelo';
+                    default:
+                        return true;
+                }
+            });
+            
+            responsabilidadesFiltradas.forEach(({atividade, areaKey, areaNome}) => {
+                const div = document.createElement('div');
+                
+                const diasRestantes = calcularDiasRestantes(atividade.prazo);
+                
+                div.style.cssText = `padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 12px; border-radius: 8px; transition: all 0.2s; ${diasRestantes < 0 ? 'border-color: #ef4444; background: #fee2e2;' : diasRestantes <= 3 ? 'border-color: #f59e0b; background: #fef3c7;' : ''}`;
+                
+                let prazoTexto = '';
+                if (diasRestantes < 0) {
+                    prazoTexto = `⚠️ Atrasado ${Math.abs(diasRestantes)} dias`;
+                } else if (diasRestantes === 0) {
+                    prazoTexto = '📅 Vence hoje!';
+                } else if (diasRestantes <= 3) {
+                    prazoTexto = `⏰ ${diasRestantes} dias restantes`;
+                } else {
+                    prazoTexto = `📅 ${diasRestantes} dias restantes`;
+                }
+                
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="status-indicator status-${atividade.status}"></span>
+                            <strong>${atividade.nome}</strong>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary btn-sm" onclick="editarResponsabilidade(${atividade.id}, '${areaKey}')">
+                                ✏️ Editar
+                            </button>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #6b7280;">
+                        ${areaNome}<br>
+                        Prazo: ${formatarData(atividade.prazo)} <span style="font-weight: bold; color: ${diasRestantes < 0 ? '#ef4444' : diasRestantes <= 3 ? '#f59e0b' : '#10b981'};">${prazoTexto}</span><br>
+                        Responsáveis: ${atividade.responsaveis.join(', ')}
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <select onchange="mudarStatusResponsabilidade(${atividade.id}, '${areaKey}', this.value)" 
+                                style="padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            <option value="verde" ${atividade.status === 'verde' ? 'selected' : ''}>🟢 Em Dia</option>
+                            <option value="amarelo" ${atividade.status === 'amarelo' ? 'selected' : ''}>🟡 Atenção</option>
+                            <option value="vermelho" ${atividade.status === 'vermelho' ? 'selected' : ''}>🔴 Atraso</option>
+                        </select>
+                    </div>
+                `;
+                
+                lista.appendChild(div);
+            });
+            
+            const contador = document.getElementById('contadorResponsabilidades');
+            if (contador) {
+                const totalReal = totalResponsabilidades;
+                const totalFiltrado = responsabilidadesFiltradas.length;
+                
+                if (filtro !== 'todas' && totalFiltrado !== totalReal) {
+                    contador.textContent = `${totalFiltrado}/${totalReal}`;
+                } else {
+                    contador.textContent = totalReal;
+                }
+                contador.style.background = totalReal > 5 ? '#fbbf24' : '#e5e7eb';
+                contador.style.color = totalReal > 5 ? 'white' : '#374151';
+            }
+            
+            if (totalResponsabilidades === 0) {
+                lista.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p style="font-size: 48px; margin-bottom: 16px;">📋</p>
+                        <p>Você ainda não tem responsabilidades atribuídas.</p>
+                    </div>
+                `;
+            } else if (responsabilidadesFiltradas.length === 0) {
+                lista.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p style="font-size: 32px; margin-bottom: 16px;">🔍</p>
+                        <p>Nenhuma responsabilidade encontrada com este filtro.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // ========== AGENDA SEMANAL LIMPA E PROFISSIONAL - ATUALIZADA ==========
+        function renderizarAgendaSemana(nome) {
+            console.log('🔍 DEBUG RENDERIZAR AGENDA PARA:', nome);
+            console.log('🔍 DEBUG DADOS.AGENDAS:', dados?.agendas);
+            console.log('🔍 DEBUG AGENDA DA PESSOA:', dados?.agendas?.[nome]);
+            
+            const container = document.getElementById('agendaSemana');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const diasSemana = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
+            const diasNomes = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+            
+            diasSemana.forEach((dia, index) => {
+                console.log(`🔍 DEBUG PROCESSANDO DIA: ${dia}`);
+                console.log(`🔍 DEBUG TAREFAS NO DIA:`, dados?.agendas?.[nome]?.[dia]);
+                
+                const diaDiv = document.createElement('div');
+                diaDiv.className = 'dia-semana';
+                
+                // Calcular data do dia
+                const hoje = new Date();
+                const diaSemanaAtual = hoje.getDay();
+                const diasParaAdicionar = index + 1 - diaSemanaAtual;
+                const dataDodia = new Date(hoje);
+                dataDodia.setDate(hoje.getDate() + diasParaAdicionar);
+                const dataFormatada = dataDodia.toISOString().split('T')[0];
+                
+                // Header do dia
+                diaDiv.innerHTML = `
+                    <h4 style="margin-bottom: 12px; color: #1f2937; font-size: 14px;">
+                        ${diasNomes[index]} 
+                        <span style="font-size: 11px; color: #6b7280; font-weight: normal;">${formatarData(dataFormatada)}</span>
+                    </h4>
+                `;
+                
+                let temItens = false;
+                
+                // ✅ 1. TAREFAS PESSOAIS COM CORES POR TIPO
+                if (dados?.agendas?.[nome]?.[dia]) {
+                    console.log(`✅ ENCONTRADAS ${dados.agendas[nome][dia].length} TAREFAS PARA ${dia}`);
+                    dados.agendas[nome][dia].forEach(tarefa => {
+                        console.log('📝 RENDERIZANDO TAREFA:', tarefa);
+                        
+                        const tarefaDiv = document.createElement('div');
+                        tarefaDiv.className = 'tarefa';
+                        
+                        // ✅ APLICAR CORES POR TIPO
+                        const tipoTarefa = tarefa.tipo || 'outro';
+                        let corFundo = '#f3f4f6';
+                        let corBorda = '#e5e7eb';
+                        
+                        switch(tipoTarefa) {
+                            case 'reuniao': 
+                                corFundo = '#dbeafe'; 
+                                corBorda = '#3b82f6'; 
+                                break;
+                            case 'entrega': 
+                                corFundo = '#d1fae5'; 
+                                corBorda = '#10b981'; 
+                                break;
+                            case 'prazo': 
+                                corFundo = '#fee2e2'; 
+                                corBorda = '#ef4444'; 
+                                break;
+                            case 'marco': 
+                                corFundo = '#ede9fe'; 
+                                corBorda = '#8b5cf6'; 
+                                break;
+                            case 'outro': 
+                                corFundo = '#f3f4f6'; 
+                                corBorda = '#6b7280'; 
+                                break;
+                        }
+                        
+                        tarefaDiv.style.background = corFundo;
+                        tarefaDiv.style.borderLeft = tarefa.mostrarNoCalendario ? `3px solid ${corBorda}` : `3px solid ${corBorda}`;
+                        tarefaDiv.style.cursor = 'pointer';
+                        
+                        // ✅ USAR TÍTULO OU DESCRIÇÃO
+                        const titulo = tarefa.titulo || tarefa.descricao?.split(' - ')[0] || 'Sem título';
+                        const horarioInicio = tarefa.horarioInicio || tarefa.descricao?.split(' - ')[1] || '';
+                        const horarioFim = tarefa.horarioFim ? ` - ${tarefa.horarioFim}` : '';
+                        
+                        // Verificar se o usuário atual pode editar esta tarefa
+                        const podeEditar = podeEditarTarefa(nome);
+                        
+                        // ✅ ÍCONE POR TIPO
+                        let iconeTipo = '';
+                        switch(tipoTarefa) {
+                            case 'reuniao': iconeTipo = '📅'; break;
+                            case 'entrega': iconeTipo = '📦'; break;
+                            case 'prazo': iconeTipo = '⏰'; break;
+                            case 'marco': iconeTipo = '🎯'; break;
+                            case 'outro': iconeTipo = '📌'; break;
+                        }
+                        
+                        tarefaDiv.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div style="flex: 1;">
+                                    <strong style="font-size: 11px; color: #374151;">${iconeTipo} ${titulo}</strong>
+                                    ${horarioInicio ? `<br><span style="font-size: 10px; color: #6b7280;">${horarioInicio}${horarioFim}</span>` : ''}
+                                    ${tarefa.descricao && tarefa.descricao !== titulo ? `<br><span style="font-size: 9px; color: #6b7280;">${tarefa.descricao}</span>` : ''}
+                                    ${tarefa.mostrarNoCalendario ? '<br><span style="font-size: 9px; color: #8b5cf6;">📅 Visível no calendário</span>' : ''}
+                                    ${podeEditar ? '<br><span style="font-size: 9px; color: #10b981;">✏️ Clique para editar</span>' : '<br><span style="font-size: 9px; color: #6b7280;">👤 Tarefa pessoal</span>'}
+                                </div>
+                                ${podeEditar ? `<span class="delete-btn" onclick="deletarTarefa('${nome}', '${dia}', '${tarefa.id}')" style="font-size: 12px; color: #ef4444; cursor: pointer; opacity: 0; transition: opacity 0.2s;">×</span>` : ''}
+                            </div>
+                        `;
+                        
+                        // Adicionar evento de clique para edição (apenas se pode editar)
+                        if (podeEditar) {
+                            tarefaDiv.onclick = (e) => {
+                                e.stopPropagation();
+                                editarTarefaPessoal(nome, dia, tarefa.id);
+                            };
+                            
+                            // Mostrar delete btn no hover
+                            tarefaDiv.addEventListener('mouseenter', () => {
+                                const deleteBtn = tarefaDiv.querySelector('.delete-btn');
+                                if (deleteBtn) deleteBtn.style.opacity = '1';
+                            });
+                            tarefaDiv.addEventListener('mouseleave', () => {
+                                const deleteBtn = tarefaDiv.querySelector('.delete-btn');
+                                if (deleteBtn) deleteBtn.style.opacity = '0';
+                            });
+                        } else {
+                            tarefaDiv.style.cursor = 'default';
+                            tarefaDiv.title = `Tarefa pessoal de ${nome}`;
+                        }
+                        
+                        diaDiv.appendChild(tarefaDiv);
+                        temItens = true;
+                    });
+                } else {
+                    console.log(`❌ NENHUMA TAREFA ENCONTRADA PARA ${nome} NO ${dia}`);
+                }
+                
+                // 2. EVENTOS DO CALENDÁRIO
+                const eventosDia = obterEventosDoDia(dataFormatada);
+                const eventosRelevantes = eventosDia.filter(evento => 
+                    evento.pessoas && (
+                        evento.pessoas.includes(nome) || 
+                        evento.pessoas.includes('Todos') ||
+                        evento.pessoas.includes('_todos')
+                    ) && evento.origem !== 'tarefa_pessoal'
+                );
+                
+                eventosRelevantes.forEach(evento => {
+                    const eventoDiv = document.createElement('div');
+                    eventoDiv.className = 'tarefa';
+                    
+                    let corFundo = '#e5e7eb';
+                    let corBorda = '#6b7280';
+                    let icone = '📌';
+                    
+                    switch(evento.tipo) {
+                        case 'reuniao': 
+                            corFundo = '#dbeafe'; 
+                            corBorda = '#3b82f6'; 
+                            icone = '📅'; 
+                            break;
+                        case 'entrega': 
+                            corFundo = '#d1fae5'; 
+                            corBorda = '#10b981'; 
+                            icone = '📦'; 
+                            break;
+                        case 'prazo': 
+                            corFundo = '#fee2e2'; 
+                            corBorda = '#ef4444'; 
+                            icone = '⏰'; 
+                            break;
+                        case 'marco': 
+                            corFundo = '#ede9fe'; 
+                            corBorda = '#8b5cf6'; 
+                            icone = '🎯'; 
+                            break;
+                    }
+                    
+                    eventoDiv.style.background = corFundo;
+                    eventoDiv.style.borderLeft = `3px solid ${corBorda}`;
+                    eventoDiv.style.cursor = 'pointer';
+                    
+                    let htmlEvento = `
+                        <strong style="font-size: 11px; color: #374151;">${icone} ${evento.titulo}</strong>
+                        <br><span style="font-size: 10px; color: #6b7280;">
+                            ${evento.horarioInicio || 'Todo dia'}
+                            ${evento.horarioFim ? ` - ${evento.horarioFim}` : ''}
+                        </span>
+                        ${evento.pessoas.length > 1 ? `<br><span style="font-size: 9px; color: #6b7280;">👥 ${evento.pessoas.length} pessoas</span>` : ''}
+                    `;
+                    
+                    // ✅ INDICADOR VISUAL DE RECORRÊNCIA
+                    if (evento.recorrente) {
+                        htmlEvento += `<br><span style="font-size: 9px; color: #8b5cf6;">🔄 Recorrente</span>`;
+                    }
+                    
+                    eventoDiv.innerHTML = htmlEvento;
+                    
+                    eventoDiv.onclick = () => editarEvento(evento);
+                    eventoDiv.title = `${evento.titulo}\n${evento.descricao || ''}\n💡 Clique para editar`;
+                    
+                    diaDiv.appendChild(eventoDiv);
+                    temItens = true;
+                });
+                
+                // 3. PRAZOS DAS RESPONSABILIDADES
+                if (dados?.areas) {
+                    Object.entries(dados.areas).forEach(([areaKey, area]) => {
+                        area.atividades.forEach(atividade => {
+                            if (atividade.responsaveis.includes(nome)) {
+                                const prazoData = new Date(atividade.prazo);
+                                prazoData.setHours(0, 0, 0, 0);
+                                const dataAtual = new Date(dataFormatada);
+                                dataAtual.setHours(0, 0, 0, 0);
+                                
+                                const diffDias = Math.floor((prazoData - dataAtual) / (1000 * 60 * 60 * 24));
+                                
+                                if (diffDias === 0) {
+                                    // Prazo hoje
+                                    const prazoDiv = document.createElement('div');
+                                    prazoDiv.className = 'tarefa';
+                                    prazoDiv.style.background = '#fee2e2';
+                                    prazoDiv.style.borderLeft = '3px solid #ef4444';
+                                    prazoDiv.style.cursor = 'pointer';
+                                    
+                                    prazoDiv.innerHTML = `
+                                        <strong style="font-size: 11px; color: #dc2626;">⏰ PRAZO HOJE</strong>
+                                        <br><span style="font-size: 10px; color: #374151;">${atividade.nome}</span>
+                                        <br><span style="font-size: 9px; color: #6b7280;">${area.nome}</span>
+                                    `;
+                                    
+                                    prazoDiv.onclick = () => editarResponsabilidade(atividade.id, areaKey);
+                                    diaDiv.appendChild(prazoDiv);
+                                    temItens = true;
+                                    
+                                } else if (diffDias > 0 && diffDias <= 3) {
+                                    // Próximos 3 dias
+                                    const prazoDiv = document.createElement('div');
+                                    prazoDiv.className = 'tarefa';
+                                    prazoDiv.style.background = '#fef3c7';
+                                    prazoDiv.style.borderLeft = '3px solid #f59e0b';
+                                    prazoDiv.style.cursor = 'pointer';
+                                    
+                                    prazoDiv.innerHTML = `
+                                        <strong style="font-size: 11px; color: #d97706;">📅 Em ${diffDias} dia${diffDias > 1 ? 's' : ''}</strong>
+                                        <br><span style="font-size: 10px; color: #374151;">${atividade.nome}</span>
+                                        <br><span style="font-size: 9px; color: #6b7280;">${area.nome}</span>
+                                    `;
+                                    
+                                    prazoDiv.onclick = () => editarResponsabilidade(atividade.id, areaKey);
+                                    diaDiv.appendChild(prazoDiv);
+                                    temItens = true;
+                                }
+                            }
+                        });
+                    });
+                }
+                
+                // 4. STATUS DO DIA (ausência, home office)
+                const statusDia = dados?.statusPessoal?.[nome]?.[dataFormatada];
+                if (statusDia) {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'tarefa';
+                    statusDiv.style.background = statusDia.tipo === 'ausencia' ? '#fee2e2' : '#dbeafe';
+                    statusDiv.style.borderLeft = statusDia.tipo === 'ausencia' ? '3px solid #ef4444' : '3px solid #3b82f6';
+                    
+                    const iconeStatus = statusDia.tipo === 'ausencia' ? '❌' : '🏠';
+                    const textoStatus = statusDia.tipo === 'ausencia' ? 'Ausente' : 'Home Office';
+                    
+                    statusDiv.innerHTML = `
+                        <strong style="font-size: 11px; color: #374151;">${iconeStatus} ${textoStatus}</strong>
+                        ${statusDia.observacao ? `<br><span style="font-size: 10px; color: #6b7280;">${statusDia.observacao}</span>` : ''}
+                    `;
+                    
+                    diaDiv.appendChild(statusDiv);
+                    temItens = true;
+                }
+                
+                // Mensagem se não há itens
+                if (!temItens) {
+                    const vazioDiv = document.createElement('div');
+                    vazioDiv.style.cssText = 'text-align: center; color: #9ca3af; font-size: 12px; padding: 20px 8px; font-style: italic;';
+                    vazioDiv.textContent = 'Dia livre';
+                    diaDiv.appendChild(vazioDiv);
+                }
+                
+                container.appendChild(diaDiv);
+            });
+        }
+        
+        function carregarObservacoes(nome) {
+            const observacoes = dados.agendas?.[nome]?.observacoes || '';
+            document.getElementById('observacoesPessoais').value = observacoes;
+        }
+        
+        
+        // ========== SISTEMA DE BUSCA OTIMIZADO ==========
+        let timeoutBusca = null;
+
+        // Debounce reduzido para melhor UX
+        function buscarGlobalDebounced() {
+            clearTimeout(timeoutBusca);
+            timeoutBusca = setTimeout(buscarGlobal, 150); // Reduzido de 300ms para 150ms
+        }
+
+        // Função de busca otimizada
+        function buscarGlobal() {
+            const termo = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!termo) {
+                renderizarDashboard();
+                return;
+            }
+            
+            const resultados = [];
+            const termoNormalizado = normalizarTexto(termo);
+            
+            // Cache para evitar recalcular pessoas múltiplas vezes
+            const pessoasCache = new Map();
+            
+            // Busca em atividades (otimizada)
+            Object.entries(dados.areas).forEach(([areaKey, area]) => {
+                area.atividades.forEach(atividade => {
+                    const match = normalizarTexto(atividade.nome).includes(termoNormalizado) ||
+                                 atividade.responsaveis.some(r => normalizarTexto(r).includes(termoNormalizado));
+                    
+                    if (match) {
+                        resultados.push({
+                            tipo: 'atividade',
+                            area: area.nome,
+                            areaKey: areaKey,
+                            atividade: atividade,
+                            relevancia: calcularRelevancia(atividade.nome, termo)
+                        });
+                    }
+                });
+            });
+            
+            // Busca em eventos (otimizada)
+            dados.eventos.forEach(evento => {
+                const match = normalizarTexto(evento.titulo).includes(termoNormalizado) ||
+                             (evento.pessoas && evento.pessoas.some(p => normalizarTexto(p).includes(termoNormalizado)));
+                
+                if (match) {
+                    resultados.push({
+                        tipo: 'evento',
+                        evento: evento,
+                        relevancia: calcularRelevancia(evento.titulo, termo)
+                    });
+                }
+            });
+            
+            // Busca em pessoas (otimizada e sem duplicatas)
+            Object.values(dados.areas).forEach(area => {
+                area.equipe.forEach(membro => {
+                    if (!pessoasCache.has(membro.nome)) {
+                        const match = normalizarTexto(membro.nome).includes(termoNormalizado) || 
+                                     normalizarTexto(membro.cargo).includes(termoNormalizado);
+                        
+                        if (match) {
+                            pessoasCache.set(membro.nome, {
+                                nome: membro.nome,
+                                cargo: membro.cargo,
+                                area: area.nome,
+                                relevancia: calcularRelevancia(membro.nome, termo)
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Adicionar pessoas aos resultados
+            pessoasCache.forEach(pessoa => {
+                resultados.push({
+                    tipo: 'pessoa',
+                    pessoa: pessoa,
+                    relevancia: pessoa.relevancia
+                });
+            });
+            
+            // Ordenar por relevância
+            resultados.sort((a, b) => b.relevancia - a.relevancia);
+            
+            mostrarResultadosBusca(resultados, termo);
+        }
+
+        // Função para calcular relevância da busca
+        function calcularRelevancia(texto, termo) {
+            const textoNorm = normalizarTexto(texto);
+            const termoNorm = normalizarTexto(termo);
+            
+            // Pontuação por match exato
+            if (textoNorm === termoNorm) return 100;
+            
+            // Pontuação por início
+            if (textoNorm.startsWith(termoNorm)) return 80;
+            
+            // Pontuação por inclusão
+            if (textoNorm.includes(termoNorm)) return 60;
+            
+            // Pontuação por palavras
+            const palavras = termoNorm.split(' ');
+            let pontos = 0;
+            palavras.forEach(palavra => {
+                if (textoNorm.includes(palavra)) pontos += 20;
+            });
+            
+            return pontos;
+        }
+
+        // Função otimizada para mostrar resultados
+        function mostrarResultadosBusca(resultados, termo) {
+            const grid = document.getElementById('areasGrid');
+            grid.innerHTML = '';
+            
+            const cardResultados = document.createElement('div');
+            cardResultados.className = 'card';
+            cardResultados.style.gridColumn = 'span 3';
+            
+            // Header dos resultados
+            cardResultados.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>🔍 Resultados: "${termo}"</h3>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="background: #e5e7eb; padding: 4px 12px; border-radius: 20px; font-size: 13px;">
+                            ${resultados.length} resultado${resultados.length !== 1 ? 's' : ''}
+                        </span>
+                        <button class="btn btn-secondary btn-sm" onclick="limparBusca()">✕ Limpar</button>
+                    </div>
+                </div>
+            `;
+            
+            if (resultados.length === 0) {
+                cardResultados.innerHTML += `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p style="font-size: 48px; margin-bottom: 16px;">🔍</p>
+                        <p>Nenhum resultado encontrado para "${termo}"</p>
+                        <p style="font-size: 14px; margin-top: 8px;">Tente usar termos diferentes ou verifique a ortografia</p>
+                    </div>
+                `;
+            } else {
+                // Agrupar resultados por tipo
+                const atividades = resultados.filter(r => r.tipo === 'atividade').slice(0, 10); // Limitar para performance
+                const eventos = resultados.filter(r => r.tipo === 'evento').slice(0, 10);
+                const pessoas = resultados.filter(r => r.tipo === 'pessoa').slice(0, 10);
+                
+                // Renderizar cada tipo
+                renderizarResultadosAtividades(cardResultados, atividades);
+                renderizarResultadosEventos(cardResultados, eventos);
+                renderizarResultadosPessoas(cardResultados, pessoas);
+            }
+            
+            grid.appendChild(cardResultados);
+        }
+
+        // Funções auxiliares para renderizar resultados por tipo
+        function renderizarResultadosAtividades(container, atividades) {
+            if (atividades.length === 0) return;
+            
+            container.innerHTML += '<h4 style="margin: 20px 0 12px 0; color: #374151;">📋 Atividades</h4>';
+            
+            atividades.forEach(res => {
+                const diasRestantes = calcularDiasRestantes(res.atividade.prazo);
+                const urgente = diasRestantes <= 3 ? 'style="border-left: 3px solid #ef4444;"' : '';
+                
+                container.innerHTML += `
+                    <div ${urgente} style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" 
+                         onclick="abrirAreaAtividade('${res.areaKey}', ${res.atividade.id})"
+                         onmouseover="this.style.background='#f9fafb'"
+                         onmouseout="this.style.background='white'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #374151;">${res.atividade.nome}</strong>
+                            <span class="status-indicator status-${res.atividade.status}"></span>
+                        </div>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                            📁 ${res.area} | 👥 ${res.atividade.responsaveis.join(', ')}
+                            <br>📅 ${formatarData(res.atividade.prazo)} 
+                            ${diasRestantes <= 0 ? '<span style="color: #ef4444; font-weight: bold;">(VENCIDO)</span>' :
+                              diasRestantes <= 3 ? '<span style="color: #f59e0b; font-weight: bold;">(URGENTE)</span>' :
+                              `(${diasRestantes} dias)`}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarResultadosEventos(container, eventos) {
+            if (eventos.length === 0) return;
+            
+            container.innerHTML += '<h4 style="margin: 20px 0 12px 0; color: #374151;">📅 Eventos</h4>';
+            
+            eventos.forEach(res => {
+                const evento = res.evento;
+                const icones = {reuniao: '📅', entrega: '📦', prazo: '⏰', marco: '🎯', outro: '📌'};
+                const icone = icones[evento.tipo] || '📌';
+                
+                container.innerHTML += `
+                    <div style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                         onclick="editarEvento({id: ${evento.id}})"
+                         onmouseover="this.style.background='#f9fafb'"
+                         onmouseout="this.style.background='white'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #374151;">${icone} ${evento.titulo}</strong>
+                            <span style="background: #e5e7eb; padding: 2px 8px; border-radius: 12px; font-size: 11px; text-transform: capitalize;">
+                                ${evento.tipo}${evento.recorrente ? ' 🔄' : ''}
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                            📅 ${formatarData(evento.data)} ${evento.horarioInicio ? `às ${evento.horarioInicio}` : ''} 
+                            | 👥 ${evento.pessoas ? evento.pessoas.length : 0} pessoa${evento.pessoas?.length !== 1 ? 's' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarResultadosPessoas(container, pessoas) {
+            if (pessoas.length === 0) return;
+            
+            container.innerHTML += '<h4 style="margin: 20px 0 12px 0; color: #374151;">👥 Pessoas</h4>';
+            
+            pessoas.forEach(res => {
+                container.innerHTML += `
+                    <div style="padding: 12px; border: 1px solid #e5e7eb; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                         onmouseover="this.style.background='#f9fafb'"
+                         onmouseout="this.style.background='white'">
+                        <strong style="color: #374151;">👤 ${res.pessoa.nome}</strong>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                            💼 ${res.pessoa.cargo} | 📁 ${res.pessoa.area}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function limparBusca() {
+            document.getElementById('searchInput').value = '';
+            renderizarDashboard();
+        }
+        
+        function abrirAreaAtividade(areaKey, atividadeId) {
+            mostrarArea(areaKey);
+            setTimeout(() => {
+                const elemento = document.querySelector(`[data-atividade-id="${atividadeId}"]`);
+                if (elemento) {
+                    elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    elemento.style.border = '2px solid #3b82f6';
+                    setTimeout(() => {
+                        elemento.style.border = '1px solid #e5e7eb';
+                    }, 2000);
+                }
+            }, 100);
+        }
+        
+        function filtrarStatus(status, elemento) {
+            estadoSistema.filtroAtual = status;
+            
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            elemento.classList.add('active');
+            
+            if (estadoSistema.areaAtual) {
+                renderizarAtividades(dados.areas[estadoSistema.areaAtual]);
+            }
+        }
+        
+        // Outras funções auxiliares
+        function atualizarBreadcrumb(path) {
+            const breadcrumb = document.getElementById('breadcrumb');
+            const breadcrumbPath = document.getElementById('breadcrumbPath');
+            
+            breadcrumb.classList.remove('hidden');
+            
+            const parts = path.split(' > ');
+            const links = parts.map((part, index) => {
+                if (index === 0) {
+                    return `<a onclick="voltarDashboard()">Dashboard</a>`;
+                } else if (index === parts.length - 1) {
+                    return part;
+                } else {
+                    return `<a onclick="mostrarArea('${estadoSistema.areaAtual}')">${part}</a>`;
+                }
+            });
+            
+            breadcrumbPath.innerHTML = links.join(' > ');
+        }
+        
+        // ========== FUNÇÕES DE TAREFAS PESSOAIS UNIFICADAS ==========
+        function mostrarNovaTarefa() {
+            // ✅ LIMPAR CAMPOS DE RECORRÊNCIA
+            document.getElementById('tarefaRecorrencia').checked = false;
+            document.getElementById('tarefaRecorrenciaContainer').style.display = 'none';
+            document.getElementById('tarefaTipoRecorrencia').value = 'mensal';
+            document.getElementById('tarefaQuantidadeRecorrencia').value = '4';
+            
+            document.getElementById('modalTarefa').classList.add('active');
+        }
+        
+        function alternarTipoAgendamento() {
+            const tipo = document.getElementById('tarefaAgendamento').value;
+            if (tipo === 'semanal') {
+                document.getElementById('grupoDiaSemana').classList.remove('hidden');
+                document.getElementById('grupoData').classList.add('hidden');
+            } else {
+                document.getElementById('grupoDiaSemana').classList.add('hidden');
+                document.getElementById('grupoData').classList.remove('hidden');
+            }
+        }
+        
+        // ✅ FUNÇÃO SALVAR TAREFA ATUALIZADA COM RECORRÊNCIA
+        function salvarTarefa() {
+            const nome = estadoSistema.pessoaAtual;
+            const tipo = document.getElementById('tarefaAgendamento').value;
+            const tipoCategoria = document.getElementById('tarefaTipo').value;
+            const titulo = document.getElementById('tarefaTitulo').value;
+            const horarioInicio = document.getElementById('tarefaHorarioInicio').value;
+            const horarioFim = document.getElementById('tarefaHorarioFim').value;
+            const descricao = document.getElementById('tarefaDescricao').value;
+            const mostrarNoCalendario = document.getElementById('tarefaCalendario').checked;
+            const isRecorrente = document.getElementById('tarefaRecorrencia').checked;
+            
+            console.log('🔧 DEBUG SALVAR TAREFA:', {nome, tipo, tipoCategoria, titulo, horarioInicio, horarioFim, descricao, mostrarNoCalendario, isRecorrente});
+            
+            if (!validarFormulario([
+                {id: 'tarefaTitulo'},
+                {id: 'tarefaHorarioInicio'}
+            ])) {
+                mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+            
+            if (tipo === 'data') {
+                if (!document.getElementById('tarefaDataEspecifica').value) {
+                    document.getElementById('tarefaDataEspecifica').classList.add('input-error');
+                    document.getElementById('tarefaDataError').classList.remove('hidden');
+                    mostrarNotificacao('Selecione uma data!', 'error');
+                    return;
+                }
+            }
+            
+            // ✅ ESTRUTURA UNIFICADA COM EVENTOS
+            const tarefaBase = {
+                id: Date.now(),
+                titulo: titulo,
+                tipo: tipoCategoria, // ✅ PRESERVAR TIPO PARA CORES
+                horarioInicio: horarioInicio,
+                horarioFim: horarioFim || null,
+                descricao: descricao || `${titulo} - ${horarioInicio}`, // ✅ COMPATIBILIDADE COM SISTEMA ANTIGO
+                mostrarNoCalendario: mostrarNoCalendario
+            };
+            
+            console.log('🔧 DEBUG TAREFA BASE:', tarefaBase);
+            
+            // ✅ CORREÇÃO: Garantir que a estrutura de agendas existe
+            if (!dados.agendas) {
+                dados.agendas = {};
+            }
             if (!dados.agendas[nome]) {
                 dados.agendas[nome] = {};
             }
             
-            dados.agendas[nome].observacoes = observacoes;
-            salvarDados();
-        }
-        
-        // Função voltarParaArea
-        function voltarParaArea() {
-            estadoSistema.pessoaAtual = null;
-            document.getElementById('agendaIndividual').classList.add('hidden');
-            document.getElementById('painelArea').classList.remove('hidden');
+            if (tipo === 'semanal') {
+                const dia = document.getElementById('tarefaDia').value;
+                console.log('🔧 DEBUG DIA SELECIONADO:', dia);
+                
+                if (!dados.agendas[nome][dia]) {
+                    dados.agendas[nome][dia] = [];
+                }
+                
+                if (isRecorrente) {
+                    // ✅ CRIAR TAREFAS RECORRENTES (convertidas para eventos)
+                    const tipoRecorrencia = document.getElementById('tarefaTipoRecorrencia').value;
+                    const quantidade = parseInt(document.getElementById('tarefaQuantidadeRecorrencia').value) || 4;
+                    
+                    const tarefasRecorrentes = gerarTarefasRecorrentes(tarefaBase, tipoRecorrencia, quantidade, nome, dia);
+                    
+                    tarefasRecorrentes.forEach(evento => {
+                        dados.eventos.push(evento);
+                    });
+                    
+                    mostrarNotificacao(`${quantidade} tarefas recorrentes criadas como eventos!`);
+                } else {
+                    // ✅ TAREFA SEMANAL ÚNICA
+                    dados.agendas[nome][dia].push(tarefaBase);
+                    console.log('🔧 DEBUG TAREFA SALVA EM:', `dados.agendas['${nome}']['${dia}']`);
+                    console.log('🔧 DEBUG ESTRUTURA APÓS SALVAR:', dados.agendas[nome][dia]);
+                    mostrarNotificacao('Tarefa salva com sucesso!');
+                }
+                
+            } else {
+                const dataEspecifica = document.getElementById('tarefaDataEspecifica').value;
+                
+                const evento = {
+                    id: Date.now(),
+                    data: dataEspecifica,
+                    horarioInicio: horarioInicio,
+                    horarioFim: horarioFim || null,
+                    titulo: titulo,
+                    tipo: tipoCategoria, // ✅ PRESERVAR TIPO
+                    pessoas: [nome],
+                    origem: 'tarefa_pessoal',
+                    descricao: descricao
+                };
+                dados.eventos.push(evento);
+                console.log('🔧 DEBUG EVENTO CRIADO:', evento);
+                mostrarNotificacao('Tarefa criada como evento!');
+            }
             
-            const area = dados.areas[estadoSistema.areaAtual];
-            atualizarBreadcrumb(`Dashboard > ${area.nome}`);
+            salvarDados();
+            fecharModal('modalTarefa');
+            
+            // ✅ CORREÇÃO: Forçar re-renderização da agenda
+            console.log('🔧 DEBUG: Re-renderizando agenda para:', nome);
+            renderizarAgendaSemana(nome);
+            gerarCalendario();
+        }
+
+        function deletarTarefa(nome, dia, tarefaId) {
+            if (confirm('Deseja realmente excluir esta tarefa?')) {
+                dados.agendas[nome][dia] = dados.agendas[nome][dia].filter(t => t.id != tarefaId);
+                salvarDados();
+                renderizarAgendaSemana(nome);
+                
+                mostrarNotificacao('Tarefa excluída!');
+            }
         }
         
-        // Resto das funções...
-        // [As demais funções do sistema continuam aqui...]
+        // Funções de status pessoal
+        function mostrarMarcarStatus() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('statusData').value = hoje;
+            document.getElementById('modalStatus').classList.add('active');
+        }
+        
+        function salvarStatus() {
+            const nome = estadoSistema.pessoaAtual;
+            const data = document.getElementById('statusData').value;
+            const tipo = document.getElementById('statusTipo').value;
+            const observacao = document.getElementById('statusObservacao').value;
+            
+            if (!data) {
+                document.getElementById('statusData').classList.add('input-error');
+                document.getElementById('statusDataError').classList.remove('hidden');
+                return;
+            }
+            
+            if (!dados.statusPessoal) {
+                dados.statusPessoal = {};
+            }
+            if (!dados.statusPessoal[nome]) {
+                dados.statusPessoal[nome] = {};
+            }
+            
+            if (tipo === 'presente') {
+                delete dados.statusPessoal[nome][data];
+            } else {
+                dados.statusPessoal[nome][data] = {
+                    tipo: tipo,
+                    observacao: observacao
+                };
+            }
+            
+            salvarDados();
+            fecharModal('modalStatus');
+            renderizarAgendaSemana(nome);
+            mostrarNotificacao('Status do dia salvo com sucesso!');
+        }
+        
+        // Funções de feriados
+        function mostrarMarcarFeriado() {
+            document.getElementById('modalFeriado').classList.add('active');
+            listarFeriados();
+        }
+        
+        function salvarFeriado() {
+            const data = document.getElementById('feriadoData').value;
+            const nome = document.getElementById('feriadoNome').value;
+            
+            if (!validarFormulario([
+                {id: 'feriadoData'},
+                {id: 'feriadoNome'}
+            ])) {
+                mostrarNotificacao('Preencha todos os campos!', 'error');
+                return;
+            }
+            
+            if (!dados.feriados) {
+                dados.feriados = {};
+            }
+            
+            dados.feriados[data] = nome;
+            
+            salvarDados();
+            document.getElementById('feriadoData').value = '';
+            document.getElementById('feriadoNome').value = '';
+            listarFeriados();
+            gerarCalendario();
+            mostrarNotificacao('Feriado cadastrado com sucesso!');
+        }
+        
+        function listarFeriados() {
+            const lista = document.getElementById('listaFeriados');
+            lista.innerHTML = '';
+            
+            if (dados.feriados && Object.keys(dados.feriados).length > 0) {
+                Object.entries(dados.feriados)
+                    .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+                    .forEach(([data, nome]) => {
+                        const div = document.createElement('div');
+                        div.style.cssText = 'padding: 8px; background: #fef3c7; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;';
+                        div.innerHTML = `
+                            <span>${formatarData(data)} - ${nome}</span>
+                            <span class="delete-btn" onclick="deletarFeriado('${data}')">×</span>
+                        `;
+                        lista.appendChild(div);
+                    });
+            } else {
+                lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Nenhum feriado cadastrado</p>';
+            }
+        }
+        
+        function deletarFeriado(data) {
+            if (confirm('Deseja remover este feriado?')) {
+                delete dados.feriados[data];
+                salvarDados();
+                listarFeriados();
+                gerarCalendario();
+                mostrarNotificacao('Feriado removido!');
+            }
+        }
+        
+        // Funções auxiliares do sistema de responsabilidades
+        function mudarStatusResponsabilidade(atividadeId, areaKey, novoStatus) {
+            const area = dados.areas[areaKey];
+            const atividade = area.atividades.find(a => a.id === atividadeId);
+            if (atividade) {
+                atividade.status = novoStatus;
+                salvarDados();
+                renderizarResponsabilidades(estadoSistema.pessoaAtual);
+                mostrarNotificacao('Status atualizado!');
+            }
+        }
+        
+        function editarResponsabilidade(atividadeId, areaKey) {
+            const areaTemp = estadoSistema.areaAtual;
+            estadoSistema.areaAtual = areaKey;
+            editarAtividade(atividadeId);
+        }
+        
+        // ========== FUNÇÕES DE EDIÇÃO DE TAREFAS PESSOAIS ATUALIZADAS ==========
+        
+        // Abrir modal de edição de tarefa pessoal
+        function editarTarefaPessoal(nomePessoa, dia, tarefaId) {
+            // Verificar permissão - apenas o dono pode editar
+            if (estadoSistema.pessoaAtual !== nomePessoa) {
+                mostrarNotificacao('Você só pode editar suas próprias tarefas!', 'error');
+                return;
+            }
+            
+            // Buscar a tarefa
+            const tarefa = dados.agendas?.[nomePessoa]?.[dia]?.find(t => t.id == tarefaId);
+            if (!tarefa) {
+                mostrarNotificacao('Tarefa não encontrada!', 'error');
+                return;
+            }
+            
+            console.log('🔧 DEBUG EDITANDO TAREFA:', tarefa);
+            
+            // ✅ USAR ESTRUTURA UNIFICADA
+            document.getElementById('editarTarefaId').value = tarefaId;
+            document.getElementById('editarTarefaDono').value = nomePessoa;
+            document.getElementById('editarTarefaDia').value = dia;
+            document.getElementById('editarTarefaTipoCategoria').value = tarefa.tipo || 'outro';
+            document.getElementById('editarTarefaTitulo').value = tarefa.titulo || tarefa.descricao?.split(' - ')[0] || '';
+            document.getElementById('editarTarefaTipo').value = 'semanal';
+            document.getElementById('editarTarefaDiaSemana').value = dia;
+            document.getElementById('editarTarefaHorarioInicio').value = tarefa.horarioInicio || tarefa.descricao?.split(' - ')[1] || '09:00';
+            document.getElementById('editarTarefaHorarioFim').value = tarefa.horarioFim || '';
+            document.getElementById('editarTarefaDescricaoTexto').value = tarefa.descricao || '';
+            document.getElementById('editarTarefaCalendario').checked = tarefa.mostrarNoCalendario || false;
+            
+            // Mostrar grupo correto
+            alternarTipoAgendamentoEdicao();
+            
+            // Abrir modal
+            document.getElementById('modalEditarTarefa').classList.add('active');
+        }
+
+        // Alternar tipo de agendamento na edição
+        function alternarTipoAgendamentoEdicao() {
+            const tipo = document.getElementById('editarTarefaTipo').value;
+            if (tipo === 'semanal') {
+                document.getElementById('editarGrupoDiaSemana').classList.remove('hidden');
+                document.getElementById('editarGrupoData').classList.add('hidden');
+            } else {
+                document.getElementById('editarGrupoDiaSemana').classList.add('hidden');
+                document.getElementById('editarGrupoData').classList.remove('hidden');
+            }
+        }
+
+        // ✅ SALVAR EDIÇÃO COM ESTRUTURA UNIFICADA
+        function salvarEdicaoTarefa() {
+            const tarefaId = document.getElementById('editarTarefaId').value;
+            const nomePessoa = document.getElementById('editarTarefaDono').value;
+            const diaOriginal = document.getElementById('editarTarefaDia').value;
+            const tipo = document.getElementById('editarTarefaTipo').value;
+            const tipoCategoria = document.getElementById('editarTarefaTipoCategoria').value;
+            const titulo = document.getElementById('editarTarefaTitulo').value;
+            const horarioInicio = document.getElementById('editarTarefaHorarioInicio').value;
+            const horarioFim = document.getElementById('editarTarefaHorarioFim').value;
+            const descricaoTexto = document.getElementById('editarTarefaDescricaoTexto').value;
+            const mostrarNoCalendario = document.getElementById('editarTarefaCalendario').checked;
+            
+            if (!validarFormulario([
+                {id: 'editarTarefaTitulo'},
+                {id: 'editarTarefaHorarioInicio'}
+            ])) {
+                mostrarNotificacao('Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+            
+            // Verificar permissão novamente
+            if (estadoSistema.pessoaAtual !== nomePessoa) {
+                mostrarNotificacao('Permissão negada!', 'error');
+                return;
+            }
+            
+            if (tipo === 'data') {
+                if (!document.getElementById('editarTarefaDataEspecifica').value) {
+                    document.getElementById('editarTarefaDataEspecifica').classList.add('input-error');
+                    document.getElementById('editarTarefaDataError').classList.remove('hidden');
+                    mostrarNotificacao('Selecione uma data!', 'error');
+                    return;
+                }
+            }
+            
+            // Remover tarefa original
+            dados.agendas[nomePessoa][diaOriginal] = dados.agendas[nomePessoa][diaOriginal].filter(t => t.id != tarefaId);
+            
+            if (tipo === 'semanal') {
+                const novoDia = document.getElementById('editarTarefaDiaSemana').value;
+                
+                // ✅ CRIAR TAREFA ATUALIZADA COM ESTRUTURA UNIFICADA
+                const tarefaAtualizada = {
+                    id: tarefaId, // Manter o mesmo ID
+                    titulo: titulo,
+                    tipo: tipoCategoria, // ✅ PRESERVAR TIPO PARA CORES
+                    horarioInicio: horarioInicio,
+                    horarioFim: horarioFim || null,
+                    descricao: descricaoTexto || `${titulo} - ${horarioInicio}`,
+                    mostrarNoCalendario: mostrarNoCalendario
+                };
+                
+                // Garantir que o array do dia existe
+                if (!dados.agendas[nomePessoa][novoDia]) {
+                    dados.agendas[nomePessoa][novoDia] = [];
+                }
+                
+                dados.agendas[nomePessoa][novoDia].push(tarefaAtualizada);
+            } else {
+                // Converter para evento
+                const dataEspecifica = document.getElementById('editarTarefaDataEspecifica').value;
+                
+                // Remover da agenda pessoal e criar evento
+                const evento = {
+                    id: Date.now(), // Novo ID para evento
+                    data: dataEspecifica,
+                    horarioInicio: horarioInicio,
+                    horarioFim: horarioFim || null,
+                    titulo: titulo,
+                    tipo: tipoCategoria, // ✅ PRESERVAR TIPO
+                    pessoas: [nomePessoa],
+                    origem: 'tarefa_pessoal',
+                    descricao: descricaoTexto
+                };
+                dados.eventos.push(evento);
+            }
+            
+            salvarDados();
+            fecharModal('modalEditarTarefa');
+            renderizarAgendaSemana(nomePessoa);
+            gerarCalendario();
+            
+            mostrarNotificacao('Tarefa atualizada com sucesso!');
+        }
+
+        // Deletar tarefa pessoal (através do modal de edição)
+        function deletarTarefaPessoal() {
+            const tarefaId = document.getElementById('editarTarefaId').value;
+            const nomePessoa = document.getElementById('editarTarefaDono').value;
+            const dia = document.getElementById('editarTarefaDia').value;
+            
+            // Verificar permissão
+            if (estadoSistema.pessoaAtual !== nomePessoa) {
+                mostrarNotificacao('Permissão negada!', 'error');
+                return;
+            }
+            
+            if (confirm('Deseja realmente excluir esta tarefa?')) {
+                dados.agendas[nomePessoa][dia] = dados.agendas[nomePessoa][dia].filter(t => t.id != tarefaId);
+                
+                salvarDados();
+                fecharModal('modalEditarTarefa');
+                renderizarAgendaSemana(nomePessoa);
+                
+                mostrarNotificacao('Tarefa excluída!');
+            }
+        }
+
+        // Verificar se usuário pode editar tarefa
+        function podeEditarTarefa(nomeDono) {
+            return estadoSistema.pessoaAtual === nomeDono;
+        }
+
+        // Verificar se usuário pode editar evento (todos podem)
+        function podeEditarEvento() {
+            return true; // Qualquer usuário logado pode editar eventos
+        }
+        
+        // ========== FUNÇÃO DE DEBUG ==========
+        function debugSistema() {
+            console.log('🔍 DEBUG COMPLETO DO SISTEMA:');
+            console.log('📊 Estado do Sistema:', estadoSistema);
+            console.log('📁 Dados Completos:', dados);
+            console.log('📅 Agendas:', dados?.agendas);
+            
+            if (estadoSistema.pessoaAtual) {
+                console.log(`👤 Agenda de ${estadoSistema.pessoaAtual}:`, dados?.agendas?.[estadoSistema.pessoaAtual]);
+            }
+            
+            return {
+                estado: estadoSistema,
+                dados: dados,
+                agendas: dados?.agendas
+            };
+        }
+        
+        // Expor função de debug globalmente
+        window.debugSistema = debugSistema;
         
         function validarFormulario(campos) {
             let valido = true;
@@ -3557,13 +5174,81 @@
             }
         }
         
-        // Todas as outras funções do sistema vão aqui...
-        // Por brevidade, só incluí as principais para demonstrar que o arquivo está completo
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // ✅ NOVO: Event listener para vinculação de colaborador
+            const vinculacaoSelect = document.getElementById('vinculacaoColaborador');
+            if (vinculacaoSelect) {
+                vinculacaoSelect.addEventListener('change', atualizarInfoVinculacao);
+            }
+            
+            // Atalhos de teclado
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    salvarDados();
+                    mostrarNotificacao('Dados salvos!');
+                }
+                
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal.active').forEach(modal => {
+                        fecharModal(modal.id);
+                    });
+                }
+            });
+        });
         
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    fecharModal(this.id);
+                }
+            });
+        });
+        
+        window.addEventListener('beforeunload', function(e) {
+            if (usuarioAtual) {
+                salvarDados();
+            }
+        });
     </script>
     
     <!-- Script do chat profissional -->
     <script src="modules/chat-module.js"></script>
     
 </body>
-</html> 
+</html>
+                            },
+                            {
+                                id: Date.now() + 1,
+                                titulo: "Email importante",
+                                tipo: "outro",
+                                horarioInicio: "09:30",
+                                horarioFim: "10:00",
+                                descricao: "Responder emails prioritários",
+                                mostrarNoCalendario: false
+                            }
+                        ],
+                        "quarta": [
+                            {
+                                id: Date.now() + 2,
+                                titulo: "Reunião coordenadores",
+                                tipo: "reuniao",
+                                horarioInicio: "15:00",
+                                horarioFim: "16:00",
+                                descricao: "Alinhamento semanal com coordenadores",
+                                mostrarNoCalendario: false
+                            }
+                        ],
+                        observacoes: "Focando na finalização do As Built esta semana."
+                    },
+                    "Bruna": {
+                        "terca": [
+                            {
+                                id: Date.now() + 3,
+                                titulo: "Atualizar BIM",
+                                tipo: "marco",
+                                horarioInicio: "10:00",
+                                horarioFim: "12:00",
+                                descricao: "Atualizar modelo BIM com alterações",
+                                mostrarNoCalendario: true
