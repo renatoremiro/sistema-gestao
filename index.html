@@ -47,39 +47,59 @@
             color: #1f2937;
         }
         
-        /* Indicador de Sincronização */
-        .sync-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            transition: all 0.3s;
+        /* ✅ CHAT MENOS INTRUSIVO - Sobreposições para tornar menos invasivo */
+        #chatContainer {
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+            z-index: 999 !important;
+            transition: all 0.3s ease !important;
         }
         
-        .sync-indicator.syncing {
-            background: #fbbf24;
+        #chatContainer:hover {
+            transform: scale(1.05) !important;
         }
         
-        .sync-indicator.synced {
-            background: #10b981;
-            color: white;
+        #chatContainer.expanded {
+            width: 350px !important;
+            height: 450px !important;
+            border-radius: 12px !important;
+            bottom: 20px !important;
+            right: 20px !important;
         }
         
-        .sync-indicator.error {
-            background: #ef4444;
-            color: white;
+        .chat-toggle {
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            background: #3b82f6 !important;
+            color: white !important;
+            border: none !important;
+            font-size: 24px !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
         }
         
-        .sync-indicator.offline {
-            background: #6b7280;
-            color: white;
+        .chat-notification {
+            position: absolute !important;
+            top: -5px !important;
+            right: -5px !important;
+            background: #ef4444 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 20px !important;
+            height: 20px !important;
+            font-size: 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
         
         /* Sistema de Notificações */
@@ -300,14 +320,14 @@
             border-radius: 3px;
         }
         
-        /* ✅ MINI-EVENTOS ULTRA COMPACTOS */
+        /* ✅ MINI-EVENTOS ULTRA COMPACTOS COM TÍTULOS */
         .mini-evento {
             background: #3b82f6;
             color: white;
-            padding: 2px 4px; /* ✅ SUPER REDUZIDO */
+            padding: 2px 4px; /* ✅ MANTIDO COMPACTO */
             border-radius: 3px;
             margin-top: 2px;
-            font-size: 8px; /* ✅ FONTE MUITO PEQUENA */
+            font-size: 7px; /* ✅ FONTE REDUZIDA PARA ACOMODAR TÍTULO */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -315,7 +335,9 @@
             transition: all 0.2s;
             user-select: none;
             line-height: 1;
-            height: 14px; /* ✅ ALTURA FIXA MINI */
+            height: 16px; /* ✅ ALTURA LIGEIRAMENTE AUMENTADA PARA TÍTULO */
+            overflow: hidden;
+            white-space: nowrap;
         }
         
         .mini-evento:hover {
@@ -324,7 +346,7 @@
             z-index: 15;
         }
         
-        /* ✅ INDICADOR DE MAIS EVENTOS MINI */
+        /* ✅ INDICADOR DE MAIS EVENTOS MINI ATUALIZADO */
         .mais-eventos-mini {
             background: #6b7280;
             color: white;
@@ -335,7 +357,7 @@
             cursor: pointer;
             margin-top: 2px;
             transition: all 0.2s;
-            height: 12px;
+            height: 14px; /* ✅ ALTURA AJUSTADA */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -902,8 +924,6 @@
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
-
-        /* ✅ REMOVIDO COMPLETAMENTE: Badge "Sincronizado" e similares */
         
         /* ✅ MELHORIAS VISUAIS v6.0 - CORES UNIFICADAS COM MELHOR VISIBILIDADE */
         .evento-pessoal {
@@ -1097,14 +1117,14 @@
             }
             
             .mini-evento {
-                font-size: 7px;
-                height: 12px;
+                font-size: 6px;
+                height: 14px; /* ✅ ALTURA AJUSTADA PARA MOBILE */
                 padding: 1px 3px;
             }
             
             .mais-eventos-mini {
                 font-size: 6px;
-                height: 10px;
+                height: 12px; /* ✅ ALTURA AJUSTADA PARA MOBILE */
             }
         }
     </style>
@@ -1134,12 +1154,6 @@
                 Não tem conta? Registre-se
             </a>
         </div>
-    </div>
-    
-    <!-- Indicador de Sincronização -->
-    <div id="syncIndicator" class="sync-indicator synced">
-        <span class="loading" id="syncLoader" style="display: none;"></span>
-        <span id="syncText">✓ Sincronizado</span>
     </div>
     
     <!-- Sistema de Notificações -->
@@ -1268,13 +1282,13 @@
             
        <!-- Dica do sistema -->
 <div style="background: #d1fae5; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #065f46;">
-    <strong>✅ Sistema v6.0 - MINI-EVENTOS + MODAL DE DETALHES:</strong> 
-    <br><strong>📅 Calendário:</strong> Mini-eventos compactos (ícone + horário), clique para detalhes completos
+    <strong>✅ Sistema v6.0 - MINI-EVENTOS COM TÍTULOS + CHAT OTIMIZADO:</strong> 
+    <br><strong>📅 Calendário:</strong> Mini-eventos compactos (ícone + horário + título), clique para detalhes completos
     <br><strong>🎯 Visual:</strong> Células baixas (90px), sem scroll, máximo 5 eventos + indicador "+X"
     <br><strong>📄 PDFs:</strong> Gerar calendário mensal A3 e agenda semanal A4
-    <br><strong>💬 Chat:</strong> Sistema profissional integrado com notificações
+    <br><strong>💬 Chat:</strong> Sistema otimizado, botão circular discreto no canto
     <br><strong>👥 Usuários:</strong> Sistema vinculado aos emails reais dos colaboradores
-    <br><strong>⚡ Performance:</strong> Interface ultra otimizada e clean
+    <br><strong>⚡ Performance:</strong> Interface ultra otimizada, badge de sync removido
 </div>
             <!-- Cards das Áreas -->
             <div class="grid" id="areasGrid"></div>
@@ -2365,34 +2379,8 @@
         }
         
         function atualizarIndicadorSync(status) {
-            const indicator = document.getElementById('syncIndicator');
-            const loader = document.getElementById('syncLoader');
-            const text = document.getElementById('syncText');
-            
-            indicator.className = 'sync-indicator';
-            
-            switch(status) {
-                case 'syncing':
-                    indicator.classList.add('syncing');
-                    loader.style.display = 'inline-block';
-                    text.textContent = 'Sincronizando...';
-                    break;
-                case 'synced':
-                    indicator.classList.add('synced');
-                    loader.style.display = 'none';
-                    text.textContent = '✓ Sincronizado';
-                    break;
-                case 'error':
-                    indicator.classList.add('error');
-                    loader.style.display = 'none';
-                    text.textContent = '✗ Erro de sincronização';
-                    break;
-                case 'offline':
-                    indicator.classList.add('offline');
-                    loader.style.display = 'none';
-                    text.textContent = '◉ Offline';
-                    break;
-            }
+            // ✅ FUNÇÃO REMOVIDA: Badge de sincronização foi removido conforme solicitado
+            console.log('🔄 Status de sincronização:', status);
         }
         
         // ========== FUNÇÕES DE SALVAMENTO FIREBASE OTIMIZADAS ==========
@@ -2616,8 +2604,8 @@
                         }
                     }, 1000);
                     
-                    // ✅ ATUALIZADO: Mencionar otimizações
-                    mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Calendário otimizado + PDFs!`);
+                    // ✅ ATUALIZADO: Mencionar otimizações e melhorias
+                    mostrarNotificacao(`✨ Bem-vindo(a), ${estadoSistema.usuarioNome}! Sistema v6.0 - Calendário otimizado + Chat discreto!`);
                     
                 } catch (error) {
                     console.error('Erro na inicialização:', error);
@@ -2761,40 +2749,6 @@
                                 horarioInicio: "08:00",
                                 horarioFim: "09:00",
                                 descricao: "Revisão dos projetos em andamento",
-                                mostrarNoCalendario: true
-                            },
-                            {
-                                id: Date.now() + 1,
-                                titulo: "Email importante",
-                                tipo: "outro",
-                                horarioInicio: "09:30",
-                                horarioFim: "10:00",
-                                descricao: "Responder emails prioritários",
-                                mostrarNoCalendario: false
-                            }
-                        ],
-                        "quarta": [
-                            {
-                                id: Date.now() + 2,
-                                titulo: "Reunião coordenadores",
-                                tipo: "reuniao",
-                                horarioInicio: "15:00",
-                                horarioFim: "16:00",
-                                descricao: "Alinhamento semanal com coordenadores",
-                                mostrarNoCalendario: false
-                            }
-                        ],
-                        observacoes: "Focando na finalização do As Built esta semana."
-                    },
-                    "Bruna": {
-                        "terca": [
-                            {
-                                id: Date.now() + 3,
-                                titulo: "Atualizar BIM",
-                                tipo: "marco",
-                                horarioInicio: "10:00",
-                                horarioFim: "12:00",
-                                descricao: "Atualizar modelo BIM com alterações",
                                 mostrarNoCalendario: true
                             }
                         ],
@@ -3140,7 +3094,7 @@
             document.getElementById('mesAno').textContent = `${meses[estadoSistema.mesAtual]} ${estadoSistema.anoAtual}`;
         }
         
-        // ✅ NOVA FUNÇÃO PARA CRIAR MINI-EVENTO COMPACTO
+        // ✅ NOVA FUNÇÃO PARA CRIAR MINI-EVENTO COMPACTO COM TÍTULO
         function criarMiniEvento(evento) {
             const miniEventoDiv = document.createElement('div');
             let classesEvento = `mini-evento evento-${evento.tipo}`;
@@ -3160,8 +3114,9 @@
                 case 'outro': iconeTipo = '📌'; break;
             }
             
-            // ✅ FORMATO SUPER COMPACTO: APENAS ÍCONE + HORÁRIO
-            miniEventoDiv.innerHTML = `${iconeTipo} ${evento.horarioInicio || '∙'}`;
+            // ✅ FORMATO MELHORADO: ÍCONE + HORÁRIO + TÍTULO TRUNCADO
+            const tituloTruncado = evento.titulo.length > 12 ? evento.titulo.substring(0, 12) + '...' : evento.titulo;
+            miniEventoDiv.innerHTML = `${iconeTipo} ${evento.horarioInicio || '∙'} ${tituloTruncado}`;
             
             // ✅ ADICIONAR INDICADOR DE RECORRÊNCIA
             if (evento.recorrente) {
@@ -3174,8 +3129,8 @@
                 mostrarDetalhesEvento(evento);
             };
             
-            // ✅ TOOLTIP NO HOVER
-            miniEventoDiv.title = `${evento.titulo} - Clique para detalhes`;
+            // ✅ TOOLTIP MELHORADO COM TÍTULO COMPLETO
+            miniEventoDiv.title = `${evento.titulo} - ${evento.horarioInicio || 'Todo dia'}${evento.horarioFim ? ` às ${evento.horarioFim}` : ''} - Clique para detalhes`;
             
             return miniEventoDiv;
         }
@@ -3619,11 +3574,6 @@
             renderizarDashboard();
         }
         
-        function voltarParaArea() {
-            document.getElementById('agendaIndividual').classList.add('hidden');
-            document.getElementById('painelArea').classList.remove('hidden');
-            mostrarArea(estadoSistema.areaAtual);
-        }
         
         // Funções de Eventos Simplificados
         function mostrarNovoEvento() {
@@ -4422,14 +4372,6 @@
             document.getElementById('observacoesPessoais').value = observacoes;
         }
         
-        function salvarObservacoes() {
-            const nome = estadoSistema.pessoaAtual;
-            if (!dados.agendas[nome]) {
-                dados.agendas[nome] = {};
-            }
-            dados.agendas[nome].observacoes = document.getElementById('observacoesPessoais').value;
-            salvarDados();
-        }
         
         // ========== SISTEMA DE BUSCA OTIMIZADO ==========
         let timeoutBusca = null;
@@ -5277,3 +5219,37 @@
     
 </body>
 </html>
+                            },
+                            {
+                                id: Date.now() + 1,
+                                titulo: "Email importante",
+                                tipo: "outro",
+                                horarioInicio: "09:30",
+                                horarioFim: "10:00",
+                                descricao: "Responder emails prioritários",
+                                mostrarNoCalendario: false
+                            }
+                        ],
+                        "quarta": [
+                            {
+                                id: Date.now() + 2,
+                                titulo: "Reunião coordenadores",
+                                tipo: "reuniao",
+                                horarioInicio: "15:00",
+                                horarioFim: "16:00",
+                                descricao: "Alinhamento semanal com coordenadores",
+                                mostrarNoCalendario: false
+                            }
+                        ],
+                        observacoes: "Focando na finalização do As Built esta semana."
+                    },
+                    "Bruna": {
+                        "terca": [
+                            {
+                                id: Date.now() + 3,
+                                titulo: "Atualizar BIM",
+                                tipo: "marco",
+                                horarioInicio: "10:00",
+                                horarioFim: "12:00",
+                                descricao: "Atualizar modelo BIM com alterações",
+                                mostrarNoCalendario: true
