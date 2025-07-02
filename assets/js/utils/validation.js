@@ -1,373 +1,614 @@
-/* ========== ✅ SISTEMA DE VALIDAÇÃO v6.2 ========== */
+/* ========== ✅ SISTEMA DE VALIDAÇÃO v6.3.0 ========== */
 
 const Validation = {
-    // ✅ VALIDAR FORMULÁRIO GENÉRICO
-    validarFormulario(campos) {
-        let valido = true;
+    // ✅ CONFIGURAÇÕES
+    config: {
+        emailRegex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        phoneRegex: /^[\+]?[1-9][\d]{0,15}$/,
+        urlRegex: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+        passwordMinLength: 6,
+        nomeMinLength: 2,
+        tituloMinLength: 3
+    },
+
+    // ✅ VALIDAÇÕES BÁSICAS
+    
+    // Validar email
+    isValidEmail(email) {
+        if (!email || typeof email !== 'string') return false;
+        return this.config.emailRegex.test(email.trim());
+    },
+
+    // Validar data
+    isValidDate(data) {
+        if (!data) return false;
         
-        campos.forEach(campo => {
-            const elemento = document.getElementById(campo.id);
-            const errorElement = document.getElementById(campo.id + 'Error');
-            
-            if (!elemento) return;
-            
-            // Limpar erros anteriores
-            elemento.classList.remove('input-error');
-            if (errorElement) {
-                errorElement.classList.add('hidden');
+        // Aceitar tanto string (YYYY-MM-DD) quanto objeto Date
+        const dateObj = typeof data === 'string' ? new Date(data + 'T00:00:00') : new Date(data);
+        
+        return !isNaN(dateObj.getTime()) && dateObj.getFullYear() > 1900;
+    },
+
+    // Validar horário (HH:MM)
+    isValidTime(horario) {
+        if (!horario || typeof horario !== 'string') return false;
+        
+        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        return timeRegex.test(horario);
+    },
+
+    // Validar URL
+    isValidURL(url) {
+        if (!url || typeof url !== 'string') return false;
+        return this.config.urlRegex.test(url.trim());
+    },
+
+    // Validar telefone
+    isValidPhone(phone) {
+        if (!phone || typeof phone !== 'string') return false;
+        
+        // Remover formatação para validar apenas números
+        const cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
+        return this.config.phoneRegex.test(cleanPhone);
+    },
+
+    // Validar senha
+    isValidPassword(senha) {
+        if (!senha || typeof senha !== 'string') return false;
+        return senha.length >= this.config.passwordMinLength;
+    },
+
+    // Validar nome
+    isValidName(nome) {
+        if (!nome || typeof nome !== 'string') return false;
+        return nome.trim().length >= this.config.nomeMinLength;
+    },
+
+    // Validar título
+    isValidTitle(titulo) {
+        if (!titulo || typeof titulo !== 'string') return false;
+        return titulo.trim().length >= this.config.tituloMinLength;
+    },
+
+    // ✅ VALIDAÇÕES ESPECÍFICAS DO SISTEMA
+
+    // Validar dados de evento
+    validateEvent(dados) {
+        const erros = [];
+
+        // Título obrigatório
+        if (!this.isValidTitle(dados.titulo)) {
+            erros.push('Título deve ter pelo menos 3 caracteres');
+        }
+
+        // Tipo obrigatório
+        if (!dados.tipo) {
+            erros.push('Tipo do evento é obrigatório');
+        }
+
+        // Data obrigatória
+        if (!this.isValidDate(dados.data)) {
+            erros.push('Data do evento é obrigatória e deve ser válida');
+        }
+
+        // Validar horários se fornecidos
+        if (dados.horarioInicio && !this.isValidTime(dados.horarioInicio)) {
+            erros.push('Horário de início inválido (formato: HH:MM)');
+        }
+
+        if (dados.horarioFim && !this.isValidTime(dados.horarioFim)) {
+            erros.push('Horário de fim inválido (formato: HH:MM)');
+        }
+
+        // Validar sequência de horários
+        if (dados.horarioInicio && dados.horarioFim) {
+            if (!this.isValidTimeRange(dados.horarioInicio, dados.horarioFim)) {
+                erros.push('Horário de início deve ser anterior ao horário de fim');
             }
-            
-            let campoValido = true;
-            let mensagemErro = '';
-            
-            // Validações obrigatórias
-            if (campo.required && !elemento.value.trim()) {
-                campoValido = false;
-                mensagemErro = campo.message || 'Campo obrigatório';
+        }
+
+        // Validar URL se fornecida
+        if (dados.link && !this.isValidURL(dados.link)) {
+            erros.push('URL do link é inválida');
+        }
+
+        // Validar email se fornecido
+        if (dados.email && !this.isValidEmail(dados.email)) {
+            erros.push('Email inválido');
+        }
+
+        return {
+            valido: erros.length === 0,
+            erros: erros
+        };
+    },
+
+    // Validar dados de tarefa
+    validateTask(dados) {
+        const erros = [];
+
+        // Título obrigatório
+        if (!this.isValidTitle(dados.titulo)) {
+            erros.push('Título deve ter pelo menos 3 caracteres');
+        }
+
+        // Tipo obrigatório
+        if (!dados.tipo) {
+            erros.push('Tipo da tarefa é obrigatório');
+        }
+
+        // Prioridade obrigatória
+        if (!dados.prioridade) {
+            erros.push('Prioridade é obrigatória');
+        }
+
+        // Responsável obrigatório
+        if (!dados.responsavel) {
+            erros.push('Responsável é obrigatório');
+        }
+
+        // Validar datas se fornecidas
+        if (dados.dataInicio && !this.isValidDate(dados.dataInicio)) {
+            erros.push('Data de início inválida');
+        }
+
+        if (dados.dataFim && !this.isValidDate(dados.dataFim)) {
+            erros.push('Data de fim inválida');
+        }
+
+        // Validar sequência de datas
+        if (dados.dataInicio && dados.dataFim) {
+            if (!this.isValidDateRange(dados.dataInicio, dados.dataFim)) {
+                erros.push('Data de início deve ser anterior à data de fim');
             }
-            
-            // Validações específicas por tipo
-            if (elemento.value.trim() && campo.type) {
-                switch (campo.type) {
+        }
+
+        // Validar progresso
+        if (dados.progresso !== undefined) {
+            if (!this.isValidProgress(dados.progresso)) {
+                erros.push('Progresso deve ser um número entre 0 e 100');
+            }
+        }
+
+        return {
+            valido: erros.length === 0,
+            erros: erros
+        };
+    },
+
+    // Validar dados de usuário
+    validateUser(dados) {
+        const erros = [];
+
+        // Nome obrigatório
+        if (!this.isValidName(dados.nome)) {
+            erros.push('Nome deve ter pelo menos 2 caracteres');
+        }
+
+        // Email obrigatório e válido
+        if (!this.isValidEmail(dados.email)) {
+            erros.push('Email é obrigatório e deve ser válido');
+        }
+
+        // Senha obrigatória se for novo usuário
+        if (dados.senha && !this.isValidPassword(dados.senha)) {
+            erros.push(`Senha deve ter pelo menos ${this.config.passwordMinLength} caracteres`);
+        }
+
+        // Telefone se fornecido
+        if (dados.telefone && !this.isValidPhone(dados.telefone)) {
+            erros.push('Telefone inválido');
+        }
+
+        return {
+            valido: erros.length === 0,
+            erros: erros
+        };
+    },
+
+    // ✅ VALIDAÇÕES AUXILIARES
+
+    // Validar intervalo de horários
+    isValidTimeRange(horaInicio, horaFim) {
+        if (!this.isValidTime(horaInicio) || !this.isValidTime(horaFim)) {
+            return false;
+        }
+
+        const [horaIni, minIni] = horaInicio.split(':').map(Number);
+        const [horaFi, minFi] = horaFim.split(':').map(Number);
+
+        const minutosIni = horaIni * 60 + minIni;
+        const minutosFi = horaFi * 60 + minFi;
+
+        return minutosIni < minutosFi;
+    },
+
+    // Validar intervalo de datas
+    isValidDateRange(dataInicio, dataFim) {
+        const dataIni = new Date(dataInicio);
+        const dataFi = new Date(dataFim);
+
+        return dataIni <= dataFi;
+    },
+
+    // Validar progresso (0-100)
+    isValidProgress(progresso) {
+        const num = Number(progresso);
+        return !isNaN(num) && num >= 0 && num <= 100;
+    },
+
+    // Validar número positivo
+    isPositiveNumber(valor) {
+        const num = Number(valor);
+        return !isNaN(num) && num > 0;
+    },
+
+    // Validar número inteiro
+    isInteger(valor) {
+        const num = Number(valor);
+        return !isNaN(num) && Number.isInteger(num);
+    },
+
+    // ✅ VALIDAÇÃO DE FORMULÁRIOS DOM
+
+    // Validar formulário completo
+    validateForm(formId, rules = {}) {
+        try {
+            const form = document.getElementById(formId);
+            if (!form) {
+                throw new Error(`Formulário ${formId} não encontrado`);
+            }
+
+            const erros = [];
+            const dados = {};
+
+            // Obter todos os inputs do formulário
+            const inputs = form.querySelectorAll('input, textarea, select');
+
+            inputs.forEach(input => {
+                const nome = input.name || input.id;
+                const valor = input.value;
+                const tipo = input.type;
+                const obrigatorio = input.required;
+
+                // Armazenar valor
+                dados[nome] = valor;
+
+                // Validar campo obrigatório
+                if (obrigatorio && !valor.trim()) {
+                    erros.push(`${this._getFieldLabel(input)} é obrigatório`);
+                    this._markFieldError(input, `${this._getFieldLabel(input)} é obrigatório`);
+                    return;
+                }
+
+                // Pular validação se campo vazio e não obrigatório
+                if (!valor.trim()) return;
+
+                // Validações por tipo
+                switch (tipo) {
                     case 'email':
-                        if (!this.isValidEmail(elemento.value)) {
-                            campoValido = false;
-                            mensagemErro = 'Email inválido';
+                        if (!this.isValidEmail(valor)) {
+                            erros.push(`${this._getFieldLabel(input)} deve ser um email válido`);
+                            this._markFieldError(input, 'Email inválido');
+                        }
+                        break;
+                        
+                    case 'url':
+                        if (!this.isValidURL(valor)) {
+                            erros.push(`${this._getFieldLabel(input)} deve ser uma URL válida`);
+                            this._markFieldError(input, 'URL inválida');
+                        }
+                        break;
+                        
+                    case 'tel':
+                        if (!this.isValidPhone(valor)) {
+                            erros.push(`${this._getFieldLabel(input)} deve ser um telefone válido`);
+                            this._markFieldError(input, 'Telefone inválido');
                         }
                         break;
                         
                     case 'date':
-                        if (!this.isValidDate(elemento.value)) {
-                            campoValido = false;
-                            mensagemErro = 'Data inválida';
+                        if (!this.isValidDate(valor)) {
+                            erros.push(`${this._getFieldLabel(input)} deve ser uma data válida`);
+                            this._markFieldError(input, 'Data inválida');
                         }
                         break;
                         
                     case 'time':
-                        if (!this.isValidTime(elemento.value)) {
-                            campoValido = false;
-                            mensagemErro = 'Horário inválido';
+                        if (!this.isValidTime(valor)) {
+                            erros.push(`${this._getFieldLabel(input)} deve ser um horário válido`);
+                            this._markFieldError(input, 'Horário inválido (HH:MM)');
                         }
                         break;
                         
-                    case 'minLength':
-                        if (elemento.value.length < campo.minLength) {
-                            campoValido = false;
-                            mensagemErro = `Mínimo ${campo.minLength} caracteres`;
+                    case 'number':
+                        if (isNaN(Number(valor))) {
+                            erros.push(`${this._getFieldLabel(input)} deve ser um número válido`);
+                            this._markFieldError(input, 'Número inválido');
                         }
                         break;
                         
-                    case 'maxLength':
-                        if (elemento.value.length > campo.maxLength) {
-                            campoValido = false;
-                            mensagemErro = `Máximo ${campo.maxLength} caracteres`;
+                    case 'password':
+                        if (!this.isValidPassword(valor)) {
+                            erros.push(`${this._getFieldLabel(input)} deve ter pelo menos ${this.config.passwordMinLength} caracteres`);
+                            this._markFieldError(input, `Mínimo ${this.config.passwordMinLength} caracteres`);
                         }
                         break;
                 }
-            }
-            
-            // Validações customizadas
-            if (campoValido && campo.customValidator) {
-                const resultado = campo.customValidator(elemento.value);
-                if (!resultado.valido) {
-                    campoValido = false;
-                    mensagemErro = resultado.mensagem;
+
+                // Validações customizadas
+                if (rules[nome]) {
+                    const resultado = rules[nome](valor, dados);
+                    if (resultado !== true) {
+                        erros.push(resultado);
+                        this._markFieldError(input, resultado);
+                    }
                 }
-            }
-            
-            // Aplicar resultado da validação
-            if (!campoValido) {
-                valido = false;
-                elemento.classList.add('input-error');
-                if (errorElement) {
-                    errorElement.textContent = mensagemErro;
-                    errorElement.classList.remove('hidden');
+
+                // Limpar erro se campo está válido
+                if (erros.length === 0) {
+                    this._clearFieldError(input);
                 }
-            }
-        });
-        
-        return valido;
-    },
+            });
 
-    // ✅ VALIDAÇÃO DE EMAIL
-    isValidEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    },
+            return {
+                valido: erros.length === 0,
+                erros: erros,
+                dados: dados
+            };
 
-    // ✅ VALIDAÇÃO DE DATA
-    isValidDate(dateString) {
-        if (!dateString) return false;
-        
-        const date = new Date(dateString + 'T00:00:00');
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        
-        // Verifica se é uma data válida
-        if (isNaN(date.getTime())) return false;
-        
-        // Não permite datas muito antigas (anterior a 2020)
-        const dataMinima = new Date('2020-01-01');
-        if (date < dataMinima) return false;
-        
-        // Não permite datas muito futuras (mais de 10 anos)
-        const dataMaxima = new Date();
-        dataMaxima.setFullYear(dataMaxima.getFullYear() + 10);
-        if (date > dataMaxima) return false;
-        
-        return true;
-    },
-
-    // ✅ VALIDAÇÃO DE HORÁRIO
-    isValidTime(timeString) {
-        if (!timeString) return false;
-        
-        const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        return regex.test(timeString);
-    },
-
-    // ✅ VALIDAÇÃO DE PRAZO (não pode ser no passado)
-    isValidPrazo(dateString) {
-        if (!this.isValidDate(dateString)) return false;
-        
-        const date = new Date(dateString + 'T00:00:00');
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        
-        // Prazo não pode ser no passado
-        return date >= hoje;
-    },
-
-    // ✅ VALIDAÇÃO DE INTERVALO DE HORÁRIO
-    validarIntervaloHorario(inicio, fim) {
-        if (!inicio) return { valido: true }; // Início é obrigatório, fim é opcional
-        
-        if (!this.isValidTime(inicio)) {
-            return { valido: false, mensagem: 'Horário de início inválido' };
+        } catch (error) {
+            console.error('❌ Erro na validação do formulário:', error);
+            return {
+                valido: false,
+                erros: [`Erro na validação: ${error.message}`],
+                dados: {}
+            };
         }
-        
-        if (fim && !this.isValidTime(fim)) {
-            return { valido: false, mensagem: 'Horário de fim inválido' };
+    },
+
+    // ✅ UTILITÁRIOS DOM
+
+    // Obter label do campo
+    _getFieldLabel(input) {
+        const label = document.querySelector(`label[for="${input.id}"]`);
+        if (label) {
+            return label.textContent.replace('*', '').replace(':', '').trim();
         }
-        
-        if (inicio && fim) {
-            const [horaI, minI] = inicio.split(':').map(Number);
-            const [horaF, minF] = fim.split(':').map(Number);
+        return input.name || input.id || 'Campo';
+    },
+
+    // Marcar campo com erro
+    _markFieldError(input, mensagem) {
+        try {
+            // Adicionar classe de erro
+            input.classList.add('input-error');
             
-            const inicioMinutos = horaI * 60 + minI;
-            const fimMinutos = horaF * 60 + minF;
+            // Remover mensagem de erro anterior
+            this._clearFieldError(input);
             
-            if (fimMinutos <= inicioMinutos) {
-                return { valido: false, mensagem: 'Horário de fim deve ser após o início' };
+            // Adicionar nova mensagem de erro
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = mensagem;
+            errorDiv.style.cssText = `
+                color: #ef4444;
+                font-size: 12px;
+                margin-top: 4px;
+                display: block;
+            `;
+            
+            // Inserir após o input
+            input.parentNode.insertBefore(errorDiv, input.nextSibling);
+
+        } catch (error) {
+            console.error('❌ Erro ao marcar campo com erro:', error);
+        }
+    },
+
+    // Limpar erro do campo
+    _clearFieldError(input) {
+        try {
+            input.classList.remove('input-error');
+            
+            // Remover mensagem de erro
+            const errorMessage = input.parentNode.querySelector('.error-message');
+            if (errorMessage) {
+                errorMessage.remove();
             }
-        }
-        
-        return { valido: true };
-    },
 
-    // ✅ VALIDAÇÃO DE TÍTULO/NOME
-    validarTitulo(titulo) {
-        if (!titulo || !titulo.trim()) {
-            return { valido: false, mensagem: 'Título é obrigatório' };
-        }
-        
-        if (titulo.trim().length < 3) {
-            return { valido: false, mensagem: 'Título deve ter pelo menos 3 caracteres' };
-        }
-        
-        if (titulo.length > 100) {
-            return { valido: false, mensagem: 'Título deve ter no máximo 100 caracteres' };
-        }
-        
-        return { valido: true };
-    },
-
-    // ✅ VALIDAÇÃO DE SENHA
-    validarSenha(senha) {
-        if (!senha) {
-            return { valido: false, mensagem: 'Senha é obrigatória' };
-        }
-        
-        if (senha.length < 6) {
-            return { valido: false, mensagem: 'Senha deve ter pelo menos 6 caracteres' };
-        }
-        
-        if (senha.length > 50) {
-            return { valido: false, mensagem: 'Senha deve ter no máximo 50 caracteres' };
-        }
-        
-        return { valido: true };
-    },
-
-    // ✅ VALIDAÇÃO DE RECORRÊNCIA
-    validarRecorrencia(tipo, quantidade) {
-        if (!tipo) {
-            return { valido: false, mensagem: 'Tipo de recorrência é obrigatório' };
-        }
-        
-        const tiposValidos = ['diaria', 'quinzenal', 'mensal', 'bimestral'];
-        if (!tiposValidos.includes(tipo)) {
-            return { valido: false, mensagem: 'Tipo de recorrência inválido' };
-        }
-        
-        const qtd = parseInt(quantidade);
-        if (isNaN(qtd) || qtd < 1) {
-            return { valido: false, mensagem: 'Quantidade deve ser maior que zero' };
-        }
-        
-        if (qtd > 365) {
-            return { valido: false, mensagem: 'Quantidade máxima é 365' };
-        }
-        
-        return { valido: true };
-    },
-
-    // ✅ SANITIZAÇÃO DE ENTRADA
-    sanitizarEntrada(texto) {
-        if (!texto) return '';
-        
-        return texto
-            .trim()
-            .replace(/[<>]/g, '') // Remove caracteres perigosos
-            .substring(0, 1000); // Limita tamanho
-    },
-
-    // ✅ VALIDAÇÃO DE DADOS DO EVENTO
-    validarEvento(evento) {
-        const erros = [];
-        
-        // Título obrigatório
-        const tituloValidacao = this.validarTitulo(evento.titulo);
-        if (!tituloValidacao.valido) {
-            erros.push(tituloValidacao.mensagem);
-        }
-        
-        // Data obrigatória e válida
-        if (!this.isValidDate(evento.data)) {
-            erros.push('Data inválida');
-        }
-        
-        // Horário de início obrigatório
-        if (!this.isValidTime(evento.horarioInicio)) {
-            erros.push('Horário de início inválido');
-        }
-        
-        // Validar intervalo de horário se ambos existirem
-        if (evento.horarioInicio && evento.horarioFim) {
-            const intervaloValidacao = this.validarIntervaloHorario(evento.horarioInicio, evento.horarioFim);
-            if (!intervaloValidacao.valido) {
-                erros.push(intervaloValidacao.mensagem);
-            }
-        }
-        
-        // Tipo obrigatório
-        const tiposValidos = ['reuniao', 'entrega', 'prazo', 'marco', 'outro'];
-        if (!evento.tipo || !tiposValidos.includes(evento.tipo)) {
-            erros.push('Tipo de evento inválido');
-        }
-        
-        return {
-            valido: erros.length === 0,
-            erros: erros
-        };
-    },
-
-    // ✅ VALIDAÇÃO DE DADOS DA TAREFA
-    validarTarefa(tarefa) {
-        const erros = [];
-        
-        // Título obrigatório
-        const tituloValidacao = this.validarTitulo(tarefa.titulo);
-        if (!tituloValidacao.valido) {
-            erros.push(tituloValidacao.mensagem);
-        }
-        
-        // Horário de início obrigatório
-        if (!this.isValidTime(tarefa.horarioInicio)) {
-            erros.push('Horário de início inválido');
-        }
-        
-        // Validar data específica se informada
-        if (tarefa.dataEspecifica && !this.isValidDate(tarefa.dataEspecifica)) {
-            erros.push('Data específica inválida');
-        }
-        
-        // Tipo obrigatório
-        const tiposValidos = ['reuniao', 'entrega', 'prazo', 'marco', 'outro'];
-        if (!tarefa.tipo || !tiposValidos.includes(tarefa.tipo)) {
-            erros.push('Tipo de tarefa inválido');
-        }
-        
-        return {
-            valido: erros.length === 0,
-            erros: erros
-        };
-    },
-
-    // ✅ EXIBIR ERROS DE VALIDAÇÃO
-    exibirErros(erros, containerId = null) {
-        if (erros.length === 0) return;
-        
-        const mensagem = erros.join('\n');
-        
-        if (containerId) {
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.innerHTML = `
-                    <div class="validation-errors" style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
-                        <strong>❌ Erros encontrados:</strong>
-                        <ul style="margin-top: 8px; margin-left: 16px;">
-                            ${erros.map(erro => `<li>${erro}</li>`).join('')}
-                        </ul>
-                    </div>
-                `;
-                return;
-            }
-        }
-        
-        // Fallback para alert
-        alert('❌ Erros encontrados:\n\n' + mensagem);
-    },
-
-    // ✅ LIMPAR ERROS DE VALIDAÇÃO
-    limparErros(containerId) {
-        const container = document.getElementById(containerId);
-        if (container) {
-            const errorDiv = container.querySelector('.validation-errors');
-            if (errorDiv) {
-                errorDiv.remove();
-            }
+        } catch (error) {
+            console.error('❌ Erro ao limpar erro do campo:', error);
         }
     },
 
     // ✅ VALIDAÇÃO EM TEMPO REAL
-    setupValidacaoTempoReal(inputId, validatorFunction) {
-        const input = document.getElementById(inputId);
-        if (!input) return;
-        
-        const debounced = Helpers.debounce((value) => {
-            const resultado = validatorFunction(value);
-            
-            if (resultado.valido) {
-                input.classList.remove('input-error');
-                const errorElement = document.getElementById(inputId + 'Error');
-                if (errorElement) {
-                    errorElement.classList.add('hidden');
-                }
-            } else {
-                input.classList.add('input-error');
-                const errorElement = document.getElementById(inputId + 'Error');
-                if (errorElement) {
-                    errorElement.textContent = resultado.mensagem;
-                    errorElement.classList.remove('hidden');
-                }
+
+    // Configurar validação em tempo real para um formulário
+    setupRealTimeValidation(formId, rules = {}) {
+        try {
+            const form = document.getElementById(formId);
+            if (!form) {
+                throw new Error(`Formulário ${formId} não encontrado`);
             }
-        }, 500);
+
+            const inputs = form.querySelectorAll('input, textarea, select');
+
+            inputs.forEach(input => {
+                // Validar ao sair do campo (blur)
+                input.addEventListener('blur', () => {
+                    this._validateSingleField(input, rules);
+                });
+
+                // Limpar erro ao digitar (input)
+                input.addEventListener('input', () => {
+                    if (input.classList.contains('input-error')) {
+                        setTimeout(() => {
+                            this._validateSingleField(input, rules);
+                        }, 500); // Debounce de 500ms
+                    }
+                });
+            });
+
+            console.log(`✅ Validação em tempo real configurada para ${formId}`);
+
+        } catch (error) {
+            console.error('❌ Erro ao configurar validação em tempo real:', error);
+        }
+    },
+
+    // Validar campo individual
+    _validateSingleField(input, rules = {}) {
+        const nome = input.name || input.id;
+        const valor = input.value;
+        const tipo = input.type;
+        const obrigatorio = input.required;
+
+        // Campo obrigatório vazio
+        if (obrigatorio && !valor.trim()) {
+            this._markFieldError(input, `${this._getFieldLabel(input)} é obrigatório`);
+            return false;
+        }
+
+        // Campo vazio não obrigatório
+        if (!valor.trim()) {
+            this._clearFieldError(input);
+            return true;
+        }
+
+        // Validar por tipo
+        let valido = true;
+        let mensagem = '';
+
+        switch (tipo) {
+            case 'email':
+                if (!this.isValidEmail(valor)) {
+                    valido = false;
+                    mensagem = 'Email inválido';
+                }
+                break;
+                
+            case 'url':
+                if (!this.isValidURL(valor)) {
+                    valido = false;
+                    mensagem = 'URL inválida';
+                }
+                break;
+                
+            case 'date':
+                if (!this.isValidDate(valor)) {
+                    valido = false;
+                    mensagem = 'Data inválida';
+                }
+                break;
+                
+            case 'time':
+                if (!this.isValidTime(valor)) {
+                    valido = false;
+                    mensagem = 'Horário inválido (HH:MM)';
+                }
+                break;
+        }
+
+        // Validação customizada
+        if (valido && rules[nome]) {
+            const resultado = rules[nome](valor);
+            if (resultado !== true) {
+                valido = false;
+                mensagem = resultado;
+            }
+        }
+
+        if (valido) {
+            this._clearFieldError(input);
+        } else {
+            this._markFieldError(input, mensagem);
+        }
+
+        return valido;
+    },
+
+    // ✅ UTILITÁRIOS GERAIS
+
+    // Sanitizar entrada de texto
+    sanitizeInput(texto) {
+        if (!texto || typeof texto !== 'string') return '';
         
-        input.addEventListener('input', (e) => {
-            debounced(e.target.value);
-        });
+        return texto
+            .trim()
+            .replace(/[<>]/g, '') // Remover caracteres HTML básicos
+            .substring(0, 1000); // Limitar tamanho
+    },
+
+    // Formatar telefone
+    formatPhone(phone) {
+        if (!phone) return '';
+        
+        const clean = phone.replace(/\D/g, '');
+        
+        if (clean.length === 11) {
+            return clean.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (clean.length === 10) {
+            return clean.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        }
+        
+        return phone;
+    },
+
+    // Formatar CEP
+    formatCEP(cep) {
+        if (!cep) return '';
+        
+        const clean = cep.replace(/\D/g, '');
+        
+        if (clean.length === 8) {
+            return clean.replace(/(\d{5})(\d{3})/, '$1-$2');
+        }
+        
+        return cep;
     }
 };
 
-console.log('✅ Sistema de Validação v6.2 carregado!');
+// ✅ ADICIONAR ESTILOS PARA CAMPOS COM ERRO
+if (!document.getElementById('validation-styles')) {
+    const styles = document.createElement('style');
+    styles.id = 'validation-styles';
+    styles.textContent = `
+        .input-error {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+        
+        .input-error:focus {
+            outline-color: #ef4444 !important;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+        }
+    `;
+    document.head.appendChild(styles);
+}
+
+// ✅ FUNÇÃO GLOBAL PARA DEBUG
+window.Validation_Debug = {
+    testarEmail: (email) => {
+        console.log(`Email "${email}":`, Validation.isValidEmail(email));
+    },
+    testarData: (data) => {
+        console.log(`Data "${data}":`, Validation.isValidDate(data));
+    },
+    testarFormulario: (formId) => {
+        const resultado = Validation.validateForm(formId);
+        console.log(`Formulário "${formId}":`, resultado);
+        return resultado;
+    }
+};
+
+console.log('✅ Sistema de Validação v6.3.0 carregado!');
+console.log('🎯 Funcionalidades: Validação de formulários, tempo real, eventos/tarefas');
+console.log('🧪 Debug: Validation_Debug.testarEmail(), Validation_Debug.testarData()');
