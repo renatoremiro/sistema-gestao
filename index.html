@@ -28,8 +28,9 @@
     <script src="assets/js/utils/validation.js"></script>
     <script src="assets/js/utils/notifications.js"></script>
     
-    <!-- 3. ESTRUTURA DE DADOS -->
+    <!-- 3. CORE DO SISTEMA -->
     <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
     
     <!-- 4. SISTEMA DE PERSISTÊNCIA -->
     <script src="assets/js/modules/persistence.js"></script>
@@ -50,9 +51,9 @@
                 <h1>🔧 Sistema de Gestão - DESENVOLVIMENTO</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    <strong>v6.2 Modular - Modo Desenvolvimento (75% Completo)</strong>
+                    <strong>v6.2 Modular - Modo Desenvolvimento (80% Completo)</strong>
                     <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                        Persistence ✅
+                        App + Persistence ✅
                     </span>
                 </p>
             </div>
@@ -82,7 +83,7 @@
                         <li>✅ <strong>CSS:</strong> main.css, calendar.css</li>
                         <li>✅ <strong>Config:</strong> firebase.js</li>
                         <li>✅ <strong>Utils:</strong> helpers.js, validation.js, notifications.js</li>
-                        <li>✅ <strong>Core:</strong> data.js</li>
+                        <li>✅ <strong>Core:</strong> data.js, app.js</li>
                         <li>✅ <strong>Modules:</strong> persistence.js ⭐ <span style="color: #10b981;">NOVO</span></li>
                         <li>✅ <strong>Chat:</strong> chat-module.js (existente)</li>
                     </ul>
@@ -91,7 +92,6 @@
                 <div class="card">
                     <h4 style="color: #f59e0b;">🔄 MÓDULOS PENDENTES</h4>
                     <ul style="list-style: none; padding: 0; line-height: 1.8;">
-                        <li>🔄 <strong>Core:</strong> app.js</li>
                         <li>🔄 <strong>Modules:</strong> auth.js</li>
                         <li>🔄 <strong>Modules:</strong> calendar.js</li>
                         <li>🔄 <strong>Modules:</strong> events.js</li>
@@ -234,9 +234,10 @@
                 <div>✅ Sistema de Validação v6.2 carregado!</div>
                 <div>🔔 Sistema de Notificações v6.2 carregado!</div>
                 <div>📊 Estrutura de Dados v6.2 carregada!</div>
+                <div>🚀 Core App v6.2 carregado!</div>
                 <div>💾 Sistema de Persistência Ultra-Robusta v6.2 carregado!</div>
                 <div style="color: #10b981;">✅ Todos os módulos básicos carregados com sucesso!</div>
-                <div style="color: #8b5cf6;">🎯 Progresso: 75% da modularização concluída</div>
+                <div style="color: #8b5cf6;">🎯 Progresso: 80% da modularização concluída</div>
             </div>
         </div>
     </div>
@@ -345,6 +346,13 @@
             const resultado = document.getElementById('resultadoPersistencia');
             resultado.innerHTML += '⏳ Testando salvamento padrão...<br>';
             
+            // Garantir que App tem dados
+            if (typeof App !== 'undefined' && !App.dados) {
+                App.dados = DataStructure.inicializarDados();
+                App.usuarioAtual = { email: 'teste@dev.com' };
+                resultado.innerHTML += '📊 Dados inicializados para teste<br>';
+            }
+            
             Persistence.salvarDados().then(() => {
                 resultado.innerHTML += '✅ Salvamento padrão executado<br>';
             }).catch(error => {
@@ -356,6 +364,13 @@
             const resultado = document.getElementById('resultadoPersistencia');
             resultado.innerHTML += '⚡ Testando salvamento crítico...<br>';
             
+            // Garantir que App tem dados
+            if (typeof App !== 'undefined' && !App.dados) {
+                App.dados = DataStructure.inicializarDados();
+                App.usuarioAtual = { email: 'teste@dev.com' };
+                resultado.innerHTML += '📊 Dados inicializados para teste<br>';
+            }
+            
             Persistence.salvarDadosCritico().then(() => {
                 resultado.innerHTML += '✅ Salvamento crítico concluído<br>';
             }).catch(error => {
@@ -366,13 +381,19 @@
         function testarBackupLocal() {
             const resultado = document.getElementById('resultadoPersistencia');
             
+            // Garantir que App tem dados
+            if (typeof App !== 'undefined' && !App.dados) {
+                App.dados = DataStructure.inicializarDados();
+                resultado.innerHTML += '📊 Dados inicializados para teste<br>';
+            }
+            
             // Simular dados para backup
-            const dadosTeste = { teste: 'backup', timestamp: new Date().toISOString() };
+            const dadosTeste = App.dados || { teste: 'backup', timestamp: new Date().toISOString() };
             Persistence._salvarBackupLocal(dadosTeste);
             
             const backup = Persistence.recuperarBackupLocal();
             if (backup) {
-                resultado.innerHTML += `✅ Backup local funcionando<br>Data: ${backup.timestamp || 'N/A'}<br>`;
+                resultado.innerHTML += `✅ Backup local funcionando<br>Dados: ${backup.versao || 'N/A'}<br>`;
             } else {
                 resultado.innerHTML += '❌ Nenhum backup local encontrado<br>';
             }
@@ -421,12 +442,20 @@
             Validation: typeof Validation !== 'undefined', 
             Notifications: typeof Notifications !== 'undefined',
             DataStructure: typeof DataStructure !== 'undefined',
+            App: typeof App !== 'undefined',
             Persistence: typeof Persistence !== 'undefined'
         });
         
         // ✅ TESTE AUTOMÁTICO DE INICIALIZAÇÃO
         setTimeout(() => {
             Notifications.success('🚀 Sistema modular inicializado com sucesso!');
+            
+            // Inicializar dados do App para testes
+            if (typeof App !== 'undefined' && typeof DataStructure !== 'undefined') {
+                App.dados = DataStructure.inicializarDados();
+                App.usuarioAtual = { email: 'teste@dev.com', displayName: 'Dev User' };
+                console.log('📊 Dados de teste inicializados no App');
+            }
             
             // Teste automático do sistema de persistência
             setTimeout(() => {
@@ -437,9 +466,15 @@
                     if (typeof Persistence !== 'undefined') {
                         resultado.innerHTML += '✅ Módulo Persistence carregado<br>';
                         
-                        // Teste básico de status
-                        const status = Persistence.obterStatus();
-                        resultado.innerHTML += `📊 Status inicial: ${status.operacoesEmAndamento} operações<br>`;
+                        if (typeof App !== 'undefined') {
+                            resultado.innerHTML += '✅ Módulo App carregado<br>';
+                            
+                            // Teste básico de status
+                            const status = Persistence.obterStatus();
+                            resultado.innerHTML += `📊 Status inicial: ${status.operacoesEmAndamento} operações<br>`;
+                        } else {
+                            resultado.innerHTML += '❌ Módulo App não encontrado<br>';
+                        }
                     } else {
                         resultado.innerHTML += '❌ Módulo Persistence não encontrado<br>';
                     }
