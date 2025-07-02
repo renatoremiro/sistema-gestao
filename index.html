@@ -822,6 +822,42 @@
                         console.log('📊 Dados inicializados');
                     }
                     
+                    // Garantir que existe array de eventos
+                    if (!App.dados.eventos) {
+                        App.dados.eventos = [];
+                    }
+                    
+                    // DEBUG: Adicionar eventos de teste se não houver
+                    if (App.dados.eventos.length === 0 && (!Events || !Events.eventos || Events.eventos.length === 0)) {
+                        console.log('🧪 Adicionando eventos de teste ao App.dados...');
+                        App.dados.eventos = [
+                            {
+                                id: 1,
+                                titulo: 'Revisão As Built',
+                                tipo: 'reuniao',
+                                data: '2025-07-02',
+                                horarioInicio: '14:00',
+                                horarioFim: '16:00',
+                                descricao: 'Reunião de revisão do projeto As Built',
+                                participantes: ['João Silva', 'Maria Santos']
+                            },
+                            {
+                                id: 2,
+                                titulo: 'Entrega Relatório Fotográfico',
+                                tipo: 'entrega',
+                                data: '2025-07-14',
+                                horarioInicio: '17:00',
+                                descricao: 'Entrega do relatório fotográfico do projeto',
+                                participantes: ['Carlos Oliveira']
+                            }
+                        ];
+                        console.log('✅ Eventos de teste adicionados ao App.dados');
+                    } else if (Events && Events.eventos && Events.eventos.length > 0) {
+                        // Se Events já tem eventos, sincronizar com App.dados
+                        App.dados.eventos = [...Events.eventos];
+                        console.log('🔄 Eventos sincronizados do Events para App.dados');
+                    }
+                    
                     // Usuário padrão
                     if (!App.usuarioAtual) {
                         App.usuarioAtual = { 
@@ -836,6 +872,33 @@
                 if (typeof Events !== 'undefined') {
                     if (!Events.eventos || !Array.isArray(Events.eventos)) {
                         Events.eventos = [];
+                    }
+                    
+                    // DEBUG: Criar eventos de teste se não houver nenhum
+                    if (Events.eventos.length === 0 && (!App.dados || !App.dados.eventos || App.dados.eventos.length === 0)) {
+                        console.log('🧪 Criando eventos de teste no Events...');
+                        Events.eventos = [
+                            {
+                                id: 1,
+                                titulo: 'Revisão As Built',
+                                tipo: 'reuniao',
+                                data: '2025-07-02',
+                                horarioInicio: '14:00',
+                                horarioFim: '16:00',
+                                descricao: 'Reunião de revisão do projeto As Built',
+                                participantes: ['João Silva', 'Maria Santos']
+                            },
+                            {
+                                id: 2,
+                                titulo: 'Entrega Relatório Fotográfico',
+                                tipo: 'entrega',
+                                data: '2025-07-14',
+                                horarioInicio: '17:00',
+                                descricao: 'Entrega do relatório fotográfico do projeto',
+                                participantes: ['Carlos Oliveira']
+                            }
+                        ];
+                        console.log('✅ Eventos de teste criados no Events:', Events.eventos);
                     }
                 }
                 
@@ -857,14 +920,37 @@
                 // Atualizar interface
                 atualizarInterface();
                 
+                // Forçar nova atualização após os dados de teste serem criados
+                setTimeout(() => {
+                    atualizarInterface();
+                    console.log('🔄 Interface atualizada novamente com dados de teste');
+                }, 500);
+                
                 // Feedback de sucesso
                 setTimeout(() => {
                     if (typeof Notifications !== 'undefined') {
                         Notifications.success('🎉 Gestão Integrada BIAPO carregada com sucesso!');
                     }
+                    
+                    // Debug automático para verificar estado do sistema
+                    debugSistema();
+                    
+                    // Teste automático do modal para debug
+                    setTimeout(() => {
+                        console.log('🧪 === TESTE AUTOMÁTICO ===');
+                        console.log('🧪 Tentando abrir evento ID 1 automaticamente para teste...');
+                        if (document.querySelector('.evento-item')) {
+                            console.log('🧪 Eventos na sidebar encontrados, teste manual disponível');
+                        } else {
+                            console.log('🧪 Nenhum evento na sidebar, tentando teste direto...');
+                            // abrirDetalhesEvento(1); // Descomentei para não incomodar o usuário
+                        }
+                        console.log('🧪 === FIM TESTE ===');
+                    }, 2000);
                 }, 800);
                 
-                console.log('✅ Sistema BIAPO pronto!');
+                console.log('✅ Sistema BIAPO pronto! Use debugSistema() para verificar status.');
+                console.log('📋 Para testar: clique nos eventos da sidebar "Próximos Eventos"');
                 
             }, 1200);
         }
@@ -1009,39 +1095,71 @@
             try {
                 const container = document.getElementById('proximosEventos');
                 
-                // Verificar se existe sistema de eventos e se há eventos
-                if (typeof Events !== 'undefined' && Events.obterProximosEventos) {
-                    const proximos = Events.obterProximosEventos(5);
-                    
-                    if (proximos && proximos.length > 0) {
-                        container.innerHTML = proximos.map(evento => `
-                            <div class="evento-item ${evento.tipo}" onclick="abrirDetalhesEvento(${evento.id})">
+                // Buscar eventos de múltiplas fontes
+                let proximos = [];
+                
+                // Tentar buscar do sistema Events
+                if (typeof Events !== 'undefined') {
+                    if (Events.obterProximosEventos) {
+                        proximos = Events.obterProximosEventos(5);
+                    } else if (Events.eventos && Array.isArray(Events.eventos)) {
+                        // Buscar diretamente do array e ordenar por data
+                        const hoje = new Date();
+                        proximos = Events.eventos
+                            .filter(evento => new Date(evento.data) >= hoje)
+                            .sort((a, b) => new Date(a.data) - new Date(b.data))
+                            .slice(0, 5);
+                    }
+                }
+                
+                // Se não encontrou no Events, tentar no App.dados
+                if ((!proximos || proximos.length === 0) && typeof App !== 'undefined' && App.dados && App.dados.eventos) {
+                    const hoje = new Date();
+                    proximos = App.dados.eventos
+                        .filter(evento => new Date(evento.data) >= hoje)
+                        .sort((a, b) => new Date(a.data) - new Date(b.data))
+                        .slice(0, 5);
+                }
+                
+                console.log('📅 Próximos eventos encontrados:', proximos);
+                
+                if (proximos && proximos.length > 0) {
+                    container.innerHTML = proximos.map(evento => {
+                        // Garantir que o evento tem ID
+                        const eventoId = evento.id || evento.uid || Math.random().toString(36).substr(2, 9);
+                        
+                        // Atualizar o evento com ID se não tiver
+                        if (!evento.id) {
+                            evento.id = eventoId;
+                        }
+                        
+                        return `
+                            <div class="evento-item ${evento.tipo}" onclick="abrirDetalhesEvento(${eventoId})" style="cursor: pointer;">
                                 <p class="evento-titulo">${evento.titulo}</p>
                                 <p class="evento-data">${new Date(evento.data).toLocaleDateString('pt-BR')} ${evento.horarioInicio ? '- ' + evento.horarioInicio : ''}</p>
                             </div>
-                        `).join('');
-                    } else {
-                        container.innerHTML = `
-                            <div style="text-align: center; padding: 20px; color: #6b7280;">
-                                <p style="margin: 0;">📅 Nenhum evento próximo</p>
-                            </div>
                         `;
-                    }
+                    }).join('');
+                    
+                    console.log('📅 HTML dos próximos eventos gerado:', container.innerHTML.substring(0, 200) + '...');
                 } else {
                     container.innerHTML = `
                         <div style="text-align: center; padding: 20px; color: #6b7280;">
-                            <p style="margin: 0;">📅 Sistema de eventos carregando...</p>
+                            <p style="margin: 0;">📅 Nenhum evento próximo</p>
                         </div>
                     `;
                 }
                 
-                console.log('📅 Próximos eventos atualizados');
+                console.log('📅 Próximos eventos atualizados na interface');
             } catch (error) {
                 console.warn('⚠️ Erro ao atualizar próximos eventos:', error);
                 const container = document.getElementById('proximosEventos');
                 container.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: #6b7280;">
-                        <p style="margin: 0;">📅 Aguardando eventos...</p>
+                        <p style="margin: 0;">📅 Erro ao carregar eventos</p>
+                        <button class="btn-acao primario" onclick="atualizarInterface()" style="font-size: 12px; padding: 6px 12px; margin-top: 8px;">
+                            🔄 Tentar Novamente
+                        </button>
                     </div>
                 `;
             }
@@ -1061,84 +1179,193 @@
         
         // ✅ FUNÇÃO PARA ABRIR DETALHES DO EVENTO
         function abrirDetalhesEvento(eventoId) {
+            console.log('🔍 === ABRINDO DETALHES DO EVENTO ===');
+            console.log('🆔 ID recebido:', eventoId, 'Tipo:', typeof eventoId);
+            
             try {
-                if (typeof Events !== 'undefined' && Events.obterPorId) {
-                    const evento = Events.obterPorId(eventoId);
-                    
-                    if (evento) {
-                        document.getElementById('tituloDetalhesDia').textContent = `📅 ${evento.titulo}`;
-                        
-                        const tipoIcon = {
-                            'reuniao': '👥',
-                            'entrega': '📦',
-                            'prazo': '⏰',
-                            'marco': '🎯',
-                            'outro': '📅'
-                        };
-                        
-                        document.getElementById('conteudoDetalhesDia').innerHTML = `
-                            <div style="padding: 20px 0;">
-                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                                    <span style="font-size: 32px;">${tipoIcon[evento.tipo] || '📅'}</span>
-                                    <div>
-                                        <h3 style="margin: 0; color: #1f2937;">${evento.titulo}</h3>
-                                        <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${evento.tipo.charAt(0).toUpperCase() + evento.tipo.slice(1)}</p>
-                                    </div>
-                                </div>
-                                
-                                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                                    <p style="margin: 0 0 8px 0; color: #374151;"><strong>📅 Data:</strong> ${new Date(evento.data).toLocaleDateString('pt-BR')}</p>
-                                    ${evento.horarioInicio ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>⏰ Horário:</strong> ${evento.horarioInicio} ${evento.horarioFim ? '- ' + evento.horarioFim : ''}</p>` : ''}
-                                    ${evento.descricao ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>📝 Descrição:</strong> ${evento.descricao}</p>` : ''}
-                                    ${evento.participantes && evento.participantes.length > 0 ? `<p style="margin: 0; color: #374151;"><strong>👥 Participantes:</strong> ${evento.participantes.join(', ')}</p>` : ''}
-                                </div>
-                                
-                                <div style="display: flex; gap: 12px; justify-content: center;">
-                                    <button class="btn-acao secundario" onclick="editarEvento(${eventoId})">
-                                        ✏️ Editar
-                                    </button>
-                                    <button class="btn-acao" onclick="excluirEventoDetalhes(${eventoId})" style="background: #ef4444; color: white;">
-                                        🗑️ Excluir
-                                    </button>
-                                    <button class="btn-acao primario" onclick="fecharModalDetalhesDia()">
-                                        Fechar
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        
-                        document.getElementById('modalDetalhesDia').style.display = 'block';
+                // Buscar evento pelos dados disponíveis
+                let evento = null;
+                
+                // Tentar buscar pelo sistema Events
+                if (typeof Events !== 'undefined') {
+                    console.log('📅 Tentando buscar no Events...');
+                    if (Events.obterPorId) {
+                        evento = Events.obterPorId(eventoId);
+                        console.log('📅 Events.obterPorId resultado:', evento);
+                    } else if (Events.eventos && Array.isArray(Events.eventos)) {
+                        console.log('📅 Buscando no array Events.eventos:', Events.eventos);
+                        evento = Events.eventos.find(e => e.id == eventoId); // Usar == para comparação flexível
+                        console.log('📅 Evento encontrado no array:', evento);
                     }
                 }
+                
+                // Se não encontrou, tentar buscar nos dados do App
+                if (!evento && typeof App !== 'undefined' && App.dados && App.dados.eventos) {
+                    console.log('📊 Tentando buscar no App.dados.eventos:', App.dados.eventos);
+                    evento = App.dados.eventos.find(e => e.id == eventoId); // Usar == para comparação flexível
+                    console.log('📊 Evento encontrado no App.dados:', evento);
+                }
+                
+                console.log('📅 Evento final encontrado:', evento);
+                
+                if (evento) {
+                    document.getElementById('tituloDetalhesDia').textContent = `📅 ${evento.titulo}`;
+                    
+                    const tipoIcon = {
+                        'reuniao': '👥',
+                        'entrega': '📦',
+                        'prazo': '⏰',
+                        'marco': '🎯',
+                        'outro': '📅'
+                    };
+                    
+                    const tipoNome = {
+                        'reuniao': 'Reunião',
+                        'entrega': 'Entrega',
+                        'prazo': 'Prazo',
+                        'marco': 'Marco',
+                        'outro': 'Outro'
+                    };
+                    
+                    document.getElementById('conteudoDetalhesDia').innerHTML = `
+                        <div style="padding: 20px 0;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                                <span style="font-size: 32px;">${tipoIcon[evento.tipo] || '📅'}</span>
+                                <div>
+                                    <h3 style="margin: 0; color: #1f2937;">${evento.titulo}</h3>
+                                    <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${tipoNome[evento.tipo] || 'Evento'}</p>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 0 0 8px 0; color: #374151;"><strong>📅 Data:</strong> ${new Date(evento.data).toLocaleDateString('pt-BR')}</p>
+                                ${evento.horarioInicio ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>⏰ Horário:</strong> ${evento.horarioInicio} ${evento.horarioFim ? '- ' + evento.horarioFim : ''}</p>` : ''}
+                                ${evento.descricao ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>📝 Descrição:</strong> ${evento.descricao}</p>` : ''}
+                                ${evento.participantes && evento.participantes.length > 0 ? `<p style="margin: 0; color: #374151;"><strong>👥 Participantes:</strong> ${evento.participantes.join(', ')}</p>` : ''}
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn-acao secundario" onclick="editarEvento(${eventoId})">
+                                    ✏️ Editar
+                                </button>
+                                <button class="btn-acao" onclick="excluirEventoDetalhes(${eventoId})" style="background: #ef4444; color: white;">
+                                    🗑️ Excluir
+                                </button>
+                                <button class="btn-acao primario" onclick="fecharModalDetalhesDia()">
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('modalDetalhesDia').style.display = 'block';
+                    console.log('✅ Modal de detalhes aberto com sucesso');
+                } else {
+                    console.warn('⚠️ Evento não encontrado:', eventoId);
+                    
+                    // Fallback: mostrar modal com informação de erro
+                    document.getElementById('tituloDetalhesDia').textContent = '❌ Evento não encontrado';
+                    document.getElementById('conteudoDetalhesDia').innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #6b7280;">
+                            <p style="font-size: 16px; margin-bottom: 20px;">❌ Não foi possível carregar os detalhes do evento</p>
+                            <p style="margin-bottom: 20px;">O evento pode ter sido removido ou houve um erro no sistema.</p>
+                            <button class="btn-acao primario" onclick="fecharModalDetalhesDia()">
+                                Fechar
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('modalDetalhesDia').style.display = 'block';
+                }
+                
             } catch (error) {
-                console.warn('⚠️ Erro ao abrir detalhes do evento:', error);
+                console.error('❌ Erro ao abrir detalhes do evento:', error);
+                
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('❌ Erro ao carregar detalhes do evento');
+                }
+                
+                // Modal de erro
+                document.getElementById('tituloDetalhesDia').textContent = '❌ Erro no Sistema';
+                document.getElementById('conteudoDetalhesDia').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p style="font-size: 16px; margin-bottom: 20px;">⚠️ Ocorreu um erro inesperado</p>
+                        <p style="margin-bottom: 20px;">Tente recarregar a página ou criar um novo evento.</p>
+                        <button class="btn-acao primario" onclick="fecharModalDetalhesDia()">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+                document.getElementById('modalDetalhesDia').style.display = 'block';
             }
+            
+            console.log('🔍 === FIM ABERTURA DETALHES ===');
         }
         
         // ✅ FUNÇÃO PARA EXCLUIR EVENTO DOS DETALHES
         function excluirEventoDetalhes(eventoId) {
+            console.log('🗑️ Tentando excluir evento:', eventoId);
+            
             if (confirm('🗑️ Deseja realmente excluir este evento?\n\nEsta ação não pode ser desfeita.')) {
                 try {
-                    if (typeof Events !== 'undefined' && Events.excluir) {
-                        Events.excluir(eventoId);
-                        
+                    let eventoExcluido = false;
+                    
+                    // Tentar excluir pelo sistema Events
+                    if (typeof Events !== 'undefined') {
+                        if (Events.excluir) {
+                            Events.excluir(eventoId);
+                            eventoExcluido = true;
+                            console.log('✅ Evento excluído via Events.excluir()');
+                        } else if (Events.eventos && Array.isArray(Events.eventos)) {
+                            const index = Events.eventos.findIndex(e => e.id === eventoId);
+                            if (index !== -1) {
+                                Events.eventos.splice(index, 1);
+                                eventoExcluido = true;
+                                console.log('✅ Evento excluído do array Events.eventos');
+                            }
+                        }
+                    }
+                    
+                    // Se não conseguiu excluir via Events, tentar via App.dados
+                    if (!eventoExcluido && typeof App !== 'undefined' && App.dados && App.dados.eventos) {
+                        const index = App.dados.eventos.findIndex(e => e.id === eventoId);
+                        if (index !== -1) {
+                            App.dados.eventos.splice(index, 1);
+                            eventoExcluido = true;
+                            console.log('✅ Evento excluído do App.dados.eventos');
+                        }
+                    }
+                    
+                    if (eventoExcluido) {
                         // Fechar modal
                         fecharModalDetalhesDia();
                         
                         // Regenerar calendário e atualizar interface
-                        if (typeof Calendar !== 'undefined') {
+                        if (typeof Calendar !== 'undefined' && Calendar.gerar) {
                             Calendar.gerar();
                         }
                         atualizarInterface();
                         
+                        // Salvar dados se houver sistema de persistência
+                        if (typeof Persistence !== 'undefined' && Persistence.salvar) {
+                            Persistence.salvar();
+                        }
+                        
                         if (typeof Notifications !== 'undefined') {
                             Notifications.success('🗑️ Evento excluído com sucesso!');
                         }
+                        
+                        console.log('✅ Evento excluído e interface atualizada');
+                    } else {
+                        console.warn('⚠️ Não foi possível excluir o evento');
+                        if (typeof Notifications !== 'undefined') {
+                            Notifications.error('❌ Erro: Evento não encontrado para exclusão');
+                        }
                     }
+                    
                 } catch (error) {
-                    console.warn('⚠️ Erro ao excluir evento:', error);
+                    console.error('❌ Erro ao excluir evento:', error);
                     if (typeof Notifications !== 'undefined') {
-                        Notifications.error('❌ Erro ao excluir evento');
+                        Notifications.error('❌ Erro inesperado ao excluir evento');
                     }
                 }
             }
@@ -1156,6 +1383,36 @@
                 }
             }
         }
+        
+        // ✅ FUNÇÃO DE DEBUG
+        function debugSistema() {
+            console.log('🔍 === DEBUG DO SISTEMA ===');
+            console.log('📊 App:', typeof App !== 'undefined' ? App : 'Não carregado');
+            console.log('📅 Events:', typeof Events !== 'undefined' ? Events : 'Não carregado');
+            console.log('📝 Tasks:', typeof Tasks !== 'undefined' ? Tasks : 'Não carregado');
+            console.log('📅 Calendar:', typeof Calendar !== 'undefined' ? Calendar : 'Não carregado');
+            
+            if (typeof App !== 'undefined' && App.dados) {
+                console.log('📊 App.dados:', App.dados);
+                if (App.dados.eventos) {
+                    console.log('📅 Eventos em App.dados:', App.dados.eventos);
+                }
+            }
+            
+            if (typeof Events !== 'undefined') {
+                if (Events.eventos) {
+                    console.log('📅 Events.eventos:', Events.eventos);
+                }
+                console.log('📅 Events.obterProximosEventos:', typeof Events.obterProximosEventos);
+                console.log('📅 Events.obterPorId:', typeof Events.obterPorId);
+                console.log('📅 Events.excluir:', typeof Events.excluir);
+            }
+            
+            console.log('🔍 === FIM DEBUG ===');
+        }
+        
+        // Disponibilizar debug globalmente
+        window.debugSistema = debugSistema;
         
         // ✅ MODAL DETALHES DO DIA
         function abrirDetalhesDia(dia, mes, ano) {
@@ -1296,8 +1553,9 @@
         
         // ✅ LOG INICIAL
         console.log('🏗️ Gestão Integrada BIAPO v6.3');
-        console.log('📋 Sistema limpo e modularizado');
+        console.log('📋 Sistema com correções para modal de eventos');
         console.log('✨ Interface profissional carregada!');
+        console.log('🔍 Digite debugSistema() no console para verificar status do sistema');
     </script>
 </body>
 </html>
