@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão Integrada - BIAPO</title>
     
+    <!-- ✅ CSS MODULARIZADO -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/calendar.css">
+    
     <!-- ✅ BIBLIOTECAS EXTERNAS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -13,621 +17,27 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <style>
-        /* ✅ ESTILOS PARA INTERFACE GESTÃO INTEGRADA v6.3 */
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8fafc;
-            color: #1f2937;
-            line-height: 1.6;
-        }
-        
-        /* ✅ HEADER BIAPO REDESENHADO */
-        .header-biapo {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            color: white;
-            padding: 24px 0;
-            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
-        }
-        
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .logo-container {
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 12px;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .logo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
-        .titulo-section h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        
-        .titulo-section p {
-            margin: 4px 0 0 0;
-            opacity: 0.9;
-            font-size: 16px;
-            font-weight: 400;
-        }
-        
-        .header-info {
-            text-align: right;
-        }
-        
-        .data-atual {
-            font-size: 15px;
-            opacity: 0.9;
-            margin: 0 0 4px 0;
-        }
-        
-        .usuario-info {
-            font-size: 17px;
-            font-weight: 600;
-            margin: 0;
-        }
-        
-        /* ✅ DASHBOARD PRINCIPAL REDESENHADO */
-        .dashboard-principal {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 32px 24px;
-        }
-        
-        .controles-principais {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            background: white;
-            padding: 20px 24px;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-        
-        .filtros-calendario {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .toggle-switch {
-            width: 48px;
-            height: 24px;
-            background: #e5e7eb;
-            border-radius: 12px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .toggle-switch.ativo {
-            background: #dc2626;
-        }
-        
-        .toggle-switch::after {
-            content: '';
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .toggle-switch.ativo::after {
-            left: 26px;
-        }
-        
-        .acoes-rapidas {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .btn-acao {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-acao.primario {
-            background: #dc2626;
-            color: white;
-        }
-        
-        .btn-acao.primario:hover {
-            background: #b91c1c;
-            transform: translateY(-1px);
-        }
-        
-        .btn-acao.secundario {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-        
-        .btn-acao.secundario:hover {
-            background: #e5e7eb;
-            transform: translateY(-1px);
-        }
-        
-        .cards-estatisticas {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        
-        .card-stat {
-            background: white;
-            padding: 28px;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            border: 1px solid #f1f5f9;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card-stat::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #dc2626, #ef4444);
-        }
-        
-        .card-stat:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-        }
-        
-        .card-stat h3 {
-            margin: 0 0 12px 0;
-            font-size: 14px;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            font-weight: 600;
-        }
-        
-        .card-stat .numero {
-            font-size: 36px;
-            font-weight: 800;
-            color: #1f2937;
-            margin: 0 0 8px 0;
-            line-height: 1;
-        }
-        
-        .card-stat .descricao {
-            margin: 0;
-            font-size: 15px;
-            color: #6b7280;
-            font-weight: 500;
-        }
-        
-        .card-stat.eventos .numero { color: #3b82f6; }
-        .card-stat.tarefas .numero { color: #10b981; }
-        .card-stat.urgente .numero { color: #ef4444; }
-        .card-stat.progresso .numero { color: #8b5cf6; }
-        
-        .secao-principal {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 32px;
-        }
-        
-        .calendario-container {
-            background: white;
-            border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-        
-        .calendario-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f1f5f9;
-        }
-        
-        .calendario-titulo {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1f2937;
-            margin: 0;
-        }
-        
-        .calendario-nav {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .btn-nav {
-            padding: 10px 16px;
-            border: 1px solid #d1d5db;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-nav:hover {
-            border-color: #dc2626;
-            color: #dc2626;
-            background: #fef2f2;
-        }
-        
-        .sidebar-direita {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-        
-        .card-sidebar {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        }
-        
-        .card-sidebar h3 {
-            margin: 0 0 20px 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .proximos-eventos {
-            max-height: 350px;
-            overflow-y: auto;
-        }
-        
-        .evento-item {
-            padding: 16px;
-            border-left: 4px solid #e5e7eb;
-            margin-bottom: 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .evento-item:hover {
-            background: #f1f5f9;
-            transform: translateX(4px);
-        }
-        
-        .evento-item.reuniao { border-left-color: #3b82f6; }
-        .evento-item.entrega { border-left-color: #10b981; }
-        .evento-item.prazo { border-left-color: #ef4444; }
-        .evento-item.marco { border-left-color: #8b5cf6; }
-        
-        .evento-titulo {
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0 0 6px 0;
-            font-size: 15px;
-        }
-        
-        .evento-data {
-            font-size: 13px;
-            color: #6b7280;
-            margin: 0;
-        }
-        
-        /* ✅ CALENDÁRIO MELHORADO */
-        #calendario {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            font-size: 13px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .calendario-dia {
-            background: white;
-            border: 1px solid #f1f5f9;
-            min-height: 100px;
-            padding: 8px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .calendario-dia:hover {
-            background: #fef2f2;
-        }
-        
-        .calendario-dia.hoje {
-            background: #dc2626;
-            color: white;
-        }
-        
-        .calendario-dia.feriado {
-            background: #fef3c7;
-        }
-        
-        .calendario-dia.outro-mes {
-            color: #9ca3af;
-            background: #f9fafb;
-        }
-        
-        .dia-numero {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .eventos-dia {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        
-        .evento-calendario {
-            background: #3b82f6;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .evento-calendario:hover {
-            transform: scale(1.05);
-        }
-        
-        .evento-calendario.reuniao { background: #3b82f6; }
-        .evento-calendario.entrega { background: #10b981; }
-        .evento-calendario.prazo { background: #ef4444; }
-        .evento-calendario.marco { background: #8b5cf6; }
-        .evento-calendario.tarefa { background: #f59e0b; border: 1px solid #d97706; }
-        
-        .mais-eventos {
-            font-size: 10px;
-            color: #6b7280;
-            font-weight: 600;
-            margin-top: 2px;
-            cursor: pointer;
-        }
-        
-        .mais-eventos:hover {
-            color: #dc2626;
-        }
-        
-        /* ✅ FOOTER LIMPO */
-        .footer-info {
-            background: #1f2937;
-            color: #9ca3af;
-            padding: 20px 0;
-            text-align: center;
-            font-size: 14px;
-        }
-        
-        .footer-info .status-ok {
-            color: #10b981;
-            font-weight: 600;
-        }
-        
-        /* ✅ RESPONSIVO */
-        @media (max-width: 1024px) {
-            .secao-principal {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar-direita {
-                grid-row: 1;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 16px;
-                text-align: center;
-            }
-            
-            .logo-section {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .controles-principais {
-                flex-direction: column;
-                gap: 16px;
-            }
-            
-            .cards-estatisticas {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .acoes-rapidas {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-        
-        /* ✅ MODAL MELHORADO */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 3% auto;
-            padding: 32px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #f1f5f9;
-        }
-        
-        .modal-titulo {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1f2937;
-            margin: 0;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #6b7280;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: #f3f4f6;
-            color: #dc2626;
-        }
-        
-        /* ✅ SISTEMA DE NOTIFICAÇÕES */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            max-width: 400px;
-            font-weight: 500;
-        }
-        
-        .notification.error {
-            background: #ef4444;
-        }
-        
-        .notification.warning {
-            background: #f59e0b;
-        }
-        
-        .notification.info {
-            background: #3b82f6;
-        }
-        
-        /* ✅ ANIMAÇÕES */
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px);
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0);
-            }
-        }
-        
-        .slide-in {
-            animation: slideIn 0.4s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-    </style>
+    <!-- ✅ SISTEMA MODULARIZADO COMPLETO -->
+    
+    <!-- 1. CONFIGURAÇÕES -->
+    <script src="assets/js/config/firebase.js"></script>
+    
+    <!-- 2. UTILITÁRIOS -->
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    
+    <!-- 3. CORE DO SISTEMA -->
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    
+    <!-- 4. MÓDULOS FUNCIONAIS -->
+    <script src="assets/js/modules/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/calendar.js"></script>
+    <script src="assets/js/modules/events.js"></script>
+    <script src="assets/js/modules/tasks.js"></script>
+    <script src="assets/js/modules/pdf.js"></script>
 </head>
 <body>
     <!-- ✅ SISTEMA DE NOTIFICAÇÕES -->
@@ -663,19 +73,19 @@
                 <h3 style="margin: 0; color: #1f2937; font-weight: 600;">📅 Calendário</h3>
                 <div class="toggle-container">
                     <span style="font-size: 14px; color: #6b7280;">Apenas eventos</span>
-                    <div class="toggle-switch" id="toggleTarefas" onclick="alternarVisualizacaoTarefas()"></div>
+                    <div class="toggle-switch" id="toggleTarefas" onclick="Calendar.alternarVisualizacaoTarefas()"></div>
                     <span style="font-size: 14px; color: #6b7280;">Eventos + Tarefas</span>
                 </div>
             </div>
             
             <div class="acoes-rapidas">
-                <button class="btn-acao primario" onclick="mostrarNovaTarefa()">
+                <button class="btn-acao primario" onclick="Tasks.mostrarNovaTarefa()">
                     📝 Nova Tarefa
                 </button>
-                <button class="btn-acao primario" onclick="mostrarNovoEvento()">
+                <button class="btn-acao primario" onclick="Events.mostrarNovoEvento()">
                     📅 Novo Evento
                 </button>
-                <button class="btn-acao secundario" onclick="exportarPDF()">
+                <button class="btn-acao secundario" onclick="PDF.exportarCalendario()">
                     📄 Exportar PDF
                 </button>
             </div>
@@ -716,9 +126,9 @@
                 <div class="calendario-header">
                     <h2 class="calendario-titulo" id="mesAnoTitulo">Carregando...</h2>
                     <div class="calendario-nav">
-                        <button class="btn-nav" onclick="mudarMes(-1)">◀ Anterior</button>
-                        <button class="btn-nav" onclick="irParaHoje()">📅 Hoje</button>
-                        <button class="btn-nav" onclick="mudarMes(1)">Próximo ▶</button>
+                        <button class="btn-nav" onclick="Calendar.mudarMes(-1)">◀ Anterior</button>
+                        <button class="btn-nav" onclick="Calendar.irParaHoje()">📅 Hoje</button>
+                        <button class="btn-nav" onclick="Calendar.mudarMes(1)">Próximo ▶</button>
                     </div>
                 </div>
                 
@@ -747,7 +157,7 @@
                 <div class="card-sidebar">
                     <h3>👤 Agenda Pessoal</h3>
                     <div style="text-align: center; padding: 20px;">
-                        <button class="btn-acao primario" onclick="abrirAgendaPessoal()" style="width: 100%;">
+                        <button class="btn-acao primario" onclick="Tasks.abrirAgendaPessoal()" style="width: 100%;">
                             📋 Acessar Minhas Tarefas
                         </button>
                         <p style="font-size: 13px; color: #6b7280; margin-top: 12px;">
@@ -760,10 +170,10 @@
                 <div class="card-sidebar">
                     <h3>🏢 Áreas</h3>
                     <div style="text-align: center; padding: 20px;">
-                        <button class="btn-acao secundario" onclick="gerenciarAreas()" style="width: 100%; margin-bottom: 8px;">
+                        <button class="btn-acao secundario" onclick="App.gerenciarAreas()" style="width: 100%; margin-bottom: 8px;">
                             🏗️ Gerenciar Áreas
                         </button>
-                        <button class="btn-acao secundario" onclick="atribuirResponsabilidades()" style="width: 100%;">
+                        <button class="btn-acao secundario" onclick="App.atribuirResponsabilidades()" style="width: 100%;">
                             👥 Responsabilidades
                         </button>
                     </div>
@@ -788,7 +198,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-titulo" id="tituloDetalhesDia">Detalhes do Dia</h2>
-                <button class="modal-close" onclick="fecharModalDetalhesDia()">&times;</button>
+                <button class="modal-close" onclick="App.fecharModalDetalhesDia()">&times;</button>
             </div>
             <div id="conteudoDetalhesDia">
                 <!-- Conteúdo será preenchido dinamicamente -->
@@ -796,160 +206,80 @@
         </div>
     </div>
 
+    <!-- ✅ SCRIPT DE INICIALIZAÇÃO APENAS -->
     <script>
-        // ✅ SISTEMA BÁSICO DE GESTÃO INTEGRADA BIAPO v6.3
-        
-        // ✅ VARIÁVEIS GLOBAIS
-        let sistemaCarregado = false;
-        let mostrarTarefasNoCalendario = false;
-        let mesAtual = new Date().getMonth();
-        let anoAtual = new Date().getFullYear();
-        
-        // Dados básicos do sistema
-        const sistemaDados = {
-            eventos: [],
-            tarefas: [],
-            usuarios: [],
-            areas: []
-        };
-        
-        // ✅ SISTEMA DE NOTIFICAÇÕES
-        const Notifications = {
-            show: function(message, type = 'success') {
-                const notification = document.getElementById('notification');
-                const notificationText = document.getElementById('notificationText');
-                
-                notificationText.textContent = message;
-                notification.className = `notification ${type}`;
-                notification.style.display = 'block';
-                
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
-            },
-            
-            success: function(message) {
-                this.show(message, 'success');
-            },
-            
-            error: function(message) {
-                this.show(message, 'error');
-            },
-            
-            warning: function(message) {
-                this.show(message, 'warning');
-            },
-            
-            info: function(message) {
-                this.show(message, 'info');
-            }
-        };
-        
-        // ✅ INICIALIZAÇÃO DO SISTEMA
+        // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎉 Gestão Integrada BIAPO v6.3 carregando...');
+            console.log('🎉 Gestão Integrada BIAPO v6.3 - Estrutura Modular');
+            console.log('📁 Carregando módulos na ordem correta...');
             
-            // Verificar logo e aplicar fallback se necessário
+            // Verificar se logo existe, senão usar placeholder
             const logoImg = document.getElementById('logoBiapo');
-            logoImg.onerror = function() {
-                this.style.display = 'none';
-                this.parentElement.innerHTML = '<div style="background: white; border-radius: 8px; padding: 12px; font-weight: 700; color: #dc2626; font-size: 14px; text-align: center;">BIAPO</div>';
-            };
+            if (logoImg) {
+                logoImg.onerror = function() {
+                    this.style.display = 'none';
+                    this.parentElement.innerHTML = '<div style="background: white; border-radius: 8px; padding: 12px; font-weight: 700; color: #dc2626; font-size: 14px; text-align: center;">BIAPO</div>';
+                };
+            }
             
-            inicializarSistema();
+            // Aguardar carregamento de todos os módulos
+            setTimeout(() => {
+                inicializarSistemaCompleto();
+            }, 1000);
         });
         
-        function inicializarSistema() {
+        // ✅ INICIALIZAÇÃO SEQUENCIAL DOS MÓDULOS
+        function inicializarSistemaCompleto() {
+            console.log('🚀 Iniciando sistema completo...');
+            
             try {
-                // Inicializar dados básicos
-                carregarDadosIniciais();
+                // 1. Verificar se todos os módulos foram carregados
+                const modulosNecessarios = [
+                    'Notifications', 'Helpers', 'Validation', 
+                    'DataStructure', 'App', 'Persistence', 
+                    'Auth', 'Calendar', 'Events', 'Tasks', 'PDF'
+                ];
                 
-                // Atualizar interface
-                atualizarInterface();
+                const modulosCarregados = [];
+                const modulosAusentes = [];
                 
-                // Gerar calendário
-                gerarCalendario();
+                modulosNecessarios.forEach(modulo => {
+                    if (typeof window[modulo] !== 'undefined') {
+                        modulosCarregados.push(modulo);
+                    } else {
+                        modulosAusentes.push(modulo);
+                    }
+                });
                 
-                // Marcar sistema como carregado
-                sistemaCarregado = true;
+                console.log('✅ Módulos carregados:', modulosCarregados);
+                if (modulosAusentes.length > 0) {
+                    console.warn('⚠️ Módulos ausentes:', modulosAusentes);
+                }
                 
-                setTimeout(() => {
-                    Notifications.success('🎉 Sistema BIAPO carregado com sucesso!');
-                    console.log('✅ Sistema pronto para uso');
-                }, 500);
-                
-            } catch (error) {
-                console.error('❌ Erro ao inicializar sistema:', error);
-                Notifications.error('❌ Erro ao carregar sistema');
-            }
-        }
-        
-        function carregarDadosIniciais() {
-            // Carregar dados salvos ou criar dados de exemplo
-            try {
-                const dadosSalvos = localStorage.getItem('gestao_biapo_dados');
-                if (dadosSalvos) {
-                    const dados = JSON.parse(dadosSalvos);
-                    Object.assign(sistemaDados, dados);
+                // 2. Inicializar App principal
+                if (typeof App !== 'undefined' && App.init) {
+                    App.init();
                 } else {
-                    // Criar dados de exemplo
-                    criarDadosExemplo();
+                    console.warn('⚠️ App não encontrado, inicializando modo básico');
+                    inicializarModoBasico();
                 }
+                
+                // 3. Configurar listeners globais
+                configurarListenersGlobais();
+                
+                console.log('✅ Sistema BIAPO inicializado com sucesso!');
+                
             } catch (error) {
-                console.warn('⚠️ Erro ao carregar dados salvos, criando dados de exemplo');
-                criarDadosExemplo();
+                console.error('❌ Erro na inicialização:', error);
+                inicializarModoBasico();
             }
         }
         
-        function criarDadosExemplo() {
-            const hoje = new Date();
-            const proximaSemana = new Date(hoje);
-            proximaSemana.setDate(hoje.getDate() + 7);
+        // ✅ MODO BÁSICO DE FALLBACK
+        function inicializarModoBasico() {
+            console.log('🔧 Iniciando modo básico...');
             
-            sistemaDados.eventos = [
-                {
-                    id: 1,
-                    titulo: 'Reunião de Planejamento',
-                    data: hoje.toISOString().split('T')[0],
-                    horarioInicio: '09:00',
-                    horarioFim: '10:30',
-                    tipo: 'reuniao',
-                    descricao: 'Planejamento da obra do Museu Nacional',
-                    participantes: ['João Silva', 'Maria Santos']
-                },
-                {
-                    id: 2,
-                    titulo: 'Entrega de Projeto',
-                    data: proximaSemana.toISOString().split('T')[0],
-                    horarioInicio: '14:00',
-                    tipo: 'entrega',
-                    descricao: 'Entrega do projeto arquitetônico',
-                    participantes: ['Ana Costa']
-                }
-            ];
-            
-            console.log('📊 Dados de exemplo criados');
-        }
-        
-        function salvarDados() {
-            try {
-                localStorage.setItem('gestao_biapo_dados', JSON.stringify(sistemaDados));
-                console.log('💾 Dados salvos com sucesso');
-            } catch (error) {
-                console.warn('⚠️ Erro ao salvar dados:', error);
-            }
-        }
-        
-        // ✅ FUNÇÕES DE INTERFACE
-        function atualizarInterface() {
-            atualizarDataAtual();
-            atualizarUsuario();
-            atualizarTituloCalendario();
-            atualizarEstatisticas();
-            atualizarProximosEventos();
-        }
-        
-        function atualizarDataAtual() {
+            // Atualizar data atual
             const agora = new Date();
             const dataFormatada = agora.toLocaleDateString('pt-BR', {
                 weekday: 'long',
@@ -959,341 +289,126 @@
             });
             document.getElementById('dataAtual').textContent = 
                 dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
-        }
-        
-        function atualizarUsuario() {
+            
+            // Atualizar usuário
             document.getElementById('usuarioLogado').textContent = '👤 Administrador BIAPO';
-        }
-        
-        function atualizarTituloCalendario() {
+            
+            // Atualizar título do calendário
             const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                           'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            const titulo = `${meses[mesAtual]} ${anoAtual}`;
-            document.getElementById('mesAnoTitulo').textContent = titulo;
-        }
-        
-        function atualizarEstatisticas() {
-            document.getElementById('totalEventos').textContent = sistemaDados.eventos.length;
-            document.getElementById('totalTarefas').textContent = sistemaDados.tarefas.length;
-            document.getElementById('totalUrgentes').textContent = '0';
-            document.getElementById('progressoMedio').textContent = '0%';
-        }
-        
-        function atualizarProximosEventos() {
-            const container = document.getElementById('proximosEventos');
-            const hoje = new Date();
+            document.getElementById('mesAnoTitulo').textContent = `${meses[agora.getMonth()]} ${agora.getFullYear()}`;
             
-            const proximosEventos = sistemaDados.eventos
-                .filter(evento => new Date(evento.data) >= hoje)
-                .sort((a, b) => new Date(a.data) - new Date(b.data))
-                .slice(0, 5);
-            
-            if (proximosEventos.length > 0) {
-                container.innerHTML = proximosEventos.map(evento => `
-                    <div class="evento-item ${evento.tipo}" onclick="abrirDetalhesEvento(${evento.id})">
-                        <p class="evento-titulo">${evento.titulo}</p>
-                        <p class="evento-data">${new Date(evento.data).toLocaleDateString('pt-BR')} ${evento.horarioInicio ? '- ' + evento.horarioInicio : ''}</p>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 20px; color: #6b7280;">
-                        <p style="margin: 0;">📅 Nenhum evento próximo</p>
-                        <button class="btn-acao primario" onclick="mostrarNovoEvento()" style="font-size: 12px; padding: 6px 12px; margin-top: 8px;">
-                            📅 Criar Evento
-                        </button>
-                    </div>
-                `;
+            // Mostrar mensagem de carregamento
+            if (typeof Notifications !== 'undefined') {
+                Notifications.warning('⚠️ Sistema em modo básico - alguns módulos podem não estar disponíveis');
             }
         }
         
-        // ✅ CALENDÁRIO
-        function gerarCalendario() {
-            const calendario = document.getElementById('calendario');
-            const primeiroDia = new Date(anoAtual, mesAtual, 1);
-            const ultimoDia = new Date(anoAtual, mesAtual + 1, 0);
-            const diasNoMes = ultimoDia.getDate();
-            const diaSemanaInicio = primeiroDia.getDay();
-            
-            let html = '';
-            
-            // Cabeçalhos dos dias da semana
-            const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            diasSemana.forEach(dia => {
-                html += `<div style="background: #f8fafc; padding: 12px; text-align: center; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb;">${dia}</div>`;
-            });
-            
-            // Células vazias antes do primeiro dia
-            for (let i = 0; i < diaSemanaInicio; i++) {
-                html += '<div class="calendario-dia outro-mes"></div>';
-            }
-            
-            // Dias do mês
-            const hoje = new Date();
-            for (let dia = 1; dia <= diasNoMes; dia++) {
-                const isHoje = (hoje.getDate() === dia && hoje.getMonth() === mesAtual && hoje.getFullYear() === anoAtual);
-                const classeDia = isHoje ? 'calendario-dia hoje' : 'calendario-dia';
-                
-                // Buscar eventos do dia
-                const eventosHTML = gerarEventosDoDia(dia);
-                
-                html += `
-                    <div class="${classeDia}" onclick="abrirDetalhesDia(${dia}, ${mesAtual}, ${anoAtual})">
-                        <div class="dia-numero">${dia}</div>
-                        <div class="eventos-dia">${eventosHTML}</div>
-                    </div>
-                `;
-            }
-            
-            calendario.innerHTML = html;
-        }
-        
-        function gerarEventosDoDia(dia) {
-            const dataEvento = new Date(anoAtual, mesAtual, dia).toISOString().split('T')[0];
-            const eventos = sistemaDados.eventos.filter(evento => evento.data === dataEvento);
-            
-            let html = '';
-            eventos.slice(0, 3).forEach(evento => {
-                html += `<div class="evento-calendario ${evento.tipo}" onclick="event.stopPropagation(); abrirDetalhesEvento(${evento.id})">${evento.titulo}</div>`;
-            });
-            
-            if (eventos.length > 3) {
-                html += `<div class="mais-eventos">+${eventos.length - 3} mais</div>`;
-            }
-            
-            return html;
-        }
-        
-        function mudarMes(direcao) {
-            mesAtual += direcao;
-            if (mesAtual > 11) {
-                mesAtual = 0;
-                anoAtual++;
-            } else if (mesAtual < 0) {
-                mesAtual = 11;
-                anoAtual--;
-            }
-            
-            atualizarTituloCalendario();
-            gerarCalendario();
-        }
-        
-        function irParaHoje() {
-            const hoje = new Date();
-            mesAtual = hoje.getMonth();
-            anoAtual = hoje.getFullYear();
-            
-            atualizarTituloCalendario();
-            gerarCalendario();
-        }
-        
-        // ✅ TOGGLE VISUALIZAÇÃO TAREFAS
-        function alternarVisualizacaoTarefas() {
-            mostrarTarefasNoCalendario = !mostrarTarefasNoCalendario;
-            
-            const toggle = document.getElementById('toggleTarefas');
-            if (mostrarTarefasNoCalendario) {
-                toggle.classList.add('ativo');
-            } else {
-                toggle.classList.remove('ativo');
-            }
-            
-            gerarCalendario();
-            console.log(`🔄 Visualização de tarefas: ${mostrarTarefasNoCalendario ? 'ATIVADA' : 'DESATIVADA'}`);
-        }
-        
-        // ✅ MODAL DE DETALHES DO EVENTO
-        function abrirDetalhesEvento(eventoId) {
-            console.log('🔍 Abrindo detalhes do evento:', eventoId);
-            
-            const evento = sistemaDados.eventos.find(e => e.id == eventoId);
-            
-            if (evento) {
-                document.getElementById('tituloDetalhesDia').textContent = `📅 ${evento.titulo}`;
-                
-                const tipoIcon = {
-                    'reuniao': '👥',
-                    'entrega': '📦',
-                    'prazo': '⏰',
-                    'marco': '🎯',
-                    'outro': '📅'
-                };
-                
-                const tipoNome = {
-                    'reuniao': 'Reunião',
-                    'entrega': 'Entrega',
-                    'prazo': 'Prazo',
-                    'marco': 'Marco',
-                    'outro': 'Outro'
-                };
-                
-                document.getElementById('conteudoDetalhesDia').innerHTML = `
-                    <div style="padding: 20px 0;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <span style="font-size: 32px;">${tipoIcon[evento.tipo] || '📅'}</span>
-                            <div>
-                                <h3 style="margin: 0; color: #1f2937;">${evento.titulo}</h3>
-                                <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${tipoNome[evento.tipo] || 'Evento'}</p>
-                            </div>
-                        </div>
-                        
-                        <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                            <p style="margin: 0 0 8px 0; color: #374151;"><strong>📅 Data:</strong> ${new Date(evento.data).toLocaleDateString('pt-BR')}</p>
-                            ${evento.horarioInicio ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>⏰ Horário:</strong> ${evento.horarioInicio} ${evento.horarioFim ? '- ' + evento.horarioFim : ''}</p>` : ''}
-                            ${evento.descricao ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>📝 Descrição:</strong> ${evento.descricao}</p>` : ''}
-                            ${evento.participantes && evento.participantes.length > 0 ? `<p style="margin: 0; color: #374151;"><strong>👥 Participantes:</strong> ${evento.participantes.join(', ')}</p>` : ''}
-                        </div>
-                        
-                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                            <button class="btn-acao secundario" onclick="editarEvento(${eventoId})">
-                                ✏️ Editar
-                            </button>
-                            <button class="btn-acao" onclick="excluirEvento(${eventoId})" style="background: #ef4444; color: white;">
-                                🗑️ Excluir
-                            </button>
-                            <button class="btn-acao primario" onclick="fecharModalDetalhesDia()">
-                                Fechar
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('modalDetalhesDia').style.display = 'block';
-            } else {
-                Notifications.error('❌ Evento não encontrado');
-            }
-        }
-        
-        function abrirDetalhesDia(dia, mes, ano) {
-            const data = new Date(ano, mes, dia);
-            const dataFormatada = data.toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
-            
-            document.getElementById('tituloDetalhesDia').textContent = 
-                `📅 ${dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1)}`;
-            
-            const dataEvento = data.toISOString().split('T')[0];
-            const eventosData = sistemaDados.eventos.filter(evento => evento.data === dataEvento);
-            
-            if (eventosData.length > 0) {
-                const eventosHTML = eventosData.map(evento => `
-                    <div class="evento-item ${evento.tipo}" onclick="abrirDetalhesEvento(${evento.id})" style="margin-bottom: 8px; cursor: pointer;">
-                        <p style="margin: 0 0 4px 0; font-weight: 600; color: #1f2937; font-size: 14px;">${evento.titulo}</p>
-                        <p style="margin: 0; font-size: 12px; color: #6b7280;">${evento.horarioInicio ? evento.horarioInicio + (evento.horarioFim ? ' - ' + evento.horarioFim : '') : 'Horário não definido'}</p>
-                    </div>
-                `).join('');
-                
-                document.getElementById('conteudoDetalhesDia').innerHTML = `
-                    <div style="padding: 20px 0;">
-                        <h4 style="margin: 0 0 16px 0; color: #1f2937;">📅 Eventos do Dia</h4>
-                        ${eventosHTML}
-                        <div style="text-align: center; margin-top: 24px;">
-                            <button class="btn-acao primario" onclick="mostrarNovoEvento()">
-                                📅 Novo Evento
-                            </button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                document.getElementById('conteudoDetalhesDia').innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #6b7280;">
-                        <p style="font-size: 16px; margin-bottom: 20px;">📋 Nenhum evento neste dia</p>
-                        <button class="btn-acao primario" onclick="mostrarNovoEvento()">
-                            📅 Criar Evento
-                        </button>
-                    </div>
-                `;
-            }
-            
-            document.getElementById('modalDetalhesDia').style.display = 'block';
-        }
-        
-        function fecharModalDetalhesDia() {
-            document.getElementById('modalDetalhesDia').style.display = 'none';
-        }
-        
-        function excluirEvento(eventoId) {
-            if (confirm('🗑️ Deseja realmente excluir este evento?\n\nEsta ação não pode ser desfeita.')) {
-                const index = sistemaDados.eventos.findIndex(e => e.id == eventoId);
-                if (index !== -1) {
-                    sistemaDados.eventos.splice(index, 1);
-                    salvarDados();
-                    fecharModalDetalhesDia();
-                    atualizarInterface();
-                    gerarCalendario();
-                    Notifications.success('🗑️ Evento excluído com sucesso!');
-                } else {
-                    Notifications.error('❌ Erro ao excluir evento');
+        // ✅ CONFIGURAR LISTENERS GLOBAIS
+        function configurarListenersGlobais() {
+            // Fechar modais ao clicar fora
+            window.onclick = function(event) {
+                const modalDetalhes = document.getElementById('modalDetalhesDia');
+                if (event.target === modalDetalhes) {
+                    if (typeof App !== 'undefined' && App.fecharModalDetalhesDia) {
+                        App.fecharModalDetalhesDia();
+                    } else {
+                        modalDetalhes.style.display = 'none';
+                    }
                 }
-            }
+            };
+            
+            // Tecla ESC para fechar modais
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    const modalDetalhes = document.getElementById('modalDetalhesDia');
+                    if (modalDetalhes && modalDetalhes.style.display === 'block') {
+                        if (typeof App !== 'undefined' && App.fecharModalDetalhesDia) {
+                            App.fecharModalDetalhesDia();
+                        } else {
+                            modalDetalhes.style.display = 'none';
+                        }
+                    }
+                }
+            });
+            
+            console.log('🔧 Listeners globais configurados');
         }
         
-        // ✅ FUNÇÕES PLACEHOLDER
-        function mostrarNovoEvento() {
-            Notifications.info('📅 Modal de criação de eventos será implementado');
-        }
-        
-        function mostrarNovaTarefa() {
-            Notifications.info('📝 Modal de criação de tarefas será implementado');
-        }
-        
-        function editarEvento(eventoId) {
-            fecharModalDetalhesDia();
-            Notifications.info('✏️ Edição de eventos será implementada');
-        }
-        
-        function exportarPDF() {
-            Notifications.info('📄 Exportação de PDF será implementada');
-        }
-        
-        function abrirAgendaPessoal() {
-            Notifications.info('👤 Agenda pessoal será implementada');
-        }
-        
-        function gerenciarAreas() {
-            Notifications.info('🏢 Gerenciamento de áreas será implementado');
-        }
-        
-        function atribuirResponsabilidades() {
-            Notifications.info('👥 Atribuição de responsabilidades será implementada');
-        }
-        
-        // ✅ EVENT LISTENERS
-        
-        // Fechar modal ao clicar fora
-        window.onclick = function(event) {
-            const modalDetalhes = document.getElementById('modalDetalhesDia');
-            if (event.target === modalDetalhes) {
-                fecharModalDetalhesDia();
-            }
-        }
-        
-        // Atualizar interface periodicamente
-        setInterval(atualizarInterface, 60000); // A cada 1 minuto
-        
-        // ✅ FUNÇÃO DE DEBUG
+        // ✅ FUNÇÃO DE DEBUG GLOBAL
         function debugSistema() {
-            console.log('🔍 === DEBUG DO SISTEMA ===');
-            console.log('📊 Sistema carregado:', sistemaCarregado);
-            console.log('📅 Eventos:', sistemaDados.eventos);
-            console.log('📝 Tarefas:', sistemaDados.tarefas);
-            console.log('📅 Mês atual:', mesAtual, 'Ano atual:', anoAtual);
-            console.log('🔄 Mostrar tarefas:', mostrarTarefasNoCalendario);
+            console.log('🔍 === DEBUG DO SISTEMA MODULAR ===');
+            
+            const modulos = [
+                'Notifications', 'Helpers', 'Validation', 
+                'DataStructure', 'App', 'Persistence', 
+                'Auth', 'Calendar', 'Events', 'Tasks', 'PDF'
+            ];
+            
+            modulos.forEach(modulo => {
+                const status = typeof window[modulo] !== 'undefined';
+                console.log(`${status ? '✅' : '❌'} ${modulo}:`, status ? window[modulo] : 'Não carregado');
+            });
+            
+            if (typeof App !== 'undefined' && App.dados) {
+                console.log('📊 App.dados:', App.dados);
+            }
+            
+            if (typeof Events !== 'undefined' && Events.eventos) {
+                console.log('📅 Events.eventos:', Events.eventos.length, 'eventos');
+            }
+            
+            if (typeof Tasks !== 'undefined' && Tasks.tarefas) {
+                console.log('📝 Tasks.tarefas:', Tasks.tarefas.length, 'tarefas');
+            }
+            
             console.log('🔍 === FIM DEBUG ===');
         }
         
         // Disponibilizar debug globalmente
         window.debugSistema = debugSistema;
         
+        // ✅ FUNÇÕES DE COMPATIBILIDADE GLOBAL
+        
+        // Para casos onde algum módulo não carregou
+        function mostrarNovoEvento() {
+            if (typeof Events !== 'undefined' && Events.mostrarNovoEvento) {
+                Events.mostrarNovoEvento();
+            } else {
+                console.warn('⚠️ Módulo Events não carregado');
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.warning('⚠️ Módulo de eventos não disponível');
+                }
+            }
+        }
+        
+        function mostrarNovaTarefa() {
+            if (typeof Tasks !== 'undefined' && Tasks.mostrarNovaTarefa) {
+                Tasks.mostrarNovaTarefa();
+            } else {
+                console.warn('⚠️ Módulo Tasks não carregado');
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.warning('⚠️ Módulo de tarefas não disponível');
+                }
+            }
+        }
+        
+        function exportarPDF() {
+            if (typeof PDF !== 'undefined' && PDF.exportarCalendario) {
+                PDF.exportarCalendario();
+            } else {
+                console.warn('⚠️ Módulo PDF não carregado');
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.warning('⚠️ Módulo de PDF não disponível');
+                }
+            }
+        }
+        
         // ✅ LOG INICIAL
-        console.log('🏗️ Gestão Integrada BIAPO v6.3 - Arquivo Corrigido');
-        console.log('✅ Estrutura HTML organizada corretamente');
-        console.log('🔍 Digite debugSistema() no console para verificar status');
-        console.log('📋 Sistema básico funcional com eventos de exemplo');
+        console.log('🏗️ Gestão Integrada BIAPO v6.3 - Estrutura Modular');
+        console.log('📁 Ordem de carregamento: Config → Utils → Core → Modules');
+        console.log('🔍 Digite debugSistema() para verificar status dos módulos');
+        console.log('⚡ Sistema aguardando inicialização completa...');
     </script>
 </body>
 </html>
