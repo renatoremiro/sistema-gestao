@@ -32,8 +32,9 @@
     <script src="assets/js/core/data.js"></script>
     <script src="assets/js/core/app.js"></script>
     
-    <!-- 4. SISTEMA DE PERSISTÊNCIA -->
+    <!-- 4. MÓDULOS FUNCIONAIS -->
     <script src="assets/js/modules/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
     
     <!-- 4. CHAT EXISTENTE -->
     <script src="modules/chat-module.js"></script>
@@ -51,9 +52,9 @@
                 <h1>🔧 Sistema de Gestão - DESENVOLVIMENTO</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    <strong>v6.2 Modular - Modo Desenvolvimento (80% Completo)</strong>
+                    <strong>v6.2 Modular - Modo Desenvolvimento (85% Completo)</strong>
                     <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                        App + Persistence ✅
+                        Core + Auth ✅
                     </span>
                 </p>
             </div>
@@ -84,7 +85,7 @@
                         <li>✅ <strong>Config:</strong> firebase.js</li>
                         <li>✅ <strong>Utils:</strong> helpers.js, validation.js, notifications.js</li>
                         <li>✅ <strong>Core:</strong> data.js, app.js</li>
-                        <li>✅ <strong>Modules:</strong> persistence.js ⭐ <span style="color: #10b981;">NOVO</span></li>
+                        <li>✅ <strong>Modules:</strong> persistence.js, auth.js ⭐ <span style="color: #10b981;">NOVO</span></li>
                         <li>✅ <strong>Chat:</strong> chat-module.js (existente)</li>
                     </ul>
                 </div>
@@ -92,7 +93,6 @@
                 <div class="card">
                     <h4 style="color: #f59e0b;">🔄 MÓDULOS PENDENTES</h4>
                     <ul style="list-style: none; padding: 0; line-height: 1.8;">
-                        <li>🔄 <strong>Modules:</strong> auth.js</li>
                         <li>🔄 <strong>Modules:</strong> calendar.js</li>
                         <li>🔄 <strong>Modules:</strong> events.js</li>
                         <li>🔄 <strong>Modules:</strong> tasks.js</li>
@@ -194,7 +194,7 @@
             
             <!-- Teste de Sistema de Persistência -->
             <div style="margin-bottom: 20px; padding: 16px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;">
-                <h4>💾 Sistema de Persistência Ultra-Robusta ⭐ <span style="color: #10b981; font-size: 12px;">NOVO</span></h4>
+                <h4>💾 Sistema de Persistência Ultra-Robusta</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
                     <div>
                         <button class="btn btn-primary btn-sm" onclick="testarSalvamentoPadrao()">
@@ -223,6 +223,38 @@
                 </div>
                 <div id="resultadoPersistencia" style="margin-top: 12px; padding: 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
             </div>
+            
+            <!-- Teste de Sistema de Autenticação -->
+            <div style="margin-bottom: 20px; padding: 16px; background: #fdf2f8; border: 1px solid #ec4899; border-radius: 8px;">
+                <h4>🔐 Sistema de Autenticação Firebase ⭐ <span style="color: #10b981; font-size: 12px;">NOVO</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="testarStatusAuth()">
+                            👤 Status Atual
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="testarValidacaoLogin()">
+                            ✅ Validar Campos
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-warning btn-sm" onclick="testarModalRegistro()">
+                            📝 Modal Registro
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="testarConfigAuth()">
+                            ⚙️ Config Sistema
+                        </button>
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    <button class="btn btn-danger btn-sm" onclick="testarBloqueioLogin()">
+                        🔒 Simular Bloqueio
+                    </button>
+                    <button class="btn btn-pdf btn-sm" onclick="testarLimpezaSessao()">
+                        🧹 Limpar Sessão
+                    </button>
+                </div>
+                <div id="resultadoAuth" style="margin-top: 12px; padding: 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+            </div>
         </div>
         
         <!-- ✅ LOG DE DESENVOLVIMENTO -->
@@ -236,8 +268,9 @@
                 <div>📊 Estrutura de Dados v6.2 carregada!</div>
                 <div>🚀 Core App v6.2 carregado!</div>
                 <div>💾 Sistema de Persistência Ultra-Robusta v6.2 carregado!</div>
+                <div>🔐 Sistema de Autenticação Firebase v6.2 carregado!</div>
                 <div style="color: #10b981;">✅ Todos os módulos básicos carregados com sucesso!</div>
-                <div style="color: #8b5cf6;">🎯 Progresso: 80% da modularização concluída</div>
+                <div style="color: #8b5cf6;">🎯 Progresso: 85% da modularização concluída</div>
             </div>
         </div>
     </div>
@@ -251,6 +284,82 @@
         // Teste de notificações simples
         function testarNotificacoes() {
             Notifications.success('Sistema de notificações funcionando!');
+        }
+        
+        // ✅ TESTES DO SISTEMA DE AUTENTICAÇÃO
+        function testarStatusAuth() {
+            const resultado = document.getElementById('resultadoAuth');
+            resultado.innerHTML += '👤 Verificando status de autenticação...<br>';
+            
+            if (typeof Auth !== 'undefined') {
+                const status = Auth.obterStatus();
+                resultado.innerHTML += `✅ Módulo Auth carregado<br>`;
+                resultado.innerHTML += `• Autenticado: ${status.autenticado ? 'Sim' : 'Não'}<br>`;
+                resultado.innerHTML += `• Email: ${status.email || 'N/A'}<br>`;
+                resultado.innerHTML += `• Nome: ${status.nome || 'N/A'}<br>`;
+                resultado.innerHTML += `• Tentativas: ${status.tentativasLogin}/3<br>`;
+                resultado.innerHTML += `• Login em andamento: ${status.loginEmAndamento ? 'Sim' : 'Não'}<br>`;
+            } else {
+                resultado.innerHTML += '❌ Módulo Auth não encontrado<br>';
+            }
+        }
+        
+        function testarValidacaoLogin() {
+            const resultado = document.getElementById('resultadoAuth');
+            resultado.innerHTML += '✅ Testando validação de login...<br>';
+            
+            // Testar validações
+            const emailInvalido = Auth._validarCamposLogin('email-inválido', '123');
+            const emailVazio = Auth._validarCamposLogin('', 'senha123');
+            const senhaFraca = Auth._validarCamposLogin('teste@email.com', '123');
+            const dadosValidos = Auth._validarCamposLogin('teste@email.com', 'senha123');
+            
+            resultado.innerHTML += `• Email inválido: ${emailInvalido.valido ? '❌' : '✅'}<br>`;
+            resultado.innerHTML += `• Email vazio: ${emailVazio.valido ? '❌' : '✅'}<br>`;
+            resultado.innerHTML += `• Senha fraca: ${senhaFraca.valido ? '❌' : '✅'}<br>`;
+            resultado.innerHTML += `• Dados válidos: ${dadosValidos.valido ? '✅' : '❌'}<br>`;
+        }
+        
+        function testarModalRegistro() {
+            const resultado = document.getElementById('resultadoAuth');
+            resultado.innerHTML += '📝 Abrindo modal de registro...<br>';
+            
+            Auth.mostrarRegistro();
+            resultado.innerHTML += '✅ Modal de registro criado<br>';
+            resultado.innerHTML += '💡 Verifique se modal apareceu na tela<br>';
+        }
+        
+        function testarConfigAuth() {
+            const resultado = document.getElementById('resultadoAuth');
+            resultado.innerHTML += '⚙️ Verificando configurações...<br>';
+            
+            resultado.innerHTML += `• Timeout login: ${Auth.config.TIMEOUT_LOGIN}ms<br>`;
+            resultado.innerHTML += `• Max tentativas: ${Auth.config.MAX_TENTATIVAS_LOGIN}<br>`;
+            resultado.innerHTML += `• Auto redirect: ${Auth.config.AUTO_REDIRECT_DELAY}ms<br>`;
+            resultado.innerHTML += `• Lembrar usuário: ${Auth.config.REMEMBER_USER ? 'Sim' : 'Não'}<br>`;
+        }
+        
+        function testarBloqueioLogin() {
+            const resultado = document.getElementById('resultadoAuth');
+            resultado.innerHTML += '🔒 Simulando bloqueio de login...<br>';
+            
+            // Simular muitas tentativas
+            Auth.state.tentativasLogin = Auth.config.MAX_TENTATIVAS_LOGIN;
+            Auth._bloquearLogin();
+            
+            resultado.innerHTML += '⚠️ Login bloqueado por 5 minutos<br>';
+            resultado.innerHTML += '💡 Verifique se botão de login foi desabilitado<br>';
+        }
+        
+        function testarLimpezaSessao() {
+            const resultado = document.getElementById('resultadoAuth');
+            resultado.innerHTML += '🧹 Testando limpeza de sessão...<br>';
+            
+            Auth._limparSessaoLocal();
+            Auth._limparCamposLogin();
+            
+            resultado.innerHTML += '✅ Sessão local limpa<br>';
+            resultado.innerHTML += '✅ Campos de login limpos<br>';
         }
         
         // Teste de notificações múltiplas
@@ -443,7 +552,8 @@
             Notifications: typeof Notifications !== 'undefined',
             DataStructure: typeof DataStructure !== 'undefined',
             App: typeof App !== 'undefined',
-            Persistence: typeof Persistence !== 'undefined'
+            Persistence: typeof Persistence !== 'undefined',
+            Auth: typeof Auth !== 'undefined'
         });
         
         // ✅ TESTE AUTOMÁTICO DE INICIALIZAÇÃO
@@ -469,9 +579,18 @@
                         if (typeof App !== 'undefined') {
                             resultado.innerHTML += '✅ Módulo App carregado<br>';
                             
-                            // Teste básico de status
-                            const status = Persistence.obterStatus();
-                            resultado.innerHTML += `📊 Status inicial: ${status.operacoesEmAndamento} operações<br>`;
+                            if (typeof Auth !== 'undefined') {
+                                resultado.innerHTML += '✅ Módulo Auth carregado<br>';
+                                
+                                // Teste básico de status
+                                const status = Persistence.obterStatus();
+                                resultado.innerHTML += `📊 Status inicial: ${status.operacoesEmAndamento} operações<br>`;
+                                
+                                const authStatus = Auth.obterStatus();
+                                resultado.innerHTML += `🔐 Auth: ${authStatus.autenticado ? 'Logado' : 'Não logado'}<br>`;
+                            } else {
+                                resultado.innerHTML += '❌ Módulo Auth não encontrado<br>';
+                            }
                         } else {
                             resultado.innerHTML += '❌ Módulo App não encontrado<br>';
                         }
