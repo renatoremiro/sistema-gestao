@@ -5,9 +5,371 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão Integrada - BIAPO</title>
     
-    <!-- ✅ CSS MODULARIZADO -->
+    <!-- ✅ CSS MODULARIZADO - SEUS ARQUIVOS EXISTENTES -->
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/calendar.css">
+    
+    <!-- ✅ CSS COMPLEMENTAR PARA INTERFACE BIAPO -->
+    <style>
+        /* Estilos específicos da interface BIAPO que podem não estar nos CSS existentes */
+        .header-biapo {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 24px 0;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo-container {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .titulo-section h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .titulo-section p {
+            margin: 4px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        .header-info {
+            text-align: right;
+        }
+        
+        .data-atual {
+            font-size: 15px;
+            opacity: 0.9;
+            margin: 0 0 4px 0;
+        }
+        
+        .usuario-info {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* Interface responsiva e limpa */
+        .dashboard-principal {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        
+        .controles-principais {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            background: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .filtros-calendario {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .acoes-rapidas {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toggle-switch {
+            width: 48px;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-switch.ativo {
+            background: #dc2626;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .toggle-switch.ativo::after {
+            left: 26px;
+        }
+        
+        .cards-estatisticas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .card-stat {
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+        }
+        
+        .card-stat:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .card-stat h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+        
+        .card-stat .numero {
+            font-size: 36px;
+            font-weight: 800;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+            line-height: 1;
+        }
+        
+        .card-stat .descricao {
+            margin: 0;
+            font-size: 15px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .card-stat.eventos .numero { color: #3b82f6; }
+        .card-stat.tarefas .numero { color: #10b981; }
+        .card-stat.urgente .numero { color: #ef4444; }
+        .card-stat.progresso .numero { color: #8b5cf6; }
+        
+        .secao-principal {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 32px;
+        }
+        
+        .calendario-container {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .calendario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .calendario-titulo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .calendario-nav {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .sidebar-direita {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .card-sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .card-sidebar h3 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .proximos-eventos {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        
+        .evento-item {
+            padding: 16px;
+            border-left: 4px solid #e5e7eb;
+            margin-bottom: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .evento-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+        
+        .evento-item.reuniao { border-left-color: #3b82f6; }
+        .evento-item.entrega { border-left-color: #10b981; }
+        .evento-item.prazo { border-left-color: #ef4444; }
+        .evento-item.marco { border-left-color: #8b5cf6; }
+        
+        .evento-titulo {
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 6px 0;
+            font-size: 15px;
+        }
+        
+        .evento-data {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .footer-info {
+            background: #1f2937;
+            color: #9ca3af;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .footer-info .status-ok {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        /* Animações */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsivo */
+        @media (max-width: 1024px) {
+            .secao-principal {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar-direita {
+                grid-row: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            
+            .logo-section {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .controles-principais {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .cards-estatisticas {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .acoes-rapidas {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
     
     <!-- ✅ BIBLIOTECAS EXTERNAS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
