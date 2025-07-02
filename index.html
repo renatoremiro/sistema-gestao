@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão - Obra 292</title>
+    
+    <!-- ✅ CSS MODULARIZADO -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/calendar.css">
+    <link rel="stylesheet" href="modules/chat-styles.css">
+    
+    <!-- ✅ BIBLIOTECAS EXTERNAS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- ✅ FIREBASE SCRIPTS -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- ✅ SISTEMA MODULARIZADO COMPLETO -->
+    
+    <!-- 1. CONFIGURAÇÕES -->
+    <script src="assets/js/config/firebase.js"></script>
+    
+    <!-- 2. UTILITÁRIOS -->
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    
+    <!-- 3. CORE DO SISTEMA -->
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    
+    <!-- 4. MÓDULOS FUNCIONAIS -->
+    <script src="assets/js/modules/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/calendar.js"></script>
+    <script src="assets/js/modules/events.js"></script>
+    <script src="assets/js/modules/tasks.js"></script>
+    <script src="assets/js/modules/pdf.js"></script>
+    
+    <!-- 5. CHAT EXISTENTE -->
+    <script src="modules/chat-module.js"></script>
+    
+    <style>
+        /* ✅ ESTILOS ADICIONAIS PARA INTERFACE PROFISSIONAL */
+        
+        .header-profissional {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .logo-section h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .logo-section p {
+            margin: 4px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .header-info {
+            text-align: right;
+        }
+        
+        .data-atual {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .usuario-info {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 4px 0 0 0;
+        }
+        
+        .menu-navegacao {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .menu-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 20px;
+        }
+        
+        .menu-item {
+            padding: 16px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover, .menu-item.ativo {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: #f8fafc;
+        }
+        
+        .dashboard-principal {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+        
+        .cards-estatisticas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .card-stat {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.2s ease;
+        }
+        
+        .card-stat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-stat h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-stat .numero {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .card-stat .descricao {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .card-stat.urgente .numero { color: #ef4444; }
+        .card-stat.eventos .numero { color: #3b82f6; }
+        .card-stat.tarefas .numero { color: #10b981; }
+        .card-stat.progresso .numero { color: #8b5cf6; }
+        
+        .secao-principal {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        
+        .calendario-principal {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .calendario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .calendario-titulo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .calendario-nav {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .btn-nav {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-nav:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .sidebar-acoes {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card-acoes {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .card-acoes h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .btn-acao {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .btn-acao.primaria {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-acao.primaria:hover {
+            background: #5a67d8;
+        }
+        
+        .btn-acao.secundaria {
+            background: #f8fafc;
+            color: #1f2937;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .btn-acao.secundaria:hover {
+            background: #e2e8f0;
+        }
+        
+        .btn-acao.pdf {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-acao.pdf:hover {
+            background: #d97706;
+        }
+        
+        .proximos-eventos {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .evento-item {
+            padding: 12px;
+            border-left: 4px solid #e5e7eb;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+        
+        .evento-item.reuniao { border-left-color: #3b82f6; }
+        .evento-item.entrega { border-left-color: #10b981; }
+        .evento-item.prazo { border-left-color: #ef4444; }
+        .evento-item.marco { border-left-color: #8b5cf6; }
+        
+        .evento-titulo {
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 4px 0;
+            font-size: 14px;
+        }
+        
+        .evento-data {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .footer-info {
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+            padding: 20px 0;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            
+            .secao-principal {
+                grid-template-columns: 1fr;
+            }
+            
+            .cards-estatisticas {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .menu-content {
+                flex-wrap: wrap;
+            }
+        }
+        
+        /* Animações suaves */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- ✅ SISTEMA DE NOTIFICAÇÕES -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+    
+    <!-- ✅ HEADER PROFISSIONAL -->
+    <header class="header-profissional">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1>🏗️ Sistema de Gestão</h1>
+                <p>Obra 292 - Museu Nacional</p>
+            </div>
+            <div class="header-info">
+                <p id="dataAtual" class="data-atual">Carregando...</p>
+                <p id="usuarioLogado" class="usuario-info">👤 Usuário</p>
+            </div>
+        </div>
+    </header>
+    
+    <!-- ✅ MENU DE NAVEGAÇÃO -->
+    <nav class="menu-navegacao">
+        <div class="menu-content">
+            <div class="menu-item ativo" onclick="mostrarSecao('dashboard')">
+                📊 Dashboard
+            </div>
+            <div class="menu-item" onclick="mostrarSecao('calendario')">
+                📅 Calendário
+            </div>
+            <div class="menu-item" onclick="mostrarSecao('tarefas')">
+                📝 Tarefas
+            </div>
+            <div class="menu-item" onclick="mostrarSecao('eventos')">
+                📅 Eventos
+            </div>
+            <div class="menu-item" onclick="mostrarSecao('relatorios')">
+                📄 Relatórios
+            </div>
+        </div>
+    </nav>
+    
+    <!-- ✅ DASHBOARD PRINCIPAL -->
+    <main class="dashboard-principal">
+        
+        <!-- Cards de Estatísticas -->
+        <section class="cards-estatisticas fade-in">
+            <div class="card-stat eventos">
+                <h3>Eventos do Mês</h3>
+                <p class="numero" id="totalEventos">0</p>
+                <p class="descricao">Reuniões, entregas e marcos</p>
+            </div>
+            
+            <div class="card-stat tarefas">
+                <h3>Tarefas Ativas</h3>
+                <p class="numero" id="totalTarefas">0</p>
+                <p class="descricao">Em andamento e pendentes</p>
+            </div>
+            
+            <div class="card-stat urgente">
+                <h3>Urgentes</h3>
+                <p class="numero" id="totalUrgentes">0</p>
+                <p class="descricao">Prazo ≤ 3 dias</p>
+            </div>
+            
+            <div class="card-stat progresso">
+                <h3>Progresso Médio</h3>
+                <p class="numero" id="progressoMedio">0%</p>
+                <p class="descricao">Conclusão das tarefas</p>
+            </div>
+        </section>
+        
+        <!-- Seção Principal: Calendário + Sidebar -->
+        <section class="secao-principal fade-in">
+            
+            <!-- Calendário Principal -->
+            <div class="calendario-principal">
+                <div class="calendario-header">
+                    <h2 class="calendario-titulo" id="mesAnoTitulo">Carregando...</h2>
+                    <div class="calendario-nav">
+                        <button class="btn-nav" onclick="Calendar.mudarMes(-1)">◀ Anterior</button>
+                        <button class="btn-nav" onclick="Calendar.irParaHoje()">📅 Hoje</button>
+                        <button class="btn-nav" onclick="Calendar.mudarMes(1)">Próximo ▶</button>
+                    </div>
+                </div>
+                
+                <!-- Grid do Calendário -->
+                <div id="calendario" style="
+                    display: grid; 
+                    grid-template-columns: repeat(7, 1fr); 
+                    gap: 6px; 
+                    font-size: 12px;
+                ">
+                    <div style="text-align: center; color: #6b7280;">Carregando calendário...</div>
+                </div>
+            </div>
+            
+            <!-- Sidebar com Ações -->
+            <div class="sidebar-acoes">
+                
+                <!-- Ações Rápidas -->
+                <div class="card-acoes">
+                    <h3>⚡ Ações Rápidas</h3>
+                    <button class="btn-acao primaria" onclick="Tasks.mostrarNovaTarefa()">
+                        📝 Nova Tarefa
+                    </button>
+                    <button class="btn-acao primaria" onclick="Events.mostrarNovoEvento()">
+                        📅 Novo Evento
+                    </button>
+                    <button class="btn-acao secundaria" onclick="Calendar.mostrarMarcarFeriado()">
+                        🎉 Marcar Feriado
+                    </button>
+                </div>
+                
+                <!-- Relatórios PDF -->
+                <div class="card-acoes">
+                    <h3>📄 Relatórios</h3>
+                    <button class="btn-acao pdf" onclick="Calendar.exportarPDF()">
+                        📅 PDF Calendário
+                    </button>
+                    <button class="btn-acao pdf" onclick="Tasks.exportarAgendaPDF()">
+                        📋 PDF Agenda Semanal
+                    </button>
+                </div>
+                
+                <!-- Próximos Eventos -->
+                <div class="card-acoes">
+                    <h3>📅 Próximos Eventos</h3>
+                    <div id="proximosEventos" class="proximos-eventos">
+                        <p style="color: #6b7280; text-align: center; margin: 20px 0;">
+                            Carregando eventos...
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </section>
+        
+    </main>
+    
+    <!-- ✅ FOOTER INFORMATIVO -->
+    <footer class="footer-info">
+        <p>
+            Sistema de Gestão v6.2 - Obra 292 (Museu Nacional) | 
+            <span id="statusSistema">Sistema carregando...</span>
+        </p>
+    </footer>
+
+    <script>
+        // ✅ INICIALIZAÇÃO DA INTERFACE PROFISSIONAL
+        
+        // Atualizar data atual
+        function atualizarDataAtual() {
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('dataAtual').textContent = Helpers.capitalize(dataFormatada);
+        }
+        
+        // Atualizar estatísticas do dashboard
+        function atualizarEstatisticas() {
+            try {
+                if (typeof Events !== 'undefined' && typeof Tasks !== 'undefined') {
+                    // Estatísticas de eventos
+                    const statsEventos = Events.obterEstatisticas();
+                    document.getElementById('totalEventos').textContent = statsEventos.total || 0;
+                    
+                    // Estatísticas de tarefas
+                    const statsTarefas = Tasks.obterEstatisticas();
+                    document.getElementById('totalTarefas').textContent = statsTarefas.total || 0;
+                    document.getElementById('totalUrgentes').textContent = statsTarefas.urgentes || 0;
+                    document.getElementById('progressoMedio').textContent = `${statsTarefas.progressoMedio || 0}%`;
+                    
+                    console.log('📊 Estatísticas atualizadas');
+                }
+            } catch (error) {
+                console.warn('⚠️ Erro ao atualizar estatísticas:', error);
+            }
+        }
+        
+        // Atualizar próximos eventos
+        function atualizarProximosEventos() {
+            try {
+                if (typeof Events !== 'undefined') {
+                    const proximos = Events.obterProximosEventos(5);
+                    const container = document.getElementById('proximosEventos');
+                    
+                    if (proximos.length === 0) {
+                        container.innerHTML = '<p style="color: #6b7280; text-align: center; margin: 20px 0;">Nenhum evento próximo</p>';
+                        return;
+                    }
+                    
+                    container.innerHTML = proximos.map(evento => `
+                        <div class="evento-item ${evento.tipo}" onclick="Events.editarEvento(${evento.id})">
+                            <p class="evento-titulo">${evento.titulo}</p>
+                            <p class="evento-data">${new Date(evento.data).toLocaleDateString('pt-BR')} ${evento.horarioInicio ? '- ' + evento.horarioInicio : ''}</p>
+                        </div>
+                    `).join('');
+                    
+                    console.log('📅 Próximos eventos atualizados');
+                }
+            } catch (error) {
+                console.warn('⚠️ Erro ao atualizar próximos eventos:', error);
+            }
+        }
+        
+        // Atualizar título do calendário
+        function atualizarTituloCalendario() {
+            try {
+                if (typeof Calendar !== 'undefined') {
+                    const status = Calendar.obterStatus();
+                    const titulo = `${status.mesNome} ${status.anoAtual}`;
+                    document.getElementById('mesAnoTitulo').textContent = titulo;
+                }
+            } catch (error) {
+                console.warn('⚠️ Erro ao atualizar título do calendário:', error);
+            }
+        }
+        
+        // Atualizar informações do usuário
+        function atualizarUsuario() {
+            try {
+                if (typeof App !== 'undefined' && App.usuarioAtual) {
+                    const nome = App.usuarioAtual.displayName || App.usuarioAtual.email || 'Usuário';
+                    document.getElementById('usuarioLogado').textContent = `👤 ${nome}`;
+                } else {
+                    document.getElementById('usuarioLogado').textContent = '👤 Sistema Local';
+                }
+            } catch (error) {
+                console.warn('⚠️ Erro ao atualizar usuário:', error);
+            }
+        }
+        
+        // Atualizar status do sistema
+        function atualizarStatusSistema() {
+            try {
+                const modulosCarregados = [
+                    typeof Helpers !== 'undefined',
+                    typeof Validation !== 'undefined',
+                    typeof Notifications !== 'undefined',
+                    typeof App !== 'undefined',
+                    typeof Calendar !== 'undefined',
+                    typeof Events !== 'undefined',
+                    typeof Tasks !== 'undefined',
+                    typeof PDF !== 'undefined'
+                ].filter(Boolean).length;
+                
+                const status = `${modulosCarregados}/8 módulos carregados - Sistema operacional`;
+                document.getElementById('statusSistema').textContent = status;
+                
+                if (modulosCarregados === 8) {
+                    document.getElementById('statusSistema').style.color = '#10b981';
+                }
+            } catch (error) {
+                document.getElementById('statusSistema').textContent = 'Sistema em inicialização...';
+            }
+        }
+        
+        // Navegação entre seções (placeholder para futuras expansões)
+        function mostrarSecao(secao) {
+            // Remover classe ativa de todos os itens
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('ativo');
+            });
+            
+            // Adicionar classe ativa ao item clicado
+            event.target.classList.add('ativo');
+            
+            // Feedback visual
+            switch(secao) {
+                case 'dashboard':
+                    Notifications.info('📊 Você está no Dashboard principal');
+                    break;
+                case 'calendario':
+                    Notifications.info('📅 Visualização do calendário');
+                    break;
+                case 'tarefas':
+                    Tasks.mostrarNovaTarefa();
+                    break;
+                case 'eventos':
+                    Events.mostrarNovoEvento();
+                    break;
+                case 'relatorios':
+                    Calendar.exportarPDF();
+                    break;
+            }
+            
+            console.log(`📍 Navegação para: ${secao}`);
+        }
+        
+        // Função principal de atualização
+        function atualizarInterface() {
+            atualizarDataAtual();
+            atualizarUsuario();
+            atualizarTituloCalendario();
+            atualizarEstatisticas();
+            atualizarProximosEventos();
+            atualizarStatusSistema();
+        }
+        
+        // ✅ INICIALIZAÇÃO AUTOMÁTICA
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎉 Interface profissional carregando...');
+            
+            // Inicialização após carregamento dos módulos
+            setTimeout(() => {
+                // Inicializar dados se necessário
+                if (typeof App !== 'undefined' && typeof DataStructure !== 'undefined') {
+                    if (!App.dados) {
+                        App.dados = DataStructure.inicializarDados();
+                        console.log('📊 Dados inicializados');
+                    }
+                    
+                    if (!App.usuarioAtual) {
+                        App.usuarioAtual = { 
+                            displayName: 'Administrador', 
+                            email: 'admin@obra292.com' 
+                        };
+                    }
+                }
+                
+                // Gerar calendário
+                if (typeof Calendar !== 'undefined') {
+                    Calendar.gerar();
+                    console.log('📅 Calendário gerado');
+                }
+                
+                // Atualizar interface
+                atualizarInterface();
+                
+                // Mostrar notificação de boas-vindas
+                setTimeout(() => {
+                    Notifications.success('🎉 Sistema de Gestão carregado com sucesso!');
+                }, 500);
+                
+                console.log('✅ Interface profissional pronta!');
+                
+            }, 1000);
+            
+            // Atualizar periodicamente
+            setInterval(atualizarInterface, 30000); // A cada 30 segundos
+        });
+        
+        // ✅ LOG INICIAL
+        console.log('🏗️ Sistema de Gestão v6.2 - Interface Profissional');
+        console.log('📋 Obra 292 - Museu Nacional');
+        console.log('✨ Interface elegante e funcional carregada!');
+    </script>
+</body>
+</html>
