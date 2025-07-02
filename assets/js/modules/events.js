@@ -1,5 +1,5 @@
 /**
- * 📅 Sistema de Gestão de Eventos v6.2.1 - INTEGRAÇÃO PERFEITA
+ * 📅 Sistema de Gestão de Eventos v6.2.1 - INTEGRAÇÃO PERFEITA + EXCLUSÃO
  * 
  * CORREÇÕES APLICADAS:
  * ✅ Criado sistema de eventos REAL (não duplicata do PDF)
@@ -9,6 +9,7 @@
  * ✅ Modal responsivo e intuitivo
  * ✅ Validações robustas
  * ✅ Sincronização automática
+ * ✅ NOVO: Botão de exclusão e confirmação segura
  */
 
 const Events = {
@@ -269,6 +270,83 @@ const Events = {
         }
     },
 
+    // ✅ NOVA FUNÇÃO: Confirmação de exclusão segura
+    _confirmarExclusaoEvento(eventoId) {
+        try {
+            const evento = App.dados?.eventos?.find(e => e.id === eventoId);
+            if (!evento) {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('Evento não encontrado');
+                }
+                return;
+            }
+
+            // Modal de confirmação personalizado
+            const modalConfirmacao = document.createElement('div');
+            modalConfirmacao.id = 'modalConfirmacaoExclusao';
+            modalConfirmacao.className = 'modal';
+            modalConfirmacao.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header modal-header-danger">
+                        <h3 style="color: #dc2626;">🗑️ Confirmar Exclusão</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                            <h4 style="color: #dc2626; margin-bottom: 16px;">Tem certeza que deseja excluir este evento?</h4>
+                            
+                            <div class="info-box info-box-warning" style="margin: 16px 0; text-align: left;">
+                                <strong>📅 ${evento.titulo}</strong><br>
+                                <span style="color: #6b7280;">Data: ${new Date(evento.data).toLocaleDateString('pt-BR')}</span><br>
+                                ${evento.horarioInicio ? `<span style="color: #6b7280;">Horário: ${evento.horarioInicio}</span><br>` : ''}
+                                ${evento.local ? `<span style="color: #6b7280;">Local: ${evento.local}</span><br>` : ''}
+                                ${evento.pessoas ? `<span style="color: #6b7280;">Participantes: ${evento.pessoas.length}</span>` : ''}
+                            </div>
+                            
+                            <p style="color: #dc2626; font-weight: 500;">
+                                ⚠️ Esta ação não pode ser desfeita!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            ❌ Cancelar
+                        </button>
+                        <button class="btn btn-danger" onclick="Events._executarExclusaoEvento(${eventoId}); this.closest('.modal').remove();">
+                            🗑️ Sim, Excluir Definitivamente
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modalConfirmacao);
+            setTimeout(() => modalConfirmacao.classList.add('show'), 10);
+
+        } catch (error) {
+            console.error('❌ Erro ao confirmar exclusão:', error);
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error('Erro ao abrir confirmação de exclusão');
+            }
+        }
+    },
+
+    // ✅ NOVA FUNÇÃO: Executar exclusão após confirmação
+    _executarExclusaoEvento(eventoId) {
+        try {
+            // Fechar modal de edição
+            this.fecharModal();
+            
+            // Executar exclusão
+            this.excluirEvento(eventoId);
+            
+        } catch (error) {
+            console.error('❌ Erro ao executar exclusão:', error);
+        }
+    },
+
     // ✅ MARCAR COMO CONCLUÍDO
     marcarConcluido(eventoId) {
         try {
@@ -500,7 +578,8 @@ const Events = {
         try {
             const modals = [
                 document.getElementById('modalEvento'),
-                document.getElementById('modalDetalhesEvento')
+                document.getElementById('modalDetalhesEvento'),
+                document.getElementById('modalConfirmacaoExclusao')
             ];
 
             modals.forEach(modal => {
@@ -552,7 +631,7 @@ const Events = {
         }
     },
 
-    // Criar modal de evento - VISUAL PROFISSIONAL
+    // ✅ CRIAR MODAL DE EVENTO - VISUAL PROFISSIONAL COM EXCLUSÃO
     _criarModalEvento(evento = null) {
         const ehEdicao = evento !== null;
         const titulo = ehEdicao ? 'Editar Evento' : 'Novo Evento';
@@ -696,9 +775,24 @@ const Events = {
                 </div>
                 
                 <div class="modal-footer">
+                    <!-- ✅ BOTÃO DE EXCLUIR QUANDO EDITANDO -->
+                    ${ehEdicao ? `
+                        <button class="btn btn-danger" onclick="Events._confirmarExclusaoEvento(${evento.id})" 
+                                style="margin-right: auto;">
+                            🗑️ Excluir Evento
+                        </button>
+                    ` : ''}
+                    
                     <button class="btn btn-secondary" onclick="Events.fecharModal()">
                         ❌ Cancelar
                     </button>
+                    
+                    ${ehEdicao ? `
+                        <button class="btn btn-success" onclick="Events.marcarConcluido(${evento.id})">
+                            ✅ Marcar Concluído
+                        </button>
+                    ` : ''}
+                    
                     <button class="btn btn-primary" onclick="Events.salvarEvento()">
                         💾 ${ehEdicao ? 'Atualizar' : 'Criar'} Evento
                     </button>
@@ -1029,8 +1123,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG DE CARREGAMENTO
-console.log('📅 Sistema de Gestão de Eventos v6.2.1 CRIADO - Integração Perfeita!');
-console.log('🎯 Funcionalidades: CRUD, Participantes, Recorrência, Notificações, PDF Export');
+console.log('📅 Sistema de Gestão de Eventos v6.2.1 CORRIGIDO - Integração Perfeita + Exclusão!');
+console.log('🎯 Funcionalidades: CRUD, Participantes, Recorrência, Notificações, PDF Export, EXCLUSÃO SEGURA');
 console.log('⚙️ Integração PERFEITA: Calendar.js, Tasks.js, PDF.js, Persistence.js');
-console.log('✅ NOVO: Sistema completo de eventos (não duplicata do PDF)');
+console.log('✅ NOVO: Botão de exclusão seguro com confirmação visual');
 console.log('⌨️ Atalhos: Ctrl+E (novo evento), Esc (fechar modal)');
