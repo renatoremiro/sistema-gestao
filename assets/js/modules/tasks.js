@@ -1,5 +1,5 @@
 /**
- * 📝 Sistema de Gestão de Tarefas v6.2.1 - INTEGRAÇÃO CORRIGIDA
+ * 📝 Sistema de Gestão de Tarefas v6.2.1 - INTEGRAÇÃO CORRIGIDA + EXCLUSÃO
  * 
  * CORREÇÕES APLICADAS:
  * ✅ Referências ao Events.js corrigidas
@@ -8,6 +8,7 @@
  * ✅ Verificações de dependências melhoradas
  * ✅ Performance otimizada
  * ✅ Validações robustas implementadas
+ * ✅ NOVO: Botão de exclusão e confirmação segura
  */
 
 const Tasks = {
@@ -385,6 +386,94 @@ const Tasks = {
         }
     },
 
+    // ✅ NOVA FUNÇÃO: Confirmação de exclusão de tarefa
+    _confirmarExclusaoTarefa(tarefaId) {
+        try {
+            const tarefa = App.dados?.tarefas?.find(t => t.id === tarefaId);
+            if (!tarefa) {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('Tarefa não encontrada');
+                }
+                return;
+            }
+
+            // Verificar dependências
+            const tarefasDependentes = App.dados.tarefas.filter(t => 
+                t.dependencias && t.dependencias.includes(tarefaId)
+            );
+
+            const modalConfirmacao = document.createElement('div');
+            modalConfirmacao.id = 'modalConfirmacaoExclusaoTarefa';
+            modalConfirmacao.className = 'modal';
+            modalConfirmacao.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header modal-header-danger">
+                        <h3 style="color: #dc2626;">🗑️ Confirmar Exclusão da Tarefa</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                            <h4 style="color: #dc2626; margin-bottom: 16px;">Tem certeza que deseja excluir esta tarefa?</h4>
+                            
+                            <div class="info-box info-box-warning" style="margin: 16px 0; text-align: left;">
+                                <strong>📝 ${tarefa.titulo}</strong><br>
+                                <span style="color: #6b7280;">Tipo: ${tarefa.tipo}</span><br>
+                                <span style="color: #6b7280;">Responsável: ${tarefa.responsavel}</span><br>
+                                <span style="color: #6b7280;">Status: ${tarefa.status}</span><br>
+                                <span style="color: #6b7280;">Progresso: ${tarefa.progresso || 0}%</span><br>
+                                ${tarefa.subtarefas ? `<span style="color: #6b7280;">Subtarefas: ${tarefa.subtarefas.length}</span>` : ''}
+                            </div>
+                            
+                            ${tarefasDependentes.length > 0 ? `
+                                <div class="info-box info-box-danger" style="margin: 12px 0;">
+                                    <strong style="color: #d97706;">⚠️ Atenção:</strong><br>
+                                    <span style="color: #92400e;">Esta tarefa possui ${tarefasDependentes.length} tarefa(s) dependente(s):</span><br>
+                                    <em style="color: #92400e;">${tarefasDependentes.map(t => t.titulo).join(', ')}</em><br>
+                                    <span style="color: #92400e;">As dependências serão removidas.</span>
+                                </div>
+                            ` : ''}
+                            
+                            <p style="color: #dc2626; font-weight: 500;">
+                                ⚠️ Esta ação não pode ser desfeita!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            ❌ Cancelar
+                        </button>
+                        <button class="btn btn-danger" onclick="Tasks._executarExclusaoTarefa(${tarefaId}); this.closest('.modal').remove();">
+                            🗑️ Sim, Excluir Definitivamente
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modalConfirmacao);
+            setTimeout(() => modalConfirmacao.classList.add('show'), 10);
+
+        } catch (error) {
+            console.error('❌ Erro ao confirmar exclusão da tarefa:', error);
+        }
+    },
+
+    // ✅ NOVA FUNÇÃO: Executar exclusão da tarefa
+    _executarExclusaoTarefa(tarefaId) {
+        try {
+            // Fechar modal de edição
+            this.fecharModal();
+            
+            // Executar exclusão
+            this.excluirTarefa(tarefaId);
+            
+        } catch (error) {
+            console.error('❌ Erro ao executar exclusão da tarefa:', error);
+        }
+    },
+
     // ✅ MARCAR COMO CONCLUÍDA - INTEGRAÇÃO PERFEITA
     marcarConcluida(tarefaId) {
         try {
@@ -758,7 +847,8 @@ const Tasks = {
         try {
             const modals = [
                 document.getElementById('modalTarefa'),
-                document.getElementById('modalTemplate')
+                document.getElementById('modalTemplate'),
+                document.getElementById('modalConfirmacaoExclusaoTarefa')
             ];
 
             modals.forEach(modal => {
@@ -804,7 +894,7 @@ const Tasks = {
 
     // ✅ === MÉTODOS PRIVADOS MELHORADOS ===
 
-    // Criar modal de tarefa - VISUAL MELHORADO
+    // ✅ CRIAR MODAL DE TAREFA - VISUAL MELHORADO COM EXCLUSÃO
     _criarModalTarefa(tarefa = null) {
         const ehEdicao = tarefa !== null;
         const titulo = ehEdicao ? 'Editar Tarefa' : 'Nova Tarefa';
@@ -980,9 +1070,24 @@ const Tasks = {
                 </div>
                 
                 <div class="modal-footer">
+                    <!-- ✅ BOTÃO DE EXCLUIR QUANDO EDITANDO -->
+                    ${ehEdicao ? `
+                        <button class="btn btn-danger" onclick="Tasks._confirmarExclusaoTarefa(${tarefa.id})" 
+                                style="margin-right: auto;">
+                            🗑️ Excluir Tarefa
+                        </button>
+                    ` : ''}
+                    
                     <button class="btn btn-secondary" onclick="Tasks.fecharModal()">
                         ❌ Cancelar
                     </button>
+                    
+                    ${ehEdicao ? `
+                        <button class="btn btn-success" onclick="Tasks.marcarConcluida(${tarefa.id})">
+                            ✅ Marcar Concluída
+                        </button>
+                    ` : ''}
+                    
                     <button class="btn btn-primary" onclick="Tasks.salvarTarefa()">
                         💾 ${ehEdicao ? 'Atualizar' : 'Criar'} Tarefa
                     </button>
@@ -1476,8 +1581,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG DE CARREGAMENTO
-console.log('📝 Sistema de Gestão de Tarefas v6.2.1 CORRIGIDO - Integração Perfeita!');
-console.log('🎯 Funcionalidades: CRUD, Subtarefas, Agenda Semanal, Templates, PDF Export');
+console.log('📝 Sistema de Gestão de Tarefas v6.2.1 CORRIGIDO - Integração Perfeita + Exclusão!');
+console.log('🎯 Funcionalidades: CRUD, Subtarefas, Agenda Semanal, Templates, PDF Export, EXCLUSÃO SEGURA');
 console.log('⚙️ Integração PERFEITA: Calendar.js, Events.js, PDF.js, Persistence.js');
-console.log('✅ CORREÇÕES: Referências Events corrigidas, validação de datas, verificação dependências');
+console.log('✅ NOVO: Botão de exclusão seguro com confirmação e verificação de dependências');
 console.log('⌨️ Atalhos: Ctrl+T (nova tarefa), Esc (fechar modal)');
