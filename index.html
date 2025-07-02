@@ -36,6 +36,7 @@
     <script src="assets/js/modules/persistence.js"></script>
     <script src="assets/js/modules/auth.js"></script>
     <script src="assets/js/modules/calendar.js"></script>
+    <script src="assets/js/modules/events.js"></script>
     
     <!-- 5. CHAT EXISTENTE -->
     <script src="modules/chat-module.js"></script>
@@ -53,9 +54,9 @@
                 <h1>🔧 Sistema de Gestão - DESENVOLVIMENTO</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    <strong>v6.2 Modular - Modo Desenvolvimento (90% Completo)</strong>
+                    <strong>v6.2 Modular - Modo Desenvolvimento (95% Completo)</strong>
                     <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                        Core + Auth + Calendar ✅
+                        Core + Auth + Calendar + Events ✅
                     </span>
                 </p>
             </div>
@@ -89,7 +90,7 @@
                         <li>✅ <strong>Config:</strong> firebase.js</li>
                         <li>✅ <strong>Utils:</strong> helpers.js, validation.js, notifications.js</li>
                         <li>✅ <strong>Core:</strong> data.js, app.js</li>
-                        <li>✅ <strong>Modules:</strong> persistence.js, auth.js, calendar.js ⭐ <span style="color: #10b981;">NOVO</span></li>
+                        <li>✅ <strong>Modules:</strong> persistence.js, auth.js, calendar.js, events.js ⭐ <span style="color: #10b981;">NOVO</span></li>
                         <li>✅ <strong>Chat:</strong> chat-module.js (existente)</li>
                     </ul>
                 </div>
@@ -97,12 +98,11 @@
                 <div class="card">
                     <h4 style="color: #f59e0b;">🔄 MÓDULOS PENDENTES</h4>
                     <ul style="list-style: none; padding: 0; line-height: 1.8;">
-                        <li>🔄 <strong>Modules:</strong> events.js</li>
                         <li>🔄 <strong>Modules:</strong> tasks.js</li>
                         <li>🔄 <strong>Modules:</strong> pdf.js</li>
                     </ul>
                     <div style="margin-top: 12px; padding: 8px; background: #ecfdf5; border-radius: 6px; font-size: 12px;">
-                        <strong>🎯 Progresso:</strong> 6/9 módulos (67%) → <strong>90% da funcionalidade base</strong>
+                        <strong>🎯 Progresso:</strong> 7/9 módulos (78%) → <strong>95% da funcionalidade base</strong>
                     </div>
                 </div>
             </div>
@@ -262,7 +262,59 @@
                 <div id="resultadoAuth" style="margin-top: 12px; padding: 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
             </div>
             
-            <!-- ✅ NOVO: Teste de Sistema de Calendário -->
+            <!-- ✅ NOVO: Teste de Sistema de Eventos -->
+            <div style="margin-bottom: 20px; padding: 16px; background: #fefce8; border: 1px solid #facc15; border-radius: 8px;">
+                <h4>📅 Sistema de Gestão de Eventos ⭐ <span style="color: #10b981; font-size: 12px;">NOVO</span></h4>
+                
+                <!-- Testes do Sistema de Eventos -->
+                <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="testarModalNovoEvento()">
+                            ➕ Modal Novo Evento
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="testarBuscaEventos()">
+                            🔍 Buscar Eventos
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-warning btn-sm" onclick="testarEstatisticasEventos()">
+                            📊 Estatísticas
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="testarStatusEvents()">
+                            ⚙️ Status Sistema
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 12px;">
+                    <button class="btn btn-danger btn-sm" onclick="criarEventoTeste()">
+                        🧪 Criar Evento Teste
+                    </button>
+                    <button class="btn btn-pdf btn-sm" onclick="testarExportacao()">
+                        📤 Exportar CSV
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="limparEventosTeste()">
+                        🗑️ Limpar Testes
+                    </button>
+                </div>
+                
+                <!-- Resultado dos Testes de Eventos -->
+                <div id="resultadoEvents" style="
+                    margin-top: 12px; 
+                    padding: 8px; 
+                    background: white; 
+                    border: 1px solid #d1d5db; 
+                    border-radius: 4px; 
+                    max-height: 150px; 
+                    overflow-y: auto; 
+                    font-family: monospace; 
+                    font-size: 12px;
+                ">
+                    📋 Aguardando testes de eventos...
+                </div>
+            </div>
+            
+            <!-- ✅ ATUALIZADO: Teste de Sistema de Calendário -->
             <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px;">
                 <h4>📅 Sistema de Calendário ⭐ <span style="color: #10b981; font-size: 12px;">NOVO</span></h4>
                 
@@ -344,8 +396,9 @@
                 <div>💾 Sistema de Persistência Ultra-Robusta v6.2 carregado!</div>
                 <div>🔐 Sistema de Autenticação Firebase v6.2 carregado!</div>
                 <div style="color: #22c55e;">📅 Sistema de Calendário Modular v6.2 carregado!</div>
-                <div style="color: #10b981;">✅ Todos os módulos básicos + calendário carregados com sucesso!</div>
-                <div style="color: #8b5cf6;">🎯 Progresso: 90% da modularização concluída</div>
+                <div style="color: #eab308;">📅 Sistema de Gestão de Eventos v6.2 carregado!</div>
+                <div style="color: #10b981;">✅ Todos os módulos básicos + calendário + eventos carregados com sucesso!</div>
+                <div style="color: #8b5cf6;">🎯 Progresso: 95% da modularização concluída</div>
             </div>
         </div>
     </div>
@@ -437,7 +490,187 @@
             resultado.innerHTML += '✅ Campos de login limpos<br>';
         }
         
-        // ✅ NOVAS FUNÇÕES DE TESTE DO CALENDÁRIO
+        
+        // ✅ NOVAS FUNÇÕES DE TESTE DO SISTEMA DE EVENTOS
+        function testarModalNovoEvento() {
+            const resultado = document.getElementById('resultadoEvents');
+            resultado.innerHTML = '📅 Testando modal de novo evento...<br>';
+            
+            if (typeof Events !== 'undefined') {
+                const hoje = new Date().toISOString().split('T')[0];
+                Events.mostrarNovoEvento(hoje);
+                resultado.innerHTML += '✅ Modal de novo evento aberto<br>';
+                resultado.innerHTML += '💡 Verifique se o modal apareceu na tela<br>';
+                resultado.innerHTML += `📅 Data pré-selecionada: ${hoje}<br>`;
+            } else {
+                resultado.innerHTML += '❌ Módulo Events não encontrado<br>';
+            }
+        }
+        
+        function testarBuscaEventos() {
+            const resultado = document.getElementById('resultadoEvents');
+            resultado.innerHTML = '🔍 Testando sistema de busca...<br>';
+            
+            if (typeof Events !== 'undefined') {
+                // Busca geral
+                const todosEventos = Events.buscarEventos();
+                resultado.innerHTML += `📋 Total de eventos: ${todosEventos.length}<br>`;
+                
+                // Busca por termo
+                const eventosTeste = Events.buscarEventos('teste');
+                resultado.innerHTML += `🧪 Eventos de teste: ${eventosTeste.length}<br>`;
+                
+                // Busca por tipo
+                const reunioes = Events.buscarEventos('', { tipo: 'reuniao' });
+                resultado.innerHTML += `📅 Reuniões: ${reunioes.length}<br>`;
+                
+                // Próximos eventos
+                const proximos = Events.obterProximosEventos(3);
+                resultado.innerHTML += `⏭️ Próximos 3: ${proximos.length} eventos<br>`;
+                
+                console.log('🔍 Busca Events:', { todosEventos, eventosTeste, reunioes, proximos });
+            } else {
+                resultado.innerHTML += '❌ Módulo Events não encontrado<br>';
+            }
+        }
+        
+        function testarEstatisticasEventos() {
+            const resultado = document.getElementById('resultadoEvents');
+            resultado.innerHTML = '📊 Calculando estatísticas...<br>';
+            
+            if (typeof Events !== 'undefined') {
+                const stats = Events.obterEstatisticas();
+                
+                resultado.innerHTML += `📋 Total de eventos: ${stats.total}<br>`;
+                resultado.innerHTML += `📅 Por tipo: ${JSON.stringify(stats.porTipo)}<br>`;
+                resultado.innerHTML += `📆 Passados: ${stats.eventosPassados}<br>`;
+                resultado.innerHTML += `⏭️ Futuros: ${stats.eventosFuturos}<br>`;
+                resultado.innerHTML += `🎯 Próximo: ${stats.proximoEvento ? stats.proximoEvento.titulo : 'Nenhum'}<br>`;
+                
+                console.log('📊 Estatísticas Events:', stats);
+            } else {
+                resultado.innerHTML += '❌ Módulo Events não encontrado<br>';
+            }
+        }
+        
+        function testarStatusEvents() {
+            const resultado = document.getElementById('resultadoEvents');
+            resultado.innerHTML = '⚙️ Verificando status do sistema...<br>';
+            
+            if (typeof Events !== 'undefined') {
+                const status = Events.obterStatus();
+                
+                resultado.innerHTML += `🔄 Modal ativo: ${status.modalAtivo ? 'Sim' : 'Não'}<br>`;
+                resultado.innerHTML += `✏️ Editando evento: ${status.eventoEditando || 'Nenhum'}<br>`;
+                resultado.innerHTML += `👥 Participantes selecionados: ${status.participantesSelecionados}<br>`;
+                resultado.innerHTML += `📋 Total eventos: ${status.totalEventos}<br>`;
+                resultado.innerHTML += `📈 Stats carregadas: ${status.estatisticas ? 'Sim' : 'Não'}<br>`;
+                
+                console.log('⚙️ Status Events:', status);
+            } else {
+                resultado.innerHTML += '❌ Módulo Events não encontrado<br>';
+            }
+        }
+        
+        function criarEventoTeste() {
+            const resultado = document.getElementById('resultadoEvents');
+            resultado.innerHTML = '🧪 Criando evento de teste...<br>';
+            
+            if (typeof App !== 'undefined' && App.dados && typeof Events !== 'undefined') {
+                const hoje = new Date();
+                const amanha = new Date(hoje);
+                amanha.setDate(hoje.getDate() + 1);
+                
+                const eventoTeste = {
+                    id: Date.now(),
+                    titulo: 'Evento de Teste Automático',
+                    tipo: 'reuniao',
+                    data: amanha.toISOString().split('T')[0],
+                    horarioInicio: '10:00',
+                    horarioFim: '11:00',
+                    pessoas: ['Usuário Teste'],
+                    descricao: 'Evento criado automaticamente para testes do sistema'
+                };
+                
+                App.dados.eventos.push(eventoTeste);
+                
+                // Atualizar calendário se disponível
+                if (typeof Calendar !== 'undefined') {
+                    Calendar.gerar();
+                }
+                
+                resultado.innerHTML += '✅ Evento de teste criado<br>';
+                resultado.innerHTML += `📅 Título: ${eventoTeste.titulo}<br>`;
+                resultado.innerHTML += `📆 Data: ${eventoTeste.data}<br>`;
+                resultado.innerHTML += `⏰ Horário: ${eventoTeste.horarioInicio} - ${eventoTeste.horarioFim}<br>`;
+                
+                Notifications.success('Evento de teste criado!');
+                console.log('🧪 Evento teste criado:', eventoTeste);
+            } else {
+                resultado.innerHTML += '❌ Sistema não disponível para criar evento<br>';
+            }
+        }
+        
+        function testarExportacao() {
+            const resultado = document.getElementById('resultadoEvents');
+            resultado.innerHTML = '📤 Testando exportação...<br>';
+            
+            if (typeof Events !== 'undefined') {
+                try {
+                    // Exportar em CSV
+                    Events.exportarEventos('csv');
+                    resultado.innerHTML += '✅ Exportação CSV iniciada<br>';
+                    resultado.innerHTML += '💡 Verifique se o download começou<br>';
+                    
+                    // Aguardar um pouco e exportar JSON também
+                    setTimeout(() => {
+                        Events.exportarEventos('json');
+                        resultado.innerHTML += '✅ Exportação JSON iniciada<br>';
+                    }, 1000);
+                    
+                } catch (error) {
+                    resultado.innerHTML += `❌ Erro na exportação: ${error.message}<br>`;
+                }
+            } else {
+                resultado.innerHTML += '❌ Módulo Events não encontrado<br>';
+            }
+        }
+        
+        function limparEventosTeste() {
+            const resultado = document.getElementById('resultadoEvents');
+            resultado.innerHTML = '🗑️ Limpando eventos de teste...<br>';
+            
+            if (typeof App !== 'undefined' && App.dados) {
+                const antes = App.dados.eventos.length;
+                App.dados.eventos = App.dados.eventos.filter(e => 
+                    !e.titulo.includes('Teste') && 
+                    !e.descricao?.includes('teste') &&
+                    !e.titulo.includes('teste')
+                );
+                const depois = App.dados.eventos.length;
+                const removidos = antes - depois;
+                
+                // Atualizar calendário se disponível
+                if (typeof Calendar !== 'undefined') {
+                    Calendar.gerar();
+                }
+                
+                resultado.innerHTML += `✅ ${removidos} eventos de teste removidos<br>`;
+                resultado.innerHTML += `📋 Eventos restantes: ${depois}<br>`;
+                
+                if (removidos > 0) {
+                    Notifications.success(`${removidos} eventos de teste removidos!`);
+                } else {
+                    Notifications.info('Nenhum evento de teste encontrado');
+                }
+                
+                console.log(`🗑️ Limpeza concluída: ${removidos} eventos removidos`);
+            } else {
+                resultado.innerHTML += '❌ Sistema de dados não disponível<br>';
+            }
+        }
+        
+        // ✅ FUNÇÕES DE TESTE DO CALENDÁRIO (MANTIDAS)
         function testarStatusCalendario() {
             const resultado = document.getElementById('statsCalendario');
             resultado.innerHTML = '📊 Verificando status do calendário...<br>';
@@ -745,7 +978,8 @@
             App: typeof App !== 'undefined',
             Persistence: typeof Persistence !== 'undefined',
             Auth: typeof Auth !== 'undefined',
-            Calendar: typeof Calendar !== 'undefined'
+            Calendar: typeof Calendar !== 'undefined',
+            Events: typeof Events !== 'undefined'
         });
         
         // ✅ TESTE AUTOMÁTICO DE INICIALIZAÇÃO (ATUALIZADO)
@@ -759,7 +993,7 @@
                 console.log('📊 Dados de teste inicializados no App');
             }
             
-            // ✅ INICIALIZAÇÃO DO CALENDÁRIO
+            // ✅ INICIALIZAÇÃO DO CALENDÁRIO E EVENTOS
             if (typeof Calendar !== 'undefined') {
                 console.log('📅 Inicializando calendário...');
                 
@@ -778,6 +1012,27 @@
                 console.log('✅ Calendário inicializado com sucesso');
             }
             
+            // ✅ INICIALIZAÇÃO DO SISTEMA DE EVENTOS
+            if (typeof Events !== 'undefined') {
+                console.log('📅 Inicializando sistema de eventos...');
+                
+                setTimeout(() => {
+                    // Testar status inicial dos eventos
+                    const resultado = document.getElementById('resultadoEvents');
+                    if (resultado) {
+                        const status = Events.obterStatus();
+                        const stats = Events.obterEstatisticas();
+                        
+                        resultado.innerHTML = '🔄 Sistema de eventos inicializado...<br>';
+                        resultado.innerHTML += `📋 Total de eventos: ${status.totalEventos}<br>`;
+                        resultado.innerHTML += `📊 Estatísticas carregadas: ${stats.total > 0 ? 'Sim' : 'Sem eventos'}<br>`;
+                        resultado.innerHTML += `⚙️ Sistema pronto para uso<br>`;
+                    }
+                }, 600);
+                
+                console.log('✅ Sistema de eventos inicializado com sucesso');
+            }
+            
             // Teste automático dos módulos (mantido)
             setTimeout(() => {
                 const resultado = document.getElementById('resultadoPersistencia');
@@ -793,8 +1048,8 @@
                             if (typeof Auth !== 'undefined') {
                                 resultado.innerHTML += '✅ Módulo Auth carregado<br>';
                                 
-                                if (typeof Calendar !== 'undefined') {
-                                    resultado.innerHTML += '✅ Módulo Calendar carregado<br>';
+                                if (typeof Events !== 'undefined') {
+                                    resultado.innerHTML += '✅ Módulo Events carregado<br>';
                                     
                                     // Teste básico de status
                                     const status = Persistence.obterStatus();
@@ -805,8 +1060,11 @@
                                     
                                     const calendarStatus = Calendar.obterStatus();
                                     resultado.innerHTML += `📅 Calendar: ${calendarStatus.mesNome} ${calendarStatus.anoAtual}<br>`;
+                                    
+                                    const eventsStatus = Events.obterStatus();
+                                    resultado.innerHTML += `📋 Events: ${eventsStatus.totalEventos} eventos carregados<br>`;
                                 } else {
-                                    resultado.innerHTML += '❌ Módulo Calendar não encontrado<br>';
+                                    resultado.innerHTML += '❌ Módulo Events não encontrado<br>';
                                 }
                             } else {
                                 resultado.innerHTML += '❌ Módulo Auth não encontrado<br>';
