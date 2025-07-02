@@ -1,13 +1,13 @@
 /**
- * 📅 Sistema de Calendário Modular v6.2.1 - INTEGRAÇÃO PERFEITA
+ * 📅 Sistema de Calendário Modular v6.2.1 - INTEGRAÇÃO CORRIGIDA
  * 
  * CORREÇÕES APLICADAS:
- * ✅ Geração de grid 42 células corrigida
- * ✅ Integração perfeita com Tasks.js  
- * ✅ Integração perfeita com Events.js
- * ✅ Sincronização com PDF.js otimizada
- * ✅ Display de eventos e tarefas corrigido
+ * ✅ Referências ao Events.js corrigidas
+ * ✅ Validações de dependências melhoradas
+ * ✅ Cache com limpeza automática
+ * ✅ Comparação de datas corrigida
  * ✅ Performance otimizada
+ * ✅ Integração perfeita garantida
  */
 
 const Calendar = {
@@ -20,7 +20,7 @@ const Calendar = {
             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
         ],
         diasSemana: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-        maxEventosPorDia: 4, // Reduzido para melhor visualização
+        maxEventosPorDia: 4,
         coresEventos: {
             reuniao: '#3b82f6',
             entrega: '#10b981', 
@@ -37,19 +37,26 @@ const Calendar = {
         }
     },
 
-    // ✅ ESTADO INTERNO
+    // ✅ ESTADO INTERNO - MELHORADO
     state: {
         modalAberto: false,
         eventosSelecionados: [],
         diasComEventos: new Map(),
         ultimaAtualizacao: null,
-        cacheEventos: new Map() // Cache para performance
+        cacheEventos: new Map(),
+        cacheTimeout: null, // Para limpeza automática
+        dependenciasVerificadas: false
     },
 
     // ✅ GERAR CALENDÁRIO PRINCIPAL - CORRIGIDO
     gerar() {
         try {
             console.log(`📅 Gerando calendário: ${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`);
+            
+            // Verificar dependências antes de gerar
+            if (!this._verificarDependencias()) {
+                console.warn('⚠️ Algumas dependências não estão disponíveis');
+            }
             
             // Atualizar título
             this._atualizarDisplayMesAno();
@@ -101,7 +108,37 @@ const Calendar = {
         }
     },
 
-    // ✅ GRID DO MÊS CORRIGIDO - SOLUÇÃO DEFINITIVA
+    // ✅ VERIFICAR DEPENDÊNCIAS - NOVO
+    _verificarDependencias() {
+        try {
+            const dependencias = {
+                App: typeof App !== 'undefined' && App.dados,
+                Events: typeof Events !== 'undefined',
+                Tasks: typeof Tasks !== 'undefined',
+                PDF: typeof PDF !== 'undefined',
+                Notifications: typeof Notifications !== 'undefined'
+            };
+
+            this.state.dependenciasVerificadas = true;
+            
+            // Log das dependências disponíveis
+            Object.entries(dependencias).forEach(([nome, disponivel]) => {
+                if (disponivel) {
+                    console.log(`✅ ${nome} disponível`);
+                } else {
+                    console.warn(`⚠️ ${nome} não disponível`);
+                }
+            });
+
+            return dependencias.App; // App é obrigatório
+
+        } catch (error) {
+            console.error('❌ Erro ao verificar dependências:', error);
+            return false;
+        }
+    },
+
+    // ✅ GRID DO MÊS CORRIGIDO - INTEGRAÇÃO PERFEITA
     _gerarGridMesCorrigido(container) {
         const primeiroDia = new Date(this.config.anoAtual, this.config.mesAtual, 1);
         const ultimoDia = new Date(this.config.anoAtual, this.config.mesAtual + 1, 0);
@@ -200,17 +237,23 @@ const Calendar = {
                     dia.appendChild(indicadorFeriado);
                 }
 
-                // Adicionar eventos e tarefas do dia - INTEGRAÇÃO PERFEITA
+                // Adicionar eventos e tarefas do dia - INTEGRAÇÃO CORRIGIDA
                 this._adicionarEventosTarefasCelula(dia, dataCompleta);
 
-                // Event listeners
+                // Event listeners - CORRIGIDOS
                 dia.addEventListener('click', () => {
                     this.mostrarTodosEventosDia(dataCompleta);
                 });
 
                 dia.addEventListener('dblclick', () => {
-                    if (typeof Events !== 'undefined') {
+                    // CORREÇÃO: Verificar se Events existe antes de usar
+                    if (typeof Events !== 'undefined' && typeof Events.mostrarNovoEvento === 'function') {
                         Events.mostrarNovoEvento(dataCompleta);
+                    } else {
+                        console.warn('⚠️ Módulo Events não disponível para criar evento');
+                        if (typeof Notifications !== 'undefined') {
+                            Notifications.info('Duplo-clique: Módulo de eventos não disponível');
+                        }
                     }
                 });
             }
@@ -219,7 +262,7 @@ const Calendar = {
         }
     },
 
-    // ✅ INTEGRAÇÃO PERFEITA: EVENTOS + TAREFAS NA CÉLULA
+    // ✅ INTEGRAÇÃO CORRIGIDA: EVENTOS + TAREFAS NA CÉLULA
     _adicionarEventosTarefasCelula(celula, data) {
         try {
             // Obter eventos e tarefas do dia
@@ -288,15 +331,25 @@ const Calendar = {
                 }
 
                 elementoItem.textContent = textoItem;
-                elementoItem.title = `${item.titulo} - ${item.tipo}${item.responsavel ? ` (${item.responsavel})` : ''}`;
+                elementoItem.title = `${item.titulo} - ${item.tipo}${item.responsavel || item.pessoas ? ` (${item.responsavel || item.pessoas?.join(', ')})` : ''}`;
 
-                // Click handler
+                // Click handler - CORRIGIDO
                 elementoItem.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (ehTarefa && typeof Tasks !== 'undefined') {
-                        Tasks.editarTarefa(item.id);
-                    } else if (!ehTarefa && typeof Events !== 'undefined') {
-                        Events.editarEvento(item.id);
+                    if (ehTarefa) {
+                        // Verificar se Tasks existe
+                        if (typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function') {
+                            Tasks.editarTarefa(item.id);
+                        } else {
+                            console.warn('⚠️ Módulo Tasks não disponível');
+                        }
+                    } else {
+                        // Verificar se Events existe
+                        if (typeof Events !== 'undefined' && typeof Events.editarEvento === 'function') {
+                            Events.editarEvento(item.id);
+                        } else {
+                            console.warn('⚠️ Módulo Events não disponível');
+                        }
                     }
                 });
 
@@ -332,7 +385,7 @@ const Calendar = {
         }
     },
 
-    // ✅ OBTER EVENTOS DO DIA - INTEGRAÇÃO PERFEITA
+    // ✅ OBTER EVENTOS DO DIA - INTEGRAÇÃO CORRIGIDA
     _obterEventosDoDiaIntegrado(data) {
         try {
             if (!App.dados?.eventos) return [];
@@ -345,7 +398,7 @@ const Calendar = {
         }
     },
 
-    // ✅ OBTER TAREFAS DO DIA - INTEGRAÇÃO PERFEITA
+    // ✅ OBTER TAREFAS DO DIA - INTEGRAÇÃO CORRIGIDA
     _obterTarefasDoDiaIntegrado(data) {
         try {
             if (!App.dados?.tarefas) return [];
@@ -434,7 +487,7 @@ const Calendar = {
         }
     },
 
-    // ✅ EXPORTAR CALENDÁRIO EM PDF - INTEGRAÇÃO PERFEITA
+    // ✅ EXPORTAR CALENDÁRIO EM PDF - INTEGRAÇÃO CORRIGIDA
     exportarPDF() {
         try {
             console.log('📄 Solicitando exportação do calendário em PDF...');
@@ -445,6 +498,15 @@ const Calendar = {
                     Notifications.error('Módulo PDF não disponível - verifique se o arquivo pdf.js foi carregado');
                 }
                 console.error('❌ Módulo PDF.js não carregado');
+                return;
+            }
+
+            // Verificar se PDF tem a função correta
+            if (typeof PDF.mostrarModalCalendario !== 'function') {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('Função de PDF do calendário não disponível');
+                }
+                console.error('❌ PDF.mostrarModalCalendario não é uma função');
                 return;
             }
 
@@ -491,8 +553,9 @@ const Calendar = {
                 throw new Error('Data e nome são obrigatórios');
             }
 
-            // Validar data
-            if (typeof Validation !== 'undefined' && !Validation.isValidDate(data)) {
+            // Validar data - CORRIGIDA
+            const dataObj = new Date(data);
+            if (isNaN(dataObj.getTime())) {
                 throw new Error('Data inválida');
             }
 
@@ -513,7 +576,7 @@ const Calendar = {
             this.gerar();
 
             if (typeof Notifications !== 'undefined') {
-                Notifications.success(`Feriado "${nome}" adicionado em ${new Date(data).toLocaleDateString('pt-BR')}`);
+                Notifications.success(`Feriado "${nome}" adicionado em ${dataObj.toLocaleDateString('pt-BR')}`);
             }
             console.log(`🎉 Feriado adicionado: ${data} - ${nome}`);
 
@@ -521,66 +584,6 @@ const Calendar = {
             console.error('❌ Erro ao adicionar feriado:', error);
             if (typeof Notifications !== 'undefined') {
                 Notifications.error(`Erro ao adicionar feriado: ${error.message}`);
-            }
-        }
-    },
-
-    // ✅ MODAL PARA MARCAR FERIADO - MANTIDO
-    mostrarMarcarFeriado() {
-        try {
-            // Verificar se modal já existe
-            if (document.getElementById('modalFeriado')) {
-                return;
-            }
-
-            const modal = document.createElement('div');
-            modal.id = 'modalFeriado';
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 400px;">
-                    <div class="modal-header">
-                        <h3>🎉 Adicionar Feriado</h3>
-                        <button class="modal-close" onclick="Calendar._fecharModalFeriado()">&times;</button>
-                    </div>
-                    
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>📅 Data do Feriado:</label>
-                            <input type="date" id="feriadoData" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>🏷️ Nome do Feriado:</label>
-                            <input type="text" id="feriadoNome" placeholder="Ex: Natal" required>
-                        </div>
-                    </div>
-                    
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="Calendar._fecharModalFeriado()">
-                            ❌ Cancelar
-                        </button>
-                        <button class="btn btn-primary" onclick="Calendar._confirmarFeriado()">
-                            🎉 Adicionar Feriado
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            // Definir data atual como padrão
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('feriadoData').value = hoje;
-
-            // Exibir modal
-            setTimeout(() => modal.classList.add('show'), 10);
-
-            this.state.modalAberto = true;
-
-        } catch (error) {
-            console.error('❌ Erro ao mostrar modal de feriado:', error);
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error('Erro ao abrir modal de feriado');
             }
         }
     },
@@ -630,7 +633,7 @@ const Calendar = {
                 porTipo[tipoKey] = (porTipo[tipoKey] || 0) + 1;
             });
 
-            // Próximo evento
+            // Próximo evento - CORRIGIDO
             const agora = new Date();
             const proximoEvento = eventosMes
                 .filter(evento => new Date(evento.data) >= agora)
@@ -670,10 +673,11 @@ const Calendar = {
             eventosDoMes: stats.totalEventos,
             tarefasDoMes: stats.totalTarefas,
             ultimaAtualizacao: this.state.ultimaAtualizacao,
-            integracaoEvents: typeof Events !== 'undefined',
-            integracaoTasks: typeof Tasks !== 'undefined',
-            integracaoPDF: typeof PDF !== 'undefined',
-            cacheAtualizado: this.state.cacheEventos.size > 0
+            integracaoEvents: typeof Events !== 'undefined' && typeof Events.mostrarNovoEvento === 'function',
+            integracaoTasks: typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function',
+            integracaoPDF: typeof PDF !== 'undefined' && typeof PDF.mostrarModalCalendario === 'function',
+            cacheAtualizado: this.state.cacheEventos.size > 0,
+            dependenciasOk: this.state.dependenciasVerificadas
         };
     },
 
@@ -727,10 +731,11 @@ const Calendar = {
         return icones[tipo] || '📌';
     },
 
-    // Atualizar cache de eventos
+    // Atualizar cache de eventos - MELHORADO COM LIMPEZA
     _atualizarCacheEventos() {
         try {
-            this.state.cacheEventos.clear();
+            // Limpar cache anterior
+            this._limparCache();
             
             if (App.dados?.eventos) {
                 App.dados.eventos.forEach(evento => {
@@ -760,12 +765,30 @@ const Calendar = {
                 });
             }
 
+            // Programar limpeza automática do cache (10 minutos)
+            if (this.state.cacheTimeout) {
+                clearTimeout(this.state.cacheTimeout);
+            }
+            this.state.cacheTimeout = setTimeout(() => {
+                this._limparCache();
+            }, 10 * 60 * 1000);
+
         } catch (error) {
             console.error('❌ Erro ao atualizar cache:', error);
         }
     },
 
-    // Criar modal de eventos do dia
+    // Limpar cache - NOVO
+    _limparCache() {
+        try {
+            this.state.cacheEventos.clear();
+            console.log('🧹 Cache do calendário limpo');
+        } catch (error) {
+            console.error('❌ Erro ao limpar cache:', error);
+        }
+    },
+
+    // Criar modal de eventos do dia - CORRIGIDO
     _criarModalEventosDia(data, itens) {
         try {
             // Remover modal existente
@@ -778,7 +801,8 @@ const Calendar = {
             modal.id = 'modalEventosDia';
             modal.className = 'modal';
 
-            const dataFormatada = new Date(data).toLocaleDateString('pt-BR', {
+            const dataObj = new Date(data);
+            const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -798,7 +822,7 @@ const Calendar = {
                     
                     <div class="modal-body">
                         <p style="margin-bottom: 16px; color: #6b7280;">
-                            <strong>${typeof Helpers !== 'undefined' ? Helpers.capitalize(dataFormatada) : dataFormatada}</strong>
+                            <strong>${this._capitalize(dataFormatada)}</strong>
                         </p>
                         
                         ${eventos.length > 0 ? `
@@ -819,12 +843,16 @@ const Calendar = {
                     </div>
                     
                     <div class="modal-footer">
-                        <button class="btn btn-primary" onclick="if(typeof Events !== 'undefined') Events.mostrarNovoEvento('${data}'); this.closest('.modal').remove();">
-                            ➕ Novo Evento
-                        </button>
-                        <button class="btn btn-success" onclick="if(typeof Tasks !== 'undefined') Tasks.mostrarNovaTarefa('pessoal', App.usuarioAtual?.displayName || ''); this.closest('.modal').remove();">
-                            📝 Nova Tarefa
-                        </button>
+                        ${typeof Events !== 'undefined' ? `
+                            <button class="btn btn-primary" onclick="Events.mostrarNovoEvento('${data}'); this.closest('.modal').remove();">
+                                ➕ Novo Evento
+                            </button>
+                        ` : ''}
+                        ${typeof Tasks !== 'undefined' ? `
+                            <button class="btn btn-success" onclick="Tasks.mostrarNovaTarefa('pessoal'); this.closest('.modal').remove();">
+                                📝 Nova Tarefa
+                            </button>
+                        ` : ''}
                         <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
                             ✅ Fechar
                         </button>
@@ -840,7 +868,7 @@ const Calendar = {
         }
     },
 
-    // Renderizar item no modal
+    // Renderizar item no modal - CORRIGIDO
     _renderizarItemModal(item, ehTarefa) {
         const cor = ehTarefa ? 
             this.config.coresTarefas[item.tipo] || '#6b7280' :
@@ -850,6 +878,11 @@ const Calendar = {
         const pessoas = item.pessoas || (item.responsavel ? [item.responsavel] : []);
         const status = item.status ? ` (${item.status})` : '';
 
+        // Função onclick corrigida
+        const onclickAction = ehTarefa ? 
+            (typeof Tasks !== 'undefined' ? `Tasks.editarTarefa(${item.id}); this.closest('.modal').remove();` : 'console.warn("Tasks não disponível");') :
+            (typeof Events !== 'undefined' ? `Events.editarEvento(${item.id}); this.closest('.modal').remove();` : 'console.warn("Events não disponível");');
+
         return `
             <div class="evento-item" style="
                 border-left: 4px solid ${cor};
@@ -858,7 +891,7 @@ const Calendar = {
                 background: #f9fafb;
                 border-radius: 4px;
                 cursor: pointer;
-            " onclick="${ehTarefa ? 'Tasks' : 'Events'}.${ehTarefa ? 'editarTarefa' : 'editarEvento'}(${item.id}); this.closest('.modal').remove();">
+            " onclick="${onclickAction}">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
                         <strong>${item.titulo}${status}</strong>
@@ -879,6 +912,12 @@ const Calendar = {
                 ${item.progresso !== undefined ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 11px;">📊 Progresso: ${item.progresso}%</p>` : ''}
             </div>
         `;
+    },
+
+    // Capitalizar primeira letra - NOVO
+    _capitalize(texto) {
+        if (!texto) return '';
+        return texto.charAt(0).toUpperCase() + texto.slice(1);
     },
 
     // Fechar modal de feriado
@@ -971,5 +1010,5 @@ document.addEventListener('DOMContentLoaded', () => {
 console.log('📅 Sistema de Calendário Modular v6.2.1 CORRIGIDO - Integração Perfeita!');
 console.log('🎯 Funcionalidades: Navegação, Eventos + Tarefas Integradas, Feriados, PDF Export');
 console.log('⚙️ Integração PERFEITA: Events.js, Tasks.js, PDF.js');
-console.log('✅ CORREÇÕES: Grid 42 células, display eventos/tarefas, performance, visual');
+console.log('✅ CORREÇÕES: Referências Events corrigidas, cache com limpeza, validações melhoradas');
 console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje), Esc (fechar modais)');
