@@ -373,32 +373,11 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
-            position: relative;
         }
         
         .evento-item:hover {
             background: #f1f5f9;
             transform: translateX(4px);
-        }
-        
-        .evento-item .btn-excluir {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            width: 24px;
-            height: 24px;
-            font-size: 12px;
-            cursor: pointer;
-            opacity: 0;
-            transition: all 0.2s ease;
-        }
-        
-        .evento-item:hover .btn-excluir {
-            opacity: 1;
         }
         
         .evento-item.reuniao { border-left-color: #3b82f6; }
@@ -411,7 +390,6 @@
             color: #1f2937;
             margin: 0 0 6px 0;
             font-size: 15px;
-            padding-right: 30px;
         }
         
         .evento-data {
@@ -576,6 +554,8 @@
             width: 90%;
             max-width: 600px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
         }
         
         .modal-header {
@@ -696,12 +676,6 @@
                 <button class="btn-acao secundario" onclick="Calendar.exportarPDF()">
                     📄 Exportar PDF
                 </button>
-                <button class="btn-acao secundario" onclick="mostrarOpcoesLimpeza()">
-                    🧹 Limpeza
-                </button>
-                <button class="btn-acao secundario" onclick="resetarSistema()">
-                    🔄 Reset Total
-                </button>
             </div>
         </section>
         
@@ -820,44 +794,9 @@
         </div>
     </div>
 
-    <!-- ✅ MODAL OPÇÕES DE LIMPEZA -->
-    <div id="modalLimpeza" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-titulo">🧹 Opções de Limpeza</h2>
-                <button class="modal-close" onclick="fecharModalLimpeza()">&times;</button>
-            </div>
-            <div style="padding: 20px 0;">
-                <p style="margin-bottom: 24px; color: #6b7280;">Escolha o que deseja limpar do sistema:</p>
-                
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn-acao secundario" onclick="limparEventos()" style="justify-content: flex-start;">
-                        📅 Limpar Todos os Eventos
-                    </button>
-                    <button class="btn-acao secundario" onclick="limparTarefas()" style="justify-content: flex-start;">
-                        📝 Limpar Todas as Tarefas
-                    </button>
-                    <button class="btn-acao secundario" onclick="limparFeriados()" style="justify-content: flex-start;">
-                        🎉 Limpar Todos os Feriados
-                    </button>
-                    <button class="btn-acao secundario" onclick="limparTudo()" style="justify-content: flex-start; border: 2px solid #ef4444; color: #ef4444;">
-                        🗑️ Limpar Tudo (Eventos + Tarefas + Feriados)
-                    </button>
-                </div>
-                
-                <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
-                    <button class="btn-acao primario" onclick="fecharModalLimpeza()" style="width: 100%;">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // ✅ VARIÁVEIS GLOBAIS
         let mostrarTarefasNoCalendario = false;
-        let dadosLimpos = true; // Flag para indicar que começamos limpos
         
         // ✅ INICIALIZAÇÃO PRINCIPAL
         document.addEventListener('DOMContentLoaded', () => {
@@ -1076,8 +1015,7 @@
                     
                     if (proximos && proximos.length > 0) {
                         container.innerHTML = proximos.map(evento => `
-                            <div class="evento-item ${evento.tipo}" onclick="Events.editarEvento && Events.editarEvento(${evento.id})">
-                                <button class="btn-excluir" onclick="excluirEvento(${evento.id}, event)" title="Excluir evento">×</button>
+                            <div class="evento-item ${evento.tipo}" onclick="abrirDetalhesEvento(${evento.id})">
                                 <p class="evento-titulo">${evento.titulo}</p>
                                 <p class="evento-data">${new Date(evento.data).toLocaleDateString('pt-BR')} ${evento.horarioInicio ? '- ' + evento.horarioInicio : ''}</p>
                             </div>
@@ -1121,14 +1059,71 @@
             document.getElementById('statusSistema').className = 'status-ok';
         }
         
-        // ✅ FUNÇÃO PARA EXCLUIR EVENTO INDIVIDUAL
-        function excluirEvento(eventoId, event) {
-            event.stopPropagation(); // Evitar abrir modal de detalhes
-            
-            if (confirm('❌ Deseja realmente excluir este evento?')) {
+        // ✅ FUNÇÃO PARA ABRIR DETALHES DO EVENTO
+        function abrirDetalhesEvento(eventoId) {
+            try {
+                if (typeof Events !== 'undefined' && Events.obterPorId) {
+                    const evento = Events.obterPorId(eventoId);
+                    
+                    if (evento) {
+                        document.getElementById('tituloDetalhesDia').textContent = `📅 ${evento.titulo}`;
+                        
+                        const tipoIcon = {
+                            'reuniao': '👥',
+                            'entrega': '📦',
+                            'prazo': '⏰',
+                            'marco': '🎯',
+                            'outro': '📅'
+                        };
+                        
+                        document.getElementById('conteudoDetalhesDia').innerHTML = `
+                            <div style="padding: 20px 0;">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                                    <span style="font-size: 32px;">${tipoIcon[evento.tipo] || '📅'}</span>
+                                    <div>
+                                        <h3 style="margin: 0; color: #1f2937;">${evento.titulo}</h3>
+                                        <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${evento.tipo.charAt(0).toUpperCase() + evento.tipo.slice(1)}</p>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                                    <p style="margin: 0 0 8px 0; color: #374151;"><strong>📅 Data:</strong> ${new Date(evento.data).toLocaleDateString('pt-BR')}</p>
+                                    ${evento.horarioInicio ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>⏰ Horário:</strong> ${evento.horarioInicio} ${evento.horarioFim ? '- ' + evento.horarioFim : ''}</p>` : ''}
+                                    ${evento.descricao ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>📝 Descrição:</strong> ${evento.descricao}</p>` : ''}
+                                    ${evento.participantes && evento.participantes.length > 0 ? `<p style="margin: 0; color: #374151;"><strong>👥 Participantes:</strong> ${evento.participantes.join(', ')}</p>` : ''}
+                                </div>
+                                
+                                <div style="display: flex; gap: 12px; justify-content: center;">
+                                    <button class="btn-acao secundario" onclick="editarEvento(${eventoId})">
+                                        ✏️ Editar
+                                    </button>
+                                    <button class="btn-acao" onclick="excluirEventoDetalhes(${eventoId})" style="background: #ef4444; color: white;">
+                                        🗑️ Excluir
+                                    </button>
+                                    <button class="btn-acao primario" onclick="fecharModalDetalhesDia()">
+                                        Fechar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('modalDetalhesDia').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Erro ao abrir detalhes do evento:', error);
+            }
+        }
+        
+        // ✅ FUNÇÃO PARA EXCLUIR EVENTO DOS DETALHES
+        function excluirEventoDetalhes(eventoId) {
+            if (confirm('🗑️ Deseja realmente excluir este evento?\n\nEsta ação não pode ser desfeita.')) {
                 try {
                     if (typeof Events !== 'undefined' && Events.excluir) {
                         Events.excluir(eventoId);
+                        
+                        // Fechar modal
+                        fecharModalDetalhesDia();
                         
                         // Regenerar calendário e atualizar interface
                         if (typeof Calendar !== 'undefined') {
@@ -1149,125 +1144,15 @@
             }
         }
         
-        // ✅ FUNÇÕES DE LIMPEZA ESPECÍFICA
-        function mostrarOpcoesLimpeza() {
-            document.getElementById('modalLimpeza').style.display = 'block';
-        }
-        
-        function fecharModalLimpeza() {
-            document.getElementById('modalLimpeza').style.display = 'none';
-        }
-        
-        function limparEventos() {
-            if (confirm('📅 Deseja realmente excluir TODOS os eventos?\n\nEsta ação não pode ser desfeita.')) {
-                try {
-                    // Limpar eventos do localStorage
-                    localStorage.removeItem('events_data');
-                    localStorage.removeItem('sistemaGestao_eventos');
-                    
-                    // Limpar eventos da memória
-                    if (typeof Events !== 'undefined') {
-                        Events.eventos = [];
-                    }
-                    
-                    // Regenerar calendário e atualizar interface
-                    if (typeof Calendar !== 'undefined') {
-                        Calendar.gerar();
-                    }
-                    atualizarInterface();
-                    fecharModalLimpeza();
-                    
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.success('📅 Todos os eventos foram removidos!');
-                    }
-                    
-                    console.log('📅 Eventos limpos');
-                } catch (error) {
-                    console.warn('⚠️ Erro ao limpar eventos:', error);
-                }
-            }
-        }
-        
-        function limparTarefas() {
-            if (confirm('📝 Deseja realmente excluir TODAS as tarefas?\n\nEsta ação não pode ser desfeita.')) {
-                try {
-                    // Limpar tarefas do localStorage
-                    localStorage.removeItem('tasks_data');
-                    localStorage.removeItem('sistemaGestao_tarefas');
-                    
-                    // Limpar tarefas da memória
-                    if (typeof Tasks !== 'undefined') {
-                        Tasks.tarefas = [];
-                    }
-                    
-                    // Regenerar calendário e atualizar interface
-                    if (typeof Calendar !== 'undefined') {
-                        Calendar.gerar();
-                    }
-                    atualizarInterface();
-                    fecharModalLimpeza();
-                    
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.success('📝 Todas as tarefas foram removidas!');
-                    }
-                    
-                    console.log('📝 Tarefas limpas');
-                } catch (error) {
-                    console.warn('⚠️ Erro ao limpar tarefas:', error);
-                }
-            }
-        }
-        
-        function limparFeriados() {
-            if (confirm('🎉 Deseja realmente excluir TODOS os feriados?\n\nEsta ação não pode ser desfeita.')) {
-                try {
-                    // Limpar feriados do localStorage
-                    localStorage.removeItem('feriados_data');
-                    localStorage.removeItem('sistemaGestao_feriados');
-                    
-                    // Limpar feriados da memória
-                    if (typeof Calendar !== 'undefined') {
-                        Calendar.feriados = [];
-                    }
-                    
-                    // Regenerar calendário e atualizar interface
-                    if (typeof Calendar !== 'undefined') {
-                        Calendar.gerar();
-                    }
-                    atualizarInterface();
-                    fecharModalLimpeza();
-                    
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.success('🎉 Todos os feriados foram removidos!');
-                    }
-                    
-                    console.log('🎉 Feriados limpos');
-                } catch (error) {
-                    console.warn('⚠️ Erro ao limpar feriados:', error);
-                }
-            }
-        }
-        
-        function limparTudo() {
-            if (confirm('🗑️ ATENÇÃO: Deseja realmente excluir TODOS os dados?\n\n• Todos os eventos\n• Todas as tarefas\n• Todos os feriados\n\nEsta ação não pode ser desfeita!')) {
-                try {
-                    // Executar todas as limpezas
-                    resetarDadosCompleto();
-                    
-                    fecharModalLimpeza();
-                    
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.success('🗑️ Todos os dados foram removidos! Recarregando...');
-                    }
-                    
-                    // Recarregar página
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                    
-                    console.log('🗑️ Todos os dados limpos');
-                } catch (error) {
-                    console.warn('⚠️ Erro ao limpar tudo:', error);
+        // ✅ FUNÇÃO PARA EDITAR EVENTO
+        function editarEvento(eventoId) {
+            fecharModalDetalhesDia();
+            
+            if (typeof Events !== 'undefined' && Events.editarEvento) {
+                Events.editarEvento(eventoId);
+            } else {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.info('✏️ Edição de eventos será implementada em breve');
                 }
             }
         }
@@ -1285,21 +1170,86 @@
             document.getElementById('tituloDetalhesDia').textContent = 
                 `📅 ${dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1)}`;
             
-            // Conteúdo do modal (por enquanto placeholder)
-            document.getElementById('conteudoDetalhesDia').innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #6b7280;">
-                    <p style="font-size: 16px; margin-bottom: 20px;">📋 Detalhes do dia</p>
-                    <p>🎯 Nenhum evento ou tarefa cadastrada para este dia</p>
-                    <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
-                        <button class="btn-acao primario" onclick="Events.mostrarNovoEvento()">
-                            📅 Novo Evento
-                        </button>
-                        <button class="btn-acao primario" onclick="Tasks.mostrarNovaTarefa()">
-                            📝 Nova Tarefa
-                        </button>
+            // Buscar eventos do dia
+            let eventosHTML = '';
+            let tarefasHTML = '';
+            
+            try {
+                // Verificar eventos do dia
+                if (typeof Events !== 'undefined' && Events.obterEventosDoDia) {
+                    const eventosData = Events.obterEventosDoDia(ano, mes, dia);
+                    
+                    if (eventosData && eventosData.length > 0) {
+                        eventosHTML = `
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="margin: 0 0 12px 0; color: #1f2937; display: flex; align-items: center; gap: 8px;">
+                                    📅 Eventos do Dia
+                                </h4>
+                                ${eventosData.map(evento => `
+                                    <div class="evento-item ${evento.tipo}" onclick="abrirDetalhesEvento(${evento.id})" style="margin-bottom: 8px; cursor: pointer;">
+                                        <p style="margin: 0 0 4px 0; font-weight: 600; color: #1f2937; font-size: 14px;">${evento.titulo}</p>
+                                        <p style="margin: 0; font-size: 12px; color: #6b7280;">${evento.horarioInicio ? evento.horarioInicio + ' - ' + (evento.horarioFim || '') : 'Horário não definido'}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Verificar tarefas do dia se habilitado
+                if (mostrarTarefasNoCalendario && typeof Tasks !== 'undefined' && Tasks.obterTarefasDoDia) {
+                    const tarefasData = Tasks.obterTarefasDoDia(ano, mes, dia);
+                    
+                    if (tarefasData && tarefasData.length > 0) {
+                        tarefasHTML = `
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="margin: 0 0 12px 0; color: #1f2937; display: flex; align-items: center; gap: 8px;">
+                                    📝 Tarefas do Dia
+                                </h4>
+                                ${tarefasData.map(tarefa => `
+                                    <div style="padding: 8px 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px; margin-bottom: 8px;">
+                                        <p style="margin: 0; font-weight: 600; color: #1f2937; font-size: 14px;">${tarefa.titulo}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Erro ao buscar eventos/tarefas do dia:', error);
+            }
+            
+            // Conteúdo do modal
+            if (eventosHTML || tarefasHTML) {
+                document.getElementById('conteudoDetalhesDia').innerHTML = `
+                    <div style="padding: 20px 0;">
+                        ${eventosHTML}
+                        ${tarefasHTML}
+                        <div style="text-align: center; margin-top: 24px;">
+                            <button class="btn-acao primario" onclick="Events.mostrarNovoEvento()">
+                                📅 Novo Evento
+                            </button>
+                            <button class="btn-acao primario" onclick="Tasks.mostrarNovaTarefa()" style="margin-left: 12px;">
+                                📝 Nova Tarefa
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                document.getElementById('conteudoDetalhesDia').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <p style="font-size: 16px; margin-bottom: 20px;">📋 Nenhum evento ou tarefa neste dia</p>
+                        <div style="display: flex; gap: 12px; justify-content: center;">
+                            <button class="btn-acao primario" onclick="Events.mostrarNovoEvento()">
+                                📅 Novo Evento
+                            </button>
+                            <button class="btn-acao primario" onclick="Tasks.mostrarNovaTarefa()">
+                                📝 Nova Tarefa
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
             
             document.getElementById('modalDetalhesDia').style.display = 'block';
         }
@@ -1332,16 +1282,12 @@
         
         // ✅ EVENT LISTENERS
         
-        // Fechar modais ao clicar fora
+        // Fechar modal ao clicar fora
         window.onclick = function(event) {
             const modalDetalhes = document.getElementById('modalDetalhesDia');
-            const modalLimpeza = document.getElementById('modalLimpeza');
             
             if (event.target === modalDetalhes) {
                 fecharModalDetalhesDia();
-            }
-            if (event.target === modalLimpeza) {
-                fecharModalLimpeza();
             }
         }
         
