@@ -589,9 +589,16 @@ const Calendar = {
     },
 
     _atualizarDisplayMesAno() {
+        // Atualizar display principal (se existir)
         const mesAno = document.getElementById('mesAno');
         if (mesAno) {
             mesAno.textContent = `${this.config.MESES_NOMES[this.state.mesAtual]} ${this.state.anoAtual}`;
+        }
+        
+        // Atualizar display do calendário específico (index-dev.html)
+        const mesAnoCalendario = document.getElementById('mesAnoCalendario');
+        if (mesAnoCalendario) {
+            mesAnoCalendario.textContent = `${this.config.MESES_NOMES[this.state.mesAtual]} ${this.state.anoAtual}`;
         }
     },
 
