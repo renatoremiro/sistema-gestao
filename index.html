@@ -1,4 +1,96 @@
-<!DOCTYPE html>
+// ✅ FUNÇÃO PARA ABRIR DETALHES DO EVENTO
+        function abrirDetalhesEvento(eventoId) {
+            console.log('🔍 === ABRINDO DETALHES DO EVENTO ===');
+            console.log('🆔 ID recebido:', eventoId, 'Tipo:', typeof eventoId);
+            
+            try {
+                // Buscar evento diretamente em App.dados.eventos (fonte real)
+                let evento = null;
+                
+                if (typeof App !== 'undefined' && App.dados && App.dados.eventos && Array.isArray(App.dados.eventos)) {
+                    console.log('📊 Buscando no App.dados.eventos:', App.dados.eventos.length, 'eventos');
+                    
+                    // Tentar conversões de ID para garantir compatibilidade
+                    evento = App.dados.eventos.find(e => 
+                        e.id == eventoId ||           // Comparação flexível
+                        e.id === eventoId ||          // Comparação exata
+                        e.id === parseInt(eventoId) || // Como número
+                        e.id === String(eventoId) ||  // Como string
+                        e.uid == eventoId             // Campo alternativo
+                    );
+                    
+                    console.log('📅 Evento encontrado:', evento);
+                } else {
+                    console.warn('⚠️ App.dados.eventos não disponível');
+                }
+                
+                if (evento) {
+                    document.getElementById('tituloDetalhesDia').textContent = `📅 ${evento.titulo}`;
+                    
+                    const tipoIcon = {
+                        'reuniao': '👥',
+                        'entrega': '📦',
+                        'prazo': '⏰',
+                        'marco': '🎯',
+                        'outro': '📅'
+                    };
+                    
+                    const tipoNome = {
+                        'reuniao': 'Reunião',
+                        'entrega': 'Entrega',
+                        'prazo': 'Prazo',
+                        'marco': 'Marco',
+                        'outro': 'Outro'
+                    };
+                    
+                    document.getElementById('conteudoDetalhesDia').innerHTML = `
+                        <div style="padding: 20px 0;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                                <span style="font-size: 32px;">${tipoIcon[evento.tipo] || '📅'}</span>
+                                <div>
+                                    <h3 style="margin: 0; color: #1f2937;">${evento.titulo}</h3>
+                                    <p style="margin: 4px 0 0 0; color: #6b7280; font-size: 14px;">${tipoNome[evento.tipo] || 'Evento'}</p>
+                                </div>
+                            </div>
+                            
+                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 0 0 8px 0; color: #374151;"><strong>📅 Data:</strong> ${new Date(evento.data).toLocaleDateString('pt-BR')}</p>
+                                ${evento.horarioInicio ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>⏰ Horário:</strong> ${evento.horarioInicio} ${evento.horarioFim ? '- ' + evento.horarioFim : ''}</p>` : ''}
+                                ${evento.descricao ? `<p style="margin: 0 0 8px 0; color: #374151;"><strong>📝 Descrição:</strong> ${evento.descricao}</p>` : ''}
+                                ${evento.participantes && evento.participantes.length > 0 ? `<p style="margin: 0; color: #374151;"><strong>👥 Participantes:</strong> ${evento.participantes.join(', ')}</p>` : ''}
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn-acao secundario" onclick="editarEvento('${eventoId}')">
+                                    ✏️ Editar
+                                </button>
+                                <button class="btn-acao" onclick="excluirEventoDetalhes('${eventoId}')" style="background: #ef4444; color: white;">
+                                    🗑️ Excluir
+                                </button>
+                                <button class="btn-acao primario" onclick="fecharModalDetalhesDia()">
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('modalDetalhesDia').style.display = 'block';
+                    console.log('✅ Modal de detalhes aberto com sucesso');
+                } else {
+                    console.warn('⚠️ Evento não encontrado com ID:', eventoId);
+                    
+                    // Debug: Mostrar todos os IDs disponíveis
+                    if (App && App.dados && App.dados.eventos) {
+                        console.log('🔍 IDs disponíveis:', App.dados.eventos.map(e => ({ id: e.id, titulo: e.titulo })));
+                    }
+                    
+                    // Fallback: mostrar modal com informação de erro
+                    document.getElementById('tituloDetalhesDia').textContent = '❌ Evento não encontrado';
+                    document.getElementById('conteudoDetalhesDia').innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #6b7280;">
+                            <p style="font-size: 16px; margin-bottom: 20px;">❌ Não foi possível carregar os detalhes do evento</p>
+                            <p style="margin-bottom: 20px;">O evento pode ter sido removido ou houve um erro no sistema.</p>
+                            <button class="btn-acao primario" onclick="fe<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -638,7 +730,7 @@
         <div class="header-content">
             <div class="logo-section">
                 <div class="logo-container">
-                    <img src="assets/img/Logo-biapo.jpg" alt="BIAPO" id="logoBiapo">
+                    <img src="assets/img/Logo-biapo.jpg" alt="BIAPO" id="logoBiapo" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;background: white; border-radius: 8px; padding: 12px; font-weight: 700; color: #dc2626; font-size: 14px; text-align: center;&quot;>BIAPO</div>'">
                 </div>
                 <div class="titulo-section">
                     <h1>Gestão Integrada</h1>
@@ -828,34 +920,16 @@
                     }
                     
                     // DEBUG: Adicionar eventos de teste se não houver
-                    if (App.dados.eventos.length === 0 && (!Events || !Events.eventos || Events.eventos.length === 0)) {
-                        console.log('🧪 Adicionando eventos de teste ao App.dados...');
-                        App.dados.eventos = [
-                            {
-                                id: 1,
-                                titulo: 'Revisão As Built',
-                                tipo: 'reuniao',
-                                data: '2025-07-02',
-                                horarioInicio: '14:00',
-                                horarioFim: '16:00',
-                                descricao: 'Reunião de revisão do projeto As Built',
-                                participantes: ['João Silva', 'Maria Santos']
-                            },
-                            {
-                                id: 2,
-                                titulo: 'Entrega Relatório Fotográfico',
-                                tipo: 'entrega',
-                                data: '2025-07-14',
-                                horarioInicio: '17:00',
-                                descricao: 'Entrega do relatório fotográfico do projeto',
-                                participantes: ['Carlos Oliveira']
-                            }
-                        ];
-                        console.log('✅ Eventos de teste adicionados ao App.dados');
-                    } else if (Events && Events.eventos && Events.eventos.length > 0) {
-                        // Se Events já tem eventos, sincronizar com App.dados
-                        App.dados.eventos = [...Events.eventos];
-                        console.log('🔄 Eventos sincronizados do Events para App.dados');
+                    if (App.dados.eventos.length === 0) {
+                        console.log('📊 Nenhum evento encontrado, sistema limpo');
+                    } else {
+                        console.log('📊 Eventos existentes em App.dados:', App.dados.eventos.length);
+                        
+                        // Sincronizar com Events se necessário
+                        if (Events && (!Events.eventos || Events.eventos.length === 0)) {
+                            Events.eventos = [...App.dados.eventos];
+                            console.log('🔄 Eventos sincronizados para Events.eventos');
+                        }
                     }
                     
                     // Usuário padrão
@@ -874,31 +948,10 @@
                         Events.eventos = [];
                     }
                     
-                    // DEBUG: Criar eventos de teste se não houver nenhum
-                    if (Events.eventos.length === 0 && (!App.dados || !App.dados.eventos || App.dados.eventos.length === 0)) {
-                        console.log('🧪 Criando eventos de teste no Events...');
-                        Events.eventos = [
-                            {
-                                id: 1,
-                                titulo: 'Revisão As Built',
-                                tipo: 'reuniao',
-                                data: '2025-07-02',
-                                horarioInicio: '14:00',
-                                horarioFim: '16:00',
-                                descricao: 'Reunião de revisão do projeto As Built',
-                                participantes: ['João Silva', 'Maria Santos']
-                            },
-                            {
-                                id: 2,
-                                titulo: 'Entrega Relatório Fotográfico',
-                                tipo: 'entrega',
-                                data: '2025-07-14',
-                                horarioInicio: '17:00',
-                                descricao: 'Entrega do relatório fotográfico do projeto',
-                                participantes: ['Carlos Oliveira']
-                            }
-                        ];
-                        console.log('✅ Eventos de teste criados no Events:', Events.eventos);
+                    // Sincronizar Events.eventos com App.dados.eventos se App.dados tem mais eventos
+                    if (App.dados && App.dados.eventos && App.dados.eventos.length > Events.eventos.length) {
+                        Events.eventos = [...App.dados.eventos];
+                        console.log('🔄 Events.eventos sincronizado com App.dados.eventos:', Events.eventos.length, 'eventos');
                     }
                 }
                 
@@ -935,22 +988,23 @@
                     // Debug automático para verificar estado do sistema
                     debugSistema();
                     
-                    // Teste automático do modal para debug
+                    // Informações de teste para o usuário
                     setTimeout(() => {
-                        console.log('🧪 === TESTE AUTOMÁTICO ===');
-                        console.log('🧪 Tentando abrir evento ID 1 automaticamente para teste...');
-                        if (document.querySelector('.evento-item')) {
-                            console.log('🧪 Eventos na sidebar encontrados, teste manual disponível');
+                        console.log('🧪 === INFORMAÇÕES DE TESTE ===');
+                        if (App.dados && App.dados.eventos && App.dados.eventos.length > 0) {
+                            console.log('✅ Sistema tem', App.dados.eventos.length, 'eventos disponíveis');
+                            console.log('📋 Para testar: clique em qualquer evento na sidebar "Próximos Eventos"');
+                            console.log('🗑️ No modal do evento, você encontrará o botão "Excluir"');
                         } else {
-                            console.log('🧪 Nenhum evento na sidebar, tentando teste direto...');
-                            // abrirDetalhesEvento(1); // Descomentei para não incomodar o usuário
+                            console.log('📝 Nenhum evento encontrado. Crie um evento primeiro usando o botão "📅 Novo Evento"');
                         }
-                        console.log('🧪 === FIM TESTE ===');
-                    }, 2000);
+                        console.log('🔍 Digite debugSistema() no console para verificar o estado atual');
+                        console.log('🧪 === FIM INFORMAÇÕES ===');
+                    }, 1000);
                 }, 800);
                 
-                console.log('✅ Sistema BIAPO pronto! Use debugSistema() para verificar status.');
-                console.log('📋 Para testar: clique nos eventos da sidebar "Próximos Eventos"');
+                console.log('✅ Sistema BIAPO pronto!');
+                console.log('📋 Clique nos eventos da sidebar para ver os detalhes e opção de exclusão');
                 
             }, 1200);
         }
@@ -1303,35 +1357,41 @@
         
         // ✅ FUNÇÃO PARA EXCLUIR EVENTO DOS DETALHES
         function excluirEventoDetalhes(eventoId) {
-            console.log('🗑️ Tentando excluir evento:', eventoId);
+            console.log('🗑️ === EXCLUINDO EVENTO ===');
+            console.log('🆔 ID para excluir:', eventoId, 'Tipo:', typeof eventoId);
             
             if (confirm('🗑️ Deseja realmente excluir este evento?\n\nEsta ação não pode ser desfeita.')) {
                 try {
                     let eventoExcluido = false;
                     
-                    // Tentar excluir pelo sistema Events
-                    if (typeof Events !== 'undefined') {
-                        if (Events.excluir) {
-                            Events.excluir(eventoId);
+                    // Excluir de App.dados.eventos (fonte principal)
+                    if (typeof App !== 'undefined' && App.dados && App.dados.eventos && Array.isArray(App.dados.eventos)) {
+                        console.log('📊 Procurando evento em App.dados.eventos...');
+                        
+                        const index = App.dados.eventos.findIndex(e => 
+                            e.id == eventoId ||           // Comparação flexível
+                            e.id === eventoId ||          // Comparação exata
+                            e.id === parseInt(eventoId) || // Como número
+                            e.id === String(eventoId) ||  // Como string
+                            e.uid == eventoId             // Campo alternativo
+                        );
+                        
+                        if (index !== -1) {
+                            const eventoRemovido = App.dados.eventos.splice(index, 1)[0];
                             eventoExcluido = true;
-                            console.log('✅ Evento excluído via Events.excluir()');
-                        } else if (Events.eventos && Array.isArray(Events.eventos)) {
-                            const index = Events.eventos.findIndex(e => e.id === eventoId);
-                            if (index !== -1) {
-                                Events.eventos.splice(index, 1);
-                                eventoExcluido = true;
-                                console.log('✅ Evento excluído do array Events.eventos');
-                            }
+                            console.log('✅ Evento excluído de App.dados.eventos:', eventoRemovido.titulo);
+                        } else {
+                            console.log('⚠️ Evento não encontrado em App.dados.eventos');
+                            console.log('🔍 IDs disponíveis:', App.dados.eventos.map(e => ({ id: e.id, titulo: e.titulo })));
                         }
                     }
                     
-                    // Se não conseguiu excluir via Events, tentar via App.dados
-                    if (!eventoExcluido && typeof App !== 'undefined' && App.dados && App.dados.eventos) {
-                        const index = App.dados.eventos.findIndex(e => e.id === eventoId);
+                    // Também tentar excluir de Events.eventos se existir
+                    if (typeof Events !== 'undefined' && Events.eventos && Array.isArray(Events.eventos)) {
+                        const index = Events.eventos.findIndex(e => e.id == eventoId);
                         if (index !== -1) {
-                            App.dados.eventos.splice(index, 1);
-                            eventoExcluido = true;
-                            console.log('✅ Evento excluído do App.dados.eventos');
+                            Events.eventos.splice(index, 1);
+                            console.log('✅ Evento também excluído de Events.eventos');
                         }
                     }
                     
@@ -1339,15 +1399,19 @@
                         // Fechar modal
                         fecharModalDetalhesDia();
                         
-                        // Regenerar calendário e atualizar interface
+                        // Atualizar interface
+                        atualizarInterface();
+                        
+                        // Regenerar calendário se disponível
                         if (typeof Calendar !== 'undefined' && Calendar.gerar) {
                             Calendar.gerar();
                         }
-                        atualizarInterface();
                         
                         // Salvar dados se houver sistema de persistência
                         if (typeof Persistence !== 'undefined' && Persistence.salvar) {
                             Persistence.salvar();
+                        } else if (typeof App !== 'undefined' && App.salvarDados) {
+                            App.salvarDados();
                         }
                         
                         if (typeof Notifications !== 'undefined') {
@@ -1369,6 +1433,8 @@
                     }
                 }
             }
+            
+            console.log('🗑️ === FIM EXCLUSÃO ===');
         }
         
         // ✅ FUNÇÃO PARA EDITAR EVENTO
@@ -1553,9 +1619,9 @@
         
         // ✅ LOG INICIAL
         console.log('🏗️ Gestão Integrada BIAPO v6.3');
-        console.log('📋 Sistema com correções para modal de eventos');
-        console.log('✨ Interface profissional carregada!');
-        console.log('🔍 Digite debugSistema() no console para verificar status do sistema');
+        console.log('🔧 Sistema corrigido - Modal e exclusão funcionais');
+        console.log('🔍 Digite debugSistema() no console para verificar status');
+        console.log('✨ Clique nos eventos da sidebar para abrir detalhes!');
     </script>
 </body>
 </html>
