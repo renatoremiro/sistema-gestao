@@ -1,5 +1,5 @@
 /**
- * 📄 Sistema de Geração de PDFs v6.2 - MODULAR
+ * 📄 Sistema de Geração de PDFs v6.2 - MODULAR CORRIGIDO
  * 
  * Funcionalidades:
  * ✅ PDF do Calendário Mensal (visual, filtros, escolha de mês)
@@ -10,6 +10,7 @@
  * ✅ Orientação paisagem
  * ✅ Cabeçalho profissional
  * ✅ Títulos completos garantidos
+ * ✅ CORREÇÕES: Emojis removidos para compatibilidade jsPDF
  */
 
 const PDF = {
@@ -179,19 +180,19 @@ const PDF = {
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 500px;">
                     <div class="modal-header">
-                        <h3>📄 Gerar PDF do Calendário</h3>
+                        <h3>Gerar PDF do Calendario</h3>
                         <button class="modal-close" onclick="PDF.fecharModal()">&times;</button>
                     </div>
                     
                     <div class="modal-body">
                         <!-- Seleção de Mês/Ano -->
                         <div class="form-group">
-                            <label>📅 Mês e Ano:</label>
+                            <label>Mes e Ano:</label>
                             <div style="display: flex; gap: 12px;">
                                 <select id="pdfCalendarioMes" style="flex: 2;">
                                     <option value="1">Janeiro</option>
                                     <option value="2">Fevereiro</option>
-                                    <option value="3">Março</option>
+                                    <option value="3">Marco</option>
                                     <option value="4">Abril</option>
                                     <option value="5">Maio</option>
                                     <option value="6">Junho</option>
@@ -208,51 +209,51 @@ const PDF = {
 
                         <!-- Filtros de Conteúdo -->
                         <div class="form-group">
-                            <label>🎯 Incluir no PDF:</label>
+                            <label>Incluir no PDF:</label>
                             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
                                 <label style="display: flex; align-items: center; gap: 8px;">
                                     <input type="checkbox" id="pdfIncluirEventos" checked>
-                                    📅 Eventos (Reuniões, Entregas, Prazos, Marcos)
+                                    Eventos (Reunioes, Entregas, Prazos, Marcos)
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 8px;">
                                     <input type="checkbox" id="pdfIncluirTarefas" checked>
-                                    📝 Tarefas da Agenda Semanal
+                                    Tarefas da Agenda Semanal
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 8px;">
                                     <input type="checkbox" id="pdfIncluirFeriados" checked>
-                                    🎉 Feriados
+                                    Feriados
                                 </label>
                             </div>
                         </div>
 
                         <!-- Filtros de Tipo -->
                         <div class="form-group">
-                            <label>🏷️ Filtrar por Tipo de Evento:</label>
+                            <label>Filtrar por Tipo de Evento:</label>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
                                 <label style="display: flex; align-items: center; gap: 4px;">
                                     <input type="checkbox" id="pdfFiltroReuniao" checked>
-                                    📅 Reunião
+                                    Reuniao
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 4px;">
                                     <input type="checkbox" id="pdfFiltroEntrega" checked>
-                                    📦 Entrega
+                                    Entrega
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 4px;">
                                     <input type="checkbox" id="pdfFiltroPrazo" checked>
-                                    ⏰ Prazo
+                                    Prazo
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 4px;">
                                     <input type="checkbox" id="pdfFiltroMarco" checked>
-                                    🏁 Marco
+                                    Marco
                                 </label>
                             </div>
                         </div>
 
                         <!-- Filtro por Pessoa -->
                         <div class="form-group">
-                            <label>👤 Filtrar por Pessoa (opcional):</label>
+                            <label>Filtrar por Pessoa (opcional):</label>
                             <select id="pdfFiltroPessoa">
-                                <option value="">📋 Todas as pessoas</option>
+                                <option value="">Todas as pessoas</option>
                                 ${this._obterListaPessoas().map(pessoa => 
                                     `<option value="${pessoa}">${pessoa}</option>`
                                 ).join('')}
@@ -262,10 +263,10 @@ const PDF = {
                     
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="PDF.fecharModal()">
-                            ❌ Cancelar
+                            Cancelar
                         </button>
                         <button class="btn btn-primary" onclick="PDF.confirmarCalendario()">
-                            📄 Gerar PDF
+                            Gerar PDF
                         </button>
                     </div>
                 </div>
@@ -305,16 +306,16 @@ const PDF = {
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 500px;">
                     <div class="modal-header">
-                        <h3>📋 Gerar Agenda Semanal PDF</h3>
+                        <h3>Gerar Agenda Semanal PDF</h3>
                         <button class="modal-close" onclick="PDF.fecharModal()">&times;</button>
                     </div>
                     
                     <div class="modal-body">
                         <!-- Seleção de Pessoa -->
                         <div class="form-group">
-                            <label>👤 Pessoa:</label>
+                            <label>Pessoa:</label>
                             <select id="pdfAgendaPessoa" required>
-                                <option value="">🔸 Selecione uma pessoa</option>
+                                <option value="">Selecione uma pessoa</option>
                                 ${this._obterListaPessoas().map(pessoa => 
                                     `<option value="${pessoa}">${pessoa}</option>`
                                 ).join('')}
@@ -323,28 +324,28 @@ const PDF = {
 
                         <!-- Seleção de Semana -->
                         <div class="form-group">
-                            <label>📅 Semana (Data de Início - Segunda-feira):</label>
+                            <label>Semana (Data de Inicio - Segunda-feira):</label>
                             <input type="date" id="pdfAgendaData" value="${this._obterInicioSemana(new Date())}">
                             <small style="color: #6b7280; font-size: 12px;">
-                                💡 Selecione qualquer dia da semana - o sistema ajustará para a segunda-feira
+                                Selecione qualquer dia da semana - o sistema ajustara para a segunda-feira
                             </small>
                         </div>
 
                         <!-- Opções de Conteúdo -->
                         <div class="form-group">
-                            <label>📋 Incluir na Agenda:</label>
+                            <label>Incluir na Agenda:</label>
                             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
                                 <label style="display: flex; align-items: center; gap: 8px;">
                                     <input type="checkbox" id="pdfAgendaDescricoes" checked>
-                                    📝 Descrições das tarefas
+                                    Descricoes das tarefas
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 8px;">
                                     <input type="checkbox" id="pdfAgendaDuracoes" checked>
-                                    ⏱️ Durações dos horários
+                                    Duracoes dos horarios
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 8px;">
                                     <input type="checkbox" id="pdfAgendaApenasRecorrente" checked>
-                                    🔄 Apenas tarefas da agenda semanal (recorrentes)
+                                    Apenas tarefas da agenda semanal (recorrentes)
                                 </label>
                             </div>
                         </div>
@@ -359,16 +360,16 @@ const PDF = {
                             font-size: 12px;
                             color: #6b7280;
                         ">
-                            📊 Preview: Selecione uma pessoa para ver quantas tarefas serão incluídas
+                            Preview: Selecione uma pessoa para ver quantas tarefas serao incluidas
                         </div>
                     </div>
                     
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="PDF.fecharModal()">
-                            ❌ Cancelar
+                            Cancelar
                         </button>
                         <button class="btn btn-primary" onclick="PDF.confirmarAgenda()">
-                            📋 Gerar Agenda PDF
+                            Gerar Agenda PDF
                         </button>
                     </div>
                 </div>
@@ -427,7 +428,7 @@ const PDF = {
 
             this.fecharModal();
             
-            Notifications.info('📄 Gerando PDF do calendário...');
+            Notifications.info('Gerando PDF do calendario...');
             
             setTimeout(() => {
                 this.gerarCalendarioMensal(opcoes);
@@ -465,7 +466,7 @@ const PDF = {
 
             this.fecharModal();
             
-            Notifications.info('📋 Gerando agenda semanal em PDF...');
+            Notifications.info('Gerando agenda semanal em PDF...');
             
             setTimeout(() => {
                 this.gerarAgendaSemanal(opcoes);
@@ -587,18 +588,18 @@ const PDF = {
         return monday.toISOString().split('T')[0];
     },
 
-    // Adicionar cabeçalho do calendário
+    // ✅ CABEÇALHO DO CALENDÁRIO (SEM EMOJIS)
     _adicionarCabecalhoCalendario(pdf, config) {
         const { CORES, FONTE_TITULO, FONTE_SUBTITULO, MARGEM } = this.config;
         
         // Título principal
         pdf.setFontSize(FONTE_TITULO);
         pdf.setTextColor(CORES.CABECALHO);
-        pdf.text('📅 CALENDÁRIO MENSAL', MARGEM, MARGEM + 10);
+        pdf.text('CALENDARIO MENSAL', MARGEM, MARGEM + 10);
 
         // Subtítulo com mês/ano
         const meses = [
-            '', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            '', 'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
         ];
         const mesNome = meses[config.mes];
@@ -613,17 +614,17 @@ const PDF = {
         pdf.text(`Gerado em: ${dataGeracao}`, MARGEM, MARGEM + 28);
 
         // Sistema
-        pdf.text('Sistema de Gestão - Obra 292 (Museu Nacional)', MARGEM + 200, MARGEM + 28);
+        pdf.text('Sistema de Gestao - Obra 292 (Museu Nacional)', MARGEM + 150, MARGEM + 28);
     },
 
-    // Adicionar cabeçalho da agenda
+    // ✅ CABEÇALHO DA AGENDA (SEM EMOJIS)
     _adicionarCabecalhoAgenda(pdf, config) {
         const { CORES, FONTE_TITULO, FONTE_SUBTITULO, MARGEM } = this.config;
         
         // Título principal
         pdf.setFontSize(FONTE_TITULO);
         pdf.setTextColor(CORES.CABECALHO);
-        pdf.text('📋 AGENDA SEMANAL', MARGEM, MARGEM + 10);
+        pdf.text('AGENDA SEMANAL', MARGEM, MARGEM + 10);
 
         // Subtítulo com pessoa e período
         const dataInicio = new Date(config.dataInicio);
@@ -641,7 +642,7 @@ const PDF = {
         pdf.text(`Gerado em: ${dataGeracao}`, MARGEM, MARGEM + 36);
 
         // Sistema
-        pdf.text('Sistema de Gestão - Obra 292 (Museu Nacional)', MARGEM + 200, MARGEM + 36);
+        pdf.text('Sistema de Gestao - Obra 292 (Museu Nacional)', MARGEM + 150, MARGEM + 36);
     },
 
     // Gerar grid do calendário
@@ -653,7 +654,7 @@ const PDF = {
         const alturaCelula = 18;
 
         // Cabeçalho dos dias da semana
-        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
         
         pdf.setFontSize(10);
         pdf.setTextColor(CORES.CABECALHO);
@@ -725,7 +726,7 @@ const PDF = {
         const alturaLinha = 6;
 
         // Cabeçalho dos dias
-        const diasSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+        const diasSemana = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado', 'Domingo'];
         
         pdf.setFontSize(10);
         pdf.setTextColor(CORES.CABECALHO);
@@ -763,7 +764,7 @@ const PDF = {
         }
     },
 
-    // Adicionar eventos do dia no calendário
+    // ✅ ADICIONAR EVENTOS DO DIA (SEM EMOJIS)
     _adicionarEventosDoDia(pdf, x, y, largura, data, config) {
         try {
             const eventos = this._obterEventosDoDia(data, config);
@@ -771,7 +772,7 @@ const PDF = {
             
             let posY = y;
             const alturaItem = 4;
-            const maxItens = 3; // Máximo de itens por dia para não sobrecarregar
+            const maxItens = 3;
             
             pdf.setFontSize(6);
             
@@ -797,7 +798,7 @@ const PDF = {
                 pdf.setTextColor(cor);
                 
                 const titulo = this._truncarTexto(tarefa.titulo, 15);
-                pdf.text(`• ${titulo}`, x + 1, posY);
+                pdf.text(`- ${titulo}`, x + 1, posY);
                 posY += alturaItem;
                 contador++;
             });
@@ -866,29 +867,29 @@ const PDF = {
         }
     },
 
-    // Adicionar legenda do calendário
+    // ✅ LEGENDA DO CALENDÁRIO (SEM EMOJIS) - BUG CORRIGIDO
     _adicionarLegendaCalendario(pdf) {
         const { MARGEM, CORES } = this.config;
-        const y = 180; // Posição da legenda
+        let y = 180; // ← CORREÇÃO: const para let
         
         pdf.setFontSize(8);
         pdf.setTextColor(CORES.TEXTO);
         pdf.text('Legenda:', MARGEM, y);
         
         const itens = [
-            { cor: CORES.EVENTO_REUNIAO, texto: '📅 Reunião' },
-            { cor: CORES.EVENTO_ENTREGA, texto: '📦 Entrega' },
-            { cor: CORES.EVENTO_PRAZO, texto: '⏰ Prazo' },
-            { cor: CORES.EVENTO_MARCO, texto: '🏁 Marco' },
-            { cor: CORES.TAREFA_PESSOAL, texto: '👤 Tarefa Pessoal' },
-            { cor: CORES.TAREFA_EQUIPE, texto: '👥 Tarefa Equipe' }
+            { cor: CORES.EVENTO_REUNIAO, texto: '• Reuniao' },
+            { cor: CORES.EVENTO_ENTREGA, texto: '• Entrega' },
+            { cor: CORES.EVENTO_PRAZO, texto: '• Prazo' },
+            { cor: CORES.EVENTO_MARCO, texto: '• Marco' },
+            { cor: CORES.TAREFA_PESSOAL, texto: '• Tarefa Pessoal' },
+            { cor: CORES.TAREFA_EQUIPE, texto: '• Tarefa Equipe' }
         ];
         
         let x = MARGEM + 40;
         itens.forEach((item, index) => {
             if (index > 0 && index % 3 === 0) {
                 x = MARGEM + 40;
-                y += 8;
+                y += 8; // ← Agora funciona porque y é let
             }
             
             pdf.setFillColor(item.cor);
@@ -1008,11 +1009,11 @@ const PDF = {
             const dataFimFormatada = new Date(new Date(dataInicio).setDate(new Date(dataInicio).getDate() + 6)).toLocaleDateString('pt-BR');
             
             preview.innerHTML = `
-                📊 <strong>Preview:</strong><br>
-                👤 Pessoa: ${pessoa}<br>
-                📅 Semana: ${dataInicioFormatada} - ${dataFimFormatada}<br>
-                📝 Total de tarefas: ${totalTarefas}<br>
-                ${totalTarefas === 0 ? '⚠️ Nenhuma tarefa encontrada para esta pessoa/semana' : '✅ Agenda pronta para gerar PDF'}
+                <strong>Preview:</strong><br>
+                Pessoa: ${pessoa}<br>
+                Semana: ${dataInicioFormatada} - ${dataFimFormatada}<br>
+                Total de tarefas: ${totalTarefas}<br>
+                ${totalTarefas === 0 ? 'Nenhuma tarefa encontrada para esta pessoa/semana' : 'Agenda pronta para gerar PDF'}
             `;
             
         } catch (error) {
@@ -1122,3 +1123,4 @@ console.log('📄 Sistema de Geração de PDFs v6.2 carregado!');
 console.log('🎯 Funcionalidades: Calendário Mensal + Agenda Semanal');
 console.log('🎨 Visual organizado e profissional');
 console.log('⚙️ Integração total com Calendar.js e Tasks.js');
+console.log('✅ CORRIGIDO: Emojis removidos para compatibilidade jsPDF');
