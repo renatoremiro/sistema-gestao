@@ -31,6 +31,9 @@
     <!-- 3. ESTRUTURA DE DADOS -->
     <script src="assets/js/core/data.js"></script>
     
+    <!-- 4. SISTEMA DE PERSISTÊNCIA -->
+    <script src="assets/js/modules/persistence.js"></script>
+    
     <!-- 4. CHAT EXISTENTE -->
     <script src="modules/chat-module.js"></script>
 </head>
@@ -47,9 +50,9 @@
                 <h1>🔧 Sistema de Gestão - DESENVOLVIMENTO</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    <strong>v6.2 Modular - Modo Desenvolvimento</strong>
+                    <strong>v6.2 Modular - Modo Desenvolvimento (75% Completo)</strong>
                     <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                        Módulos Carregados ✅
+                        Persistence ✅
                     </span>
                 </p>
             </div>
@@ -80,6 +83,7 @@
                         <li>✅ <strong>Config:</strong> firebase.js</li>
                         <li>✅ <strong>Utils:</strong> helpers.js, validation.js, notifications.js</li>
                         <li>✅ <strong>Core:</strong> data.js</li>
+                        <li>✅ <strong>Modules:</strong> persistence.js ⭐ <span style="color: #10b981;">NOVO</span></li>
                         <li>✅ <strong>Chat:</strong> chat-module.js (existente)</li>
                     </ul>
                 </div>
@@ -88,7 +92,6 @@
                     <h4 style="color: #f59e0b;">🔄 MÓDULOS PENDENTES</h4>
                     <ul style="list-style: none; padding: 0; line-height: 1.8;">
                         <li>🔄 <strong>Core:</strong> app.js</li>
-                        <li>🔄 <strong>Modules:</strong> persistence.js</li>
                         <li>🔄 <strong>Modules:</strong> auth.js</li>
                         <li>🔄 <strong>Modules:</strong> calendar.js</li>
                         <li>🔄 <strong>Modules:</strong> events.js</li>
@@ -188,6 +191,38 @@
                 </div>
                 <div id="resultadoDados" style="margin-top: 12px; padding: 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; max-height: 200px; overflow-y: auto;"></div>
             </div>
+            
+            <!-- Teste de Sistema de Persistência -->
+            <div style="margin-bottom: 20px; padding: 16px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;">
+                <h4>💾 Sistema de Persistência Ultra-Robusta ⭐ <span style="color: #10b981; font-size: 12px;">NOVO</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="testarSalvamentoPadrao()">
+                            💾 Salvamento Padrão
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="testarSalvamentoCritico()">
+                            ⚡ Salvamento Crítico
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-warning btn-sm" onclick="testarBackupLocal()">
+                            📂 Backup Local
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="testarStatusPersistencia()">
+                            📊 Status Sistema
+                        </button>
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    <button class="btn btn-danger btn-sm" onclick="simularFalhaSalvamento()">
+                        🚨 Simular Falha (Teste Modal)
+                    </button>
+                    <button class="btn btn-pdf btn-sm" onclick="testarConectividade()">
+                        🌐 Verificar Conectividade
+                    </button>
+                </div>
+                <div id="resultadoPersistencia" style="margin-top: 12px; padding: 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+            </div>
         </div>
         
         <!-- ✅ LOG DE DESENVOLVIMENTO -->
@@ -199,7 +234,9 @@
                 <div>✅ Sistema de Validação v6.2 carregado!</div>
                 <div>🔔 Sistema de Notificações v6.2 carregado!</div>
                 <div>📊 Estrutura de Dados v6.2 carregada!</div>
+                <div>💾 Sistema de Persistência Ultra-Robusta v6.2 carregado!</div>
                 <div style="color: #10b981;">✅ Todos os módulos básicos carregados com sucesso!</div>
+                <div style="color: #8b5cf6;">🎯 Progresso: 75% da modularização concluída</div>
             </div>
         </div>
     </div>
@@ -303,18 +340,111 @@
             `;
         }
         
+        // ✅ TESTES DO SISTEMA DE PERSISTÊNCIA
+        function testarSalvamentoPadrao() {
+            const resultado = document.getElementById('resultadoPersistencia');
+            resultado.innerHTML += '⏳ Testando salvamento padrão...<br>';
+            
+            Persistence.salvarDados().then(() => {
+                resultado.innerHTML += '✅ Salvamento padrão executado<br>';
+            }).catch(error => {
+                resultado.innerHTML += `❌ Erro: ${error}<br>`;
+            });
+        }
+        
+        function testarSalvamentoCritico() {
+            const resultado = document.getElementById('resultadoPersistencia');
+            resultado.innerHTML += '⚡ Testando salvamento crítico...<br>';
+            
+            Persistence.salvarDadosCritico().then(() => {
+                resultado.innerHTML += '✅ Salvamento crítico concluído<br>';
+            }).catch(error => {
+                resultado.innerHTML += `❌ Erro crítico: ${error}<br>`;
+            });
+        }
+        
+        function testarBackupLocal() {
+            const resultado = document.getElementById('resultadoPersistencia');
+            
+            // Simular dados para backup
+            const dadosTeste = { teste: 'backup', timestamp: new Date().toISOString() };
+            Persistence._salvarBackupLocal(dadosTeste);
+            
+            const backup = Persistence.recuperarBackupLocal();
+            if (backup) {
+                resultado.innerHTML += `✅ Backup local funcionando<br>Data: ${backup.timestamp || 'N/A'}<br>`;
+            } else {
+                resultado.innerHTML += '❌ Nenhum backup local encontrado<br>';
+            }
+        }
+        
+        function testarStatusPersistencia() {
+            const resultado = document.getElementById('resultadoPersistencia');
+            const status = Persistence.obterStatus();
+            
+            resultado.innerHTML += `📊 Status do Sistema:<br>`;
+            resultado.innerHTML += `• Operações em andamento: ${status.operacoesEmAndamento}<br>`;
+            resultado.innerHTML += `• Dados para salvar: ${status.temDadosParaSalvar ? 'Sim' : 'Não'}<br>`;
+            resultado.innerHTML += `• Tentativas: ${status.tentativasAtual}/3<br>`;
+            resultado.innerHTML += `• Último backup: ${status.ultimoBackup || 'Nenhum'}<br>`;
+        }
+        
+        function simularFalhaSalvamento() {
+            const resultado = document.getElementById('resultadoPersistencia');
+            resultado.innerHTML += '🚨 Simulando falha de salvamento...<br>';
+            
+            // Simular falha forçando modal de recuperação
+            Persistence._mostrarOpcoesRecuperacao();
+            resultado.innerHTML += '⚠️ Modal de recuperação exibido<br>';
+        }
+        
+        async function testarConectividade() {
+            const resultado = document.getElementById('resultadoPersistencia');
+            resultado.innerHTML += '🌐 Verificando conectividade...<br>';
+            
+            try {
+                const conectado = await Persistence.verificarConectividade();
+                if (conectado) {
+                    resultado.innerHTML += '✅ Firebase conectado<br>';
+                } else {
+                    resultado.innerHTML += '❌ Firebase desconectado<br>';
+                }
+            } catch (error) {
+                resultado.innerHTML += `❌ Erro de conectividade: ${error.message}<br>`;
+            }
+        }
+        
         // ✅ LOG INICIAL
         console.log('🔧 Index DEV v6.2 - Modo desenvolvimento carregado!');
         console.log('📦 Módulos disponíveis:', {
             Helpers: typeof Helpers !== 'undefined',
             Validation: typeof Validation !== 'undefined', 
             Notifications: typeof Notifications !== 'undefined',
-            DataStructure: typeof DataStructure !== 'undefined'
+            DataStructure: typeof DataStructure !== 'undefined',
+            Persistence: typeof Persistence !== 'undefined'
         });
         
         // ✅ TESTE AUTOMÁTICO DE INICIALIZAÇÃO
         setTimeout(() => {
             Notifications.success('🚀 Sistema modular inicializado com sucesso!');
+            
+            // Teste automático do sistema de persistência
+            setTimeout(() => {
+                const resultado = document.getElementById('resultadoPersistencia');
+                if (resultado) {
+                    resultado.innerHTML = '🔄 Executando testes automáticos...<br>';
+                    
+                    if (typeof Persistence !== 'undefined') {
+                        resultado.innerHTML += '✅ Módulo Persistence carregado<br>';
+                        
+                        // Teste básico de status
+                        const status = Persistence.obterStatus();
+                        resultado.innerHTML += `📊 Status inicial: ${status.operacoesEmAndamento} operações<br>`;
+                    } else {
+                        resultado.innerHTML += '❌ Módulo Persistence não encontrado<br>';
+                    }
+                }
+            }, 2000);
         }, 1000);
     </script>
 </body>
