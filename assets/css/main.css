@@ -1,8 +1,13 @@
 /**
- * 🎨 Sistema de Gestão - Estilos Principais v6.2
+ * 🎨 Sistema de Gestão - Estilos Principais v6.2.1 - COMPLETO COM EXCLUSÃO
  * Arquivo: assets/css/main.css
  * 
- * ✅ ATUALIZADO COM CSS DOS MODAIS PDF
+ * ✅ ATUALIZADO COM:
+ * - CSS dos modais PDF
+ * - Estilos para botões de exclusão
+ * - Modais de confirmação
+ * - Info-boxes de aviso
+ * - Classes de utilidade
  */
 
 /* === RESET E BASE === */
@@ -95,6 +100,13 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     gap: 6px;
+    user-select: none;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
 }
 
 .btn-sm {
@@ -102,14 +114,20 @@ body {
     font-size: 12px;
 }
 
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
 .btn-primary {
     background: #3b82f6;
     color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     background: #2563eb;
     transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
 .btn-secondary {
@@ -117,8 +135,9 @@ body {
     color: white;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
     background: #4b5563;
+    transform: translateY(-1px);
 }
 
 .btn-success {
@@ -126,8 +145,10 @@ body {
     color: white;
 }
 
-.btn-success:hover {
+.btn-success:hover:not(:disabled) {
     background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
 }
 
 .btn-warning {
@@ -135,17 +156,33 @@ body {
     color: white;
 }
 
-.btn-warning:hover {
+.btn-warning:hover:not(:disabled) {
     background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
 }
 
+/* ✅ BOTÕES DE EXCLUSÃO - NOVO */
 .btn-danger {
     background: #ef4444;
     color: white;
 }
 
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
     background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger:focus {
+    outline: 2px solid #fecaca;
+    outline-offset: 2px;
+}
+
+/* ✅ BOTÃO DE EXCLUSÃO POSICIONADO À ESQUERDA */
+.modal-footer .btn-danger {
+    margin-right: auto;
+    order: -1;
 }
 
 .btn-pdf {
@@ -153,8 +190,10 @@ body {
     color: white;
 }
 
-.btn-pdf:hover {
+.btn-pdf:hover:not(:disabled) {
     background: #7c3aed;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
 }
 
 /* === NOTIFICAÇÕES === */
@@ -170,6 +209,7 @@ body {
     transform: translateX(400px);
     transition: transform 0.3s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 350px;
 }
 
 .notification.show {
@@ -268,7 +308,22 @@ body {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* === MODAIS PDF === */
+/* ✅ SEÇÕES DE FORMULÁRIO */
+.form-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.form-section h4 {
+    margin: 0 0 16px 0;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* === MODAIS === */
 .modal {
     display: none;
     position: fixed;
@@ -313,6 +368,12 @@ body {
     border-bottom: 1px solid #e5e7eb;
     background: #f9fafb;
     border-radius: 12px 12px 0 0;
+}
+
+/* ✅ HEADER DE MODAL DE PERIGO - NOVO */
+.modal-header-danger {
+    background: #fee2e2 !important;
+    border-bottom-color: #fecaca !important;
 }
 
 .modal-header h3 {
@@ -370,7 +431,41 @@ body {
     gap: 8px;
 }
 
-/* === CHECKBOXES DOS MODAIS PDF - ESTILO ESPECÍFICO === */
+/* ✅ INFO-BOXES PARA CONFIRMAÇÕES - NOVO */
+.info-box {
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    border: 1px solid;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.info-box-warning {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+.info-box-danger {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.info-box-success {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #047857;
+}
+
+.info-box-info {
+    background: #dbeafe;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+/* === CHECKBOXES DOS MODAIS === */
 .modal-body input[type="checkbox"] {
     width: 16px !important;
     height: 16px !important;
@@ -396,6 +491,113 @@ body {
     display: block;
 }
 
+/* ✅ ALERTAS DE AÇÃO DESTRUTIVA - NOVO */
+.alert-destructive {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 16px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-destructive::before {
+    content: "⚠️";
+    font-size: 16px;
+}
+
+/* ✅ BADGES E LABELS */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* ✅ LOADING E ESTADOS */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ✅ TOOLTIPS */
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+
+.tooltip:hover::before {
+    opacity: 1;
+}
+
 /* === RESPONSIVIDADE === */
 @media (max-width: 768px) {
     .container {
@@ -416,6 +618,7 @@ body {
     .modal-content {
         margin: 20px;
         width: calc(100% - 40px);
+        max-height: 90vh;
     }
     
     .modal-footer {
@@ -425,6 +628,12 @@ body {
     .modal-footer .btn {
         width: 100%;
         justify-content: center;
+    }
+    
+    /* ✅ BOTÃO DE EXCLUSÃO EM MOBILE */
+    .modal-footer .btn-danger {
+        order: 2; /* Vai para baixo em mobile */
+        margin-right: 0;
     }
     
     .notification,
@@ -437,6 +646,39 @@ body {
     .toast {
         min-width: auto;
     }
+    
+    /* ✅ INFO-BOXES RESPONSIVOS */
+    .info-box {
+        padding: 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        margin: 10px;
+        width: calc(100% - 20px);
+        max-height: 95vh;
+    }
+    
+    .modal-header,
+    .modal-footer {
+        padding: 16px;
+    }
+    
+    .modal-body {
+        padding: 16px;
+    }
+    
+    .btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
 }
 
 /* === UTILIDADES === */
@@ -448,24 +690,56 @@ body {
     text-align: right;
 }
 
-.mt-4 {
-    margin-top: 16px;
+.text-left {
+    text-align: left;
 }
 
-.mb-4 {
-    margin-bottom: 16px;
-}
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+.mt-8 { margin-top: 32px; }
 
-.p-4 {
-    padding: 16px;
-}
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.mb-8 { margin-bottom: 32px; }
+
+.ml-1 { margin-left: 4px; }
+.ml-2 { margin-left: 8px; }
+.ml-4 { margin-left: 16px; }
+.ml-auto { margin-left: auto; }
+
+.mr-1 { margin-right: 4px; }
+.mr-2 { margin-right: 8px; }
+.mr-4 { margin-right: 16px; }
+.mr-auto { margin-right: auto; }
+
+.p-1 { padding: 4px; }
+.p-2 { padding: 8px; }
+.p-4 { padding: 16px; }
+.p-6 { padding: 24px; }
+.p-8 { padding: 32px; }
 
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+.visible {
+    visibility: visible;
+}
+
+.invisible {
+    visibility: hidden;
 }
 
 .flex {
     display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
 }
 
 .flex-center {
@@ -474,13 +748,47 @@ body {
     align-items: center;
 }
 
-.gap-2 {
-    gap: 8px;
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.gap-4 {
-    gap: 16px;
+.flex-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
+
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+
+.z-10 { z-index: 10; }
+.z-20 { z-index: 20; }
+.z-50 { z-index: 50; }
+
+/* ✅ CORES DE TEXTO */
+.text-danger { color: #dc2626; }
+.text-warning { color: #d97706; }
+.text-success { color: #059669; }
+.text-info { color: #2563eb; }
+.text-muted { color: #6b7280; }
+
+/* ✅ CORES DE FUNDO */
+.bg-danger { background-color: #fee2e2; }
+.bg-warning { background-color: #fef3c7; }
+.bg-success { background-color: #d1fae5; }
+.bg-info { background-color: #dbeafe; }
 
 /* === ANIMAÇÕES === */
 @keyframes fadeIn {
@@ -509,6 +817,35 @@ body {
 
 .slide-in {
     animation: slideIn 0.3s ease-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    40%, 43% {
+        transform: translate3d(0, -8px, 0);
+    }
+    70% {
+        transform: translate3d(0, -4px, 0);
+    }
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
+}
+
+.bounce {
+    animation: bounce 1s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
 }
 
 /* === TEMAS === */
@@ -557,6 +894,11 @@ body {
         border-color: #4b5563;
     }
     
+    .modal-header-danger {
+        background: #7f1d1d !important;
+        border-bottom-color: #991b1b !important;
+    }
+    
     .form-group input,
     .form-group select,
     .form-group textarea {
@@ -564,11 +906,67 @@ body {
         border-color: #4b5563;
         color: #f9fafb;
     }
+    
+    .info-box-warning {
+        background: #451a03;
+        border-color: #92400e;
+        color: #fbbf24;
+    }
+    
+    .info-box-danger {
+        background: #450a0a;
+        border-color: #991b1b;
+        color: #fca5a5;
+    }
+}
+
+/* === PRINT STYLES === */
+@media print {
+    .modal,
+    .notification,
+    .toast-container,
+    .btn-danger,
+    .alert-destructive {
+        display: none !important;
+    }
+    
+    .modal-content {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
+
+/* ✅ ACESSIBILIDADE */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* === FOCUS VISIBLE === */
+.btn:focus-visible,
+.modal-close:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.btn-danger:focus-visible {
+    outline-color: #ef4444;
 }
 
 /* === LOG === */
-/* ✅ ATUALIZADO v6.2 */
-/* ✅ CSS dos modais PDF adicionado */
-/* ✅ Responsividade melhorada */
-/* ✅ Tema escuro opcional */
-/* ✅ Animações suaves */
+/* ✅ ATUALIZADO v6.2.1 */
+/* ✅ Estilos para botões de exclusão adicionados */
+/* ✅ Modais de confirmação estilizados */
+/* ✅ Info-boxes para alertas */
+/* ✅ Classes de utilidade expandidas */
+/* ✅ Responsividade melhorada para ações destrutivas */
+/* ✅ Acessibilidade aprimorada */
+/* ✅ Animações e transições suaves */
