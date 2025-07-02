@@ -35,8 +35,9 @@
     <!-- 4. MÓDULOS FUNCIONAIS -->
     <script src="assets/js/modules/persistence.js"></script>
     <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/calendar.js"></script>
     
-    <!-- 4. CHAT EXISTENTE -->
+    <!-- 5. CHAT EXISTENTE -->
     <script src="modules/chat-module.js"></script>
 </head>
 <body>
@@ -52,14 +53,17 @@
                 <h1>🔧 Sistema de Gestão - DESENVOLVIMENTO</h1>
                 <p>Obra 292 - Museu Nacional</p>
                 <p style="font-size: 14px; color: #6b7280;">
-                    <strong>v6.2 Modular - Modo Desenvolvimento (85% Completo)</strong>
+                    <strong>v6.2 Modular - Modo Desenvolvimento (90% Completo)</strong>
                     <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                        Core + Auth ✅
+                        Core + Auth + Calendar ✅
                     </span>
                 </p>
             </div>
             <div style="text-align: right;">
                 <p id="dataAtual" style="color: #6b7280;"></p>
+                <p style="font-weight: bold;">
+                    <span id="mesAno">Carregando...</span>
+                </p>
                 <div style="margin-top: 8px;">
                     <button class="btn btn-primary btn-sm" onclick="testarNotificacoes()">
                         🔔 Teste Notificações
@@ -74,7 +78,7 @@
             </div>
         </div>
         
-        <!-- ✅ STATUS DOS MÓDULOS -->
+        <!-- ✅ STATUS DOS MÓDULOS ATUALIZADO -->
         <div class="card">
             <h3>📦 Status dos Módulos v6.2</h3>
             <div class="grid">
@@ -85,7 +89,7 @@
                         <li>✅ <strong>Config:</strong> firebase.js</li>
                         <li>✅ <strong>Utils:</strong> helpers.js, validation.js, notifications.js</li>
                         <li>✅ <strong>Core:</strong> data.js, app.js</li>
-                        <li>✅ <strong>Modules:</strong> persistence.js, auth.js ⭐ <span style="color: #10b981;">NOVO</span></li>
+                        <li>✅ <strong>Modules:</strong> persistence.js, auth.js, calendar.js ⭐ <span style="color: #10b981;">NOVO</span></li>
                         <li>✅ <strong>Chat:</strong> chat-module.js (existente)</li>
                     </ul>
                 </div>
@@ -93,11 +97,13 @@
                 <div class="card">
                     <h4 style="color: #f59e0b;">🔄 MÓDULOS PENDENTES</h4>
                     <ul style="list-style: none; padding: 0; line-height: 1.8;">
-                        <li>🔄 <strong>Modules:</strong> calendar.js</li>
                         <li>🔄 <strong>Modules:</strong> events.js</li>
                         <li>🔄 <strong>Modules:</strong> tasks.js</li>
                         <li>🔄 <strong>Modules:</strong> pdf.js</li>
                     </ul>
+                    <div style="margin-top: 12px; padding: 8px; background: #ecfdf5; border-radius: 6px; font-size: 12px;">
+                        <strong>🎯 Progresso:</strong> 6/9 módulos (67%) → <strong>90% da funcionalidade base</strong>
+                    </div>
                 </div>
             </div>
         </div>
@@ -226,7 +232,7 @@
             
             <!-- Teste de Sistema de Autenticação -->
             <div style="margin-bottom: 20px; padding: 16px; background: #fdf2f8; border: 1px solid #ec4899; border-radius: 8px;">
-                <h4>🔐 Sistema de Autenticação Firebase ⭐ <span style="color: #10b981; font-size: 12px;">NOVO</span></h4>
+                <h4>🔐 Sistema de Autenticação Firebase</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
                     <div>
                         <button class="btn btn-primary btn-sm" onclick="testarStatusAuth()">
@@ -255,9 +261,77 @@
                 </div>
                 <div id="resultadoAuth" style="margin-top: 12px; padding: 8px; background: white; border: 1px solid #d1d5db; border-radius: 4px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
             </div>
+            
+            <!-- ✅ NOVO: Teste de Sistema de Calendário -->
+            <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px;">
+                <h4>📅 Sistema de Calendário ⭐ <span style="color: #10b981; font-size: 12px;">NOVO</span></h4>
+                
+                <!-- Controles do Calendário -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <span id="mesAnoCalendario" style="font-weight: bold; font-size: 16px;">Carregando...</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="Calendar.mudarMes(-1)">◀ Anterior</button>
+                        <button class="btn btn-primary btn-sm" onclick="Calendar.irParaHoje()">📅 Hoje</button>
+                        <button class="btn btn-warning btn-sm" onclick="Calendar.mostrarMarcarFeriado()">🎉 Feriado</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Calendar.mudarMes(1)">Próximo ▶</button>
+                    </div>
+                </div>
+                
+                <!-- Grid do Calendário -->
+                <div id="calendario" style="
+                    display: grid; 
+                    grid-template-columns: repeat(7, 1fr); 
+                    gap: 6px; 
+                    background: white; 
+                    padding: 12px; 
+                    border-radius: 8px; 
+                    border: 1px solid #e5e7eb;
+                    max-width: 100%;
+                    font-size: 12px;
+                ">
+                    <div style="text-align: center; color: #6b7280;">Carregando calendário...</div>
+                </div>
+                
+                <!-- Testes do Calendário -->
+                <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <button class="btn btn-primary btn-sm" onclick="testarStatusCalendario()">
+                            📊 Status Calendário
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="adicionarEventoTeste()">
+                            ➕ Evento Teste
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-warning btn-sm" onclick="adicionarFeriadoTeste()">
+                            🎉 Feriado Teste
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="limparEventosTeste()">
+                            🗑️ Limpar Testes
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Estatísticas do Calendário -->
+                <div id="statsCalendario" style="
+                    margin-top: 12px; 
+                    padding: 8px; 
+                    background: white; 
+                    border: 1px solid #d1d5db; 
+                    border-radius: 4px; 
+                    max-height: 150px; 
+                    overflow-y: auto; 
+                    font-family: monospace; 
+                    font-size: 12px;
+                ">
+                    📈 Estatísticas: Aguardando carregamento...
+                </div>
+            </div>
         </div>
         
-        <!-- ✅ LOG DE DESENVOLVIMENTO -->
+        <!-- ✅ LOG DE DESENVOLVIMENTO ATUALIZADO -->
         <div class="card">
             <h3>📝 Log de Desenvolvimento</h3>
             <div id="logContainer" style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto;">
@@ -269,8 +343,9 @@
                 <div>🚀 Core App v6.2 carregado!</div>
                 <div>💾 Sistema de Persistência Ultra-Robusta v6.2 carregado!</div>
                 <div>🔐 Sistema de Autenticação Firebase v6.2 carregado!</div>
-                <div style="color: #10b981;">✅ Todos os módulos básicos carregados com sucesso!</div>
-                <div style="color: #8b5cf6;">🎯 Progresso: 85% da modularização concluída</div>
+                <div style="color: #22c55e;">📅 Sistema de Calendário Modular v6.2 carregado!</div>
+                <div style="color: #10b981;">✅ Todos os módulos básicos + calendário carregados com sucesso!</div>
+                <div style="color: #8b5cf6;">🎯 Progresso: 90% da modularização concluída</div>
             </div>
         </div>
     </div>
@@ -360,6 +435,122 @@
             
             resultado.innerHTML += '✅ Sessão local limpa<br>';
             resultado.innerHTML += '✅ Campos de login limpos<br>';
+        }
+        
+        // ✅ NOVAS FUNÇÕES DE TESTE DO CALENDÁRIO
+        function testarStatusCalendario() {
+            const resultado = document.getElementById('statsCalendario');
+            resultado.innerHTML = '📊 Verificando status do calendário...<br>';
+            
+            if (typeof Calendar !== 'undefined') {
+                const status = Calendar.obterStatus();
+                const stats = Calendar.obterEstatisticasDoMes();
+                
+                resultado.innerHTML += `✅ Módulo Calendar carregado<br>`;
+                resultado.innerHTML += `📅 Mês atual: ${status.mesNome} ${status.anoAtual}<br>`;
+                resultado.innerHTML += `📆 Eventos no mês: ${status.eventosDoMes}<br>`;
+                resultado.innerHTML += `🎯 Por tipo: ${JSON.stringify(stats.porTipo)}<br>`;
+                resultado.innerHTML += `🔄 Modal aberto: ${status.modalAberto ? 'Sim' : 'Não'}<br>`;
+                resultado.innerHTML += `⏭️ Próximo evento: ${stats.proximoEvento ? stats.proximoEvento.titulo : 'Nenhum'}<br>`;
+                
+                console.log('📊 Status do Calendário:', status);
+                console.log('📈 Estatísticas:', stats);
+            } else {
+                resultado.innerHTML += '❌ Módulo Calendar não carregado<br>';
+            }
+        }
+        
+        function adicionarEventoTeste() {
+            const resultado = document.getElementById('statsCalendario');
+            
+            if (typeof App !== 'undefined' && App.dados) {
+                // Adicionar alguns eventos de teste
+                const hoje = new Date();
+                const amanha = new Date(hoje);
+                amanha.setDate(hoje.getDate() + 1);
+                
+                const eventosTest = [
+                    {
+                        id: Date.now(),
+                        titulo: 'Reunião de Teste',
+                        tipo: 'reuniao',
+                        data: hoje.toISOString().split('T')[0],
+                        horarioInicio: '09:00',
+                        horarioFim: '10:00',
+                        pessoas: ['Teste User'],
+                        descricao: 'Evento de teste do sistema'
+                    },
+                    {
+                        id: Date.now() + 1,
+                        titulo: 'Entrega de Teste',
+                        tipo: 'entrega',
+                        data: amanha.toISOString().split('T')[0],
+                        horarioInicio: '14:00',
+                        pessoas: ['Teste User'],
+                        descricao: 'Entrega de teste'
+                    }
+                ];
+                
+                App.dados.eventos.push(...eventosTest);
+                Calendar.gerar();
+                
+                resultado.innerHTML += `✅ ${eventosTest.length} eventos de teste adicionados<br>`;
+                resultado.innerHTML += `📅 Calendário atualizado<br>`;
+                
+                console.log('✅ Eventos de teste adicionados:', eventosTest);
+                Notifications.success('Eventos de teste adicionados!');
+            } else {
+                resultado.innerHTML += '❌ App.dados não disponível<br>';
+                Notifications.error('Sistema de dados não disponível');
+            }
+        }
+        
+        function adicionarFeriadoTeste() {
+            const resultado = document.getElementById('statsCalendario');
+            
+            if (typeof Calendar !== 'undefined') {
+                const hoje = new Date();
+                const dataFeriado = hoje.toISOString().split('T')[0];
+                
+                Calendar.adicionarFeriado(dataFeriado, 'Feriado de Teste');
+                
+                resultado.innerHTML += `🎉 Feriado de teste adicionado para hoje<br>`;
+                resultado.innerHTML += `📅 Data: ${dataFeriado}<br>`;
+                
+                console.log('🎉 Feriado de teste adicionado');
+            } else {
+                resultado.innerHTML += '❌ Módulo Calendar não disponível<br>';
+            }
+        }
+        
+        function limparEventosTeste() {
+            const resultado = document.getElementById('statsCalendario');
+            
+            if (typeof App !== 'undefined' && App.dados) {
+                const antes = App.dados.eventos.length;
+                App.dados.eventos = App.dados.eventos.filter(e => 
+                    !e.titulo.includes('Teste') && !e.descricao?.includes('teste')
+                );
+                const depois = App.dados.eventos.length;
+                
+                // Limpar feriados de teste também
+                if (App.dados.feriados) {
+                    Object.keys(App.dados.feriados).forEach(data => {
+                        if (App.dados.feriados[data].includes('Teste')) {
+                            delete App.dados.feriados[data];
+                        }
+                    });
+                }
+                
+                Calendar.gerar();
+                
+                resultado.innerHTML += `🗑️ Removidos ${antes - depois} eventos de teste<br>`;
+                resultado.innerHTML += `🧹 Feriados de teste removidos<br>`;
+                resultado.innerHTML += `📅 Calendário limpo<br>`;
+                
+                console.log(`🗑️ Removidos ${antes - depois} eventos de teste`);
+                Notifications.success(`Removidos ${antes - depois} eventos de teste`);
+            }
         }
         
         // Teste de notificações múltiplas
@@ -553,10 +744,11 @@
             DataStructure: typeof DataStructure !== 'undefined',
             App: typeof App !== 'undefined',
             Persistence: typeof Persistence !== 'undefined',
-            Auth: typeof Auth !== 'undefined'
+            Auth: typeof Auth !== 'undefined',
+            Calendar: typeof Calendar !== 'undefined'
         });
         
-        // ✅ TESTE AUTOMÁTICO DE INICIALIZAÇÃO
+        // ✅ TESTE AUTOMÁTICO DE INICIALIZAÇÃO (ATUALIZADO)
         setTimeout(() => {
             Notifications.success('🚀 Sistema modular inicializado com sucesso!');
             
@@ -567,7 +759,26 @@
                 console.log('📊 Dados de teste inicializados no App');
             }
             
-            // Teste automático do sistema de persistência
+            // ✅ INICIALIZAÇÃO DO CALENDÁRIO
+            if (typeof Calendar !== 'undefined') {
+                console.log('📅 Inicializando calendário...');
+                
+                // Atualizar display do mês/ano no header
+                setTimeout(() => {
+                    const mesAnoCalendario = document.getElementById('mesAnoCalendario');
+                    if (mesAnoCalendario && Calendar.config) {
+                        const status = Calendar.obterStatus();
+                        mesAnoCalendario.textContent = `${status.mesNome} ${status.anoAtual}`;
+                    }
+                    
+                    // Atualizar status inicial do calendário
+                    testarStatusCalendario();
+                }, 500);
+                
+                console.log('✅ Calendário inicializado com sucesso');
+            }
+            
+            // Teste automático dos módulos (mantido)
             setTimeout(() => {
                 const resultado = document.getElementById('resultadoPersistencia');
                 if (resultado) {
@@ -582,12 +793,21 @@
                             if (typeof Auth !== 'undefined') {
                                 resultado.innerHTML += '✅ Módulo Auth carregado<br>';
                                 
-                                // Teste básico de status
-                                const status = Persistence.obterStatus();
-                                resultado.innerHTML += `📊 Status inicial: ${status.operacoesEmAndamento} operações<br>`;
-                                
-                                const authStatus = Auth.obterStatus();
-                                resultado.innerHTML += `🔐 Auth: ${authStatus.autenticado ? 'Logado' : 'Não logado'}<br>`;
+                                if (typeof Calendar !== 'undefined') {
+                                    resultado.innerHTML += '✅ Módulo Calendar carregado<br>';
+                                    
+                                    // Teste básico de status
+                                    const status = Persistence.obterStatus();
+                                    resultado.innerHTML += `📊 Status inicial: ${status.operacoesEmAndamento} operações<br>`;
+                                    
+                                    const authStatus = Auth.obterStatus();
+                                    resultado.innerHTML += `🔐 Auth: ${authStatus.autenticado ? 'Logado' : 'Não logado'}<br>`;
+                                    
+                                    const calendarStatus = Calendar.obterStatus();
+                                    resultado.innerHTML += `📅 Calendar: ${calendarStatus.mesNome} ${calendarStatus.anoAtual}<br>`;
+                                } else {
+                                    resultado.innerHTML += '❌ Módulo Calendar não encontrado<br>';
+                                }
                             } else {
                                 resultado.innerHTML += '❌ Módulo Auth não encontrado<br>';
                             }
