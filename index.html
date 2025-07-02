@@ -658,7 +658,7 @@
         <div class="header-content">
             <div class="logo-section">
                 <div class="logo-container">
-                    <img src="assets/img/logo.png" alt="BIAPO" id="logoBiapo">
+                    <img src="assets/img/Logo-biapo.jpg" alt="BIAPO" id="logoBiapo">
                 </div>
                 <div class="titulo-section">
                     <h1>Gestão Integrada</h1>
@@ -696,8 +696,11 @@
                 <button class="btn-acao secundario" onclick="Calendar.exportarPDF()">
                     📄 Exportar PDF
                 </button>
+                <button class="btn-acao secundario" onclick="mostrarOpcoesLimpeza()">
+                    🧹 Limpeza
+                </button>
                 <button class="btn-acao secundario" onclick="resetarSistema()">
-                    🔄 Reset Sistema
+                    🔄 Reset Total
                 </button>
             </div>
         </section>
@@ -817,6 +820,40 @@
         </div>
     </div>
 
+    <!-- ✅ MODAL OPÇÕES DE LIMPEZA -->
+    <div id="modalLimpeza" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-titulo">🧹 Opções de Limpeza</h2>
+                <button class="modal-close" onclick="fecharModalLimpeza()">&times;</button>
+            </div>
+            <div style="padding: 20px 0;">
+                <p style="margin-bottom: 24px; color: #6b7280;">Escolha o que deseja limpar do sistema:</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn-acao secundario" onclick="limparEventos()" style="justify-content: flex-start;">
+                        📅 Limpar Todos os Eventos
+                    </button>
+                    <button class="btn-acao secundario" onclick="limparTarefas()" style="justify-content: flex-start;">
+                        📝 Limpar Todas as Tarefas
+                    </button>
+                    <button class="btn-acao secundario" onclick="limparFeriados()" style="justify-content: flex-start;">
+                        🎉 Limpar Todos os Feriados
+                    </button>
+                    <button class="btn-acao secundario" onclick="limparTudo()" style="justify-content: flex-start; border: 2px solid #ef4444; color: #ef4444;">
+                        🗑️ Limpar Tudo (Eventos + Tarefas + Feriados)
+                    </button>
+                </div>
+                
+                <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                    <button class="btn-acao primario" onclick="fecharModalLimpeza()" style="width: 100%;">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ✅ VARIÁVEIS GLOBAIS
         let mostrarTarefasNoCalendario = false;
@@ -838,11 +875,6 @@
         
         // ✅ FUNÇÃO DE INICIALIZAÇÃO
         function inicializarSistema() {
-            // Reset completo para começar limpo
-            if (dadosLimpos) {
-                resetarDadosCompleto();
-            }
-            
             setTimeout(() => {
                 // Inicializar dados básicos
                 if (typeof App !== 'undefined' && typeof DataStructure !== 'undefined') {
@@ -861,8 +893,24 @@
                     }
                 }
                 
-                // Gerar calendário
+                // Garantir arrays limpos na memória
+                if (typeof Events !== 'undefined') {
+                    if (!Events.eventos || !Array.isArray(Events.eventos)) {
+                        Events.eventos = [];
+                    }
+                }
+                
+                if (typeof Tasks !== 'undefined') {
+                    if (!Tasks.tarefas || !Array.isArray(Tasks.tarefas)) {
+                        Tasks.tarefas = [];
+                    }
+                }
+                
                 if (typeof Calendar !== 'undefined') {
+                    if (!Calendar.feriados || !Array.isArray(Calendar.feriados)) {
+                        Calendar.feriados = [];
+                    }
+                    // Gerar calendário sempre
                     Calendar.gerar();
                     console.log('📅 Calendário gerado');
                 }
@@ -884,37 +932,61 @@
         
         // ✅ RESET COMPLETO DO SISTEMA
         function resetarSistema() {
-            if (confirm('🔄 Deseja realmente resetar todos os dados do sistema?\n\nIsto irá remover todos os eventos, tarefas e configurações.')) {
+            if (confirm('🔄 Deseja realmente resetar todos os dados do sistema?\n\nIsto irá remover TODOS os eventos, tarefas, feriados e configurações.')) {
                 resetarDadosCompleto();
                 
                 // Recarregar a página para garantir estado limpo
                 setTimeout(() => {
                     if (typeof Notifications !== 'undefined') {
-                        Notifications.success('🔄 Sistema resetado com sucesso!');
+                        Notifications.success('🔄 Sistema resetado com sucesso! Recarregando...');
                     }
                     setTimeout(() => {
                         window.location.reload();
-                    }, 1500);
-                }, 500);
+                    }, 1000);
+                }, 300);
             }
         }
         
         function resetarDadosCompleto() {
             try {
-                // Limpar localStorage
+                // Limpar TODOS os dados do localStorage
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.includes('sistema') || key.includes('gestao') || key.includes('calendar') || key.includes('events') || key.includes('tasks')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                
+                // Força limpeza de chaves específicas
                 localStorage.removeItem('sistemaGestao_dados');
                 localStorage.removeItem('sistemaGestao_backup');
                 localStorage.removeItem('sistemaGestao_config');
+                localStorage.removeItem('calendar_data');
+                localStorage.removeItem('events_data');
+                localStorage.removeItem('tasks_data');
+                localStorage.removeItem('feriados_data');
                 
-                // Limpar sessionStorage
+                // Limpar sessionStorage completamente
                 sessionStorage.clear();
                 
-                // Resetar dados na memória se existirem
+                // Resetar dados na memória
                 if (typeof App !== 'undefined') {
                     App.dados = null;
                 }
                 
-                console.log('🧹 Dados resetados completamente');
+                if (typeof Events !== 'undefined') {
+                    Events.eventos = [];
+                }
+                
+                if (typeof Tasks !== 'undefined') {
+                    Tasks.tarefas = [];
+                }
+                
+                if (typeof Calendar !== 'undefined') {
+                    Calendar.feriados = [];
+                }
+                
+                console.log('🧹 TODOS os dados foram resetados completamente');
                 dadosLimpos = true;
                 
             } catch (error) {
@@ -997,17 +1069,43 @@
         function atualizarProximosEventos() {
             try {
                 const container = document.getElementById('proximosEventos');
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 20px; color: #6b7280;">
-                        <p>🎯 Nenhum evento cadastrado</p>
-                        <button class="btn-acao primario" onclick="Events.mostrarNovoEvento()" style="font-size: 12px; padding: 8px 12px;">
-                            ➕ Criar Primeiro Evento
-                        </button>
-                    </div>
-                `;
+                
+                // Verificar se existe sistema de eventos e se há eventos
+                if (typeof Events !== 'undefined' && Events.obterProximosEventos) {
+                    const proximos = Events.obterProximosEventos(5);
+                    
+                    if (proximos && proximos.length > 0) {
+                        container.innerHTML = proximos.map(evento => `
+                            <div class="evento-item ${evento.tipo}" onclick="Events.editarEvento && Events.editarEvento(${evento.id})">
+                                <button class="btn-excluir" onclick="excluirEvento(${evento.id}, event)" title="Excluir evento">×</button>
+                                <p class="evento-titulo">${evento.titulo}</p>
+                                <p class="evento-data">${new Date(evento.data).toLocaleDateString('pt-BR')} ${evento.horarioInicio ? '- ' + evento.horarioInicio : ''}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 20px; color: #6b7280;">
+                                <p style="margin: 0;">📅 Nenhum evento próximo</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #6b7280;">
+                            <p style="margin: 0;">📅 Sistema de eventos carregando...</p>
+                        </div>
+                    `;
+                }
+                
                 console.log('📅 Próximos eventos atualizados');
             } catch (error) {
                 console.warn('⚠️ Erro ao atualizar próximos eventos:', error);
+                const container = document.getElementById('proximosEventos');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #6b7280;">
+                        <p style="margin: 0;">📅 Aguardando eventos...</p>
+                    </div>
+                `;
             }
         }
         
@@ -1023,14 +1121,19 @@
             document.getElementById('statusSistema').className = 'status-ok';
         }
         
-        // ✅ FUNÇÃO PARA EXCLUIR EVENTO
+        // ✅ FUNÇÃO PARA EXCLUIR EVENTO INDIVIDUAL
         function excluirEvento(eventoId, event) {
             event.stopPropagation(); // Evitar abrir modal de detalhes
             
             if (confirm('❌ Deseja realmente excluir este evento?')) {
                 try {
-                    if (typeof Events !== 'undefined') {
+                    if (typeof Events !== 'undefined' && Events.excluir) {
                         Events.excluir(eventoId);
+                        
+                        // Regenerar calendário e atualizar interface
+                        if (typeof Calendar !== 'undefined') {
+                            Calendar.gerar();
+                        }
                         atualizarInterface();
                         
                         if (typeof Notifications !== 'undefined') {
@@ -1042,6 +1145,129 @@
                     if (typeof Notifications !== 'undefined') {
                         Notifications.error('❌ Erro ao excluir evento');
                     }
+                }
+            }
+        }
+        
+        // ✅ FUNÇÕES DE LIMPEZA ESPECÍFICA
+        function mostrarOpcoesLimpeza() {
+            document.getElementById('modalLimpeza').style.display = 'block';
+        }
+        
+        function fecharModalLimpeza() {
+            document.getElementById('modalLimpeza').style.display = 'none';
+        }
+        
+        function limparEventos() {
+            if (confirm('📅 Deseja realmente excluir TODOS os eventos?\n\nEsta ação não pode ser desfeita.')) {
+                try {
+                    // Limpar eventos do localStorage
+                    localStorage.removeItem('events_data');
+                    localStorage.removeItem('sistemaGestao_eventos');
+                    
+                    // Limpar eventos da memória
+                    if (typeof Events !== 'undefined') {
+                        Events.eventos = [];
+                    }
+                    
+                    // Regenerar calendário e atualizar interface
+                    if (typeof Calendar !== 'undefined') {
+                        Calendar.gerar();
+                    }
+                    atualizarInterface();
+                    fecharModalLimpeza();
+                    
+                    if (typeof Notifications !== 'undefined') {
+                        Notifications.success('📅 Todos os eventos foram removidos!');
+                    }
+                    
+                    console.log('📅 Eventos limpos');
+                } catch (error) {
+                    console.warn('⚠️ Erro ao limpar eventos:', error);
+                }
+            }
+        }
+        
+        function limparTarefas() {
+            if (confirm('📝 Deseja realmente excluir TODAS as tarefas?\n\nEsta ação não pode ser desfeita.')) {
+                try {
+                    // Limpar tarefas do localStorage
+                    localStorage.removeItem('tasks_data');
+                    localStorage.removeItem('sistemaGestao_tarefas');
+                    
+                    // Limpar tarefas da memória
+                    if (typeof Tasks !== 'undefined') {
+                        Tasks.tarefas = [];
+                    }
+                    
+                    // Regenerar calendário e atualizar interface
+                    if (typeof Calendar !== 'undefined') {
+                        Calendar.gerar();
+                    }
+                    atualizarInterface();
+                    fecharModalLimpeza();
+                    
+                    if (typeof Notifications !== 'undefined') {
+                        Notifications.success('📝 Todas as tarefas foram removidas!');
+                    }
+                    
+                    console.log('📝 Tarefas limpas');
+                } catch (error) {
+                    console.warn('⚠️ Erro ao limpar tarefas:', error);
+                }
+            }
+        }
+        
+        function limparFeriados() {
+            if (confirm('🎉 Deseja realmente excluir TODOS os feriados?\n\nEsta ação não pode ser desfeita.')) {
+                try {
+                    // Limpar feriados do localStorage
+                    localStorage.removeItem('feriados_data');
+                    localStorage.removeItem('sistemaGestao_feriados');
+                    
+                    // Limpar feriados da memória
+                    if (typeof Calendar !== 'undefined') {
+                        Calendar.feriados = [];
+                    }
+                    
+                    // Regenerar calendário e atualizar interface
+                    if (typeof Calendar !== 'undefined') {
+                        Calendar.gerar();
+                    }
+                    atualizarInterface();
+                    fecharModalLimpeza();
+                    
+                    if (typeof Notifications !== 'undefined') {
+                        Notifications.success('🎉 Todos os feriados foram removidos!');
+                    }
+                    
+                    console.log('🎉 Feriados limpos');
+                } catch (error) {
+                    console.warn('⚠️ Erro ao limpar feriados:', error);
+                }
+            }
+        }
+        
+        function limparTudo() {
+            if (confirm('🗑️ ATENÇÃO: Deseja realmente excluir TODOS os dados?\n\n• Todos os eventos\n• Todas as tarefas\n• Todos os feriados\n\nEsta ação não pode ser desfeita!')) {
+                try {
+                    // Executar todas as limpezas
+                    resetarDadosCompleto();
+                    
+                    fecharModalLimpeza();
+                    
+                    if (typeof Notifications !== 'undefined') {
+                        Notifications.success('🗑️ Todos os dados foram removidos! Recarregando...');
+                    }
+                    
+                    // Recarregar página
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                    
+                    console.log('🗑️ Todos os dados limpos');
+                } catch (error) {
+                    console.warn('⚠️ Erro ao limpar tudo:', error);
                 }
             }
         }
@@ -1106,11 +1332,16 @@
         
         // ✅ EVENT LISTENERS
         
-        // Fechar modal ao clicar fora
+        // Fechar modais ao clicar fora
         window.onclick = function(event) {
-            const modal = document.getElementById('modalDetalhesDia');
-            if (event.target === modal) {
+            const modalDetalhes = document.getElementById('modalDetalhesDia');
+            const modalLimpeza = document.getElementById('modalLimpeza');
+            
+            if (event.target === modalDetalhes) {
                 fecharModalDetalhesDia();
+            }
+            if (event.target === modalLimpeza) {
+                fecharModalLimpeza();
             }
         }
         
