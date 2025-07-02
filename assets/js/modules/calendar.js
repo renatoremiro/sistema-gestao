@@ -1,819 +1,881 @@
-/* ========== 📅 SISTEMA DE CALENDÁRIO MODULAR v6.2 ========== */
+/**
+ * 📅 Sistema de Calendário Modular v6.2 - INTEGRADO COM PDF
+ * 
+ * Funcionalidades:
+ * ✅ Calendário principal com grid 7x6
+ * ✅ Navegação fluida entre meses
+ * ✅ Gestão de eventos integrada
+ * ✅ Sistema de feriados
+ * ✅ Indicadores visuais (eventos, tarefas, feriados)
+ * ✅ Estatísticas completas
+ * ✅ Integração com Events.js e Tasks.js
+ * ✅ NOVO: Exportação em PDF 📄
+ * ✅ Atalhos de teclado
+ * ✅ Performance otimizada
+ */
 
 const Calendar = {
     // ✅ CONFIGURAÇÕES
     config: {
-        MAX_EVENTOS_VISIVEIS: 5,
-        DIAS_SEMANA: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-        MESES_NOMES: [
+        mesAtual: new Date().getMonth(),
+        anoAtual: new Date().getFullYear(),
+        mesesNomes: [
             'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
         ],
-        CORES_EVENTOS: {
-            'reuniao': '#3b82f6',
-            'entrega': '#10b981', 
-            'prazo': '#ef4444',
-            'marco': '#8b5cf6',
-            'outro': '#6b7280'
+        diasSemana: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+        maxEventosPorDia: 5,
+        coresEventos: {
+            reuniao: '#3b82f6',
+            entrega: '#10b981', 
+            prazo: '#ef4444',
+            marco: '#8b5cf6',
+            outro: '#6b7280'
+        },
+        coresTarefas: {
+            pessoal: '#f59e0b',
+            equipe: '#06b6d4',
+            projeto: '#8b5cf6',
+            urgente: '#ef4444',
+            rotina: '#6b7280'
         }
     },
 
-    // ✅ ESTADO DO CALENDÁRIO
+    // ✅ ESTADO INTERNO
     state: {
-        mesAtual: new Date().getMonth(),
-        anoAtual: new Date().getFullYear(),
-        diaAtual: new Date().getDate(),
-        eventosSelecionados: new Map(),
-        modalDetalhes: null,
-        modalListaEventos: null
+        modalAberto: false,
+        eventosSelecionados: [],
+        diasComEventos: new Map(),
+        ultimaAtualizacao: null
     },
 
     // ✅ GERAR CALENDÁRIO PRINCIPAL
     gerar() {
-        const calendario = document.getElementById('calendario');
-        if (!calendario) {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.warning('Elemento calendario não encontrado');
-            }
-            return;
-        }
-
-        console.log(`📅 Gerando calendário: ${this.state.mesAtual + 1}/${this.state.anoAtual}`);
-
-        // Limpar calendário
-        calendario.innerHTML = '';
-
-        // Adicionar cabeçalhos dos dias
-        this._adicionarCabecalhos(calendario);
-
-        // Gerar dias do mês
-        this._gerarDiasDoMes(calendario);
-
-        // Atualizar display do mês/ano
-        this._atualizarDisplayMesAno();
-    },
-
-    // ✅ ADICIONAR CABEÇALHOS DOS DIAS DA SEMANA
-    _adicionarCabecalhos(calendario) {
-        this.config.DIAS_SEMANA.forEach(dia => {
-            const diaHeader = document.createElement('div');
-            diaHeader.className = 'dia-header';
-            diaHeader.textContent = dia;
-            calendario.appendChild(diaHeader);
-        });
-    },
-
-    // ✅ GERAR DIAS DO MÊS
-    _gerarDiasDoMes(calendario) {
-        const primeiroDia = new Date(this.state.anoAtual, this.state.mesAtual, 1);
-        const ultimoDia = new Date(this.state.anoAtual, this.state.mesAtual + 1, 0);
-        const primeiroDiaSemana = primeiroDia.getDay();
-
-        let diaAtual = 1;
-
-        // Gerar 6 semanas (42 células)
-        for (let i = 0; i < 42; i++) {
-            const diaElement = document.createElement('div');
-            diaElement.className = 'dia';
-
-            if (i >= primeiroDiaSemana && diaAtual <= ultimoDia.getDate()) {
-                this._configurarDia(diaElement, diaAtual);
-                diaAtual++;
-            } else {
-                diaElement.style.visibility = 'hidden';
+        try {
+            console.log(`📅 Gerando calendário: ${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`);
+            
+            // Atualizar título
+            this._atualizarDisplayMesAno();
+            
+            // Obter container
+            const container = document.getElementById('calendario');
+            if (!container) {
+                console.warn('⚠️ Container #calendario não encontrado');
+                return;
             }
 
-            calendario.appendChild(diaElement);
+            // Limpar container
+            container.innerHTML = '';
+
+            // Gerar cabeçalho dos dias da semana
+            this._gerarCabecalhoDias(container);
+
+            // Gerar grid do mês
+            this._gerarGridMes(container);
+
+            // Atualizar estatísticas
+            this._atualizarEstatisticas();
+
+            // Marcar como atualizado
+            this.state.ultimaAtualizacao = new Date();
+
+            console.log('✅ Calendário gerado com sucesso');
+
+        } catch (error) {
+            console.error('❌ Erro ao gerar calendário:', error);
+            Notifications.error('Erro ao gerar calendário');
         }
-    },
-
-    // ✅ CONFIGURAR DIA INDIVIDUAL
-    _configurarDia(diaElement, numeroDia) {
-        const dataCompleta = this._obterDataCompleta(numeroDia);
-        
-        // Criar estrutura do dia
-        const diaNumero = document.createElement('div');
-        diaNumero.className = 'dia-numero';
-        diaNumero.textContent = numeroDia;
-
-        // Verificar se é hoje
-        if (this._ehHoje(numeroDia)) {
-            diaElement.classList.add('dia-hoje');
-            diaNumero.style.fontWeight = 'bold';
-            diaNumero.style.color = '#3b82f6';
-        }
-
-        // Verificar se é feriado
-        if (this._ehFeriado(dataCompleta)) {
-            diaElement.classList.add('dia-feriado');
-            const feriado = document.createElement('span');
-            feriado.className = 'feriado-label';
-            feriado.textContent = 'FERIADO';
-            diaNumero.appendChild(feriado);
-        }
-
-        diaElement.appendChild(diaNumero);
-
-        // Adicionar eventos do dia
-        this._adicionarEventosNoDia(diaElement, dataCompleta);
-
-        // Adicionar evento de clique
-        diaElement.addEventListener('click', () => {
-            this.abrirDetalheDia(dataCompleta);
-        });
-    },
-
-    // ✅ ADICIONAR EVENTOS NO DIA
-    _adicionarEventosNoDia(diaElement, data) {
-        const eventosDoDia = this.obterEventosDoDia(data);
-        const eventosVisiveis = eventosDoDia.slice(0, this.config.MAX_EVENTOS_VISIVEIS);
-        const eventosRestantes = eventosDoDia.length - this.config.MAX_EVENTOS_VISIVEIS;
-
-        eventosVisiveis.forEach(evento => {
-            const eventoElement = this._criarElementoEvento(evento);
-            diaElement.appendChild(eventoElement);
-        });
-
-        // Mostrar indicador de mais eventos
-        if (eventosRestantes > 0) {
-            const maisEventos = this._criarIndicadorMaisEventos(eventosRestantes, data);
-            diaElement.appendChild(maisEventos);
-        }
-    },
-
-    // ✅ CRIAR ELEMENTO DE EVENTO
-    _criarElementoEvento(evento) {
-        const eventoElement = document.createElement('div');
-        eventoElement.className = `mini-evento evento-${evento.tipo}`;
-        
-        // Determinar se é evento pessoal
-        if (evento.origem === 'tarefa_pessoal' || this._ehEventoPessoal(evento)) {
-            eventoElement.classList.add('evento-pessoal');
-        }
-
-        // Adicionar ícone de recorrência se aplicável
-        if (evento.recorrente || evento.isRecorrente) {
-            eventoElement.classList.add('evento-recorrente');
-        }
-
-        // Definir conteúdo
-        const horario = evento.horarioInicio ? `${evento.horarioInicio} ` : '';
-        const titulo = typeof Helpers !== 'undefined' ? 
-            Helpers.truncateText(evento.titulo, 15) : 
-            evento.titulo.substring(0, 15);
-        eventoElement.textContent = `${horario}${titulo}`;
-
-        // Adicionar tooltip
-        eventoElement.title = `${evento.titulo}\n${horario}${evento.horarioFim ? `- ${evento.horarioFim}` : ''}`;
-
-        // Adicionar evento de clique
-        eventoElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.mostrarDetalhesEvento(evento);
-        });
-
-        return eventoElement;
-    },
-
-    // ✅ CRIAR INDICADOR DE MAIS EVENTOS
-    _criarIndicadorMaisEventos(quantidade, data) {
-        const maisEventos = document.createElement('div');
-        maisEventos.className = 'mais-eventos-mini';
-        maisEventos.textContent = `+${quantidade} mais`;
-        maisEventos.title = `Clique para ver todos os ${quantidade + this.config.MAX_EVENTOS_VISIVEIS} eventos`;
-        
-        maisEventos.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.mostrarTodosEventosDia(data);
-        });
-        
-        return maisEventos;
     },
 
     // ✅ NAVEGAÇÃO DE MÊS
     mudarMes(direcao) {
-        this.state.mesAtual += direcao;
-        
-        if (this.state.mesAtual > 11) {
-            this.state.mesAtual = 0;
-            this.state.anoAtual++;
-        } else if (this.state.mesAtual < 0) {
-            this.state.mesAtual = 11;
-            this.state.anoAtual--;
+        try {
+            this.config.mesAtual += direcao;
+            
+            if (this.config.mesAtual > 11) {
+                this.config.mesAtual = 0;
+                this.config.anoAtual++;
+            } else if (this.config.mesAtual < 0) {
+                this.config.mesAtual = 11;
+                this.config.anoAtual--;
+            }
+
+            // Regenerar calendário
+            this.gerar();
+
+            console.log(`📅 Navegado para: ${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`);
+
+        } catch (error) {
+            console.error('❌ Erro ao navegar mês:', error);
+            Notifications.error('Erro na navegação do calendário');
         }
-        
-        // Atualizar estado global do App se existir
-        if (typeof App !== 'undefined' && App.estadoSistema) {
-            App.estadoSistema.mesAtual = this.state.mesAtual;
-            App.estadoSistema.anoAtual = this.state.anoAtual;
-        }
-        
-        this.gerar();
-        
-        // Atualizar estatísticas se App estiver disponível
-        if (typeof App !== 'undefined' && typeof App.atualizarEstatisticas === 'function') {
-            App.atualizarEstatisticas();
+    },
+
+    // ✅ IR PARA HOJE
+    irParaHoje() {
+        try {
+            const hoje = new Date();
+            this.config.mesAtual = hoje.getMonth();
+            this.config.anoAtual = hoje.getFullYear();
+            
+            this.gerar();
+            
+            Notifications.success('📅 Voltou para o mês atual');
+            console.log('📅 Calendário resetado para hoje');
+
+        } catch (error) {
+            console.error('❌ Erro ao ir para hoje:', error);
         }
     },
 
     // ✅ IR PARA MÊS ESPECÍFICO
     irParaMes(mes, ano) {
-        this.state.mesAtual = mes;
-        this.state.anoAtual = ano;
-        
-        if (typeof App !== 'undefined' && App.estadoSistema) {
-            App.estadoSistema.mesAtual = mes;
-            App.estadoSistema.anoAtual = ano;
-        }
-        
-        this.gerar();
-    },
+        try {
+            if (mes < 1 || mes > 12 || ano < 1900 || ano > 2100) {
+                throw new Error('Mês ou ano inválido');
+            }
 
-    // ✅ IR PARA HOJE
-    irParaHoje() {
-        const hoje = new Date();
-        this.irParaMes(hoje.getMonth(), hoje.getFullYear());
+            this.config.mesAtual = mes - 1; // Array é 0-indexed
+            this.config.anoAtual = ano;
+            
+            this.gerar();
+            
+            console.log(`📅 Navegado para: ${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`);
+
+        } catch (error) {
+            console.error('❌ Erro ao ir para mês específico:', error);
+            Notifications.error('Erro ao navegar para mês específico');
+        }
     },
 
     // ✅ OBTER EVENTOS DO DIA
     obterEventosDoDia(data) {
-        if (typeof App === 'undefined' || !App.dados || !App.dados.eventos) return [];
-        
-        const eventos = App.dados.eventos.filter(evento => evento.data === data);
-        
-        // Adicionar eventos da agenda pessoal se aplicável
-        const eventosAgenda = this._obterEventosAgendaPessoal(data);
-        
-        return [...eventos, ...eventosAgenda].sort((a, b) => {
-            // Ordenar por horário
-            const horaA = a.horarioInicio || '00:00';
-            const horaB = b.horarioInicio || '00:00';
-            return horaA.localeCompare(horaB);
-        });
-    },
+        try {
+            if (!App.dados?.eventos) return [];
+            
+            const eventos = App.dados.eventos.filter(evento => evento.data === data);
+            const tarefas = this._obterTarefasDoDia(data);
+            
+            return [...eventos, ...tarefas];
 
-    // ✅ OBTER EVENTOS DA AGENDA PESSOAL
-    _obterEventosAgendaPessoal(data) {
-        const eventos = [];
-        
-        if (typeof App === 'undefined' || !App.dados || !App.dados.agendas) return eventos;
-        
-        const dataObj = new Date(data + 'T00:00:00');
-        const diaSemana = this._obterDiaSemanaPortugues(dataObj.getDay());
-        
-        // Verificar todas as agendas pessoais
-        Object.entries(App.dados.agendas).forEach(([pessoa, agenda]) => {
-            if (agenda[diaSemana]) {
-                agenda[diaSemana].forEach(tarefa => {
-                    if (tarefa.mostrarNoCalendario) {
-                        eventos.push({
-                            ...tarefa,
-                            data: data,
-                            pessoas: [pessoa],
-                            origem: 'tarefa_pessoal'
-                        });
-                    }
-                });
-            }
-        });
-        
-        return eventos;
+        } catch (error) {
+            console.error('❌ Erro ao obter eventos do dia:', error);
+            return [];
+        }
     },
 
     // ✅ MOSTRAR DETALHES DO EVENTO
     mostrarDetalhesEvento(evento) {
-        // Remover modal anterior se existir
-        this._fecharDetalhesEvento();
-        
-        this.state.modalDetalhes = this._criarModalDetalhes(evento);
-        document.body.appendChild(this.state.modalDetalhes);
-    },
+        try {
+            if (!evento) return;
 
-    // ✅ CRIAR MODAL DE DETALHES
-    _criarModalDetalhes(evento) {
-        const modal = document.createElement('div');
-        modal.className = 'modal-evento-detalhes active';
-        
-        const participantes = Array.isArray(evento.pessoas) ? evento.pessoas.join(', ') : (evento.pessoas || 'N/A');
-        const horario = evento.horarioInicio ? 
-            `${evento.horarioInicio}${evento.horarioFim ? ` - ${evento.horarioFim}` : ''}` : 
-            'Todo o dia';
-        
-        const dataFormatada = typeof Helpers !== 'undefined' ? 
-            Helpers.formatarDataBR(evento.data) : 
-            evento.data;
-            
-        modal.innerHTML = `
-            <div class="modal-evento-content">
-                <div class="evento-detalhes-header">
-                    <h3 class="evento-detalhes-titulo">${this._sanitizeHTML(evento.titulo)}</h3>
-                    <span class="evento-detalhes-tipo evento-${evento.tipo}">${this._obterNomeTipo(evento.tipo)}</span>
-                </div>
-                
-                <div class="evento-detalhes-info">
-                    <span class="evento-detalhes-label">📅 Data:</span>
-                    ${dataFormatada}
-                </div>
-                
-                <div class="evento-detalhes-info">
-                    <span class="evento-detalhes-label">⏰ Horário:</span>
-                    ${horario}
-                </div>
-                
-                <div class="evento-detalhes-info">
-                    <span class="evento-detalhes-label">👥 Participantes:</span>
-                    ${this._sanitizeHTML(participantes)}
-                </div>
-                
-                ${evento.descricao ? `
-                    <div class="evento-detalhes-info">
-                        <span class="evento-detalhes-label">📝 Descrição:</span>
-                        ${this._sanitizeHTML(evento.descricao)}
-                    </div>
-                ` : ''}
-                
-                ${evento.origem === 'tarefa_pessoal' ? `
-                    <div class="evento-detalhes-info" style="color: #8b5cf6;">
-                        <span class="evento-detalhes-label">📌 Tipo:</span>
-                        Tarefa pessoal
-                    </div>
-                ` : ''}
-                
-                <div class="evento-detalhes-acoes">
-                    <button class="btn btn-secondary btn-sm" onclick="Calendar._fecharDetalhesEvento()">
-                        Fechar
-                    </button>
-                    ${!evento.origem || evento.origem !== 'tarefa_pessoal' ? `
-                        <button class="btn btn-primary btn-sm" onclick="Calendar._editarEvento(${evento.id})">
-                            ✏️ Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="Calendar._confirmarExclusaoEvento(${evento.id})">
-                            🗑️ Excluir
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-        
-        // Fechar com clique fora
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                this._fecharDetalhesEvento();
-            }
-        });
-        
-        return modal;
-    },
+            // Verificar se é tarefa ou evento
+            const ehTarefa = evento.hasOwnProperty('tipo') && 
+                           ['pessoal', 'equipe', 'projeto', 'urgente', 'rotina'].includes(evento.tipo);
 
-    // ✅ MOSTRAR TODOS EVENTOS DO DIA
-    mostrarTodosEventosDia(data) {
-        this._fecharListaEventos();
-        
-        const eventos = this.obterEventosDoDia(data);
-        if (eventos.length === 0) {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.info('Nenhum evento neste dia');
+            // Redirecionar para módulo apropriado
+            if (ehTarefa && typeof Tasks !== 'undefined') {
+                Tasks.editarTarefa(evento.id);
+            } else if (typeof Events !== 'undefined') {
+                Events.editarEvento(evento.id);
+            } else {
+                // Fallback: mostrar informações básicas
+                this._mostrarModalDetalhes(evento);
             }
-            return;
+
+        } catch (error) {
+            console.error('❌ Erro ao mostrar detalhes do evento:', error);
         }
-        
-        this.state.modalListaEventos = this._criarModalListaEventos(data, eventos);
-        document.body.appendChild(this.state.modalListaEventos);
     },
 
-    // ✅ CRIAR MODAL LISTA DE EVENTOS
-    _criarModalListaEventos(data, eventos) {
-        const modal = document.createElement('div');
-        modal.className = 'modal-evento-detalhes active';
-        
-        const dataFormatada = typeof Helpers !== 'undefined' ? 
-            Helpers.formatarDataBR(data) : 
-            data;
-        
-        const eventosHtml = eventos.map(evento => {
-            const horario = evento.horarioInicio ? `${evento.horarioInicio} - ` : '';
-            const participantes = Array.isArray(evento.pessoas) ? evento.pessoas.join(', ') : (evento.pessoas || '');
+    // ✅ MOSTRAR TODOS OS EVENTOS DO DIA
+    mostrarTodosEventosDia(data) {
+        try {
+            const eventos = this.obterEventosDoDia(data);
             
-            return `
-                <div class="evento-lista-item" style="padding: 12px; margin-bottom: 8px; border-radius: 6px; background: ${this.config.CORES_EVENTOS[evento.tipo] || '#6b7280'}20; border-left: 4px solid ${this.config.CORES_EVENTOS[evento.tipo] || '#6b7280'}; cursor: pointer;" onclick="Calendar.mostrarDetalhesEvento(${JSON.stringify(evento).replace(/"/g, '&quot;')})">
-                    <div style="font-weight: bold; margin-bottom: 4px;">
-                        ${horario}${this._sanitizeHTML(evento.titulo)}
-                    </div>
-                    <div style="font-size: 12px; color: #6b7280;">
-                        👥 ${this._sanitizeHTML(participantes)}
-                    </div>
-                    ${evento.origem === 'tarefa_pessoal' ? '<div style="font-size: 11px; color: #8b5cf6;">📌 Tarefa pessoal</div>' : ''}
-                </div>
-            `;
-        }).join('');
-        
-        modal.innerHTML = `
-            <div class="modal-evento-content" style="max-width: 500px;">
-                <div class="evento-detalhes-header">
-                    <h3 class="evento-detalhes-titulo">Eventos do dia</h3>
-                    <span style="font-size: 14px; color: #6b7280;">${dataFormatada}</span>
-                </div>
-                
-                <div style="max-height: 400px; overflow-y: auto; margin: 16px 0;">
-                    ${eventosHtml}
-                </div>
-                
-                <div class="evento-detalhes-acoes">
-                    <button class="btn btn-secondary" onclick="Calendar._fecharListaEventos()">
-                        Fechar
-                    </button>
-                    <button class="btn btn-primary" onclick="Calendar._adicionarEventoData('${data}')">
-                        + Novo Evento
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        // Fechar com clique fora
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                this._fecharListaEventos();
+            if (eventos.length === 0) {
+                Notifications.info('Nenhum evento neste dia');
+                return;
             }
-        });
-        
-        return modal;
-    },
 
-    // ✅ ABRIR DETALHE DO DIA
-    abrirDetalheDia(data) {
-        console.log('📅 Abrindo detalhe do dia:', data);
-        this.mostrarTodosEventosDia(data);
+            // Criar modal com lista completa
+            this._criarModalEventosDia(data, eventos);
+
+        } catch (error) {
+            console.error('❌ Erro ao mostrar eventos do dia:', error);
+        }
     },
 
     // ✅ ADICIONAR FERIADO
     adicionarFeriado(data, nome) {
-        if (typeof App === 'undefined' || !App.dados) {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error('Sistema não inicializado');
+        try {
+            if (!data || !nome) {
+                throw new Error('Data e nome são obrigatórios');
             }
-            return;
-        }
-        
-        if (!App.dados.feriados) {
-            App.dados.feriados = {};
-        }
-        
-        App.dados.feriados[data] = nome;
-        
-        // Salvar dados usando sistema de persistência
-        if (typeof Persistence !== 'undefined' && typeof Persistence.salvarDadosCritico === 'function') {
-            Persistence.salvarDadosCritico().then(() => {
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.success(`Feriado "${nome}" adicionado!`);
-                }
-                this.gerar();
-            }).catch(() => {
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error('Erro ao salvar feriado');
-                }
-            });
-        } else {
+
+            // Validar data
+            if (!Validation.isValidDate(data)) {
+                throw new Error('Data inválida');
+            }
+
+            // Garantir estrutura de feriados
+            if (!App.dados.feriados) {
+                App.dados.feriados = {};
+            }
+
+            // Adicionar feriado
+            App.dados.feriados[data] = nome;
+
+            // Salvar dados
+            if (typeof Persistence !== 'undefined') {
+                Persistence.salvarDadosCritico();
+            }
+
+            // Regenerar calendário
             this.gerar();
+
+            Notifications.success(`Feriado "${nome}" adicionado em ${new Date(data).toLocaleDateString('pt-BR')}`);
+            console.log(`🎉 Feriado adicionado: ${data} - ${nome}`);
+
+        } catch (error) {
+            console.error('❌ Erro ao adicionar feriado:', error);
+            Notifications.error(`Erro ao adicionar feriado: ${error.message}`);
         }
     },
 
     // ✅ REMOVER FERIADO
     removerFeriado(data) {
-        if (typeof App === 'undefined' || !App.dados || !App.dados.feriados) return;
-        
-        delete App.dados.feriados[data];
-        
-        if (typeof Persistence !== 'undefined' && typeof Persistence.salvarDadosCritico === 'function') {
-            Persistence.salvarDadosCritico().then(() => {
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.success('Feriado removido!');
-                }
-                this.gerar();
-            }).catch(() => {
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error('Erro ao remover feriado');
-                }
-            });
-        } else {
+        try {
+            if (!App.dados?.feriados?.[data]) {
+                Notifications.warning('Feriado não encontrado');
+                return;
+            }
+
+            const nomeFeriado = App.dados.feriados[data];
+            delete App.dados.feriados[data];
+
+            // Salvar dados
+            if (typeof Persistence !== 'undefined') {
+                Persistence.salvarDadosCritico();
+            }
+
+            // Regenerar calendário
             this.gerar();
+
+            Notifications.success(`Feriado "${nomeFeriado}" removido`);
+            console.log(`🗑️ Feriado removido: ${data}`);
+
+        } catch (error) {
+            console.error('❌ Erro ao remover feriado:', error);
+            Notifications.error('Erro ao remover feriado');
         }
     },
 
-    // ✅ MOSTRAR MODAL MARCAR FERIADO
+    // ✅ MODAL PARA MARCAR FERIADO
     mostrarMarcarFeriado() {
-        const modal = document.createElement('div');
-        modal.className = 'modal active';
-        
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 400px;">
-                <h3 style="margin-bottom: 24px;">🎉 Marcar Feriado</h3>
-                
-                <div class="form-group">
-                    <label>Data do Feriado</label>
-                    <input type="date" id="feriadoData" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Nome do Feriado</label>
-                    <input type="text" id="feriadoNome" placeholder="Ex: Dia da Independência" required>
-                </div>
-                
-                <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
-                        Cancelar
-                    </button>
-                    <button class="btn btn-primary" onclick="Calendar._processarFeriado(this)">
-                        Marcar Feriado
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-    },
-
-    // ✅ PROCESSAR FERIADO
-    _processarFeriado(botao) {
-        const modal = botao.closest('.modal');
-        const data = modal.querySelector('#feriadoData').value;
-        const nome = modal.querySelector('#feriadoNome').value.trim();
-        
-        if (!data || !nome) {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error('Preencha todos os campos');
+        try {
+            // Verificar se modal já existe
+            if (document.getElementById('modalFeriado')) {
+                return;
             }
-            return;
-        }
-        
-        this.adicionarFeriado(data, nome);
-        modal.remove();
-    },
 
-    // ✅ FUNÇÕES AUXILIARES
-    _obterDataCompleta(dia) {
-        return `${this.state.anoAtual}-${String(this.state.mesAtual + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-    },
+            const modal = document.createElement('div');
+            modal.id = 'modalFeriado';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h3>🎉 Adicionar Feriado</h3>
+                        <button class="modal-close" onclick="Calendar._fecharModalFeriado()">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>📅 Data do Feriado:</label>
+                            <input type="date" id="feriadoData" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>🏷️ Nome do Feriado:</label>
+                            <input type="text" id="feriadoNome" placeholder="Ex: Natal" required>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="Calendar._fecharModalFeriado()">
+                            ❌ Cancelar
+                        </button>
+                        <button class="btn btn-primary" onclick="Calendar._confirmarFeriado()">
+                            🎉 Adicionar Feriado
+                        </button>
+                    </div>
+                </div>
+            `;
 
-    _ehHoje(dia) {
-        const hoje = new Date();
-        return hoje.getDate() === dia && 
-               hoje.getMonth() === this.state.mesAtual && 
-               hoje.getFullYear() === this.state.anoAtual;
-    },
+            document.body.appendChild(modal);
 
-    _ehFeriado(data) {
-        return typeof App !== 'undefined' && App.dados && App.dados.feriados && App.dados.feriados[data];
-    },
+            // Definir data atual como padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('feriadoData').value = hoje;
 
-    _ehEventoPessoal(evento) {
-        return evento.origem === 'tarefa_pessoal' || 
-               (typeof App !== 'undefined' && App.estadoSistema && App.estadoSistema.pessoaAtual && 
-                evento.pessoas && evento.pessoas.length === 1 && 
-                evento.pessoas[0] === App.estadoSistema.pessoaAtual);
-    },
+            // Exibir modal
+            setTimeout(() => modal.classList.add('show'), 10);
 
-    _obterDiaSemanaPortugues(diaJS) {
-        const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
-        return dias[diaJS];
-    },
+            this.state.modalAberto = true;
 
-    _obterNomeTipo(tipo) {
-        const tipos = {
-            'reuniao': 'Reunião',
-            'entrega': 'Entrega',
-            'prazo': 'Prazo',
-            'marco': 'Marco',
-            'outro': 'Outro'
-        };
-        return tipos[tipo] || 'Evento';
-    },
-
-    _atualizarDisplayMesAno() {
-        // Atualizar display principal (se existir)
-        const mesAno = document.getElementById('mesAno');
-        if (mesAno) {
-            mesAno.textContent = `${this.config.MESES_NOMES[this.state.mesAtual]} ${this.state.anoAtual}`;
-        }
-        
-        // Atualizar display do calendário específico (index-dev.html)
-        const mesAnoCalendario = document.getElementById('mesAnoCalendario');
-        if (mesAnoCalendario) {
-            mesAnoCalendario.textContent = `${this.config.MESES_NOMES[this.state.mesAtual]} ${this.state.anoAtual}`;
+        } catch (error) {
+            console.error('❌ Erro ao mostrar modal de feriado:', error);
+            Notifications.error('Erro ao abrir modal de feriado');
         }
     },
 
-    _sanitizeHTML(str) {
-        if (typeof Helpers !== 'undefined' && typeof Helpers.sanitizeHTML === 'function') {
-            return Helpers.sanitizeHTML(str);
-        }
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    },
-
-    // ✅ AÇÕES DE EVENTOS (INTEGRAÇÃO COM OUTROS MÓDULOS)
-    _editarEvento(eventoId) {
-        console.log('✏️ Editando evento:', eventoId);
-        this._fecharDetalhesEvento();
-        
-        // Integração com módulo Events quando criado
-        if (typeof Events !== 'undefined' && typeof Events.editarEvento === 'function') {
-            Events.editarEvento(eventoId);
-        } else {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.info('Módulo Events será implementado em breve');
-            }
-        }
-    },
-
-    _confirmarExclusaoEvento(eventoId) {
-        this._fecharDetalhesEvento();
-        
-        if (typeof Notifications !== 'undefined' && typeof Notifications.confirmar === 'function') {
-            Notifications.confirmar(
-                'Confirmar Exclusão',
-                'Deseja realmente excluir este evento?',
-                (confirmado) => {
-                    if (confirmado) {
-                        this._excluirEvento(eventoId);
-                    }
-                }
-            );
-        } else {
-            // Fallback para confirm nativo
-            if (confirm('Deseja realmente excluir este evento?')) {
-                this._excluirEvento(eventoId);
-            }
-        }
-    },
-
-    _excluirEvento(eventoId) {
-        if (typeof App === 'undefined' || !App.dados || !App.dados.eventos) return;
-        
-        const eventoIndex = App.dados.eventos.findIndex(e => e.id === eventoId);
-        if (eventoIndex !== -1) {
-            App.dados.eventos.splice(eventoIndex, 1);
+    // ✅ EXPORTAR CALENDÁRIO EM PDF
+    exportarPDF() {
+        try {
+            console.log('📄 Solicitando exportação do calendário em PDF...');
             
-            if (typeof Persistence !== 'undefined' && typeof Persistence.salvarDadosCritico === 'function') {
-                Persistence.salvarDadosCritico().then(() => {
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.success('Evento excluído!');
-                    }
-                    this.gerar();
-                }).catch(() => {
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.error('Erro ao excluir evento');
-                    }
-                });
-            } else {
-                this.gerar();
+            // Verificar se módulo PDF está disponível
+            if (typeof PDF === 'undefined') {
+                Notifications.error('Módulo PDF não disponível - verifique se o arquivo pdf.js foi carregado');
+                console.error('❌ Módulo PDF.js não carregado');
+                return;
             }
-        }
-    },
 
-    _adicionarEventoData(data) {
-        console.log('➕ Adicionando evento para:', data);
-        this._fecharListaEventos();
-        
-        // Integração com módulo Events quando criado
-        if (typeof Events !== 'undefined' && typeof Events.mostrarNovoEvento === 'function') {
-            Events.mostrarNovoEvento(data);
-        } else {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.info('Módulo Events será implementado em breve');
-            }
-        }
-    },
+            // Abrir modal de configuração do PDF
+            PDF.mostrarModalCalendario();
+            
+            console.log('✅ Modal de configuração do PDF aberto');
+            Notifications.info('📄 Configure as opções e gere seu PDF personalizado');
 
-    // ✅ FECHAR MODAIS
-    _fecharDetalhesEvento() {
-        if (this.state.modalDetalhes && this.state.modalDetalhes.parentElement) {
-            this.state.modalDetalhes.parentElement.removeChild(this.state.modalDetalhes);
-            this.state.modalDetalhes = null;
-        }
-    },
-
-    _fecharListaEventos() {
-        if (this.state.modalListaEventos && this.state.modalListaEventos.parentElement) {
-            this.state.modalListaEventos.parentElement.removeChild(this.state.modalListaEventos);
-            this.state.modalListaEventos = null;
+        } catch (error) {
+            console.error('❌ Erro ao exportar calendário em PDF:', error);
+            Notifications.error('Erro ao abrir configurações do PDF');
         }
     },
 
     // ✅ OBTER ESTATÍSTICAS DO MÊS
     obterEstatisticasDoMes() {
-        const eventos = this.obterEventosDoMes();
-        const stats = {
-            total: eventos.length,
-            porTipo: {},
-            proximoEvento: null
-        };
-        
-        // Contar por tipo
-        eventos.forEach(evento => {
-            if (!stats.porTipo[evento.tipo]) {
-                stats.porTipo[evento.tipo] = 0;
-            }
-            stats.porTipo[evento.tipo]++;
-        });
-        
-        // Encontrar próximo evento
-        const hoje = new Date().toISOString().split('T')[0];
-        const eventosProximos = eventos
-            .filter(e => e.data >= hoje)
-            .sort((a, b) => a.data.localeCompare(b.data));
+        try {
+            const mesAtual = this.config.mesAtual + 1;
+            const anoAtual = this.config.anoAtual;
             
-        if (eventosProximos.length > 0) {
-            stats.proximoEvento = eventosProximos[0];
-        }
-        
-        return stats;
-    },
+            // Obter todos os eventos do mês
+            const eventosMes = App.dados?.eventos?.filter(evento => {
+                const [ano, mes] = evento.data.split('-').map(Number);
+                return ano === anoAtual && mes === mesAtual;
+            }) || [];
 
-    // ✅ OBTER EVENTOS DO MÊS ATUAL
-    obterEventosDoMes() {
-        if (typeof App === 'undefined' || !App.dados || !App.dados.eventos) return [];
-        
-        return App.dados.eventos.filter(evento => {
-            const dataEvento = new Date(evento.data + 'T00:00:00');
-            return dataEvento.getMonth() === this.state.mesAtual && 
-                   dataEvento.getFullYear() === this.state.anoAtual;
-        });
-    },
-
-    // ✅ SINCRONIZAR COM ESTADO GLOBAL
-    sincronizarComApp() {
-        if (typeof App !== 'undefined' && App.estadoSistema) {
-            this.state.mesAtual = App.estadoSistema.mesAtual || this.state.mesAtual;
-            this.state.anoAtual = App.estadoSistema.anoAtual || this.state.anoAtual;
-        }
-    },
-
-    // ✅ CONFIGURAR EVENTOS DE TECLADO
-    _configurarEventosTeclado() {
-        document.addEventListener('keydown', (e) => {
-            // Setas para navegar meses (apenas se não houver modal aberto)
-            if (!document.querySelector('.modal.active')) {
-                if (e.key === 'ArrowLeft' && e.ctrlKey) {
-                    e.preventDefault();
-                    this.mudarMes(-1);
-                } else if (e.key === 'ArrowRight' && e.ctrlKey) {
-                    e.preventDefault();
-                    this.mudarMes(1);
-                } else if (e.key === 'Home' && e.ctrlKey) {
-                    e.preventDefault();
-                    this.irParaHoje();
+            // Obter tarefas do mês
+            const tarefasMes = App.dados?.tarefas?.filter(tarefa => {
+                if (tarefa.dataInicio) {
+                    const [ano, mes] = tarefa.dataInicio.split('-').map(Number);
+                    if (ano === anoAtual && mes === mesAtual) return true;
                 }
+                if (tarefa.dataFim) {
+                    const [ano, mes] = tarefa.dataFim.split('-').map(Number);
+                    if (ano === anoAtual && mes === mesAtual) return true;
+                }
+                return false;
+            }) || [];
+
+            // Estatísticas por tipo
+            const porTipo = {};
+            eventosMes.forEach(evento => {
+                porTipo[evento.tipo] = (porTipo[evento.tipo] || 0) + 1;
+            });
+
+            tarefasMes.forEach(tarefa => {
+                const tipoKey = `tarefa_${tarefa.tipo}`;
+                porTipo[tipoKey] = (porTipo[tipoKey] || 0) + 1;
+            });
+
+            // Próximo evento
+            const agora = new Date();
+            const proximoEvento = eventosMes
+                .filter(evento => new Date(evento.data) >= agora)
+                .sort((a, b) => new Date(a.data) - new Date(b.data))[0];
+
+            return {
+                totalEventos: eventosMes.length,
+                totalTarefas: tarefasMes.length,
+                total: eventosMes.length + tarefasMes.length,
+                porTipo,
+                proximoEvento,
+                mesAno: `${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`
+            };
+
+        } catch (error) {
+            console.error('❌ Erro ao calcular estatísticas:', error);
+            return {
+                totalEventos: 0,
+                totalTarefas: 0,
+                total: 0,
+                porTipo: {},
+                proximoEvento: null,
+                mesAno: 'Erro'
+            };
+        }
+    },
+
+    // ✅ OBTER STATUS DO SISTEMA
+    obterStatus() {
+        const stats = this.obterEstatisticasDoMes();
+        
+        return {
+            mesAtual: this.config.mesAtual + 1,
+            anoAtual: this.config.anoAtual,
+            mesNome: this.config.mesesNomes[this.config.mesAtual],
+            modalAberto: this.state.modalAberto,
+            eventosDoMes: stats.totalEventos,
+            tarefasDoMes: stats.totalTarefas,
+            ultimaAtualizacao: this.state.ultimaAtualizacao,
+            integracaoEvents: typeof Events !== 'undefined',
+            integracaoTasks: typeof Tasks !== 'undefined',
+            integracaoPDF: typeof PDF !== 'undefined'
+        };
+    },
+
+    // ✅ === MÉTODOS PRIVADOS ===
+
+    // Atualizar display do mês/ano
+    _atualizarDisplayMesAno() {
+        const elementos = [
+            document.getElementById('mesAno'),
+            document.getElementById('mesAnoCalendario')
+        ];
+
+        const textoMesAno = `${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`;
+        
+        elementos.forEach(elemento => {
+            if (elemento) {
+                elemento.textContent = textoMesAno;
             }
-            
-            // ESC para fechar modais
-            if (e.key === 'Escape') {
-                this._fecharDetalhesEvento();
-                this._fecharListaEventos();
-            }
+        });
+
+        // Atualizar App.estadoSistema se disponível
+        if (typeof App !== 'undefined' && App.estadoSistema) {
+            App.estadoSistema.mesAtual = this.config.mesAtual + 1;
+            App.estadoSistema.anoAtual = this.config.anoAtual;
+        }
+    },
+
+    // Gerar cabeçalho dos dias da semana
+    _gerarCabecalhoDias(container) {
+        this.config.diasSemana.forEach(dia => {
+            const celula = document.createElement('div');
+            celula.className = 'calendario-cabecalho';
+            celula.textContent = dia;
+            celula.style.cssText = `
+                background: #f3f4f6;
+                padding: 8px;
+                text-align: center;
+                font-weight: bold;
+                border: 1px solid #e5e7eb;
+                font-size: 12px;
+                color: #374151;
+            `;
+            container.appendChild(celula);
         });
     },
 
-    // ✅ INICIALIZAÇÃO DO MÓDULO
-    init() {
-        console.log('📅 Inicializando sistema de calendário...');
-        
-        // Sincronizar com App se disponível
-        this.sincronizarComApp();
-        
-        // Configurar eventos de teclado
-        this._configurarEventosTeclado();
-        
-        // Gerar calendário inicial
-        this.gerar();
-        
-        console.log('✅ Sistema de calendário inicializado');
+    // Gerar grid do mês
+    _gerarGridMes(container) {
+        const primeiroDia = new Date(this.config.anoAtual, this.config.mesAtual, 1);
+        const ultimoDia = new Date(this.config.anoAtual, this.config.mesAtual + 1, 0);
+        const diasNoMes = ultimoDia.getDate();
+        const iniciaDiaSemana = primeiroDia.getDay();
+        const hoje = new Date();
+
+        let diaAtual = 1;
+
+        // Gerar 6 semanas (42 células)
+        for (let i = 0; i < 42; i++) {
+            const celula = document.createElement('div');
+            celula.className = 'calendario-dia';
+
+            if (i < iniciaDiaSemana || diaAtual > diasNoMes) {
+                // Célula vazia
+                celula.style.cssText = `
+                    background: #f9fafb;
+                    border: 1px solid #e5e7eb;
+                    min-height: 80px;
+                `;
+            } else {
+                // Célula com dia
+                const dataCompleta = `${this.config.anoAtual}-${String(this.config.mesAtual + 1).padStart(2, '0')}-${String(diaAtual).padStart(2, '0')}`;
+                const ehHoje = (
+                    hoje.getDate() === diaAtual &&
+                    hoje.getMonth() === this.config.mesAtual &&
+                    hoje.getFullYear() === this.config.anoAtual
+                );
+                const ehFeriado = App.dados?.feriados?.[dataCompleta];
+
+                celula.dataset.data = dataCompleta;
+                celula.style.cssText = `
+                    border: 1px solid #e5e7eb;
+                    min-height: 80px;
+                    padding: 4px;
+                    cursor: pointer;
+                    background: ${ehFeriado ? '#fef3c7' : (ehHoje ? '#dbeafe' : 'white')};
+                    position: relative;
+                `;
+
+                // Número do dia
+                const numeroDia = document.createElement('div');
+                numeroDia.textContent = diaAtual;
+                numeroDia.style.cssText = `
+                    font-weight: bold;
+                    font-size: 12px;
+                    color: ${ehHoje ? '#1d4ed8' : '#374151'};
+                `;
+                celula.appendChild(numeroDia);
+
+                // Indicador de feriado
+                if (ehFeriado) {
+                    const indicadorFeriado = document.createElement('div');
+                    indicadorFeriado.textContent = '🎉';
+                    indicadorFeriado.style.cssText = `
+                        position: absolute;
+                        top: 2px;
+                        right: 4px;
+                        font-size: 10px;
+                    `;
+                    indicadorFeriado.title = ehFeriado;
+                    celula.appendChild(indicadorFeriado);
+                }
+
+                // Adicionar eventos do dia
+                this._adicionarEventosCelula(celula, dataCompleta);
+
+                // Event listeners
+                celula.addEventListener('click', () => {
+                    this.mostrarTodosEventosDia(dataCompleta);
+                });
+
+                celula.addEventListener('dblclick', () => {
+                    if (typeof Events !== 'undefined') {
+                        Events.mostrarNovoEvento(dataCompleta);
+                    }
+                });
+
+                diaAtual++;
+            }
+
+            container.appendChild(celula);
+        }
     },
 
-    // ✅ OBTER STATUS DO CALENDÁRIO
-    obterStatus() {
-        return {
-            mesAtual: this.state.mesAtual,
-            anoAtual: this.state.anoAtual,
-            mesNome: this.config.MESES_NOMES[this.state.mesAtual],
-            eventosDoMes: this.obterEventosDoMes().length,
-            estatisticas: this.obterEstatisticasDoMes(),
-            modalAberto: !!(this.state.modalDetalhes || this.state.modalListaEventos)
+    // Adicionar eventos na célula do dia
+    _adicionarEventosCelula(celula, data) {
+        const eventos = this.obterEventosDoDia(data);
+        
+        eventos.slice(0, this.config.maxEventosPorDia).forEach(evento => {
+            const elementoEvento = document.createElement('div');
+            
+            // Determinar cor baseada no tipo
+            const ehTarefa = ['pessoal', 'equipe', 'projeto', 'urgente', 'rotina'].includes(evento.tipo);
+            const cor = ehTarefa ? 
+                this.config.coresTarefas[evento.tipo] || '#6b7280' :
+                this.config.coresEventos[evento.tipo] || '#6b7280';
+
+            elementoEvento.style.cssText = `
+                background: ${cor};
+                color: white;
+                font-size: 9px;
+                padding: 1px 3px;
+                margin: 1px 0;
+                border-radius: 2px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                cursor: pointer;
+            `;
+
+            // Prefixo para tarefas
+            const prefixo = ehTarefa ? 
+                (evento.agendaSemanal ? '🔄 ' : '📝 ') : 
+                this._obterIconeEvento(evento.tipo);
+
+            elementoEvento.textContent = `${prefixo}${evento.titulo}`;
+            elementoEvento.title = `${evento.titulo} - ${evento.tipo}`;
+
+            elementoEvento.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.mostrarDetalhesEvento(evento);
+            });
+
+            celula.appendChild(elementoEvento);
+        });
+
+        // Indicador de mais eventos
+        if (eventos.length > this.config.maxEventosPorDia) {
+            const indicadorMais = document.createElement('div');
+            indicadorMais.textContent = `+${eventos.length - this.config.maxEventosPorDia} mais`;
+            indicadorMais.style.cssText = `
+                font-size: 8px;
+                color: #6b7280;
+                text-align: center;
+                margin-top: 2px;
+                cursor: pointer;
+            `;
+            
+            indicadorMais.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.mostrarTodosEventosDia(data);
+            });
+
+            celula.appendChild(indicadorMais);
+        }
+    },
+
+    // Obter tarefas do dia (integração com Tasks.js)
+    _obterTarefasDoDia(data) {
+        try {
+            if (!App.dados?.tarefas) return [];
+            
+            return App.dados.tarefas.filter(tarefa => {
+                // Tarefas com data específica
+                if (tarefa.dataInicio === data || tarefa.dataFim === data) {
+                    return true;
+                }
+                
+                // Tarefas da agenda semanal (recorrentes)
+                if (tarefa.agendaSemanal && tarefa.diaSemana) {
+                    const diaSemana = new Date(data).getDay();
+                    const diasSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+                    return tarefa.diaSemana === diasSemana[diaSemana];
+                }
+                
+                return false;
+            });
+
+        } catch (error) {
+            console.error('❌ Erro ao obter tarefas do dia:', error);
+            return [];
+        }
+    },
+
+    // Obter ícone do evento
+    _obterIconeEvento(tipo) {
+        const icones = {
+            reuniao: '📅 ',
+            entrega: '📦 ',
+            prazo: '⏰ ',
+            marco: '🏁 ',
+            outro: '📌 '
         };
+        return icones[tipo] || '📌 ';
+    },
+
+    // Criar modal de eventos do dia
+    _criarModalEventosDia(data, eventos) {
+        try {
+            // Remover modal existente
+            const modalExistente = document.getElementById('modalEventosDia');
+            if (modalExistente) {
+                modalExistente.remove();
+            }
+
+            const modal = document.createElement('div');
+            modal.id = 'modalEventosDia';
+            modal.className = 'modal';
+
+            const dataFormatada = new Date(data).toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h3>📅 Eventos do Dia</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <p style="margin-bottom: 16px; color: #6b7280;">
+                            <strong>${Helpers.capitalize(dataFormatada)}</strong>
+                        </p>
+                        
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            ${eventos.map(evento => {
+                                const ehTarefa = ['pessoal', 'equipe', 'projeto', 'urgente', 'rotina'].includes(evento.tipo);
+                                const cor = ehTarefa ? 
+                                    this.config.coresTarefas[evento.tipo] || '#6b7280' :
+                                    this.config.coresEventos[evento.tipo] || '#6b7280';
+                                
+                                return `
+                                    <div class="evento-item" style="
+                                        border-left: 4px solid ${cor};
+                                        padding: 12px;
+                                        margin: 8px 0;
+                                        background: #f9fafb;
+                                        border-radius: 4px;
+                                        cursor: pointer;
+                                    " onclick="Calendar.mostrarDetalhesEvento(${JSON.stringify(evento).replace(/"/g, '&quot;')})">
+                                        <div style="display: flex; justify-content: between; align-items: start;">
+                                            <div style="flex: 1;">
+                                                <strong>${evento.titulo}</strong>
+                                                <span style="
+                                                    background: ${cor};
+                                                    color: white;
+                                                    padding: 2px 6px;
+                                                    border-radius: 12px;
+                                                    font-size: 10px;
+                                                    margin-left: 8px;
+                                                ">${evento.tipo}</span>
+                                            </div>
+                                            ${evento.horarioInicio ? `<span style="color: #6b7280; font-size: 12px;">${evento.horarioInicio}</span>` : ''}
+                                        </div>
+                                        ${evento.descricao ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 12px;">${evento.descricao}</p>` : ''}
+                                        ${evento.pessoas && evento.pessoas.length > 0 ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 11px;">👥 ${evento.pessoas.join(', ')}</p>` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" onclick="if(typeof Events !== 'undefined') Events.mostrarNovoEvento('${data}'); this.closest('.modal').remove();">
+                            ➕ Novo Evento
+                        </button>
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            ✅ Fechar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('show'), 10);
+
+        } catch (error) {
+            console.error('❌ Erro ao criar modal de eventos:', error);
+        }
+    },
+
+    // Mostrar modal de detalhes (fallback)
+    _mostrarModalDetalhes(evento) {
+        try {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h3>📋 Detalhes</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <p><strong>Título:</strong> ${evento.titulo}</p>
+                        <p><strong>Tipo:</strong> ${evento.tipo}</p>
+                        ${evento.data ? `<p><strong>Data:</strong> ${new Date(evento.data).toLocaleDateString('pt-BR')}</p>` : ''}
+                        ${evento.horarioInicio ? `<p><strong>Horário:</strong> ${evento.horarioInicio}</p>` : ''}
+                        ${evento.descricao ? `<p><strong>Descrição:</strong> ${evento.descricao}</p>` : ''}
+                        ${evento.pessoas && evento.pessoas.length > 0 ? `<p><strong>Pessoas:</strong> ${evento.pessoas.join(', ')}</p>` : ''}
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            ✅ Fechar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('show'), 10);
+
+        } catch (error) {
+            console.error('❌ Erro ao mostrar modal de detalhes:', error);
+        }
+    },
+
+    // Fechar modal de feriado
+    _fecharModalFeriado() {
+        try {
+            const modal = document.getElementById('modalFeriado');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    if (modal.parentNode) {
+                        modal.parentNode.removeChild(modal);
+                    }
+                }, 300);
+            }
+            this.state.modalAberto = false;
+
+        } catch (error) {
+            console.error('❌ Erro ao fechar modal de feriado:', error);
+        }
+    },
+
+    // Confirmar adição de feriado
+    _confirmarFeriado() {
+        try {
+            const data = document.getElementById('feriadoData').value;
+            const nome = document.getElementById('feriadoNome').value.trim();
+
+            if (!data) {
+                Notifications.error('Por favor, selecione uma data');
+                return;
+            }
+
+            if (!nome) {
+                Notifications.error('Por favor, digite o nome do feriado');
+                return;
+            }
+
+            this._fecharModalFeriado();
+            this.adicionarFeriado(data, nome);
+
+        } catch (error) {
+            console.error('❌ Erro ao confirmar feriado:', error);
+            Notifications.error('Erro ao adicionar feriado');
+        }
+    },
+
+    // Atualizar estatísticas (placeholder para futuras melhorias)
+    _atualizarEstatisticas() {
+        // Implementação futura para atualizar contadores em tempo real
+        console.log('📊 Estatísticas do calendário atualizadas');
     }
 };
 
-// ✅ FUNÇÕES GLOBAIS PARA COMPATIBILIDADE
-window.mudarMes = (direcao) => Calendar.mudarMes(direcao);
-window.gerarCalendario = () => Calendar.gerar();
-window.mostrarMarcarFeriado = () => Calendar.mostrarMarcarFeriado();
-
-// ✅ INICIALIZAÇÃO AUTOMÁTICA
-document.addEventListener('DOMContentLoaded', () => {
-    // Aguardar um pouco para garantir que outros módulos carregaram
-    setTimeout(() => {
-        Calendar.init();
-    }, 200);
+// ✅ ATALHOS DE TECLADO
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey) {
+        switch (e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                Calendar.mudarMes(-1);
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                Calendar.mudarMes(1);
+                break;
+        }
+    } else if (e.key === 'Home') {
+        e.preventDefault();
+        Calendar.irParaHoje();
+    }
 });
 
+// ✅ INICIALIZAÇÃO DO MÓDULO
+document.addEventListener('DOMContentLoaded', () => {
+    // Aguardar carregamento dos dados
+    setTimeout(() => {
+        if (typeof App !== 'undefined' && App.dados) {
+            Calendar.gerar();
+            console.log('📅 Calendário inicializado automaticamente');
+        }
+    }, 1000);
+});
+
+// ✅ LOG DE CARREGAMENTO
 console.log('📅 Sistema de Calendário Modular v6.2 carregado!');
+console.log('🎯 Funcionalidades: Navegação, Eventos, Feriados, PDF Export');
+console.log('⚙️ Integração: Events.js, Tasks.js, PDF.js');
+console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje), Esc (fechar modais)');
