@@ -1,5 +1,5 @@
 /**
- * 📅 Sistema de Calendário Modular v6.2.1 - INTEGRAÇÃO CORRIGIDA
+ * 📅 Sistema de Calendário Modular v6.2.1 - INTEGRAÇÃO CORRIGIDA + EXCLUSÃO DE FERIADOS
  * 
  * CORREÇÕES APLICADAS:
  * ✅ Referências ao Events.js corrigidas
@@ -8,6 +8,7 @@
  * ✅ Comparação de datas corrigida
  * ✅ Performance otimizada
  * ✅ Integração perfeita garantida
+ * ✅ NOVO: Exclusão de feriados e melhorias no modal de detalhes
  */
 
 const Calendar = {
@@ -223,18 +224,9 @@ const Calendar = {
                 `;
                 dia.appendChild(numeroDiaEl);
 
-                // Indicador de feriado
+                // ✅ INDICADOR DE FERIADO COM OPÇÃO DE GESTÃO
                 if (ehFeriado) {
-                    const indicadorFeriado = document.createElement('div');
-                    indicadorFeriado.textContent = '🎉';
-                    indicadorFeriado.style.cssText = `
-                        position: absolute;
-                        top: 2px;
-                        right: 4px;
-                        font-size: 10px;
-                    `;
-                    indicadorFeriado.title = ehFeriado;
-                    dia.appendChild(indicadorFeriado);
+                    this._adicionarIndicadorFeriado(dia, dataCompleta, ehFeriado);
                 }
 
                 // Adicionar eventos e tarefas do dia - INTEGRAÇÃO CORRIGIDA
@@ -259,6 +251,138 @@ const Calendar = {
             }
 
             container.appendChild(dia);
+        }
+    },
+
+    // ✅ NOVA FUNÇÃO: Adicionar indicador de feriado com gestão
+    _adicionarIndicadorFeriado(dia, data, nomeFeriado) {
+        const indicadorFeriado = document.createElement('div');
+        indicadorFeriado.innerHTML = '🎉';
+        indicadorFeriado.style.cssText = `
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 2px;
+            background: rgba(251, 191, 36, 0.1);
+        `;
+        
+        indicadorFeriado.title = `${nomeFeriado}\n\nClique para gerenciar feriado`;
+        
+        // ✅ CLICK PARA GERENCIAR FERIADO
+        indicadorFeriado.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._mostrarModalGerenciarFeriado(data, nomeFeriado);
+        });
+        
+        dia.appendChild(indicadorFeriado);
+    },
+
+    // ✅ NOVA FUNÇÃO: Modal para gerenciar feriado
+    _mostrarModalGerenciarFeriado(data, nomeFeriado) {
+        try {
+            const dataFormatada = new Date(data).toLocaleDateString('pt-BR');
+            
+            const modal = document.createElement('div');
+            modal.id = 'modalGerenciarFeriado';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h3>🎉 Gerenciar Feriado</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+                            
+                            <div class="info-box info-box-warning" style="margin: 16px 0;">
+                                <strong style="color: #92400e;">${nomeFeriado}</strong><br>
+                                <span style="color: #92400e;">📅 ${dataFormatada}</span>
+                            </div>
+                            
+                            <p style="color: #6b7280;">
+                                O que deseja fazer com este feriado?
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" onclick="Calendar.excluirFeriado('${data}'); this.closest('.modal').remove();">
+                            🗑️ Excluir Feriado
+                        </button>
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            ❌ Cancelar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('show'), 10);
+
+        } catch (error) {
+            console.error('❌ Erro ao mostrar modal de gerenciar feriado:', error);
+        }
+    },
+
+    // ✅ NOVA FUNÇÃO: Excluir feriado
+    excluirFeriado(data) {
+        try {
+            if (!data) {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('Data do feriado é obrigatória');
+                }
+                return;
+            }
+
+            // Verificar se feriado existe
+            if (!App.dados?.feriados?.[data]) {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('Feriado não encontrado para esta data');
+                }
+                return;
+            }
+
+            const nomeFeriado = App.dados.feriados[data];
+            const dataFormatada = new Date(data).toLocaleDateString('pt-BR');
+
+            // Confirmar exclusão
+            const confirmacao = confirm(
+                `Tem certeza que deseja excluir o feriado?\n\n` +
+                `📅 ${nomeFeriado}\n` +
+                `Data: ${dataFormatada}\n\n` +
+                `Esta ação não pode ser desfeita.`
+            );
+
+            if (!confirmacao) {
+                return;
+            }
+
+            // Remover feriado
+            delete App.dados.feriados[data];
+
+            // Salvar dados
+            if (typeof Persistence !== 'undefined') {
+                Persistence.salvarDadosCritico();
+            }
+
+            // Regenerar calendário
+            this.gerar();
+
+            console.log(`🗑️ Feriado excluído: ${data} - ${nomeFeriado}`);
+            if (typeof Notifications !== 'undefined') {
+                Notifications.success(`Feriado "${nomeFeriado}" excluído`);
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao excluir feriado:', error);
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error('Erro ao excluir feriado');
+            }
         }
     },
 
@@ -526,7 +650,7 @@ const Calendar = {
         }
     },
 
-    // ✅ MOSTRAR TODOS OS EVENTOS DO DIA - INTEGRAÇÃO MELHORADA
+    // ✅ MOSTRAR TODOS OS EVENTOS DO DIA - INTEGRAÇÃO MELHORADA COM AÇÕES
     mostrarTodosEventosDia(data) {
         try {
             const itens = this.obterEventosDoDia(data);
@@ -681,6 +805,35 @@ const Calendar = {
         };
     },
 
+    // ✅ NOVA FUNÇÃO: Confirmar exclusão de item do dia
+    _confirmarExclusaoItemDia(itemId, tipo, titulo) {
+        try {
+            const confirmacao = confirm(
+                `Tem certeza que deseja excluir ${tipo === 'tarefa' ? 'a tarefa' : 'o evento'}?\n\n` +
+                `${tipo === 'tarefa' ? '📝' : '📅'} ${titulo}\n\n` +
+                `Esta ação não pode ser desfeita.`
+            );
+
+            if (!confirmacao) {
+                return;
+            }
+
+            // Executar exclusão
+            if (tipo === 'tarefa') {
+                if (typeof Tasks !== 'undefined') {
+                    Tasks.excluirTarefa(itemId);
+                }
+            } else {
+                if (typeof Events !== 'undefined') {
+                    Events.excluirEvento(itemId);
+                }
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao confirmar exclusão do item:', error);
+        }
+    },
+
     // ✅ === MÉTODOS PRIVADOS AUXILIARES ===
 
     // Atualizar display do mês/ano
@@ -788,7 +941,7 @@ const Calendar = {
         }
     },
 
-    // Criar modal de eventos do dia - CORRIGIDO
+    // ✅ CRIAR MODAL DE EVENTOS DO DIA - MELHORADO COM AÇÕES
     _criarModalEventosDia(data, itens) {
         try {
             // Remover modal existente
@@ -868,7 +1021,7 @@ const Calendar = {
         }
     },
 
-    // Renderizar item no modal - CORRIGIDO
+    // ✅ RENDERIZAR ITEM NO MODAL - CORRIGIDO COM AÇÕES
     _renderizarItemModal(item, ehTarefa) {
         const cor = ehTarefa ? 
             this.config.coresTarefas[item.tipo] || '#6b7280' :
@@ -878,10 +1031,28 @@ const Calendar = {
         const pessoas = item.pessoas || (item.responsavel ? [item.responsavel] : []);
         const status = item.status ? ` (${item.status})` : '';
 
-        // Função onclick corrigida
-        const onclickAction = ehTarefa ? 
-            (typeof Tasks !== 'undefined' ? `Tasks.editarTarefa(${item.id}); this.closest('.modal').remove();` : 'console.warn("Tasks não disponível");') :
-            (typeof Events !== 'undefined' ? `Events.editarEvento(${item.id}); this.closest('.modal').remove();` : 'console.warn("Events não disponível");');
+        // ✅ AÇÕES COM BOTÕES DE EXCLUSÃO
+        const acoesBotoes = `
+            <div style="display: flex; gap: 4px; margin-top: 8px;">
+                <button class="btn btn-secondary btn-sm" 
+                        onclick="${ehTarefa ? 'Tasks' : 'Events'}.${ehTarefa ? 'editarTarefa' : 'editarEvento'}(${item.id}); this.closest('.modal').remove();"
+                        style="font-size: 10px; padding: 2px 6px;">
+                    ✏️ Editar
+                </button>
+                
+                <button class="btn btn-success btn-sm" 
+                        onclick="${ehTarefa ? 'Tasks' : 'Events'}.marcarConcluida ? ${ehTarefa ? 'Tasks' : 'Events'}.marcarConcluida(${item.id}) : ${ehTarefa ? 'Tasks' : 'Events'}.marcarConcluido(${item.id}); this.closest('.modal').remove();"
+                        style="font-size: 10px; padding: 2px 6px;">
+                    ✅ Concluir
+                </button>
+                
+                <button class="btn btn-danger btn-sm" 
+                        onclick="Calendar._confirmarExclusaoItemDia(${item.id}, '${ehTarefa ? 'tarefa' : 'evento'}', '${item.titulo}'); this.closest('.modal').remove();"
+                        style="font-size: 10px; padding: 2px 6px;">
+                    🗑️ Excluir
+                </button>
+            </div>
+        `;
 
         return `
             <div class="evento-item" style="
@@ -890,8 +1061,8 @@ const Calendar = {
                 margin: 8px 0;
                 background: #f9fafb;
                 border-radius: 4px;
-                cursor: pointer;
-            " onclick="${onclickAction}">
+                position: relative;
+            ">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
                         <strong>${item.titulo}${status}</strong>
@@ -910,6 +1081,8 @@ const Calendar = {
                 ${item.descricao ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 12px;">${item.descricao}</p>` : ''}
                 ${pessoas.length > 0 ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 11px;">👥 ${pessoas.join(', ')}</p>` : ''}
                 ${item.progresso !== undefined ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 11px;">📊 Progresso: ${item.progresso}%</p>` : ''}
+                
+                ${acoesBotoes}
             </div>
         `;
     },
@@ -1007,8 +1180,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG DE CARREGAMENTO
-console.log('📅 Sistema de Calendário Modular v6.2.1 CORRIGIDO - Integração Perfeita!');
-console.log('🎯 Funcionalidades: Navegação, Eventos + Tarefas Integradas, Feriados, PDF Export');
+console.log('📅 Sistema de Calendário Modular v6.2.1 CORRIGIDO - Integração Perfeita + Exclusão de Feriados!');
+console.log('🎯 Funcionalidades: Navegação, Eventos + Tarefas Integradas, Feriados com Exclusão, PDF Export');
 console.log('⚙️ Integração PERFEITA: Events.js, Tasks.js, PDF.js');
-console.log('✅ CORREÇÕES: Referências Events corrigidas, cache com limpeza, validações melhoradas');
+console.log('✅ NOVO: Exclusão de feriados e botões de ação no modal de detalhes');
 console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje), Esc (fechar modais)');
