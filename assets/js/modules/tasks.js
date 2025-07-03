@@ -278,7 +278,137 @@ const Tasks = {
             return false;
         }
     },
+// ✅ ADICIONAR SEÇÃO DE SINCRONIZAÇÃO NO MODAL
+Tasks._adicionarSecaoSincronizacao = function(formHtml, dadosTarefa = null) {
+    const ehSincronizada = dadosTarefa?.sincronizada;
+    const ehPromovida = dadosTarefa?.eventoPromovido;
+    
+    const secaoSync = `
+        <!-- Seção de Sincronização Híbrida -->
+        <div class="form-group" style="grid-column: 1 / -1; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <h5 style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">🔄 Sistema Híbrido</h5>
+            
+            ${ehSincronizada ? `
+                <div class="info-box info-box-info" style="margin-bottom: 8px;">
+                    <strong>🔄 Tarefa Sincronizada</strong><br>
+                    <span style="font-size: 12px;">Esta tarefa foi criada automaticamente a partir do evento ID: ${dadosTarefa.eventoOrigemId}</span>
+                </div>
+            ` : ''}
+            
+            ${ehPromovida ? `
+                <div class="info-box info-box-success" style="margin-bottom: 8px;">
+                    <strong>⬆️ Tarefa Promovida</strong><br>
+                    <span style="font-size: 12px;">Esta tarefa foi promovida para evento do calendário principal</span>
+                </div>
+            ` : ''}
+            
+            ${!ehSincronizada && !ehPromovida ? `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button type="button" class="btn btn-success btn-sm" onclick="Tasks._promoverParaEvento()" style="flex: 1;">
+                        ⬆️ Promover para Evento
+                    </button>
+                    <span style="font-size: 11px; color: #6b7280;">
+                        Criar evento no calendário principal mantendo esta tarefa
+                    </span>
+                </div>
+            ` : ''}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; font-size: 11px; color: #6b7280;">
+                <div>
+                    <strong>Participantes para Evento:</strong><br>
+                    <select id="tarefaParticipantesEvento" multiple style="width: 100%; height: 60px; font-size: 10px;">
+                        ${this._obterListaPessoas().map(pessoa => 
+                            `<option value="${pessoa}" ${(dadosTarefa?.responsavel === pessoa || dadosTarefa?.participantes?.includes(pessoa)) ? 'selected' : ''}>${pessoa}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div>
+                    <strong>Local do Evento:</strong><br>
+                    <input type="text" id="tarefaLocalEvento" placeholder="Ex: Sala de reuniões" style="width: 100%; font-size: 11px;" value="${dadosTarefa?.local || ''}">
+                </div>
+                <div>
+                    <strong>Duração (min):</strong><br>
+                    <input type="number" id="tarefaDuracaoEvento" min="15" max="480" placeholder="60" style="width: 100%; font-size: 11px;" value="${dadosTarefa?.estimativa || 60}">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return formHtml.replace(
+        '<!-- Templates -->',
+        secaoSync + '\n            <!-- Templates -->'
+    );
+};
 
+// ✅ FUNÇÃO PARA PROMOVER TAREFA DIRETAMENTE DO MODAL
+Tasks._promoverParaEvento = function() {
+    try {
+        // Obter dados do formulário atual
+        const dados = this._obterDadosFormulario();
+        
+        // Adicionar participantes e local para o evento
+        const participantesSelect = document.getElementById('tarefaParticipantesEvento');
+        const localInput = document.getElementById('tarefaLocalEvento');
+        const duracaoInput = document.getElementById('tarefaDuracaoEvento');
+        
+        if (participantesSelect) {
+            dados.participantes = Array.from(participantesSelect.selectedOptions).map(opt => opt.value);
+        }
+        
+        if (localInput) {
+            dados.local = localInput.value;
+        }
+        
+        if (duracaoInput) {
+            dados.estimativa = parseInt(duracaoInput.value) || 60;
+        }
+        
+        // Confirmar promoção
+        const confirmacao = confirm(
+            `Promover tarefa para evento?\n\n` +
+            `📝 ${dados.titulo}\n` +
+            `👥 Participantes: ${dados.participantes?.join(', ') || dados.responsavel}\n` +
+            `📍 Local: ${dados.local || 'Não definido'}\n` +
+            `⏱️ Duração: ${dados.estimativa || 60} minutos\n\n` +
+            `Isso criará um evento no calendário principal.`
+        );
+        
+        if (!confirmacao) return;
+        
+        // Salvar tarefa primeiro (se for nova)
+        if (!this.state.tarefaEditando) {
+            const saved = await this.salvarTarefa(dados);
+            if (!saved) return;
+            
+            // Buscar a tarefa recém criada
+            const novaTarefa = App.dados.tarefas.find(t => t.titulo === dados.titulo);
+            if (novaTarefa && typeof HybridSync !== 'undefined') {
+                HybridSync.promoverTarefaParaEvento(novaTarefa.id);
+            }
+        } else {
+            // Atualizar tarefa existente com novos dados
+            const tarefa = App.dados.tarefas.find(t => t.id == this.state.tarefaEditando);
+            if (tarefa) {
+                Object.assign(tarefa, dados);
+                tarefa.ultimaAtualizacao = new Date().toISOString();
+                
+                // Promover
+                if (typeof HybridSync !== 'undefined') {
+                    HybridSync.promoverTarefaParaEvento(tarefa.id);
+                }
+            }
+        }
+        
+        // Fechar modal
+        this.fecharModal();
+        
+    } catch (error) {
+        console.error('❌ Erro ao promover tarefa:', error);
+        if (typeof Notifications !== 'undefined') {
+            Notifications.error(`Erro na promoção: ${error.message}`);
+        }
+    }
+};
     // ✅ BUSCAR TAREFAS
     buscarTarefas(termo = '', filtros = {}) {
         try {
