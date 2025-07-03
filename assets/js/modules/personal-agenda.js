@@ -1,4 +1,4 @@
-/* ========== 📋 SISTEMA HÍBRIDO - MINHA AGENDA v6.5.1 - COMPLETO + WINDOW ========== */
+/* ========== 📋 SISTEMA HÍBRIDO - MINHA AGENDA v6.5.2 - USUÁRIO DINÂMICO ========== */
 
 const PersonalAgenda = {
     // ✅ CONFIGURAÇÕES HÍBRIDAS
@@ -35,9 +35,9 @@ const PersonalAgenda = {
         ]
     },
 
-    // ✅ ESTADO INTERNO
+    // ✅ ESTADO INTERNO - REMOVIDO HARDCODE ISABELLA
     state: {
-        pessoaAtual: 'Isabella',
+        pessoaAtual: null, // 🔧 CORREÇÃO: Removido hardcode 'Isabella'
         modalAberto: false,
         editandoTarefa: null,
         agendaSelecionada: 'semanal',
@@ -48,7 +48,10 @@ const PersonalAgenda = {
     // ✅ INICIALIZAÇÃO
     init() {
         try {
-            console.log('📋 Inicializando PersonalAgenda v6.5.1...');
+            console.log('📋 Inicializando PersonalAgenda v6.5.2 (Dinâmico)...');
+            
+            // 🔧 CORREÇÃO: Definir usuário atual dinamicamente
+            this._definirUsuarioAtual();
             
             // Verificar dependências
             if (!this._verificarDependencias()) {
@@ -58,11 +61,74 @@ const PersonalAgenda = {
             // Configurar eventos globais
             this._configurarEventosGlobais();
             
-            console.log('✅ PersonalAgenda inicializado com sucesso');
+            console.log(`✅ PersonalAgenda inicializado para: ${this.state.pessoaAtual}`);
             
         } catch (error) {
             console.error('❌ Erro ao inicializar PersonalAgenda:', error);
         }
+    },
+
+    // 🔧 NOVA FUNÇÃO: DEFINIR USUÁRIO ATUAL DINAMICAMENTE
+    _definirUsuarioAtual() {
+        try {
+            // Prioridade 1: Usuário do App.js (Firebase Auth)
+            if (App && App.usuarioAtual && App.usuarioAtual.email) {
+                this.state.pessoaAtual = this._extrairNomeDoEmail(App.usuarioAtual.email);
+                console.log(`👤 Usuário definido via App.usuarioAtual: ${this.state.pessoaAtual}`);
+                return;
+            }
+            
+            // Prioridade 2: Usuário do Auth.js
+            if (typeof Auth !== 'undefined' && Auth.state && Auth.state.usuarioAtual) {
+                const usuario = Auth.state.usuarioAtual;
+                this.state.pessoaAtual = usuario.displayName || this._extrairNomeDoEmail(usuario.email);
+                console.log(`👤 Usuário definido via Auth.state: ${this.state.pessoaAtual}`);
+                return;
+            }
+            
+            // Prioridade 3: Função global obterUsuarioAtual (se existir)
+            if (typeof obterUsuarioAtual === 'function') {
+                const usuario = obterUsuarioAtual();
+                if (usuario && usuario.nome) {
+                    this.state.pessoaAtual = usuario.nome;
+                    console.log(`👤 Usuário definido via obterUsuarioAtual(): ${this.state.pessoaAtual}`);
+                    return;
+                }
+            }
+            
+            // Fallback: Usuário padrão para desenvolvimento
+            this.state.pessoaAtual = 'Usuário';
+            console.warn(`⚠️ Usuário não identificado - usando fallback: ${this.state.pessoaAtual}`);
+            
+        } catch (error) {
+            console.error('❌ Erro ao definir usuário atual:', error);
+            this.state.pessoaAtual = 'Usuário';
+        }
+    },
+
+    // 🔧 NOVA FUNÇÃO: EXTRAIR NOME DO EMAIL
+    _extrairNomeDoEmail(email) {
+        if (!email) return 'Usuário';
+        
+        // Para renatoremiro@biapo.com.br -> Renato Remiro
+        const parteLocal = email.split('@')[0];
+        
+        // Casos especiais conhecidos
+        const mapaUsuarios = {
+            'renatoremiro': 'Renato Remiro',
+            'isabella': 'Isabella',
+            'eduardo': 'Eduardo', 
+            'lara': 'Lara',
+            'beto': 'Beto',
+            'admin': 'Administrador'
+        };
+        
+        if (mapaUsuarios[parteLocal.toLowerCase()]) {
+            return mapaUsuarios[parteLocal.toLowerCase()];
+        }
+        
+        // Caso geral: capitalizar primeira letra
+        return parteLocal.charAt(0).toUpperCase() + parteLocal.slice(1);
     },
 
     // ✅ VERIFICAR DEPENDÊNCIAS
@@ -82,11 +148,15 @@ const PersonalAgenda = {
         return dependencias.App;
     },
 
-    // ✅ ABRIR MINHA AGENDA - FUNÇÃO PRINCIPAL
+    // ✅ ABRIR MINHA AGENDA - FUNÇÃO PRINCIPAL COM CORREÇÃO
     abrirMinhaAgenda(pessoa = null) {
         try {
+            // 🔧 CORREÇÃO: Usar usuário passado ou usuário atual dinâmico
             if (pessoa) {
                 this.state.pessoaAtual = pessoa;
+            } else {
+                // Re-definir usuário atual se não foi passado
+                this._definirUsuarioAtual();
             }
             
             console.log(`📋 Abrindo agenda de ${this.state.pessoaAtual}`);
@@ -108,12 +178,13 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ CRIAR MODAL DA AGENDA
+    // ✅ CRIAR MODAL DA AGENDA - ATUALIZADO COM USUÁRIO DINÂMICO
     _criarModalAgenda() {
         const modal = document.createElement('div');
         modal.id = 'modalMinhaAgenda';
         modal.className = 'modal';
         
+        // 🔧 CORREÇÃO: Título dinâmico com usuário atual
         modal.innerHTML = `
             <div class="modal-content" style="max-width: 900px; max-height: 80vh;">
                 <div class="modal-header">
@@ -122,6 +193,19 @@ const PersonalAgenda = {
                 </div>
                 
                 <div class="modal-body" style="overflow-y: auto;">
+                    <!-- Info do Usuário -->
+                    <div style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #0ea5e9;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 24px;">👤</span>
+                            <div>
+                                <strong style="color: #0369a1;">Usuário Logado: ${this.state.pessoaAtual}</strong>
+                                <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                                    Email: ${this._obterEmailUsuarioAtual() || 'Não disponível'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Controles -->
                     <div class="agenda-controles" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                         <div style="display: flex; gap: 8px; align-items: center;">
@@ -172,7 +256,30 @@ const PersonalAgenda = {
         this.state.modalAberto = true;
     },
 
-    // ✅ RENDERIZAR CONTEÚDO DA AGENDA
+    // 🔧 NOVA FUNÇÃO: OBTER EMAIL DO USUÁRIO ATUAL
+    _obterEmailUsuarioAtual() {
+        try {
+            if (App && App.usuarioAtual && App.usuarioAtual.email) {
+                return App.usuarioAtual.email;
+            }
+            
+            if (typeof Auth !== 'undefined' && Auth.state && Auth.state.usuarioAtual) {
+                return Auth.state.usuarioAtual.email;
+            }
+            
+            if (typeof obterUsuarioAtual === 'function') {
+                const usuario = obterUsuarioAtual();
+                return usuario ? usuario.email : null;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('❌ Erro ao obter email do usuário:', error);
+            return null;
+        }
+    },
+
+    // ✅ RENDERIZAR CONTEÚDO DA AGENDA - COM FILTRO POR USUÁRIO
     _renderizarConteudoAgenda() {
         try {
             const agendaSemanal = this._obterAgendaSemanal();
@@ -190,7 +297,16 @@ const PersonalAgenda = {
                 html += this._renderizarTarefasEspecificas(tarefasEspecificas);
             }
             
-            return html || '<p style="text-align: center; color: #6b7280; padding: 40px;">Nenhuma tarefa encontrada.</p>';
+            return html || `
+                <div style="text-align: center; color: #6b7280; padding: 40px;">
+                    <p>📭 Nenhuma tarefa encontrada para <strong>${this.state.pessoaAtual}</strong>.</p>
+                    <p style="font-size: 14px; margin-top: 8px;">
+                        <button class="btn btn-primary btn-sm" onclick="PersonalAgenda.mostrarNovaTarefa()">
+                            ➕ Criar primeira tarefa
+                        </button>
+                    </p>
+                </div>
+            `;
             
         } catch (error) {
             console.error('❌ Erro ao renderizar agenda:', error);
@@ -198,7 +314,179 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ RENDERIZAR AGENDA SEMANAL
+    // ✅ OBTER AGENDA SEMANAL - COM FILTRO POR USUÁRIO DINÂMICO
+    _obterAgendaSemanal() {
+        try {
+            if (!App.dados?.agendas?.[this.state.pessoaAtual]) {
+                console.log(`📋 Nenhuma agenda semanal encontrada para: ${this.state.pessoaAtual}`);
+                return {};
+            }
+            
+            const agenda = App.dados.agendas[this.state.pessoaAtual] || {};
+            console.log(`📋 Agenda semanal carregada para ${this.state.pessoaAtual}:`, Object.keys(agenda));
+            
+            return agenda;
+            
+        } catch (error) {
+            console.error('❌ Erro ao obter agenda semanal:', error);
+            return {};
+        }
+    },
+
+    // ✅ OBTER TAREFAS ESPECÍFICAS - COM FILTRO POR USUÁRIO DINÂMICO  
+    _obterTarefasEspecificas() {
+        try {
+            if (!App.dados?.tarefas) {
+                console.log('📋 Nenhuma tarefa específica encontrada nos dados');
+                return [];
+            }
+            
+            // 🔧 CORREÇÃO: Filtrar tarefas por usuário atual dinâmico
+            const tarefasDoUsuario = App.dados.tarefas.filter(tarefa => {
+                // Tarefa é do usuário atual se:
+                // 1. responsavel é o usuário atual
+                // 2. pessoas inclui o usuário atual
+                // 3. nome do usuário atual está na lista de participantes
+                
+                const ehResponsavel = tarefa.responsavel === this.state.pessoaAtual;
+                const ehParticipante = tarefa.pessoas?.includes(this.state.pessoaAtual);
+                const ehNaAgendaSemanal = tarefa.agendaSemanal === false || !tarefa.agendaSemanal;
+                
+                return ehNaAgendaSemanal && (ehResponsavel || ehParticipante);
+            });
+            
+            console.log(`📋 ${tarefasDoUsuario.length} tarefas específicas encontradas para: ${this.state.pessoaAtual}`);
+            
+            return tarefasDoUsuario;
+            
+        } catch (error) {
+            console.error('❌ Erro ao obter tarefas específicas:', error);
+            return [];
+        }
+    },
+
+    // ✅ MOSTRAR NOVA TAREFA - COM USUÁRIO DINÂMICO
+    mostrarNovaTarefa(tipo = 'pessoal') {
+        try {
+            // Verificar se Tasks está disponível
+            if (typeof Tasks !== 'undefined' && typeof Tasks.mostrarNovaTarefa === 'function') {
+                // 🔧 CORREÇÃO: Passar usuário atual como responsável
+                Tasks.mostrarNovaTarefa(tipo, this.state.pessoaAtual);
+            } else {
+                // Implementação simplificada
+                this._mostrarModalNovaTarefa(tipo);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao mostrar nova tarefa:', error);
+        }
+    },
+
+    // ✅ MODAL SIMPLIFICADO NOVA TAREFA - COM USUÁRIO DINÂMICO
+    _mostrarModalNovaTarefa(tipo) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>📝 Nova Tarefa - ${this.state.pessoaAtual}</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNovaTarefa">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Título:</label>
+                            <input type="text" name="titulo" required style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Tipo:</label>
+                            <select name="tipo" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                                ${this.config.tipos.map(t => `<option value="${t.value}" ${t.value === tipo ? 'selected' : ''}>${t.icon} ${t.label}</option>`).join('')}
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Responsável:</label>
+                            <input type="text" name="responsavel" value="${this.state.pessoaAtual}" readonly style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; background: #f9fafb;">
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Descrição:</label>
+                            <textarea name="descricao" rows="3" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Data:</label>
+                            <input type="date" name="dataInicio" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="PersonalAgenda._salvarNovaTarefa(this)">Salvar</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('show'), 10);
+    },
+
+    // ✅ SALVAR NOVA TAREFA - COM USUÁRIO DINÂMICO
+    _salvarNovaTarefa(botao) {
+        try {
+            const form = document.getElementById('formNovaTarefa');
+            const formData = new FormData(form);
+            
+            const novaTarefa = {
+                id: Date.now(),
+                titulo: formData.get('titulo'),
+                tipo: formData.get('tipo'),
+                descricao: formData.get('descricao'),
+                dataInicio: formData.get('dataInicio') || null,
+                status: 'pendente',
+                prioridade: 'media',
+                responsavel: this.state.pessoaAtual, // 🔧 CORREÇÃO: Usar usuário dinâmico
+                progresso: 0,
+                dataCriacao: new Date().toISOString()
+            };
+            
+            // Adicionar aos dados
+            if (!App.dados.tarefas) {
+                App.dados.tarefas = [];
+            }
+            App.dados.tarefas.push(novaTarefa);
+            
+            // Salvar dados
+            if (typeof Persistence !== 'undefined') {
+                Persistence.salvarDadosCritico();
+            }
+            
+            // Fechar modal
+            botao.closest('.modal').remove();
+            
+            // Atualizar agenda se estiver aberta
+            if (this.state.modalAberto) {
+                this._atualizarConteudoModal();
+            }
+            
+            // Notificação
+            if (typeof Notifications !== 'undefined') {
+                Notifications.success(`Tarefa criada para ${this.state.pessoaAtual}!`);
+            }
+            
+            console.log(`✅ Nova tarefa criada para ${this.state.pessoaAtual}:`, novaTarefa.titulo);
+            
+        } catch (error) {
+            console.error('❌ Erro ao salvar tarefa:', error);
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error('Erro ao salvar tarefa');
+            }
+        }
+    },
+
+    // ✅ RENDERIZAR AGENDA SEMANAL - MANTIDO IGUAL
     _renderizarAgendaSemanal(agenda) {
         let html = '<h4 style="color: #3b82f6; margin: 16px 0 8px 0;">📅 Agenda Semanal Recorrente</h4>';
         
@@ -223,7 +511,7 @@ const PersonalAgenda = {
         return html;
     },
 
-    // ✅ RENDERIZAR TAREFAS ESPECÍFICAS
+    // ✅ RENDERIZAR TAREFAS ESPECÍFICAS - MANTIDO IGUAL
     _renderizarTarefasEspecificas(tarefas) {
         const tarefasFiltradas = this._filtrarTarefas(tarefas);
         
@@ -254,7 +542,10 @@ const PersonalAgenda = {
         return html;
     },
 
-    // ✅ RENDERIZAR ITEM DE TAREFA
+    // ✅ TODAS AS OUTRAS FUNÇÕES MANTIDAS IGUAIS...
+    // (renderizarItemTarefa, filtrarTarefas, marcarConcluida, etc.)
+    
+    // ✅ RENDERIZAR ITEM DE TAREFA - MANTIDO IGUAL
     _renderizarItemTarefa(tarefa, ehSemanal) {
         const tipoConfig = this.config.tipos.find(t => t.value === tarefa.tipo) || this.config.tipos[0];
         const statusConfig = this.config.status.find(s => s.value === tarefa.status) || this.config.status[0];
@@ -341,41 +632,7 @@ const PersonalAgenda = {
         `;
     },
 
-    // ✅ OBTER AGENDA SEMANAL
-    _obterAgendaSemanal() {
-        try {
-            if (!App.dados?.agendas?.[this.state.pessoaAtual]) {
-                return {};
-            }
-            
-            return App.dados.agendas[this.state.pessoaAtual] || {};
-            
-        } catch (error) {
-            console.error('❌ Erro ao obter agenda semanal:', error);
-            return {};
-        }
-    },
-
-    // ✅ OBTER TAREFAS ESPECÍFICAS
-    _obterTarefasEspecificas() {
-        try {
-            if (!App.dados?.tarefas) {
-                return [];
-            }
-            
-            return App.dados.tarefas.filter(tarefa => 
-                !tarefa.agendaSemanal && 
-                (tarefa.responsavel === this.state.pessoaAtual || 
-                 tarefa.pessoas?.includes(this.state.pessoaAtual))
-            );
-            
-        } catch (error) {
-            console.error('❌ Erro ao obter tarefas específicas:', error);
-            return [];
-        }
-    },
-
-    // ✅ FILTRAR TAREFAS
+    // ✅ FILTRAR TAREFAS - MANTIDO IGUAL
     _filtrarTarefas(tarefas) {
         if (this.state.filtroAtivo === 'todos') {
             return tarefas;
@@ -384,7 +641,7 @@ const PersonalAgenda = {
         return tarefas.filter(tarefa => tarefa.status === this.state.filtroAtivo);
     },
 
-    // ✅ AGRUPAR TAREFAS POR DATA
+    // ✅ AGRUPAR TAREFAS POR DATA - MANTIDO IGUAL
     _agruparTarefasPorData(tarefas) {
         const grupos = {};
         
@@ -400,7 +657,7 @@ const PersonalAgenda = {
         return grupos;
     },
 
-    // ✅ CONFIGURAR EVENT LISTENERS DO MODAL
+    // ✅ CONFIGURAR EVENT LISTENERS DO MODAL - MANTIDO IGUAL
     _configurarEventListenersModal(modal) {
         // Filtro de tipo de agenda
         const tipoSelect = modal.querySelector('#tipoAgendaSelect');
@@ -421,7 +678,7 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ ATUALIZAR CONTEÚDO DO MODAL
+    // ✅ ATUALIZAR CONTEÚDO DO MODAL - MANTIDO IGUAL
     _atualizarConteudoModal() {
         const content = document.getElementById('agendaContent');
         if (content) {
@@ -429,120 +686,10 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ MOSTRAR NOVA TAREFA
-    mostrarNovaTarefa(tipo = 'pessoal') {
-        try {
-            // Verificar se Tasks está disponível
-            if (typeof Tasks !== 'undefined' && typeof Tasks.mostrarNovaTarefa === 'function') {
-                Tasks.mostrarNovaTarefa(tipo);
-            } else {
-                // Implementação simplificada
-                this._mostrarModalNovaTarefa(tipo);
-            }
-            
-        } catch (error) {
-            console.error('❌ Erro ao mostrar nova tarefa:', error);
-        }
-    },
+    // ✅ TODAS AS OUTRAS FUNÇÕES MANTIDAS IGUAIS...
+    // (marcarConcluida, excluirTarefa, sincronizarComCalendario, etc.)
 
-    // ✅ MODAL SIMPLIFICADO NOVA TAREFA
-    _mostrarModalNovaTarefa(tipo) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 500px;">
-                <div class="modal-header">
-                    <h3>📝 Nova Tarefa</h3>
-                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="formNovaTarefa">
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Título:</label>
-                            <input type="text" name="titulo" required style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                        </div>
-                        
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Tipo:</label>
-                            <select name="tipo" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                                ${this.config.tipos.map(t => `<option value="${t.value}" ${t.value === tipo ? 'selected' : ''}>${t.icon} ${t.label}</option>`).join('')}
-                            </select>
-                        </div>
-                        
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Descrição:</label>
-                            <textarea name="descricao" rows="3" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;"></textarea>
-                        </div>
-                        
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; margin-bottom: 4px; font-weight: bold;">Data:</label>
-                            <input type="date" name="dataInicio" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancelar</button>
-                    <button class="btn btn-primary" onclick="PersonalAgenda._salvarNovaTarefa(this)">Salvar</button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('show'), 10);
-    },
-
-    // ✅ SALVAR NOVA TAREFA
-    _salvarNovaTarefa(botao) {
-        try {
-            const form = document.getElementById('formNovaTarefa');
-            const formData = new FormData(form);
-            
-            const novaTarefa = {
-                id: Date.now(),
-                titulo: formData.get('titulo'),
-                tipo: formData.get('tipo'),
-                descricao: formData.get('descricao'),
-                dataInicio: formData.get('dataInicio') || null,
-                status: 'pendente',
-                prioridade: 'media',
-                responsavel: this.state.pessoaAtual,
-                progresso: 0,
-                dataCriacao: new Date().toISOString()
-            };
-            
-            // Adicionar aos dados
-            if (!App.dados.tarefas) {
-                App.dados.tarefas = [];
-            }
-            App.dados.tarefas.push(novaTarefa);
-            
-            // Salvar dados
-            if (typeof Persistence !== 'undefined') {
-                Persistence.salvarDadosCritico();
-            }
-            
-            // Fechar modal
-            botao.closest('.modal').remove();
-            
-            // Atualizar agenda se estiver aberta
-            if (this.state.modalAberto) {
-                this._atualizarConteudoModal();
-            }
-            
-            // Notificação
-            if (typeof Notifications !== 'undefined') {
-                Notifications.success('Tarefa criada com sucesso!');
-            }
-            
-        } catch (error) {
-            console.error('❌ Erro ao salvar tarefa:', error);
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error('Erro ao salvar tarefa');
-            }
-        }
-    },
-
-    // ✅ MARCAR COMO CONCLUÍDA
+    // ✅ MARCAR COMO CONCLUÍDA - MANTIDO IGUAL
     marcarConcluida(tarefaId) {
         try {
             const tarefa = this._encontrarTarefa(tarefaId);
@@ -569,7 +716,7 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ EXCLUIR TAREFA
+    // ✅ EXCLUIR TAREFA - MANTIDO IGUAL
     excluirTarefa(tarefaId) {
         try {
             const tarefa = this._encontrarTarefa(tarefaId);
@@ -609,7 +756,7 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ SINCRONIZAR COM CALENDÁRIO
+    // ✅ SINCRONIZAR COM CALENDÁRIO - MANTIDO IGUAL
     sincronizarComCalendario() {
         try {
             console.log('🔄 Sincronizando agenda com calendário...');
@@ -639,7 +786,7 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ ENCONTRAR TAREFA
+    // ✅ ENCONTRAR TAREFA - MANTIDO IGUAL
     _encontrarTarefa(tarefaId) {
         // Buscar em tarefas específicas
         if (App.dados?.tarefas) {
@@ -661,7 +808,7 @@ const PersonalAgenda = {
         return null;
     },
 
-    // ✅ SALVAR ALTERAÇÕES
+    // ✅ SALVAR ALTERAÇÕES - MANTIDO IGUAL
     _salvarAlteracoes() {
         try {
             if (typeof Persistence !== 'undefined' && typeof Persistence.salvarDadosCritico === 'function') {
@@ -677,25 +824,26 @@ const PersonalAgenda = {
         }
     },
 
-    // ✅ CONFIGURAR EVENTOS GLOBAIS
+    // ✅ CONFIGURAR EVENTOS GLOBAIS - MANTIDO IGUAL
     _configurarEventosGlobais() {
         // Placeholder para eventos globais se necessário
     },
 
-    // ✅ OBTER STATUS DO SISTEMA
+    // ✅ OBTER STATUS DO SISTEMA - ATUALIZADO COM USUÁRIO DINÂMICO
     obterStatus() {
         return {
             pessoaAtual: this.state.pessoaAtual,
+            emailAtual: this._obterEmailUsuarioAtual(),
             modalAberto: this.state.modalAberto,
             agendaSelecionada: this.state.agendaSelecionada,
             filtroAtivo: this.state.filtroAtivo,
             sincronizacaoAtiva: this.state.sincronizacaoAtiva,
             dependenciasOk: this._verificarDependencias(),
-            versao: '6.5.1'
+            versao: '6.5.2 - Usuário Dinâmico'
         };
     },
 
-    // ✅ FUNÇÕES ADICIONAIS PLACEHOLDER
+    // ✅ FUNÇÕES ADICIONAIS PLACEHOLDER - MANTIDAS IGUAIS
     editarTarefa(tarefaId) {
         console.log('📝 Editando tarefa:', tarefaId);
         // Implementação futura ou delegação para Tasks.js
@@ -751,9 +899,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG DE INICIALIZAÇÃO
-console.log('📋 Sistema de Agenda Pessoal v6.5.1 COMPLETO e exposto no window!');
-console.log('✅ CORREÇÃO: window.PersonalAgenda = PersonalAgenda adicionada');
+console.log('📋 Sistema de Agenda Pessoal v6.5.2 - USUÁRIO DINÂMICO IMPLEMENTADO!');
+console.log('✅ CORREÇÃO: Removido hardcode "Isabella" - agora usa usuário logado');
 console.log('🧪 Verificar: typeof window.PersonalAgenda =', typeof window.PersonalAgenda);
 console.log('🎯 Funcionalidades: Agenda Semanal, Tarefas Específicas, Sincronização, CRUD completo');
-console.log('⚙️ Integração: Tasks.js, HybridSync, Calendar.js');
-console.log('📱 Uso: PersonalAgenda.abrirMinhaAgenda("Isabella")');
+console.log('⚙️ Integração: Tasks.js, HybridSync, Calendar.js + Auth dinâmico');
+console.log('📱 Uso: PersonalAgenda.abrirMinhaAgenda() - detecta usuário automaticamente');
