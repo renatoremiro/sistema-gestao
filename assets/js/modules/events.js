@@ -104,53 +104,6 @@ const Events = {
         }
     },
 
-/* 
-ADICIONAR ESTAS MODIFICAÇÕES AO Events.salvarEvento (após linha ~100):
-*/
-
-// ✅ INTERCEPTOR PARA SINCRONIZAÇÃO AUTOMÁTICA
-Events._salvarEventoOriginal = Events.salvarEvento;
-
-Events.salvarEvento = async function(dadosEvento) {
-    try {
-        // Chamar função original
-        const resultado = await this._salvarEventoOriginal(dadosEvento);
-        
-        // Se salvou com sucesso e HybridSync está disponível
-        if (resultado && typeof HybridSync !== 'undefined' && HybridSync.config.autoSyncEnabled) {
-            console.log('🔄 Evento salvo - disparando sincronização automática...');
-            
-            // Aguardar um pouco para evitar loops
-            setTimeout(() => {
-                HybridSync.sincronizarEventosParaTarefas();
-            }, HybridSync.config.syncDelay || 100);
-        }
-        
-        return resultado;
-        
-    } catch (error) {
-        console.error('❌ Erro no interceptor de salvamento:', error);
-        return false;
-    }
-};
-
-// ✅ ADICIONAR INDICADOR DE SINCRONIZAÇÃO NO MODAL
-Events._criarModalEventoComIndicadores = function(dataInicial, dadosEvento = null) {
-    // Chamar função original (assumindo que existe)
-    const modal = this._criarModalEventoOriginal ? this._criarModalEventoOriginal(dataInicial, dadosEvento) : null;
-    
-    if (modal && dadosEvento) {
-        // Adicionar indicadores se evento foi promovido
-        if (dadosEvento.promovido) {
-            const header = modal.querySelector('.modal-header h3');
-            if (header) {
-                header.innerHTML = `⬆️ ${header.innerHTML} <span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">PROMOVIDO</span>`;
-            }
-        }
-    }
-    
-    return modal;
-};
     // ✅ SALVAR EVENTO (criar ou atualizar)
     async salvarEvento(dadosEvento) {
         try {
@@ -286,6 +239,281 @@ Events._criarModalEventoComIndicadores = function(dataInicial, dadosEvento = nul
             }
             return false;
         }
+    },
+
+    // ✅ MOSTRAR GERENCIAR FERIADOS - NOVA FUNÇÃO ADICIONADA
+    mostrarGerenciarFeriados() {
+        try {
+            console.log('🏖️ Abrindo modal de gerenciamento de feriados...');
+            
+            // Criar modal
+            this._criarModalGerenciarFeriados();
+            
+            console.log('✅ Modal de feriados criado com sucesso');
+
+        } catch (error) {
+            console.error('❌ Erro ao mostrar modal de feriados:', error);
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error('Erro ao abrir gerenciamento de feriados');
+            }
+        }
+    },
+
+    // ✅ CRIAR MODAL DE GERENCIAR FERIADOS - NOVA FUNÇÃO
+    _criarModalGerenciarFeriados() {
+        // Remover modal existente
+        const modalExistente = document.getElementById('modalGerenciarFeriados');
+        if (modalExistente) {
+            modalExistente.remove();
+        }
+        
+        // Obter feriados existentes
+        const feriados = App.dados?.feriados || {};
+        const feriadosArray = Object.entries(feriados).map(([data, nome]) => ({
+            data,
+            nome,
+            dataFormatada: new Date(data).toLocaleDateString('pt-BR')
+        })).sort((a, b) => new Date(a.data) - new Date(b.data));
+        
+        const modal = document.createElement('div');
+        modal.id = 'modalGerenciarFeriados';
+        modal.className = 'modal';
+        
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3>🏖️ Gerenciar Feriados</h3>
+                    <button class="modal-close" onclick="Events._fecharModalFeriados()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Adicionar Novo Feriado -->
+                    <div class="form-section">
+                        <h4>➕ Adicionar Novo Feriado</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: end;">
+                            <div class="form-group">
+                                <label for="novaDataFeriado">📅 Data:</label>
+                                <input type="date" id="novaDataFeriado" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="novoNomeFeriado">🏷️ Nome do Feriado:</label>
+                                <input type="text" id="novoNomeFeriado" placeholder="Ex: Natal" required>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary" onclick="Events._adicionarFeriado()">
+                                ➕ Adicionar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de Feriados Existentes -->
+                    <div class="form-section">
+                        <h4>📋 Feriados Cadastrados (${feriadosArray.length})</h4>
+                        
+                        ${feriadosArray.length > 0 ? `
+                            <div class="feriados-lista" style="max-height: 300px; overflow-y: auto;">
+                                ${feriadosArray.map(feriado => `
+                                    <div class="feriado-item" style="
+                                        display: flex; 
+                                        justify-content: space-between; 
+                                        align-items: center; 
+                                        padding: 12px; 
+                                        margin: 8px 0; 
+                                        background: #f8fafc; 
+                                        border-radius: 6px; 
+                                        border-left: 4px solid #f59e0b;
+                                    ">
+                                        <div>
+                                            <strong>🎉 ${feriado.nome}</strong><br>
+                                            <span style="color: #6b7280; font-size: 14px;">📅 ${feriado.dataFormatada}</span>
+                                        </div>
+                                        
+                                        <button class="btn btn-danger btn-sm" 
+                                                onclick="Events._excluirFeriado('${feriado.data}', '${feriado.nome}')"
+                                                style="font-size: 12px;">
+                                            🗑️ Excluir
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="info-box info-box-info">
+                                📭 Nenhum feriado cadastrado ainda. Adicione o primeiro feriado acima!
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Templates de Feriados -->
+                    <div class="form-section">
+                        <h4>📅 Templates de Feriados ${new Date().getFullYear()}</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-01-01', 'Confraternização Universal')">
+                                ➕ Confraternização Universal
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-04-21', 'Tiradentes')">
+                                ➕ Tiradentes
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-05-01', 'Dia do Trabalhador')">
+                                ➕ Dia do Trabalhador
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-09-07', 'Independência do Brasil')">
+                                ➕ Independência
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-10-12', 'Nossa Senhora Aparecida')">
+                                ➕ Nossa Senhora Aparecida
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-11-02', 'Finados')">
+                                ➕ Finados
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-11-15', 'Proclamação da República')">
+                                ➕ Proclamação da República
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="Events._adicionarTemplate('${new Date().getFullYear()}-12-25', 'Natal')">
+                                ➕ Natal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="Events._fecharModalFeriados()">
+                        ✅ Fechar
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        // Focar no campo de data
+        document.getElementById('novaDataFeriado').focus();
+    },
+
+    // ✅ ADICIONAR FERIADO - NOVA FUNÇÃO
+    _adicionarFeriado() {
+        try {
+            const data = document.getElementById('novaDataFeriado').value;
+            const nome = document.getElementById('novoNomeFeriado').value.trim();
+            
+            if (!data || !nome) {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('Data e nome do feriado são obrigatórios');
+                }
+                return;
+            }
+            
+            // Verificar se já existe
+            if (App.dados?.feriados?.[data]) {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.warning('Já existe um feriado nesta data');
+                }
+                return;
+            }
+            
+            // Garantir estrutura
+            if (!App.dados.feriados) {
+                App.dados.feriados = {};
+            }
+            
+            // Adicionar feriado
+            App.dados.feriados[data] = nome;
+            
+            // Salvar dados
+            if (typeof Persistence !== 'undefined') {
+                Persistence.salvarDadosCritico();
+            }
+            
+            // Atualizar calendário
+            if (typeof Calendar !== 'undefined') {
+                Calendar.gerar();
+            }
+            
+            // Limpar campos
+            document.getElementById('novaDataFeriado').value = '';
+            document.getElementById('novoNomeFeriado').value = '';
+            
+            // Recriar modal para mostrar o novo feriado
+            this._criarModalGerenciarFeriados();
+            
+            if (typeof Notifications !== 'undefined') {
+                Notifications.success(`Feriado "${nome}" adicionado com sucesso!`);
+            }
+            
+            console.log('✅ Feriado adicionado:', nome, 'em', data);
+            
+        } catch (error) {
+            console.error('❌ Erro ao adicionar feriado:', error);
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error('Erro ao adicionar feriado');
+            }
+        }
+    },
+
+    // ✅ ADICIONAR TEMPLATE DE FERIADO - NOVA FUNÇÃO
+    _adicionarTemplate(data, nome) {
+        // Preencher campos com template
+        document.getElementById('novaDataFeriado').value = data;
+        document.getElementById('novoNomeFeriado').value = nome;
+        
+        // Adicionar automaticamente
+        this._adicionarFeriado();
+    },
+
+    // ✅ EXCLUIR FERIADO - NOVA FUNÇÃO
+    _excluirFeriado(data, nome) {
+        try {
+            const confirmacao = confirm(
+                `Tem certeza que deseja excluir o feriado?\n\n` +
+                `🎉 ${nome}\n` +
+                `📅 ${new Date(data).toLocaleDateString('pt-BR')}\n\n` +
+                `Esta ação não pode ser desfeita.`
+            );
+            
+            if (!confirmacao) {
+                return;
+            }
+            
+            // Remover feriado
+            if (App.dados?.feriados?.[data]) {
+                delete App.dados.feriados[data];
+                
+                // Salvar dados
+                if (typeof Persistence !== 'undefined') {
+                    Persistence.salvarDadosCritico();
+                }
+                
+                // Atualizar calendário
+                if (typeof Calendar !== 'undefined') {
+                    Calendar.gerar();
+                }
+                
+                // Recriar modal
+                this._criarModalGerenciarFeriados();
+                
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.success(`Feriado "${nome}" excluído com sucesso!`);
+                }
+                
+                console.log('✅ Feriado excluído:', nome);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao excluir feriado:', error);
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error('Erro ao excluir feriado');
+            }
+        }
+    },
+
+    // ✅ FECHAR MODAL DE FERIADOS - NOVA FUNÇÃO
+    _fecharModalFeriados() {
+        const modal = document.getElementById('modalGerenciarFeriados');
+        if (modal) {
+            modal.remove();
+        }
+        console.log('✅ Modal de feriados fechado');
     },
 
     // ✅ BUSCAR EVENTOS
@@ -856,10 +1084,11 @@ window.Events_Debug = {
     criarTeste: () => {
         const hoje = new Date().toISOString().split('T')[0];
         Events.mostrarNovoEvento(hoje);
-    }
+    },
+    feriados: () => Events.mostrarGerenciarFeriados()
 };
 
 console.log('📅 Sistema de Gestão de Eventos v6.3.0 carregado!');
-console.log('🎯 Funcionalidades: CRUD completo, Modal responsivo, Integração Calendar.js');
+console.log('🎯 Funcionalidades: CRUD completo, Modal responsivo, Integração Calendar.js, GERENCIAR FERIADOS');
 console.log('✅ Integração: App.dados, Calendar.gerar(), Notifications, Persistence');
-console.log('🧪 Debug: Events_Debug.status(), Events_Debug.criarTeste()');
+console.log('🧪 Debug: Events_Debug.status(), Events_Debug.criarTeste(), Events_Debug.feriados()');
