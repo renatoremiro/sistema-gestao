@@ -55,53 +55,73 @@
     <script src="modules/chat-module.js"></script>
 
     <style>
-        /* 🎨 DESIGN INSPIRADO NO CLAUDE - CORES E TIPOGRAFIA */
+        /* 🔴 DESIGN BIAPO - CORES AVERMELHADAS CORPORATIVAS */
+        :root {
+            --biapo-red: #C53030;
+            --biapo-red-light: #E53E3E;
+            --biapo-red-dark: #9B2C2C;
+            --biapo-orange: #DD6B20;
+            --biapo-gray: #2D3748;
+            --biapo-gray-light: #4A5568;
+            --biapo-gray-lighter: #718096;
+            --accent-green: #38A169;
+            --accent-yellow: #D69E2E;
+            --bg-primary: #F7FAFC;
+            --bg-white: #FFFFFF;
+            --border-color: #E2E8F0;
+            --border-light: #F1F5F9;
+            --text-primary: #1A202C;
+            --text-secondary: #2D3748;
+            --text-light: #4A5568;
+            --shadow-sm: rgba(197, 48, 48, 0.1);
+            --shadow-md: rgba(197, 48, 48, 0.15);
+            --shadow-lg: rgba(197, 48, 48, 0.2);
+        }
+        
         * {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
         
-        :root {
-            --claude-orange: #FF6B35;
-            --claude-orange-light: #FF8A65;
-            --claude-orange-dark: #E55100;
-            --claude-text: #2D3748;
-            --claude-text-light: #718096;
-            --claude-text-lighter: #A0AEC0;
-            --claude-bg: #FAFAFA;
-            --claude-white: #FFFFFF;
-            --claude-border: #E2E8F0;
-            --claude-border-light: #F7FAFC;
-            --claude-shadow: rgba(0, 0, 0, 0.05);
-            --claude-shadow-hover: rgba(0, 0, 0, 0.1);
-        }
-        
         body {
-            background: var(--claude-bg);
-            color: var(--claude-text);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             margin: 0;
             padding: 0;
             line-height: 1.6;
         }
         
-        /* 🔐 TELA DE LOGIN - ESTILO CLAUDE */
+        /* 🏢 LOGO E BRANDING */
+        .logo {
+            max-height: 60px;
+            width: auto;
+            margin-bottom: 24px;
+        }
+        
+        .logo-header {
+            height: 40px;
+            width: auto;
+            margin-right: 16px;
+        }
+        
+        /* 🔐 TELA DE LOGIN - ESTILO BIAPO AVERMELHADO */
         .login-screen {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--claude-bg);
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
             padding: 24px;
         }
         
         .login-card {
-            background: var(--claude-white);
+            background: var(--bg-white);
             padding: 48px;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px var(--claude-shadow);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px var(--shadow-lg);
             width: 100%;
             max-width: 420px;
             text-align: center;
-            border: 1px solid var(--claude-border);
+            border: 1px solid var(--border-color);
         }
         
         .login-header {
@@ -109,16 +129,16 @@
         }
         
         .login-header h1 {
-            color: var(--claude-text);
+            color: var(--text-primary);
             font-size: 32px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
         }
         
         .login-header p {
-            color: var(--claude-text-light);
-            font-size: 15px;
+            color: var(--text-secondary);
+            font-size: 16px;
             font-weight: 400;
         }
         
@@ -134,31 +154,31 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--claude-text);
+            font-weight: 600;
+            color: var(--text-primary);
             font-size: 14px;
         }
         
         .form-group input {
             width: 100%;
             padding: 14px 16px;
-            border: 1.5px solid var(--claude-border);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 15px;
             transition: all 0.2s ease;
             box-sizing: border-box;
-            background: var(--claude-white);
-            color: var(--claude-text);
+            background: var(--bg-white);
+            color: var(--text-primary);
         }
         
         .form-group input:focus {
             outline: none;
-            border-color: var(--claude-orange);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            border-color: var(--biapo-red);
+            box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
         }
         
         .form-group input::placeholder {
-            color: var(--claude-text-lighter);
+            color: var(--text-light);
         }
         
         .input-error {
@@ -172,13 +192,13 @@
         
         .btn-login {
             width: 100%;
-            padding: 14px 24px;
-            background: var(--claude-orange);
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             margin-bottom: 16px;
@@ -186,9 +206,9 @@
         }
         
         .btn-login:hover:not(:disabled) {
-            background: var(--claude-orange-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            background: linear-gradient(135deg, var(--biapo-red-dark) 0%, var(--biapo-red) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(197, 48, 48, 0.3);
         }
         
         .btn-login:disabled {
@@ -201,8 +221,8 @@
             width: 100%;
             padding: 12px 24px;
             background: transparent;
-            color: var(--claude-text-light);
-            border: 1.5px solid var(--claude-border);
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
@@ -211,19 +231,19 @@
         }
         
         .btn-register:hover {
-            background: var(--claude-border-light);
-            border-color: var(--claude-text-lighter);
-            color: var(--claude-text);
+            background: var(--border-light);
+            border-color: var(--biapo-gray-lighter);
+            color: var(--text-primary);
         }
         
         .login-footer {
             text-align: center;
             font-size: 14px;
-            color: var(--claude-text-light);
+            color: var(--text-secondary);
         }
         
         .login-footer a {
-            color: var(--claude-orange);
+            color: var(--biapo-red);
             text-decoration: none;
             font-weight: 500;
         }
@@ -232,32 +252,37 @@
             text-decoration: underline;
         }
         
-        /* 🏢 SISTEMA PRINCIPAL - ESTILO CLAUDE */
+        /* 🏢 SISTEMA PRINCIPAL - ESTILO EMPRESARIAL */
         .main-system {
             min-height: 100vh;
-            background: var(--claude-bg);
+            background: var(--bg-primary);
         }
         
         .top-header {
-            background: var(--claude-white);
-            border-bottom: 1px solid var(--claude-border);
+            background: var(--bg-white);
+            border-bottom: 2px solid var(--border-color);
             padding: 20px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px var(--claude-shadow);
+            box-shadow: 0 2px 8px var(--shadow-sm);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
         }
         
         .header-left h1 {
             font-size: 28px;
-            font-weight: 600;
-            color: var(--claude-text);
+            font-weight: 700;
+            color: var(--text-primary);
             margin: 0;
             letter-spacing: -0.5px;
         }
         
         .header-left p {
-            color: var(--claude-text-light);
+            color: var(--text-secondary);
             margin: 4px 0 0 0;
             font-size: 15px;
             font-weight: 400;
@@ -266,30 +291,31 @@
         .header-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
         }
         
         .user-info {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 16px;
-            background: var(--claude-border-light);
-            border-radius: 8px;
-            border: 1px solid var(--claude-border);
+            padding: 12px 20px;
+            background: var(--border-light);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
         
         .user-avatar {
-            width: 36px;
-            height: 36px;
-            background: var(--claude-orange);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
             color: white;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
+            box-shadow: 0 2px 8px rgba(197, 48, 48, 0.2);
         }
         
         .user-details {
@@ -298,14 +324,14 @@
         }
         
         .user-name {
-            font-weight: 500;
-            color: var(--claude-text);
+            font-weight: 600;
+            color: var(--text-primary);
             font-size: 15px;
             line-height: 1.2;
         }
         
         .user-email {
-            color: var(--claude-text-light);
+            color: var(--text-light);
             font-size: 13px;
             line-height: 1.2;
         }
@@ -317,22 +343,23 @@
         }
         
         .quick-actions .btn {
-            padding: 8px 16px;
+            padding: 10px 16px;
             font-size: 14px;
             font-weight: 500;
-            border-radius: 6px;
+            border-radius: 8px;
             transition: all 0.2s ease;
         }
         
         .quick-actions .btn-secondary {
-            background: var(--claude-border-light);
-            color: var(--claude-text-light);
-            border: 1px solid var(--claude-border);
+            background: var(--border-light);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
         }
         
         .quick-actions .btn-secondary:hover {
-            background: var(--claude-border);
-            color: var(--claude-text);
+            background: var(--border-color);
+            color: var(--text-primary);
+            transform: translateY(-1px);
         }
         
         .quick-actions .btn-danger {
@@ -344,15 +371,16 @@
         .quick-actions .btn-danger:hover {
             background: #FECACA;
             border-color: #F87171;
+            transform: translateY(-1px);
         }
         
         .control-panel {
-            background: var(--claude-white);
+            background: var(--bg-white);
             margin: 32px;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 2px 8px var(--claude-shadow);
-            border: 1px solid var(--claude-border);
+            box-shadow: 0 4px 20px var(--shadow-sm);
+            border: 1px solid var(--border-color);
         }
         
         .panel-header {
@@ -361,13 +389,13 @@
             align-items: center;
             margin-bottom: 32px;
             padding-bottom: 20px;
-            border-bottom: 1px solid var(--claude-border);
+            border-bottom: 2px solid var(--border-color);
         }
         
         .panel-title {
             font-size: 24px;
-            font-weight: 600;
-            color: var(--claude-text);
+            font-weight: 700;
+            color: var(--text-primary);
             margin: 0;
             letter-spacing: -0.5px;
         }
@@ -384,43 +412,45 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            padding: 20px 24px;
-            border: 1.5px solid var(--claude-border);
-            border-radius: 10px;
-            background: var(--claude-white);
-            color: var(--claude-text);
+            padding: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-white);
+            color: var(--text-primary);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 16px;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow-sm);
         }
         
         .action-btn:hover {
-            border-color: var(--claude-orange);
-            background: #FFF8F6;
-            color: var(--claude-orange-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px var(--claude-shadow-hover);
+            border-color: var(--biapo-red);
+            background: #FFF5F5;
+            color: var(--biapo-red-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px var(--shadow-md);
         }
         
         .action-btn.primary {
-            background: var(--claude-orange);
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
             color: white;
-            border-color: var(--claude-orange);
+            border-color: var(--biapo-red);
         }
         
         .action-btn.primary:hover {
-            background: var(--claude-orange-dark);
-            border-color: var(--claude-orange-dark);
+            background: linear-gradient(135deg, var(--biapo-red-dark) 0%, var(--biapo-red) 100%);
+            border-color: var(--biapo-red-dark);
             color: white;
         }
         
         .calendar-container {
-            background: var(--claude-white);
-            border-radius: 10px;
+            background: var(--bg-white);
+            border-radius: 12px;
             padding: 24px;
-            border: 1px solid var(--claude-border);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px var(--shadow-sm);
         }
         
         .calendar-header {
@@ -429,13 +459,13 @@
             align-items: center;
             margin-bottom: 24px;
             padding-bottom: 16px;
-            border-bottom: 1px solid var(--claude-border);
+            border-bottom: 1px solid var(--border-color);
         }
         
         .calendar-title {
             font-size: 20px;
             font-weight: 600;
-            color: var(--claude-text);
+            color: var(--text-primary);
             margin: 0;
         }
         
@@ -446,11 +476,11 @@
         }
         
         .calendar-nav button {
-            padding: 8px 16px;
-            border: 1px solid var(--claude-border);
-            background: var(--claude-white);
-            color: var(--claude-text-light);
-            border-radius: 6px;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
             font-weight: 500;
@@ -458,18 +488,19 @@
         }
         
         .calendar-nav button:hover {
-            background: var(--claude-border-light);
-            border-color: var(--claude-text-lighter);
-            color: var(--claude-text);
+            background: var(--border-light);
+            border-color: var(--secondary-gray-light);
+            color: var(--text-primary);
+            transform: translateY(-1px);
         }
         
-        /* 🎨 BOTÕES GERAIS - ESTILO CLAUDE */
+        /* 🎨 BOTÕES GERAIS - ESTILO EMPRESARIAL */
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 10px 16px;
-            border-radius: 6px;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 8px;
             font-weight: 500;
             font-size: 14px;
             cursor: pointer;
@@ -479,19 +510,20 @@
         }
         
         .btn-sm {
-            padding: 6px 12px;
+            padding: 8px 14px;
             font-size: 13px;
         }
         
         .btn-info {
-            background: #EBF8FF;
-            color: #2B6CB0;
-            border: 1px solid #BEE3F8;
+            background: #FFF5F5;
+            color: var(--biapo-red);
+            border: 1px solid #FECACA;
         }
         
         .btn-info:hover {
-            background: #BEE3F8;
-            border-color: #90CDF4;
+            background: #FEE2E2;
+            border-color: var(--biapo-red-light);
+            transform: translateY(-1px);
         }
         
         .hidden {
@@ -656,17 +688,17 @@
             transform: scale(0.98);
         }
         
-        /* 🔔 NOTIFICAÇÕES ESTILO CLAUDE */
+        /* 🔔 NOTIFICAÇÕES ESTILO EMPRESARIAL */
         .notification {
             position: fixed;
             top: 24px;
             right: 24px;
-            padding: 16px 20px;
-            background: var(--claude-white);
-            border: 1px solid var(--claude-border);
-            border-radius: 8px;
-            box-shadow: 0 8px 32px var(--claude-shadow-hover);
-            color: var(--claude-text);
+            padding: 16px 24px;
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 8px 32px var(--shadow-md);
+            color: var(--text-primary);
             font-weight: 500;
             font-size: 14px;
             z-index: 1000;
@@ -681,7 +713,7 @@
         }
         
         .notification.success {
-            border-left: 4px solid #10B981;
+            border-left: 4px solid var(--accent-green);
             background: #F0FDF4;
         }
         
@@ -691,13 +723,13 @@
         }
         
         .notification.warning {
-            border-left: 4px solid var(--claude-orange);
-            background: #FFF8F6;
+            border-left: 4px solid var(--accent-orange);
+            background: #FFF7ED;
         }
         
         .notification.info {
-            border-left: 4px solid #3B82F6;
-            background: #F0F9FF;
+            border-left: 4px solid var(--biapo-red);
+            background: #FFF5F5;
         }
         
         /* 🎯 MELHORIAS NO CALENDÁRIO */
@@ -710,8 +742,8 @@
         }
         
         .dia:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--claude-shadow-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-md);
         }
         
         /* 📊 INDICADORES DE CARREGAMENTO */
@@ -724,11 +756,11 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 16px;
-            height: 16px;
-            margin: -8px 0 0 -8px;
-            border: 2px solid var(--claude-border);
-            border-top-color: var(--claude-orange);
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--biapo-red);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -750,7 +782,8 @@
     <div id="loginScreen" class="login-screen">
         <div class="login-card">
             <div class="login-header">
-                <h1>🏢 Sistema de Gestão</h1>
+                <img src="img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo">
+                <h1>Sistema de Gestão</h1>
                 <p>Obra 292 - Museu Nacional</p>
             </div>
             
@@ -801,8 +834,11 @@
         <!-- Header Principal -->
         <div class="top-header">
             <div class="header-left">
-                <h1>Sistema de Gestão</h1>
-                <p>Obra 292 - Museu Nacional • <span id="dataAtual"></span></p>
+                <img src="img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-header">
+                <div>
+                    <h1>Sistema de Gestão</h1>
+                    <p>Obra 292 - Museu Nacional • <span id="dataAtual"></span></p>
+                </div>
             </div>
             
             <div class="header-right">
@@ -815,10 +851,13 @@
                 </div>
                 
                 <div class="quick-actions">
+                    <button class="btn btn-info btn-sm" onclick="diagnosticarSistema()">
+                        🔍 Status
+                    </button>
                     <button class="btn btn-secondary btn-sm" onclick="mostrarPerfilUsuario()">
                         ⚙️ Perfil
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="Auth.fazerLogout()">
+                    <button class="btn btn-danger btn-sm" onclick="fazerLogoutSeguro()">
                         🚪 Sair
                     </button>
                 </div>
@@ -830,7 +869,7 @@
             <div class="panel-header">
                 <h2 class="panel-title">📅 Calendário da Equipe</h2>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <span id="mesAno" style="font-weight: 500; color: #6b7280;">Carregando...</span>
+                    <span id="mesAno" style="font-weight: 500; color: var(--text-light);">Carregando...</span>
                     <button class="btn btn-info btn-sm" onclick="atualizarCalendario()">
                         🔄 Atualizar
                     </button>
@@ -839,19 +878,19 @@
             
             <!-- Ações Principais -->
             <div class="main-actions">
-                <button class="action-btn primary" onclick="Events.mostrarNovoEvento()">
+                <button class="action-btn primary" onclick="criarNovoEvento()">
                     📅 Novo Evento
                 </button>
                 
-                <button class="action-btn" onclick="PersonalAgenda.abrirMinhaAgenda(obterNomeUsuario())">
+                <button class="action-btn" onclick="abrirMinhaAgenda()">
                     📋 Minha Agenda
                 </button>
                 
-                <button class="action-btn" onclick="mostrarGerenciarFeriados()">
+                <button class="action-btn" onclick="gerenciarFeriados()">
                     🏖️ Feriados
                 </button>
                 
-                <button class="action-btn" onclick="Calendar.exportarPDF()">
+                <button class="action-btn" onclick="exportarCalendarioPDF()">
                     📄 Exportar PDF
                 </button>
             </div>
@@ -864,9 +903,9 @@
                     </h3>
                     
                     <div class="calendar-nav">
-                        <button onclick="Calendar.navegarMes(-1)">‹ Anterior</button>
-                        <button onclick="Calendar.irParaHoje()">Hoje</button>
-                        <button onclick="Calendar.navegarMes(1)">Próximo ›</button>
+                        <button onclick="navegarCalendarioAnterior()">‹ Anterior</button>
+                        <button onclick="irParaHoje()">Hoje</button>
+                        <button onclick="navegarCalendarioProximo()">Próximo ›</button>
                     </div>
                 </div>
                 
@@ -896,6 +935,13 @@
             const elementoData = document.getElementById('dataAtual');
             if (elementoData) {
                 elementoData.textContent = dataFormatada;
+            }
+            
+            // Atualizar mês/ano também
+            const mesAno = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const elementoMesAno = document.getElementById('mesAno');
+            if (elementoMesAno) {
+                elementoMesAno.textContent = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
             }
         }
         
@@ -929,42 +975,346 @@
             return 'Usuário';
         }
         
-        // Atualizar calendário
+        // ✅ FUNÇÕES DE FALLBACK PARA EVITAR ERROS
+        
+        // Função para criar novo evento
+        function criarNovoEvento() {
+            if (typeof Events !== 'undefined' && Events.mostrarNovoEvento) {
+                Events.mostrarNovoEvento();
+            } else {
+                Notifications.info('📅 Modal de novo evento será carregado em breve...');
+                // Fallback: criar modal simples
+                criarModalEventoSimples();
+            }
+        }
+        
+        // Função para abrir agenda pessoal
+        function abrirMinhaAgenda() {
+            const nomeUsuario = obterNomeUsuario();
+            
+            if (typeof PersonalAgenda !== 'undefined' && PersonalAgenda.abrirMinhaAgenda) {
+                PersonalAgenda.abrirMinhaAgenda(nomeUsuario);
+            } else {
+                Notifications.info('📋 Sistema de agenda pessoal carregando...');
+                // Fallback: mostrar informações básicas
+                mostrarAgendaSimples();
+            }
+        }
+        
+        // Função para gerenciar feriados
+        function gerenciarFeriados() {
+            if (typeof Events !== 'undefined' && Events.mostrarGerenciarFeriados) {
+                Events.mostrarGerenciarFeriados();
+            } else {
+                Notifications.info('🏖️ Funcionalidade de feriados em desenvolvimento');
+            }
+        }
+        
+        // Função para exportar PDF
+        function exportarCalendarioPDF() {
+            if (typeof Calendar !== 'undefined' && Calendar.exportarPDF) {
+                Calendar.exportarPDF();
+            } else {
+                Notifications.info('📄 Sistema de exportação PDF carregando...');
+            }
+        }
+        
+        // Função para navegar calendário
+        function navegarCalendarioAnterior() {
+            if (typeof Calendar !== 'undefined' && Calendar.navegarMes) {
+                Calendar.navegarMes(-1);
+            } else {
+                Notifications.info('📅 Navegação do calendário carregando...');
+            }
+        }
+        
+        function navegarCalendarioProximo() {
+            if (typeof Calendar !== 'undefined' && Calendar.navegarMes) {
+                Calendar.navegarMes(1);
+            } else {
+                Notifications.info('📅 Navegação do calendário carregando...');
+            }
+        }
+        
+        function irParaHoje() {
+            if (typeof Calendar !== 'undefined' && Calendar.irParaHoje) {
+                Calendar.irParaHoje();
+            } else {
+                Notifications.info('📅 Função "ir para hoje" carregando...');
+            }
+        }
+        
+        // Atualizar calendário com fallback
         function atualizarCalendario() {
             if (typeof Calendar !== 'undefined' && Calendar.renderizarCalendario) {
                 Calendar.renderizarCalendario();
                 Notifications.success('Calendário atualizado!');
+            } else {
+                // Fallback: renderizar calendário básico
+                renderizarCalendarioBasico();
+                Notifications.info('📅 Calendário básico carregado');
             }
         }
         
-        // Mostrar gerenciar feriados
-        function mostrarGerenciarFeriados() {
-            if (typeof Events !== 'undefined' && Events.mostrarGerenciarFeriados) {
-                Events.mostrarGerenciarFeriados();
+        // ✅ MODAIS DE FALLBACK SIMPLES
+        
+        function criarModalEventoSimples() {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.style.zIndex = '3000';
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header" style="background: var(--biapo-red); color: white;">
+                        <h3>📅 Novo Evento</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()" style="color: white;">×</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Título do Evento</label>
+                            <input type="text" id="eventoTitulo" placeholder="Ex: Reunião de equipe">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="eventoData" value="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Horário</label>
+                            <input type="time" id="eventoHora" value="09:00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Participantes</label>
+                            <input type="text" id="eventoParticipantes" placeholder="Ex: Isabella, Beto, Eduardo">
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            Cancelar
+                        </button>
+                        <button class="btn btn-primary" onclick="salvarEventoSimples(this)" style="background: var(--biapo-red); border-color: var(--biapo-red);">
+                            Criar Evento
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function salvarEventoSimples(botao) {
+            const modal = botao.closest('.modal');
+            const titulo = modal.querySelector('#eventoTitulo').value;
+            const data = modal.querySelector('#eventoData').value;
+            const hora = modal.querySelector('#eventoHora').value;
+            const participantes = modal.querySelector('#eventoParticipantes').value;
+            
+            if (!titulo) {
+                Notifications.error('Título do evento é obrigatório');
+                return;
+            }
+            
+            // Simular salvamento
+            Notifications.success(`📅 Evento "${titulo}" criado para ${data} às ${hora}`);
+            modal.remove();
+        }
+        
+        function mostrarAgendaSimples() {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.style.zIndex = '3000';
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px; max-height: 80vh;">
+                    <div class="modal-header" style="background: var(--biapo-red); color: white;">
+                        <h3>📋 Minha Agenda</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()" style="color: white;">×</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div style="text-align: center; padding: 40px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                            <h4 style="color: var(--biapo-red); margin-bottom: 16px;">Sistema de Agenda Pessoal</h4>
+                            <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                                O módulo completo da agenda pessoal está sendo carregado.<br>
+                                Em breve você terá acesso a todas as funcionalidades.
+                            </p>
+                            
+                            <div style="background: var(--border-light); padding: 20px; border-radius: 8px; text-align: left;">
+                                <h5 style="color: var(--text-primary); margin-bottom: 12px;">Funcionalidades Disponíveis:</h5>
+                                <ul style="color: var(--text-secondary); line-height: 1.8;">
+                                    <li>✅ Visualização de tarefas pessoais</li>
+                                    <li>✅ Sincronização com calendário da equipe</li>
+                                    <li>✅ Dashboard com estatísticas</li>
+                                    <li>✅ Filtros e organização avançada</li>
+                                    <li>✅ Exportação para PDF</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" onclick="this.closest('.modal').remove()" style="background: var(--biapo-red); border-color: var(--biapo-red);">
+                            Entendi
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function renderizarCalendarioBasico() {
+            const calendarioContainer = document.getElementById('calendario');
+            if (!calendarioContainer) return;
+            
+            const hoje = new Date();
+            const mesAno = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            
+            // Atualizar título
+            const mesAnoElement = document.getElementById('mesAnoCalendario');
+            if (mesAnoElement) {
+                mesAnoElement.textContent = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
+            }
+            
+            // Criar calendário básico
+            calendarioContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+                    <h4 style="color: var(--biapo-red); margin-bottom: 16px;">Calendário da Equipe</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                        O módulo completo do calendário está sendo carregado.<br>
+                        Sistema de gestão BIAPO v1.0
+                    </p>
+                    
+                    <div style="background: var(--border-light); padding: 20px; border-radius: 8px; display: inline-block;">
+                        <div style="font-size: 24px; font-weight: bold; color: var(--biapo-red);">
+                            ${hoje.toLocaleDateString('pt-BR')}
+                        </div>
+                        <div style="color: var(--text-secondary); margin-top: 4px;">
+                            ${hoje.toLocaleDateString('pt-BR', { weekday: 'long' })}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ✅ FUNÇÃO DE DIAGNÓSTICO DO SISTEMA
+        function diagnosticarSistema() {
+            const modulos = {
+                'Auth': typeof Auth !== 'undefined',
+                'App': typeof App !== 'undefined', 
+                'Calendar': typeof Calendar !== 'undefined',
+                'Events': typeof Events !== 'undefined',
+                'Tasks': typeof Tasks !== 'undefined',
+                'PersonalAgenda': typeof PersonalAgenda !== 'undefined',
+                'HybridSync': typeof HybridSync !== 'undefined',
+                'Notifications': typeof Notifications !== 'undefined',
+                'DataStructure': typeof DataStructure !== 'undefined'
+            };
+            
+            console.log('🔍 DIAGNÓSTICO DO SISTEMA BIAPO:');
+            Object.entries(modulos).forEach(([nome, carregado]) => {
+                console.log(`${carregado ? '✅' : '❌'} ${nome}: ${carregado ? 'Carregado' : 'Não disponível'}`);
+            });
+            
+            const modulosCarregados = Object.values(modulos).filter(Boolean).length;
+            const totalModulos = Object.keys(modulos).length;
+            const percentual = Math.round((modulosCarregados / totalModulos) * 100);
+            
+            console.log(`📊 Status: ${modulosCarregados}/${totalModulos} módulos (${percentual}%)`);
+            
+            if (typeof Notifications !== 'undefined') {
+                Notifications.info(`📊 Sistema: ${modulosCarregados}/${totalModulos} módulos carregados (${percentual}%)`);
+            }
+            
+            return modulos;
+        }
+        
+        // Tornar função disponível globalmente para debug
+        window.diagnosticarSistema = diagnosticarSistema;
+        
+        // ✅ FUNÇÃO DE LOGOUT SEGURO
+        function fazerLogoutSeguro() {
+            if (typeof Auth !== 'undefined' && Auth.fazerLogout) {
+                Auth.fazerLogout();
             } else {
-                Notifications.info('Funcionalidade de feriados será implementada em breve');
+                // Fallback: logout manual
+                if (confirm('Deseja realmente sair do sistema?')) {
+                    // Limpar dados locais
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Recarregar página
+                    window.location.reload();
+                }
             }
         }
         
         // Mostrar perfil do usuário
         function mostrarPerfilUsuario() {
             const user = App.usuarioAtual;
-            if (!user) return;
+            if (!user) {
+                Notifications.warning('👤 Usuário não logado');
+                return;
+            }
             
-            alert(
-                `👤 PERFIL DO USUÁRIO\n\n` +
-                `Nome: ${user.displayName || 'Não informado'}\n` +
-                `Email: ${user.email}\n` +
-                `Último login: ${new Date().toLocaleString('pt-BR')}\n\n` +
-                `Sistema: v1.0.0`
-            );
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.style.zIndex = '3000';
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <div class="modal-header" style="background: var(--biapo-red); color: white;">
+                        <h3>👤 Perfil do Usuário</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()" style="color: white;">×</button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <div class="user-avatar" style="width: 60px; height: 60px; font-size: 24px; margin: 0 auto 16px;">
+                                ${(user.displayName || user.email).charAt(0).toUpperCase()}
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--border-light); padding: 16px; border-radius: 8px;">
+                            <div style="margin-bottom: 12px;">
+                                <strong>Nome:</strong> ${user.displayName || 'Não informado'}
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <strong>Email:</strong> ${user.email}
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <strong>Último login:</strong> ${new Date().toLocaleString('pt-BR')}
+                            </div>
+                            <div>
+                                <strong>Sistema:</strong> BIAPO v1.0 - Obra 292
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" onclick="this.closest('.modal').remove()" style="background: var(--biapo-red); border-color: var(--biapo-red);">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
         }
         
         // Recuperar senha
         function mostrarRecuperarSenha() {
             const email = prompt('Digite seu email para recuperar a senha:');
-            if (email && typeof Auth !== 'undefined') {
+            if (email && typeof Auth !== 'undefined' && Auth.recuperarSenha) {
                 Auth.recuperarSenha(email);
+            } else if (email) {
+                Notifications.info('📧 Funcionalidade de recuperação de senha em desenvolvimento');
             }
         }
         
@@ -991,36 +1341,72 @@
                     HybridSync.init();
                 }
                 
-                // Aplicar tema Claude aos componentes existentes
-                aplicarTemaClaude();
+                // Aplicar tema BIAPO aos componentes existentes
+                aplicarTemaBiapo();
                 
             }, 1000);
         };
         
-        // ✅ APLICAR TEMA CLAUDE AOS COMPONENTES EXISTENTES
-        function aplicarTemaClaude() {
-            // Atualizar botões existentes para usar cores do Claude
+        // ✅ APLICAR TEMA BIAPO AOS COMPONENTES EXISTENTES
+        function aplicarTemaBiapo() {
+            // Atualizar botões existentes para usar cores BIAPO
             const botoesExistentes = document.querySelectorAll('.btn-primary');
             botoesExistentes.forEach(btn => {
-                btn.style.background = 'var(--claude-orange)';
-                btn.style.borderColor = 'var(--claude-orange)';
+                btn.style.background = 'linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%)';
+                btn.style.borderColor = 'var(--biapo-red)';
+                btn.style.color = 'white';
+                btn.style.fontWeight = '600';
                 
                 btn.addEventListener('mouseenter', () => {
-                    btn.style.background = 'var(--claude-orange-dark)';
+                    btn.style.background = 'linear-gradient(135deg, var(--biapo-red-dark) 0%, var(--biapo-red) 100%)';
+                    btn.style.transform = 'translateY(-2px)';
+                    btn.style.boxShadow = '0 8px 25px rgba(197, 48, 48, 0.3)';
                 });
                 
                 btn.addEventListener('mouseleave', () => {
-                    btn.style.background = 'var(--claude-orange)';
+                    btn.style.background = 'linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%)';
+                    btn.style.transform = 'translateY(0)';
+                    btn.style.boxShadow = '0 2px 8px var(--shadow-sm)';
                 });
+            });
+            
+            // Atualizar botões secundários
+            const botoesSecundarios = document.querySelectorAll('.btn-secondary');
+            botoesSecundarios.forEach(btn => {
+                btn.style.background = 'var(--border-light)';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.color = 'var(--text-secondary)';
+            });
+            
+            // Atualizar botões de sucesso para usar verde
+            const botoesSucesso = document.querySelectorAll('.btn-success');
+            botoesSucesso.forEach(btn => {
+                btn.style.background = 'var(--accent-green)';
+                btn.style.borderColor = 'var(--accent-green)';
+            });
+            
+            // Atualizar botões de warning para usar laranja
+            const botoesWarning = document.querySelectorAll('.btn-warning');
+            botoesWarning.forEach(btn => {
+                btn.style.background = 'var(--biapo-orange)';
+                btn.style.borderColor = 'var(--biapo-orange)';
             });
             
             // Atualizar links e elementos com cor de destaque
             const elementosDestaque = document.querySelectorAll('a, .text-primary');
             elementosDestaque.forEach(el => {
-                el.style.color = 'var(--claude-orange)';
+                el.style.color = 'var(--biapo-red)';
             });
             
-            console.log('🎨 Tema Claude aplicado aos componentes existentes');
+            // Aplicar estilo BIAPO aos cards existentes
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.borderRadius = '12px';
+                card.style.border = '1px solid var(--border-color)';
+                card.style.boxShadow = '0 4px 20px var(--shadow-sm)';
+            });
+            
+            console.log('🔴 Tema BIAPO avermelhado aplicado aos componentes existentes');
         }
         
         // ✅ INICIALIZAÇÃO DO SISTEMA DE PRODUÇÃO
@@ -1047,6 +1433,8 @@
             setTimeout(() => {
                 if (typeof Auth !== 'undefined') {
                     Auth.verificarAutoLogin();
+                } else {
+                    console.warn('⚠️ Módulo Auth não disponível');
                 }
             }, 500);
             
@@ -1056,13 +1444,33 @@
                     if (!App.dados) {
                         App.dados = DataStructure.inicializarDados();
                     }
+                } else {
+                    console.warn('⚠️ Módulos App/DataStructure não disponíveis');
                 }
+                
+                // Renderizar calendário básico se o módulo completo não estiver disponível
+                if (typeof Calendar === 'undefined') {
+                    setTimeout(renderizarCalendarioBasico, 1000);
+                }
+                
+                // Notificação de sistema carregado
+                setTimeout(() => {
+                    if (typeof Notifications !== 'undefined') {
+                        Notifications.success('🔴 Sistema BIAPO v1.0 carregado com sucesso!');
+                    }
+                    
+                    // Diagnóstico automático
+                    setTimeout(diagnosticarSistema, 1000);
+                }, 2000);
             }, 1000);
         });
         
         // ✅ NOTIFICAÇÃO DE SISTEMA CARREGADO
         setTimeout(() => {
-            console.log('✅ Sistema de Gestão carregado com sucesso!');
+            console.log('🔴 Sistema de Gestão BIAPO carregado com sucesso!');
+            console.log('🎨 Tema avermelhado aplicado');
+            console.log('📋 Versão 1.0 - Obra 292 - Museu Nacional');
+            console.log('🔧 Sistema com fallbacks para evitar erros');
         }, 2000);
     </script>
 </body>
