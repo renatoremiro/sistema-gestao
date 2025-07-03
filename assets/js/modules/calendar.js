@@ -9,6 +9,7 @@
  * ✅ Debug logging implementado
  * ✅ Integração perfeita mantida
  * ✅ Performance otimizada
+ * ✅ ERRO DE SINTAXE LINHA 257 CORRIGIDO
  */
 
 const Calendar = {
@@ -253,85 +254,85 @@ const Calendar = {
         }
     },
 
-// ✅ RENDERIZAÇÃO COM INDICADORES DE SINCRONIZAÇÃO
-Calendar._renderizarItemComIndicadores = function(item, ehTarefa) {
-    const cor = ehTarefa ? 
-        this.config.coresTarefas[item.tipo] || '#6b7280' :
-        this.config.coresEventos[item.tipo] || '#6b7280';
+    // ✅ RENDERIZAÇÃO COM INDICADORES DE SINCRONIZAÇÃO - CORRIGIDO
+    _renderizarItemComIndicadores(item, ehTarefa) {
+        const cor = ehTarefa ? 
+            this.config.coresTarefas[item.tipo] || '#6b7280' :
+            this.config.coresEventos[item.tipo] || '#6b7280';
 
-    const horario = item.horarioInicio || item.horario || '';
-    
-    // Determinar ícone baseado no tipo e sincronização
-    let icone = ehTarefa ? '📝' : this._obterIconeEvento(item.tipo);
-    let corFundo = cor;
-    
-    if (item.sincronizada) {
-        icone = '🔄';
-        corFundo = '#06b6d4'; // azul para sincronizado
-    } else if (item.promovido) {
-        icone = '⬆️';
-        corFundo = '#10b981'; // verde para promovido
-    } else if (item.eventoPromovido) {
-        icone = '⬆️';
-        corFundo = '#10b981'; // verde para tarefas que foram promovidas
-    }
-    
-    const elementoItem = document.createElement('div');
-    elementoItem.style.cssText = `
-        background: ${corFundo};
-        color: white;
-        font-size: 9px;
-        padding: 1px 3px;
-        margin: 1px 0;
-        border-radius: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        cursor: pointer;
-        line-height: 1.2;
-        height: 14px;
-        display: flex;
-        align-items: center;
-        position: relative;
-    `;
-
-    // Texto do item
-    let textoItem = `${icone} ${item.titulo}`;
-    if (horario) {
-        textoItem = `${horario} ${textoItem}`;
-    }
-
-    elementoItem.textContent = textoItem;
-    
-    // Tooltip expandido
-    let tooltip = `${item.titulo} - ${item.tipo}`;
-    if (item.responsavel || item.pessoas) {
-        tooltip += `\n👥 ${item.responsavel || item.pessoas?.join(', ')}`;
-    }
-    if (item.sincronizada) {
-        tooltip += '\n🔄 Sincronizada automaticamente';
-    } else if (item.promovido || item.eventoPromovido) {
-        tooltip += '\n⬆️ Promovida para evento';
-    }
-    
-    elementoItem.title = tooltip;
-
-    // Click handler
-    elementoItem.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (ehTarefa) {
-            if (typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function') {
-                Tasks.editarTarefa(item.id);
-            }
-        } else {
-            if (typeof Events !== 'undefined' && typeof Events.editarEvento === 'function') {
-                Events.editarEvento(item.id);
-            }
+        const horario = item.horarioInicio || item.horario || '';
+        
+        // Determinar ícone baseado no tipo e sincronização
+        let icone = ehTarefa ? '📝' : this._obterIconeEvento(item.tipo);
+        let corFundo = cor;
+        
+        if (item.sincronizada) {
+            icone = '🔄';
+            corFundo = '#06b6d4'; // azul para sincronizado
+        } else if (item.promovido) {
+            icone = '⬆️';
+            corFundo = '#10b981'; // verde para promovido
+        } else if (item.eventoPromovido) {
+            icone = '⬆️';
+            corFundo = '#10b981'; // verde para tarefas que foram promovidas
         }
-    });
+        
+        const elementoItem = document.createElement('div');
+        elementoItem.style.cssText = `
+            background: ${corFundo};
+            color: white;
+            font-size: 9px;
+            padding: 1px 3px;
+            margin: 1px 0;
+            border-radius: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            line-height: 1.2;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        `;
 
-    return elementoItem;
-};
+        // Texto do item
+        let textoItem = `${icone} ${item.titulo}`;
+        if (horario) {
+            textoItem = `${horario} ${textoItem}`;
+        }
+
+        elementoItem.textContent = textoItem;
+        
+        // Tooltip expandido
+        let tooltip = `${item.titulo} - ${item.tipo}`;
+        if (item.responsavel || item.pessoas) {
+            tooltip += `\n👥 ${item.responsavel || item.pessoas?.join(', ')}`;
+        }
+        if (item.sincronizada) {
+            tooltip += '\n🔄 Sincronizada automaticamente';
+        } else if (item.promovido || item.eventoPromovido) {
+            tooltip += '\n⬆️ Promovida para evento';
+        }
+        
+        elementoItem.title = tooltip;
+
+        // Click handler
+        elementoItem.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (ehTarefa) {
+                if (typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function') {
+                    Tasks.editarTarefa(item.id);
+                }
+            } else {
+                if (typeof Events !== 'undefined' && typeof Events.editarEvento === 'function') {
+                    Events.editarEvento(item.id);
+                }
+            }
+        });
+
+        return elementoItem;
+    },
 
     // 🔧 FUNÇÃO CORRIGIDA: Adicionar indicador de feriado
     _adicionarIndicadorFeriado(dia, data, nomeFeriado) {
@@ -1586,6 +1587,7 @@ console.log('📅 Sistema de Calendário Modular v6.2.1 TOTALMENTE CORRIGIDO!');
 console.log('🎯 Funcionalidades: Navegação, Eventos + Tarefas Integradas, Feriados com Exclusão FUNCIONAL, PDF Export');
 console.log('⚙️ Integração PERFEITA: Events.js, Tasks.js, PDF.js');
 console.log('✅ CORREÇÃO: Exclusão de feriados 100% funcional com debug completo');
+console.log('✅ ERRO DE SINTAXE LINHA 257 CORRIGIDO - Função movida para dentro do objeto Calendar');
 console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje), Ctrl+Shift+D (debug mode)');
 console.log('🧪 Debug: Calendar_Debug.enableDebug(), Calendar_Debug.debugFeriados(), Calendar_Debug.forcarExclusao("YYYY-MM-DD")');
 console.log('🚨 EMERGÊNCIA: forcarCalendario() - Para forçar inicialização');
