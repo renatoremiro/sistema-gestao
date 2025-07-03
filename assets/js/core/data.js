@@ -1,4 +1,4 @@
-/* ========== 📊 ESTRUTURA DE DADOS v6.2 ========== */
+/* ========== 📊 ESTRUTURA DE DADOS v6.2.1 - CORRIGIDO ========== */
 
 const DataStructure = {
     // ✅ VERSÃO DOS DADOS
@@ -330,7 +330,10 @@ const DataStructure = {
             feriados: {},
             
             // ✅ STATUS PESSOAL (ausências, home office, etc.)
-            statusPessoal: {}
+            statusPessoal: {},
+            
+            // ✅ TAREFAS (garantir estrutura)
+            tarefas: []
         };
     },
 
@@ -396,6 +399,11 @@ const DataStructure = {
         
         if (dados.statusPessoal) {
             dadosNovos.statusPessoal = dados.statusPessoal;
+        }
+        
+        // ✅ GARANTIR ESTRUTURA DE TAREFAS
+        if (dados.tarefas) {
+            dadosNovos.tarefas = dados.tarefas;
         }
         
         // Atualizar versão
@@ -507,4 +515,11 @@ const DataStructure = {
     }
 };
 
-console.log('📊 Estrutura de Dados v6.2 carregada!');
+// 🔧 CORREÇÃO CRÍTICA: EXPOR NO WINDOW GLOBAL
+window.DataStructure = DataStructure;
+
+// ✅ LOG DE INICIALIZAÇÃO CORRIGIDO
+console.log('📊 Estrutura de Dados v6.2.1 carregada e exposta no window!');
+
+// 🔧 VERIFICAÇÃO DA CORREÇÃO
+console.log('🧪 Verificando DataStructure no window:', typeof window.DataStructure);
