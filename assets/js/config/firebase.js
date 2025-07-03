@@ -1,4 +1,4 @@
-/* ========== 🔥 CONFIGURAÇÃO FIREBASE v6.2 ========== */
+/* ========== 🔥 CONFIGURAÇÃO FIREBASE v6.2.1 - CORRIGIDO ========== */
 
 // ✅ CONFIGURAÇÃO FIREBASE
 const firebaseConfig = {
@@ -15,9 +15,14 @@ const firebaseConfig = {
 // ✅ INICIALIZAR FIREBASE
 firebase.initializeApp(firebaseConfig);
 
-// ✅ EXPORTAR SERVIÇOS FIREBASE
+// ✅ CRIAR SERVIÇOS FIREBASE
 const database = firebase.database();
 const auth = firebase.auth();
+
+// 🔧 CORREÇÃO CRÍTICA: EXPOR NO WINDOW GLOBAL
+window.database = database;
+window.auth = auth;
+window.firebase = firebase; // Garantir que firebase também está no window
 
 // ✅ VERIFICAÇÃO DE CONECTIVIDADE
 function verificarConectividade() {
@@ -28,6 +33,9 @@ function verificarConectividade() {
     });
 }
 
+// ✅ EXPOR FUNÇÃO NO WINDOW
+window.verificarConectividade = verificarConectividade;
+
 // ✅ CONSTANTES FIREBASE
 const FIREBASE_CONFIG = {
     VERSAO_DB: 6,
@@ -36,8 +44,17 @@ const FIREBASE_CONFIG = {
     INTERVALO_RETRY: 1000, // 1 segundo
 };
 
+// 🔧 EXPOR CONFIGURAÇÕES NO WINDOW
+window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+
 // ✅ LOG DE INICIALIZAÇÃO
-console.log('🔥 Firebase configurado v6.2');
+console.log('🔥 Firebase configurado v6.2.1 - CORRIGIDO');
+
+// 🔧 VERIFICAÇÃO DA CORREÇÃO
+console.log('🧪 Verificando exposições no window:');
+console.log('  window.database:', typeof window.database);
+console.log('  window.auth:', typeof window.auth);
+console.log('  window.firebase:', typeof window.firebase);
 
 // ✅ VERIFICAÇÃO INICIAL DE CONECTIVIDADE
 verificarConectividade().then(conectado => {
@@ -46,4 +63,6 @@ verificarConectividade().then(conectado => {
     } else {
         console.warn('⚠️ Firebase desconectado na inicialização');
     }
+}).catch(error => {
+    console.error('❌ Erro na verificação de conectividade:', error);
 });
