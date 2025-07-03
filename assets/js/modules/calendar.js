@@ -1509,21 +1509,83 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ✅ INICIALIZAÇÃO DO MÓDULO CORRIGIDA
+// ✅ INICIALIZAÇÃO FORÇADA E IMEDIATA
+function inicializarCalendarioForcado() {
+    console.log('🚨 FORÇANDO inicialização do calendário...');
+    
+    // Verificar se container existe
+    const container = document.getElementById('calendario');
+    if (!container) {
+        console.error('❌ Container #calendario não encontrado!');
+        return;
+    }
+    
+    // Verificar se App está disponível
+    if (typeof App === 'undefined') {
+        console.error('❌ App não disponível!');
+        return;
+    }
+    
+    // Inicializar dados se necessário
+    if (!App.dados) {
+        console.log('📊 Inicializando dados padrão...');
+        App.dados = {
+            eventos: [],
+            tarefas: [],
+            feriados: {}
+        };
+    }
+    
+    // GERAR CALENDÁRIO FORÇADAMENTE
+    try {
+        Calendar.gerar();
+        console.log('✅ Calendário gerado com sucesso!');
+    } catch (error) {
+        console.error('❌ Erro ao gerar calendário:', error);
+        
+        // FALLBACK: Mostrar mensagem no container
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #ef4444;">
+                ❌ Erro ao carregar calendário<br>
+                <button onclick="Calendar.gerar()" class="btn btn-primary" style="margin-top: 10px;">
+                    🔄 Tentar Novamente
+                </button>
+            </div>
+        `;
+    }
+}
+
+// 🚨 INICIALIZAÇÃO MÚLTIPLA E AGRESSIVA
 document.addEventListener('DOMContentLoaded', () => {
-    // Aguardar carregamento dos dados - TIMEOUT REDUZIDO
-    setTimeout(() => {
-        if (typeof App !== 'undefined' && App.dados) {
-            Calendar.gerar();
-            console.log('📅 Calendário inicializado automaticamente');
-        }
-    }, 500); // MUDOU DE 1000 para 500
+    console.log('📅 DOMContentLoaded - Tentando inicializar calendário...');
+    inicializarCalendarioForcado();
 });
 
-// ✅ LOG DE CARREGAMENTO
+// Timeout backup 1
+setTimeout(() => {
+    console.log('📅 Timeout 500ms - Tentando inicializar calendário...');
+    inicializarCalendarioForcado();
+}, 500);
+
+// Timeout backup 2  
+setTimeout(() => {
+    console.log('📅 Timeout 1000ms - Tentando inicializar calendário...');
+    inicializarCalendarioForcado();
+}, 1000);
+
+// Timeout backup 3
+setTimeout(() => {
+    console.log('📅 Timeout 2000ms - ÚLTIMA TENTATIVA calendário...');
+    inicializarCalendarioForcado();
+}, 2000);
+
+// ✅ FUNÇÃO GLOBAL PARA DEBUG E FORÇAR
+window.forcarCalendario = inicializarCalendarioForcado;
+
 console.log('📅 Sistema de Calendário Modular v6.2.1 TOTALMENTE CORRIGIDO!');
 console.log('🎯 Funcionalidades: Navegação, Eventos + Tarefas Integradas, Feriados com Exclusão FUNCIONAL, PDF Export');
 console.log('⚙️ Integração PERFEITA: Events.js, Tasks.js, PDF.js');
 console.log('✅ CORREÇÃO: Exclusão de feriados 100% funcional com debug completo');
 console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje), Ctrl+Shift+D (debug mode)');
 console.log('🧪 Debug: Calendar_Debug.enableDebug(), Calendar_Debug.debugFeriados(), Calendar_Debug.forcarExclusao("YYYY-MM-DD")');
+console.log('🚨 EMERGÊNCIA: forcarCalendario() - Para forçar inicialização');
