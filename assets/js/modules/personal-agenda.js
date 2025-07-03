@@ -499,6 +499,104 @@ const PersonalAgenda = {
         console.log('🔽 Filtro aplicado:', tipoFiltro, '=', valor);
     },
 
+    // ✅ RENDERIZAR TAREFA COM BOTÃO DE PROMOÇÃO
+PersonalAgenda._renderizarTarefaMiniComPromocao = function(tarefa) {
+    const ehSincronizada = tarefa.sincronizada;
+    const ehPromovida = tarefa.eventoPromovido;
+    
+    let iconeStatus = '';
+    let corBorda = '#e5e7eb';
+    
+    if (ehSincronizada) {
+        iconeStatus = '🔄';
+        corBorda = '#06b6d4';
+    } else if (ehPromovida) {
+        iconeStatus = '⬆️';
+        corBorda = '#10b981';
+    }
+    
+    const tarefaHtml = `
+        <div class="tarefa-mini-hybrid" style="
+            border-left: 3px solid ${corBorda};
+            padding: 8px;
+            margin: 4px 0;
+            background: ${ehSincronizada ? '#f0f9ff' : (ehPromovida ? '#f0fdf4' : '#fff')};
+            border-radius: 4px;
+            position: relative;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 12px; margin-bottom: 2px;">
+                        ${iconeStatus} ${tarefa.titulo}
+                        ${tarefa.prioridade === 'critica' ? ' 🚨' : tarefa.prioridade === 'alta' ? ' ⚡' : ''}
+                    </div>
+                    
+                    <div style="font-size: 10px; color: #6b7280; margin-bottom: 4px;">
+                        ${tarefa.responsavel} • ${tarefa.tipo}
+                        ${tarefa.dataFim ? ` • Prazo: ${new Date(tarefa.dataFim).toLocaleDateString('pt-BR')}` : ''}
+                    </div>
+                    
+                    ${tarefa.descricao ? `<div style="font-size: 10px; color: #4b5563;">${tarefa.descricao}</div>` : ''}
+                    
+                    ${ehSincronizada ? `
+                        <div style="font-size: 9px; color: #0369a1; margin-top: 4px;">
+                            🔄 Sincronizada do evento
+                        </div>
+                    ` : ''}
+                    
+                    ${ehPromovida ? `
+                        <div style="font-size: 9px; color: #059669; margin-top: 4px;">
+                            ⬆️ Promovida para evento
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 2px; margin-left: 8px;">
+                    <span style="font-size: 9px; color: #6b7280;">${tarefa.progresso || 0}%</span>
+                    
+                    ${!ehSincronizada && !ehPromovida ? `
+                        <button onclick="HybridSync.promoverTarefaParaEvento(${tarefa.id})" 
+                                style="font-size: 8px; padding: 2px 4px; background: #10b981; color: white; border: none; border-radius: 2px; cursor: pointer;"
+                                title="Promover para evento do calendário principal">
+                            ⬆️
+                        </button>
+                    ` : ''}
+                    
+                    <button onclick="PersonalAgenda._editarTarefa(${tarefa.id})"
+                            style="font-size: 8px; padding: 2px 4px; background: #6b7280; color: white; border: none; border-radius: 2px; cursor: pointer;">
+                        ✏️
+                    </button>
+                </div>
+            </div>
+            
+            ${tarefa.progresso > 0 ? `
+                <div style="width: 100%; background: #e5e7eb; border-radius: 2px; height: 3px; margin-top: 4px;">
+                    <div style="width: ${tarefa.progresso}%; background: #10b981; height: 100%; border-radius: 2px;"></div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    return tarefaHtml;
+};
+
+// ✅ INTEGRAÇÃO COM HYBRID SYNC
+PersonalAgenda._integrarHybridSync = function() {
+    console.log('🔗 Integrando PersonalAgenda com HybridSync...');
+    
+    // Substituir renderizador de tarefas
+    if (typeof this._renderizarTarefaMini === 'function') {
+        this._renderizarTarefaMiniOriginal = this._renderizarTarefaMini;
+        this._renderizarTarefaMini = this._renderizarTarefaMiniComPromocao;
+    }
+    
+    // Adicionar listener para atualizações
+    if (typeof HybridSync !== 'undefined') {
+        this._hybridSyncIntegrado = true;
+        console.log('✅ PersonalAgenda integrado com HybridSync');
+    }
+};
+
     // ✅ LIMPAR FILTROS
     limparFiltros() {
         this.state.filtros = {
