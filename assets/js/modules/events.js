@@ -104,6 +104,53 @@ const Events = {
         }
     },
 
+/* 
+ADICIONAR ESTAS MODIFICAÇÕES AO Events.salvarEvento (após linha ~100):
+*/
+
+// ✅ INTERCEPTOR PARA SINCRONIZAÇÃO AUTOMÁTICA
+Events._salvarEventoOriginal = Events.salvarEvento;
+
+Events.salvarEvento = async function(dadosEvento) {
+    try {
+        // Chamar função original
+        const resultado = await this._salvarEventoOriginal(dadosEvento);
+        
+        // Se salvou com sucesso e HybridSync está disponível
+        if (resultado && typeof HybridSync !== 'undefined' && HybridSync.config.autoSyncEnabled) {
+            console.log('🔄 Evento salvo - disparando sincronização automática...');
+            
+            // Aguardar um pouco para evitar loops
+            setTimeout(() => {
+                HybridSync.sincronizarEventosParaTarefas();
+            }, HybridSync.config.syncDelay || 100);
+        }
+        
+        return resultado;
+        
+    } catch (error) {
+        console.error('❌ Erro no interceptor de salvamento:', error);
+        return false;
+    }
+};
+
+// ✅ ADICIONAR INDICADOR DE SINCRONIZAÇÃO NO MODAL
+Events._criarModalEventoComIndicadores = function(dataInicial, dadosEvento = null) {
+    // Chamar função original (assumindo que existe)
+    const modal = this._criarModalEventoOriginal ? this._criarModalEventoOriginal(dataInicial, dadosEvento) : null;
+    
+    if (modal && dadosEvento) {
+        // Adicionar indicadores se evento foi promovido
+        if (dadosEvento.promovido) {
+            const header = modal.querySelector('.modal-header h3');
+            if (header) {
+                header.innerHTML = `⬆️ ${header.innerHTML} <span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">PROMOVIDO</span>`;
+            }
+        }
+    }
+    
+    return modal;
+};
     // ✅ SALVAR EVENTO (criar ou atualizar)
     async salvarEvento(dadosEvento) {
         try {
