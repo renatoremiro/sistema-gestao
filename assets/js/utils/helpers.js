@@ -1,4 +1,4 @@
-/* ========== 🔧 SISTEMA DE UTILITÁRIOS v6.2 ========== */
+/* ========== 🔧 SISTEMA DE UTILITÁRIOS v6.2.1 - CORRIGIDO ========== */
 
 const Helpers = {
     // ✅ CACHE DE ELEMENTOS DOM PARA PERFORMANCE
@@ -199,7 +199,7 @@ const Helpers = {
                 const data = {
                     value: value,
                     timestamp: Date.now(),
-                    version: '6.2'
+                    version: '6.2.1'
                 };
                 localStorage.setItem(key, JSON.stringify(data));
                 return true;
@@ -328,9 +328,16 @@ const Helpers = {
     }
 };
 
+// 🔧 CORREÇÃO CRÍTICA: EXPOR NO WINDOW GLOBAL
+window.Helpers = Helpers;
+
 // ✅ INICIALIZAÇÃO DOS HELPERS
 document.addEventListener('DOMContentLoaded', () => {
     Helpers.initDOMCache();
 });
 
-console.log('🔧 Helpers v6.2 carregados!');
+// ✅ LOG DE INICIALIZAÇÃO CORRIGIDO
+console.log('🔧 Helpers v6.2.1 carregados e expostos no window!');
+
+// 🔧 VERIFICAÇÃO DA CORREÇÃO
+console.log('🧪 Verificando Helpers no window:', typeof window.Helpers);
