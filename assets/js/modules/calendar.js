@@ -1509,15 +1509,15 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ✅ INICIALIZAÇÃO DO MÓDULO
+// ✅ INICIALIZAÇÃO DO MÓDULO CORRIGIDA
 document.addEventListener('DOMContentLoaded', () => {
-    // Aguardar carregamento dos dados
+    // Aguardar carregamento dos dados - TIMEOUT REDUZIDO
     setTimeout(() => {
         if (typeof App !== 'undefined' && App.dados) {
             Calendar.gerar();
             console.log('📅 Calendário inicializado automaticamente');
         }
-    }, 1000);
+    }, 500); // MUDOU DE 1000 para 500
 });
 
 // ✅ LOG DE CARREGAMENTO
