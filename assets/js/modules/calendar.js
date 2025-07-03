@@ -1,5 +1,5 @@
 /**
- * 📅 Sistema de Calendário Modular v6.2.1 - VERSÃO COMPLETA CORRIGIDA
+ * 📅 Sistema de Calendário Modular v6.2.2 - EXPOSIÇÃO WINDOW CORRIGIDA
  * 
  * CORREÇÕES APLICADAS:
  * ✅ Exclusão de feriados TOTALMENTE CORRIGIDA
@@ -10,6 +10,7 @@
  * ✅ Integração perfeita mantida
  * ✅ Performance otimizada
  * ✅ ERRO DE SINTAXE LINHA 257 CORRIGIDO
+ * 🔧 EXPOSIÇÃO NO WINDOW GLOBAL ADICIONADA
  */
 
 const Calendar = {
@@ -1440,6 +1441,9 @@ const Calendar = {
     }
 };
 
+// 🔧 CORREÇÃO CRÍTICA: EXPOR NO WINDOW GLOBAL
+window.Calendar = Calendar;
+
 // ✅ FUNÇÕES HELPER GLOBAIS PARA DEBUG
 window.Calendar_Debug = {
     // Ativar modo debug
@@ -1583,11 +1587,13 @@ setTimeout(() => {
 // ✅ FUNÇÃO GLOBAL PARA DEBUG E FORÇAR
 window.forcarCalendario = inicializarCalendarioForcado;
 
-console.log('📅 Sistema de Calendário Modular v6.2.1 TOTALMENTE CORRIGIDO!');
+// ✅ LOG DE INICIALIZAÇÃO CORRIGIDO
+console.log('📅 Sistema de Calendário Modular v6.2.2 TOTALMENTE CORRIGIDO E EXPOSTO NO WINDOW!');
+console.log('✅ CORREÇÃO: window.Calendar = Calendar adicionada');
+console.log('🧪 Verificar: typeof window.Calendar =', typeof window.Calendar);
 console.log('🎯 Funcionalidades: Navegação, Eventos + Tarefas Integradas, Feriados com Exclusão FUNCIONAL, PDF Export');
 console.log('⚙️ Integração PERFEITA: Events.js, Tasks.js, PDF.js');
 console.log('✅ CORREÇÃO: Exclusão de feriados 100% funcional com debug completo');
-console.log('✅ ERRO DE SINTAXE LINHA 257 CORRIGIDO - Função movida para dentro do objeto Calendar');
 console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje), Ctrl+Shift+D (debug mode)');
 console.log('🧪 Debug: Calendar_Debug.enableDebug(), Calendar_Debug.debugFeriados(), Calendar_Debug.forcarExclusao("YYYY-MM-DD")');
 console.log('🚨 EMERGÊNCIA: forcarCalendario() - Para forçar inicialização');
