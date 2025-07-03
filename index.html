@@ -81,7 +81,143 @@
             box-shadow: 0 8px 25px rgba(197, 48, 48, 0.3) !important;
         }
         
-        /* 🔴 HEADER COM LOGO BIAPO */
+        /* 🔐 TELA DE LOGIN */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-logo {
+            height: 80px;
+            width: auto;
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+        
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--biapo-gray);
+            margin-bottom: 8px;
+        }
+        
+        .login-subtitle {
+            color: var(--biapo-gray-lighter);
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--biapo-gray);
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--biapo-red);
+            box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+        }
+        
+        .form-group input.input-error {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, var(--biapo-red-dark) 0%, var(--biapo-red) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(197, 48, 48, 0.3);
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .login-links a {
+            color: var(--biapo-red);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 🔴 HEADER COM LOGOUT */
         .header {
             background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
             color: white;
@@ -132,6 +268,22 @@
             color: white;
             font-size: 14px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
         }
         
         /* 🎯 SEÇÕES DE DEBUG OCULTAS PARA PRODUÇÃO */
@@ -201,6 +353,11 @@
             color: white !important;
         }
         
+        /* 🔄 HIDDEN CLASS */
+        .hidden {
+            display: none !important;
+        }
+        
         /* 📱 RESPONSIVIDADE */
         @media (max-width: 768px) {
             .header {
@@ -218,175 +375,364 @@
                 grid-template-columns: 1fr;
                 padding: 16px;
             }
+            
+            .login-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- ✅ SISTEMA DE NOTIFICAÇÕES -->
-    <div id="notification" class="notification">
-        <span id="notificationText"></span>
+    <!-- 🔐 TELA DE LOGIN -->
+    <div id="loginScreen" class="hidden">
+        <div class="login-container">
+            <img src="img/Logo-biapo.jpg" alt="Logo BIAPO" class="login-logo">
+            <h1 class="login-title">Sistema BIAPO</h1>
+            <p class="login-subtitle">Obra 292 - Museu Nacional</p>
+            
+            <div class="form-group">
+                <label for="loginEmail">📧 Email:</label>
+                <input type="email" id="loginEmail" placeholder="renatoremiro@biapo.com.br" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">🔑 Senha:</label>
+                <input type="password" id="loginPassword" placeholder="Digite sua senha" required>
+            </div>
+            
+            <button type="button" class="btn-login" onclick="Auth.fazerLogin()">
+                Entrar
+            </button>
+            
+            <div class="login-links">
+                <a href="#" onclick="Auth.mostrarRegistro()">Criar conta</a>
+                <a href="#" onclick="mostrarRecuperarSenha()">Esqueci a senha</a>
+            </div>
+        </div>
     </div>
     
-    <!-- 🔴 HEADER BIAPO CORPORATIVO -->
-    <div class="container">
-        <div class="header">
-            <div class="header-left">
-                <img src="img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-biapo">
-                <div>
-                    <h1>Sistema de Gestão BIAPO</h1>
-                    <p>Obra 292 - Museu Nacional</p>
-                    <p style="font-size: 12px; margin-top: 4px;">
-                        <strong>v6.6.0 Sincronização Bidirecional</strong>
-                        <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                            SISTEMA HÍBRIDO ✅
-                        </span>
-                    </p>
-                </div>
-            </div>
-            <div class="header-right">
-                <div class="user-info-header">
-                    <p id="dataAtual" style="margin: 0; font-weight: 500;"></p>
-                    <p style="margin: 0; font-size: 12px; opacity: 0.8;">
-                        <span id="mesAno">Carregando...</span>
-                    </p>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-warning btn-sm" onclick="PersonalAgenda.abrirMinhaAgenda('Isabella')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
-                        📋 Minha Agenda
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="mostrarStatusHybrid()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
-                        🔄 Status
-                    </button>
-                </div>
-            </div>
+    <!-- ✅ SISTEMA PRINCIPAL -->
+    <div id="mainContainer" class="hidden">
+        <!-- ✅ SISTEMA DE NOTIFICAÇÕES -->
+        <div id="notification" class="notification">
+            <span id="notificationText"></span>
         </div>
         
-        <!-- 🎯 AÇÕES PRINCIPAIS PARA COLABORADORES -->
-        <div class="main-actions">
-            <div class="action-card primary" onclick="Events.mostrarNovoEvento()">
-                <span class="action-icon">📅</span>
-                <div class="action-title">Novo Evento</div>
-                <div class="action-desc">Criar evento para a equipe</div>
-            </div>
-            
-            <div class="action-card" onclick="PersonalAgenda.abrirMinhaAgenda('Isabella')">
-                <span class="action-icon">📋</span>
-                <div class="action-title">Minha Agenda</div>
-                <div class="action-desc">Tarefas e agenda pessoal</div>
-            </div>
-            
-            <div class="action-card" onclick="Events.mostrarGerenciarFeriados()">
-                <span class="action-icon">🏖️</span>
-                <div class="action-title">Feriados</div>
-                <div class="action-desc">Gerenciar datas especiais</div>
-            </div>
-            
-            <div class="action-card" onclick="Calendar.exportarPDF()">
-                <span class="action-icon">📄</span>
-                <div class="action-title">Exportar PDF</div>
-                <div class="action-desc">Gerar relatório do calendário</div>
-            </div>
-        </div>
-        
-        <!-- ✅ CALENDÁRIO PRINCIPAL (MANTIDO ORIGINAL) -->
-        <div class="card">
-            <h3>📅 Calendário da Equipe - Sincronização Automática</h3>
-            <div class="card-content">
-                <!-- Grid do Calendário -->
-                <div id="calendarioContainer">
-                    <div class="calendario" id="calendario">
-                        <!-- Calendário será renderizado aqui pelo módulo original -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 🔄 SISTEMA DE SINCRONIZAÇÃO (MANTIDO, MAS OCULTO SE NÃO FOR ADMIN) -->
-        <div class="card debug-section">
-            <h3>🔄 Sistema de Sincronização Híbrida v6.6.0</h3>
-            <div style="margin-bottom: 16px; padding: 16px; background: #f0f9ff; border-radius: 8px; border: 1px solid #0ea5e9;">
-                <h4 style="margin: 0 0 12px 0; color: #0369a1;">🎯 SISTEMA OPERACIONAL - Sincronização Bidirecional</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <!-- 🔴 HEADER BIAPO CORPORATIVO COM LOGOUT -->
+        <div class="container">
+            <div class="header">
+                <div class="header-left">
+                    <img src="img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-biapo">
                     <div>
-                        <h5 style="color: #374151; margin: 0 0 8px 0;">🔄 Auto-Sync Events → Tasks:</h5>
-                        <ul style="list-style: none; padding: 0; font-size: 14px; line-height: 1.6;">
-                            <li>✅ Participante em evento → tarefa pessoal automática</li>
-                            <li>✅ 100% automático, sem confirmações</li>
-                            <li>✅ Mantém origem e sincronização</li>
-                            <li>✅ Indicadores visuais 🔄 nos itens sincronizados</li>
-                        </ul>
+                        <h1>Sistema de Gestão BIAPO</h1>
+                        <p>Obra 292 - Museu Nacional</p>
+                        <p style="font-size: 12px; margin-top: 4px;">
+                            <strong>v7.2.0 Login Dinâmico</strong>
+                            <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
+                                SISTEMA HÍBRIDO ✅
+                            </span>
+                        </p>
                     </div>
-                    <div>
-                        <h5 style="color: #374151; margin: 0 0 8px 0;">⬆️ Promoção Tasks → Events:</h5>
-                        <ul style="list-style: none; padding: 0; font-size: 14px; line-height: 1.6;">
-                            <li>✅ Botão "Promover" na agenda pessoal</li>
-                            <li>✅ Tarefa vira evento + mantém tarefa</li>
-                            <li>✅ Participantes = quem está marcado</li>
-                            <li>✅ Indicadores visuais ⬆️ nos itens promovidos</li>
-                        </ul>
+                </div>
+                <div class="header-right">
+                    <div class="user-info-header">
+                        <p id="dataAtual" style="margin: 0; font-weight: 500;"></p>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.8;">
+                            <span id="mesAno">Carregando...</span>
+                        </p>
+                        <p id="usuarioLogado" style="margin: 4px 0 0 0; font-size: 12px; font-weight: 600;">
+                            👤 Carregando...
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-warning btn-sm" onclick="abrirMinhaAgendaDinamica()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                            📋 Minha Agenda
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="mostrarStatusHybrid()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                            🔄 Status
+                        </button>
+                        <button class="btn-logout" onclick="Auth.fazerLogout()">
+                            🚪 Sair
+                        </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Controles -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
-                <button class="btn btn-primary" onclick="mostrarStatusHybrid()" style="padding: 12px;">
-                    📊 Status Sistema
-                </button>
-                <button class="btn btn-success" onclick="forcarSincronizacao()" style="padding: 12px;">
-                    🔄 Forçar Sync
-                </button>
-                <button class="btn btn-warning" onclick="detectarConflitos()" style="padding: 12px;">
-                    ⚠️ Detectar Conflitos
-                </button>
-                <button class="btn btn-secondary" onclick="criarDadosTeste()" style="padding: 12px;">
-                    🧪 Criar Testes
-                </button>
+            <!-- 🎯 AÇÕES PRINCIPAIS PARA COLABORADORES -->
+            <div class="main-actions">
+                <div class="action-card primary" onclick="Events.mostrarNovoEvento()">
+                    <span class="action-icon">📅</span>
+                    <div class="action-title">Novo Evento</div>
+                    <div class="action-desc">Criar evento para a equipe</div>
+                </div>
+                
+                <div class="action-card" onclick="abrirMinhaAgendaDinamica()">
+                    <span class="action-icon">📋</span>
+                    <div class="action-title">Minha Agenda</div>
+                    <div class="action-desc">Tarefas e agenda pessoal</div>
+                </div>
+                
+                <div class="action-card" onclick="Events.mostrarGerenciarFeriados()">
+                    <span class="action-icon">🏖️</span>
+                    <div class="action-title">Feriados</div>
+                    <div class="action-desc">Gerenciar datas especiais</div>
+                </div>
+                
+                <div class="action-card" onclick="Calendar.exportarPDF()">
+                    <span class="action-icon">📄</span>
+                    <div class="action-title">Exportar PDF</div>
+                    <div class="action-desc">Gerar relatório do calendário</div>
+                </div>
             </div>
             
-            <!-- Estatísticas em Tempo Real -->
-            <div id="hybridStats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px;">
-                <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
-                    <div style="font-size: 24px; font-weight: bold; color: #0369a1;" id="statEventosSync">-</div>
-                    <div style="font-size: 12px; color: #6b7280;">Events → Tasks</div>
-                </div>
-                <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
-                    <div style="font-size: 24px; font-weight: bold; color: #059669;" id="statTarefasPromovidas">-</div>
-                    <div style="font-size: 12px; color: #6b7280;">Tasks → Events</div>
-                </div>
-                <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
-                    <div style="font-size: 24px; font-weight: bold; color: #dc2626;" id="statConflitos">-</div>
-                    <div style="font-size: 12px; color: #6b7280;">Conflitos Ativos</div>
-                </div>
-                <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
-                    <div style="font-size: 24px; font-weight: bold; color: #7c3aed;" id="statUltimaSync">-</div>
-                    <div style="font-size: 12px; color: #6b7280;">Última Sync</div>
+            <!-- ✅ CALENDÁRIO PRINCIPAL (MANTIDO ORIGINAL) -->
+            <div class="card">
+                <h3>📅 Calendário da Equipe - Sincronização Automática</h3>
+                <div class="card-content">
+                    <!-- Grid do Calendário -->
+                    <div id="calendarioContainer">
+                        <div class="calendario" id="calendario">
+                            <!-- Calendário será renderizado aqui pelo módulo original -->
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- ✅ PAINEL DE CONTROLE RÁPIDO SIMPLIFICADO -->
-        <div class="card">
-            <h3>🎮 Ações Rápidas</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 16px;">
-                <button class="btn btn-success" onclick="Tasks.mostrarNovaTarefa()" style="padding: 12px;">
-                    📝 Nova Tarefa
-                </button>
-                <button class="btn btn-info" onclick="forcarSincronizacao()" style="padding: 12px;">
-                    🔄 Sincronizar
-                </button>
-                <button class="btn btn-pdf" onclick="Tasks.exportarAgendaPDF()" style="padding: 12px;">
-                    📋 PDF Agenda
-                </button>
-                <button class="btn btn-secondary" onclick="mostrarStatusHybrid()" style="padding: 12px;">
-                    📊 Status Sistema
-                </button>
+            
+            <!-- 🔄 SISTEMA DE SINCRONIZAÇÃO (MANTIDO, MAS OCULTO SE NÃO FOR ADMIN) -->
+            <div class="card debug-section">
+                <h3>🔄 Sistema de Sincronização Híbrida v6.6.0</h3>
+                <div style="margin-bottom: 16px; padding: 16px; background: #f0f9ff; border-radius: 8px; border: 1px solid #0ea5e9;">
+                    <h4 style="margin: 0 0 12px 0; color: #0369a1;">🎯 SISTEMA OPERACIONAL - Sincronização Bidirecional</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <h5 style="color: #374151; margin: 0 0 8px 0;">🔄 Auto-Sync Events → Tasks:</h5>
+                            <ul style="list-style: none; padding: 0; font-size: 14px; line-height: 1.6;">
+                                <li>✅ Participante em evento → tarefa pessoal automática</li>
+                                <li>✅ 100% automático, sem confirmações</li>
+                                <li>✅ Mantém origem e sincronização</li>
+                                <li>✅ Indicadores visuais 🔄 nos itens sincronizados</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 style="color: #374151; margin: 0 0 8px 0;">⬆️ Promoção Tasks → Events:</h5>
+                            <ul style="list-style: none; padding: 0; font-size: 14px; line-height: 1.6;">
+                                <li>✅ Botão "Promover" na agenda pessoal</li>
+                                <li>✅ Tarefa vira evento + mantém tarefa</li>
+                                <li>✅ Participantes = quem está marcado</li>
+                                <li>✅ Indicadores visuais ⬆️ nos itens promovidos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controles -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+                    <button class="btn btn-primary" onclick="mostrarStatusHybrid()" style="padding: 12px;">
+                        📊 Status Sistema
+                    </button>
+                    <button class="btn btn-success" onclick="forcarSincronizacao()" style="padding: 12px;">
+                        🔄 Forçar Sync
+                    </button>
+                    <button class="btn btn-warning" onclick="detectarConflitos()" style="padding: 12px;">
+                        ⚠️ Detectar Conflitos
+                    </button>
+                    <button class="btn btn-secondary" onclick="criarDadosTeste()" style="padding: 12px;">
+                        🧪 Criar Testes
+                    </button>
+                </div>
+                
+                <!-- Estatísticas em Tempo Real -->
+                <div id="hybridStats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px;">
+                    <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #0369a1;" id="statEventosSync">-</div>
+                        <div style="font-size: 12px; color: #6b7280;">Events → Tasks</div>
+                    </div>
+                    <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #059669;" id="statTarefasPromovidas">-</div>
+                        <div style="font-size: 12px; color: #6b7280;">Tasks → Events</div>
+                    </div>
+                    <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #dc2626;" id="statConflitos">-</div>
+                        <div style="font-size: 12px; color: #6b7280;">Conflitos Ativos</div>
+                    </div>
+                    <div style="text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #7c3aed;" id="statUltimaSync">-</div>
+                        <div style="font-size: 12px; color: #6b7280;">Última Sync</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ✅ PAINEL DE CONTROLE RÁPIDO SIMPLIFICADO -->
+            <div class="card">
+                <h3>🎮 Ações Rápidas</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 16px;">
+                    <button class="btn btn-success" onclick="Tasks.mostrarNovaTarefa()" style="padding: 12px;">
+                        📝 Nova Tarefa
+                    </button>
+                    <button class="btn btn-info" onclick="forcarSincronizacao()" style="padding: 12px;">
+                        🔄 Sincronizar
+                    </button>
+                    <button class="btn btn-pdf" onclick="Tasks.exportarAgendaPDF()" style="padding: 12px;">
+                        📋 PDF Agenda
+                    </button>
+                    <button class="btn btn-secondary" onclick="mostrarStatusHybrid()" style="padding: 12px;">
+                        📊 Status Sistema
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ✅ TODAS AS FUNÇÕES ORIGINAIS DO INDEX-DEV.HTML MANTIDAS
+        // 🔐 FUNÇÕES DE LOGIN DINÂMICO v7.2.0
+        
+        // ✅ FUNÇÃO PARA ABRIR AGENDA DINÂMICA BASEADA NO USUÁRIO LOGADO
+        function abrirMinhaAgendaDinamica() {
+            const usuario = obterUsuarioAtual();
+            if (usuario) {
+                PersonalAgenda.abrirMinhaAgenda(usuario.nome);
+            } else {
+                Notifications.error('Usuário não identificado');
+            }
+        }
+        
+        // ✅ OBTER USUÁRIO ATUAL
+        function obterUsuarioAtual() {
+            if (App && App.usuarioAtual) {
+                return {
+                    email: App.usuarioAtual.email,
+                    nome: App.usuarioAtual.displayName || extrairNomeDoEmail(App.usuarioAtual.email)
+                };
+            }
+            
+            if (Auth && Auth.state && Auth.state.usuarioAtual) {
+                return {
+                    email: Auth.state.usuarioAtual.email,
+                    nome: Auth.state.usuarioAtual.displayName || extrairNomeDoEmail(Auth.state.usuarioAtual.email)
+                };
+            }
+            
+            return null;
+        }
+        
+        // ✅ EXTRAIR NOME DO EMAIL PARA RENATOREMIRO@BIAPO.COM.BR
+        function extrairNomeDoEmail(email) {
+            if (!email) return 'Usuário';
+            
+            // Para renatoremiro@biapo.com.br -> Renato Remiro
+            const parteLocal = email.split('@')[0];
+            
+            // Casos especiais conhecidos
+            const mapaUsuarios = {
+                'renatoremiro': 'Renato Remiro',
+                'isabella': 'Isabella',
+                'eduardo': 'Eduardo',
+                'lara': 'Lara',
+                'beto': 'Beto',
+                'admin': 'Administrador'
+            };
+            
+            if (mapaUsuarios[parteLocal.toLowerCase()]) {
+                return mapaUsuarios[parteLocal.toLowerCase()];
+            }
+            
+            // Caso geral: capitalizar primeira letra
+            return parteLocal.charAt(0).toUpperCase() + parteLocal.slice(1);
+        }
+        
+        // ✅ ATUALIZAR INFORMAÇÕES DO USUÁRIO NO HEADER
+        function atualizarUsuarioHeader() {
+            const usuario = obterUsuarioAtual();
+            const usuarioElement = document.getElementById('usuarioLogado');
+            
+            if (usuario && usuarioElement) {
+                usuarioElement.textContent = `👤 ${usuario.nome}`;
+            }
+        }
+        
+        // ✅ MOSTRAR RECUPERAR SENHA
+        function mostrarRecuperarSenha() {
+            const email = document.getElementById('loginEmail').value.trim();
+            
+            if (!email) {
+                Notifications.error('Digite seu email primeiro');
+                return;
+            }
+            
+            if (!Validation.isValidEmail(email)) {
+                Notifications.error('Email inválido');
+                return;
+            }
+            
+            const confirmacao = confirm(`Enviar email de recuperação para:\n${email}?`);
+            
+            if (confirmacao) {
+                Auth.recuperarSenha(email);
+            }
+        }
+        
+        // ✅ INICIALIZAÇÃO COM LOGIN DINÂMICO
+        function inicializarSistemaComLogin() {
+            console.log('🔐 Inicializando sistema com login dinâmico...');
+            
+            // Verificar se Auth está disponível
+            if (typeof Auth !== 'undefined') {
+                // Verificar auto-login
+                Auth.verificarAutoLogin().then((user) => {
+                    if (user) {
+                        console.log('✅ Auto-login realizado:', user.email);
+                        mostrarSistemaPrincipal();
+                        atualizarUsuarioHeader();
+                    } else {
+                        console.log('👤 Nenhum usuário logado - mostrando tela de login');
+                        mostrarTelaLogin();
+                    }
+                }).catch((error) => {
+                    console.error('❌ Erro no auto-login:', error);
+                    mostrarTelaLogin();
+                });
+            } else {
+                console.warn('⚠️ Sistema de autenticação não disponível');
+                mostrarTelaLogin();
+            }
+        }
+        
+        // ✅ MOSTRAR TELA DE LOGIN
+        function mostrarTelaLogin() {
+            const loginScreen = document.getElementById('loginScreen');
+            const mainContainer = document.getElementById('mainContainer');
+            
+            if (loginScreen) loginScreen.classList.remove('hidden');
+            if (mainContainer) mainContainer.classList.add('hidden');
+        }
+        
+        // ✅ MOSTRAR SISTEMA PRINCIPAL
+        function mostrarSistemaPrincipal() {
+            const loginScreen = document.getElementById('loginScreen');
+            const mainContainer = document.getElementById('mainContainer');
+            
+            if (loginScreen) loginScreen.classList.add('hidden');
+            if (mainContainer) mainContainer.classList.remove('hidden');
+            
+            // Inicializar dados se necessário
+            setTimeout(() => {
+                if (typeof App !== 'undefined' && typeof DataStructure !== 'undefined') {
+                    if (!App.dados) {
+                        App.dados = DataStructure.inicializarDados();
+                    }
+                    console.log('📊 Dados inicializados para usuário logado');
+                }
+                
+                // Atualizar informações do usuário
+                atualizarUsuarioHeader();
+                
+                // Inicializar estatísticas
+                setTimeout(atualizarEstatisticasHybrid, 2000);
+            }, 500);
+        }
+        
+        // ✅ TODAS AS FUNÇÕES ORIGINAIS DO INDEX.HTML MANTIDAS
         
         // Atualizar data atual
         document.getElementById('dataAtual').textContent = new Date().toLocaleDateString('pt-BR');
@@ -396,9 +742,11 @@
             if (typeof HybridSync !== 'undefined') {
                 const status = HybridSync.obterStatus();
                 const stats = HybridSync.obterEstatisticas();
+                const usuario = obterUsuarioAtual();
                 
                 alert(
-                    `📊 STATUS DO SISTEMA HÍBRIDO v6.6.0\n\n` +
+                    `📊 STATUS DO SISTEMA HÍBRIDO v7.2.0\n\n` +
+                    `👤 Usuário: ${usuario ? usuario.nome + ' (' + usuario.email + ')' : 'Não logado'}\n` +
                     `✅ Ativo: ${status.ativo ? 'Sim' : 'Não'}\n` +
                     `🔄 Auto-sync: ${status.autoSync ? 'Ativo' : 'Inativo'}\n` +
                     `⚠️ Detectar conflitos: ${status.detectarConflitos ? 'Ativo' : 'Inativo'}\n` +
@@ -485,78 +833,75 @@
             }
         }
         
-        // ✅ LOG INICIAL E INICIALIZAÇÃO v6.6.0 (ORIGINAL)
-        console.log('🔴 Sistema BIAPO v6.6.0 - Carregamento completo com cores BIAPO!');
-        console.log('📦 Módulos base + agenda pessoal + sincronização carregados');
+        // ✅ LOG INICIAL E INICIALIZAÇÃO v7.2.0 COM LOGIN
+        console.log('🔐 Sistema BIAPO v7.2.0 - Login Dinâmico Implementado!');
+        console.log('📦 Autenticação + Módulos base + agenda pessoal + sincronização');
         
-        // ✅ INICIALIZAÇÃO AUTOMÁTICA v6.6.0 (ORIGINAL)
-        setTimeout(() => {
-            Notifications.success('🔴 Sistema BIAPO v6.6.0 com cores corporativas inicializado!');
+        // ✅ INICIALIZAÇÃO AUTOMÁTICA COM LOGIN v7.2.0
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔐 Inicializando sistema BIAPO com autenticação...');
             
-            // Inicializar dados se necessário
-            if (typeof App !== 'undefined' && typeof DataStructure !== 'undefined') {
-                if (!App.dados) {
-                    App.dados = DataStructure.inicializarDados();
-                }
-                if (!App.usuarioAtual) {
-                    App.usuarioAtual = { email: 'admin@biapo.com', displayName: 'Isabella' };
-                }
-                console.log('📊 Dados inicializados para sistema BIAPO v6.6.0');
-            }
-            
-            // Status inicial da agenda
+            // Aguardar carregamento dos módulos
             setTimeout(() => {
-                console.log('✅ Sistema BIAPO completo carregado');
+                inicializarSistemaComLogin();
             }, 1000);
+        });
+        
+        // ✅ INTERCEPTAR LOGIN SUCESSO PARA MOSTRAR SISTEMA
+        if (typeof Auth !== 'undefined') {
+            // Sobrescrever função de sucesso do Auth para integrar com nossa interface
+            const originalOnLoginSucesso = Auth._onLoginSucesso;
+            Auth._onLoginSucesso = function(user) {
+                // Chamar função original
+                originalOnLoginSucesso.call(this, user);
+                
+                // Mostrar sistema principal
+                mostrarSistemaPrincipal();
+                
+                console.log('✅ Login realizado - sistema principal exibido');
+            };
             
-            // Inicializar estatísticas
-            setTimeout(atualizarEstatisticasHybrid, 2000);
-            
-        }, 1000);
+            // Sobrescrever logout para mostrar tela de login
+            const originalOnLogoutSucesso = Auth._onLogoutSucesso;
+            Auth._onLogoutSucesso = function() {
+                // Chamar função original
+                originalOnLogoutSucesso.call(this);
+                
+                // Mostrar tela de login
+                mostrarTelaLogin();
+                
+                console.log('✅ Logout realizado - tela de login exibida');
+            };
+        }
         
         // Atualizar estatísticas a cada 30 segundos
         setInterval(atualizarEstatisticasHybrid, 30000);
         
-        // ✅ INTEGRAÇÃO AUTOMÁTICA v6.6.0 (ORIGINAL)
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🔴 Inicializando integrações BIAPO v6.6.0...');
-            
-            // Aguardar carregamento completo
-            setTimeout(() => {
-                // Integrar PersonalAgenda
-                if (typeof PersonalAgenda !== 'undefined' && typeof PersonalAgenda._integrarHybridSync === 'function') {
-                    PersonalAgenda._integrarHybridSync();
+        // ✅ EVENTOS DE TECLADO PARA LOGIN
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const loginScreen = document.getElementById('loginScreen');
+                if (loginScreen && !loginScreen.classList.contains('hidden')) {
+                    Auth.fazerLogin();
                 }
-                
-                // Verificar se HybridSync está funcionando
-                if (typeof HybridSync !== 'undefined') {
-                    const status = HybridSync.obterStatus();
-                    console.log('📊 Status HybridSync:', status);
-                    
-                    // Mostrar notificação de sucesso
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.success('🔴 Sistema BIAPO com sincronização v6.6.0 ativo!');
-                    }
-                }
-                
-                // Inicializar estatísticas
-                atualizarEstatisticasHybrid();
-                
-            }, 3000);
+            }
         });
         
         // ✅ MOSTRAR/OCULTAR SEÇÕES DE DEBUG BASEADO NO USUÁRIO
         function toggleDebugSections() {
             const debugSections = document.querySelectorAll('.debug-section');
-            const isAdmin = true; // Pode verificar se usuário é admin
+            const usuario = obterUsuarioAtual();
+            const isAdmin = usuario && (usuario.email.includes('admin') || usuario.email.includes('renatoremiro'));
             
             debugSections.forEach(section => {
                 section.style.display = isAdmin ? 'block' : 'none';
             });
         }
         
-        // Chamar na inicialização
-        setTimeout(toggleDebugSections, 1000);
+        // Chamar toggle debug após login
+        setTimeout(() => {
+            toggleDebugSections();
+        }, 3000);
     </script>
 </body>
 </html>
