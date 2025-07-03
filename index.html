@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão - Obra 292</title>
+    
+    <!-- ✅ CSS MODULARIZADO -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/calendar.css">
+    <link rel="stylesheet" href="modules/chat-styles.css">
+    
+    <!-- ✅ BIBLIOTECAS EXTERNAS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- ✅ FIREBASE SCRIPTS -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- ✅ SISTEMA MODULARIZADO COMPLETO -->
+    
+    <!-- 1. CONFIGURAÇÕES -->
+    <script src="assets/js/config/firebase.js"></script>
+    
+    <!-- 2. UTILITÁRIOS -->
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    <script src="assets/js/utils/agenda-tests.js"></script>
+    <script src="assets/js/utils/window-expose-fix.js"></script>
+    
+    <!-- 3. CORE DO SISTEMA -->
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    
+    <!-- 4. MÓDULOS FUNCIONAIS COMPLETOS -->
+    <script src="assets/js/modules/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/calendar.js"></script>
+    <script src="assets/js/modules/events.js"></script>
+    <script src="assets/js/modules/tasks.js"></script>
+    <script src="assets/js/modules/pdf.js"></script>
+    
+    <!-- 5. SISTEMA HÍBRIDO DE AGENDA PESSOAL -->
+    <script src="assets/js/modules/personal-agenda.js"></script>
+    <script src="assets/js/modules/personal-dashboard.js"></script>
+    <script src="assets/js/modules/agenda-helpers.js"></script>
+    <script src="assets/js/modules/personal-agenda-fix.js"></script>
+    
+    <!-- 6. SISTEMA DE SINCRONIZAÇÃO BIDIRECIONAL -->
+    <script src="assets/js/modules/hybrid.js"></script>
+    
+    <!-- 7. CHAT -->
+    <script src="modules/chat-module.js"></script>
+
+    <style>
+        /* 🎨 DESIGN INSPIRADO NO CLAUDE - CORES E TIPOGRAFIA */
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        :root {
+            --claude-orange: #FF6B35;
+            --claude-orange-light: #FF8A65;
+            --claude-orange-dark: #E55100;
+            --claude-text: #2D3748;
+            --claude-text-light: #718096;
+            --claude-text-lighter: #A0AEC0;
+            --claude-bg: #FAFAFA;
+            --claude-white: #FFFFFF;
+            --claude-border: #E2E8F0;
+            --claude-border-light: #F7FAFC;
+            --claude-shadow: rgba(0, 0, 0, 0.05);
+            --claude-shadow-hover: rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            background: var(--claude-bg);
+            color: var(--claude-text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        /* 🔐 TELA DE LOGIN - ESTILO CLAUDE */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--claude-bg);
+            padding: 24px;
+        }
+        
+        .login-card {
+            background: var(--claude-white);
+            padding: 48px;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--claude-shadow);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            border: 1px solid var(--claude-border);
+        }
+        
+        .login-header {
+            margin-bottom: 40px;
+        }
+        
+        .login-header h1 {
+            color: var(--claude-text);
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .login-header p {
+            color: var(--claude-text-light);
+            font-size: 15px;
+            font-weight: 400;
+        }
+        
+        .login-form {
+            margin-bottom: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--claude-text);
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid var(--claude-border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            background: var(--claude-white);
+            color: var(--claude-text);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--claude-orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: var(--claude-text-lighter);
+        }
+        
+        .input-error {
+            border-color: #EF4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+        }
+        
+        .login-actions {
+            margin-bottom: 32px;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--claude-orange);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+            letter-spacing: 0.25px;
+        }
+        
+        .btn-login:hover:not(:disabled) {
+            background: var(--claude-orange-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 12px 24px;
+            background: transparent;
+            color: var(--claude-text-light);
+            border: 1.5px solid var(--claude-border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-register:hover {
+            background: var(--claude-border-light);
+            border-color: var(--claude-text-lighter);
+            color: var(--claude-text);
+        }
+        
+        .login-footer {
+            text-align: center;
+            font-size: 14px;
+            color: var(--claude-text-light);
+        }
+        
+        .login-footer a {
+            color: var(--claude-orange);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* 🏢 SISTEMA PRINCIPAL - ESTILO CLAUDE */
+        .main-system {
+            min-height: 100vh;
+            background: var(--claude-bg);
+        }
+        
+        .top-header {
+            background: var(--claude-white);
+            border-bottom: 1px solid var(--claude-border);
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px var(--claude-shadow);
+        }
+        
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--claude-text);
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-left p {
+            color: var(--claude-text-light);
+            margin: 4px 0 0 0;
+            font-size: 15px;
+            font-weight: 400;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: var(--claude-border-light);
+            border-radius: 8px;
+            border: 1px solid var(--claude-border);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--claude-orange);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--claude-text);
+            font-size: 15px;
+            line-height: 1.2;
+        }
+        
+        .user-email {
+            color: var(--claude-text-light);
+            font-size: 13px;
+            line-height: 1.2;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .quick-actions .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-actions .btn-secondary {
+            background: var(--claude-border-light);
+            color: var(--claude-text-light);
+            border: 1px solid var(--claude-border);
+        }
+        
+        .quick-actions .btn-secondary:hover {
+            background: var(--claude-border);
+            color: var(--claude-text);
+        }
+        
+        .quick-actions .btn-danger {
+            background: #FEE2E2;
+            color: #DC2626;
+            border: 1px solid #FECACA;
+        }
+        
+        .quick-actions .btn-danger:hover {
+            background: #FECACA;
+            border-color: #F87171;
+        }
+        
+        .control-panel {
+            background: var(--claude-white);
+            margin: 32px;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 2px 8px var(--claude-shadow);
+            border: 1px solid var(--claude-border);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--claude-border);
+        }
+        
+        .panel-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--claude-text);
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .main-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 24px;
+            border: 1.5px solid var(--claude-border);
+            border-radius: 10px;
+            background: var(--claude-white);
+            color: var(--claude-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--claude-orange);
+            background: #FFF8F6;
+            color: var(--claude-orange-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--claude-shadow-hover);
+        }
+        
+        .action-btn.primary {
+            background: var(--claude-orange);
+            color: white;
+            border-color: var(--claude-orange);
+        }
+        
+        .action-btn.primary:hover {
+            background: var(--claude-orange-dark);
+            border-color: var(--claude-orange-dark);
+            color: white;
+        }
+        
+        .calendar-container {
+            background: var(--claude-white);
+            border-radius: 10px;
+            padding: 24px;
+            border: 1px solid var(--claude-border);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--claude-border);
+        }
+        
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--claude-text);
+            margin: 0;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .calendar-nav button {
+            padding: 8px 16px;
+            border: 1px solid var(--claude-border);
+            background: var(--claude-white);
+            color: var(--claude-text-light);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .calendar-nav button:hover {
+            background: var(--claude-border-light);
+            border-color: var(--claude-text-lighter);
+            color: var(--claude-text);
+        }
+        
+        /* 🎨 BOTÕES GERAIS - ESTILO CLAUDE */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: none;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .btn-info {
+            background: #EBF8FF;
+            color: #2B6CB0;
+            border: 1px solid #BEE3F8;
+        }
+        
+        .btn-info:hover {
+            background: #BEE3F8;
+            border-color: #90CDF4;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 📱 RESPONSIVIDADE - ESTILO CLAUDE */
+        @media (max-width: 768px) {
+            .top-header {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px 24px;
+                text-align: center;
+            }
+            
+            .header-right {
+                flex-direction: column;
+                width: 100%;
+                gap: 16px;
+            }
+            
+            .quick-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .control-panel {
+                margin: 20px 16px;
+                padding: 24px 20px;
+            }
+            
+            .main-actions {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .panel-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding-bottom: 16px;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 16px;
+            }
+            
+            .calendar-container {
+                padding: 20px 16px;
+            }
+            
+            .calendar-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-screen {
+                padding: 16px;
+            }
+            
+            .login-card {
+                padding: 32px 24px;
+                margin: 0;
+                max-width: 100%;
+            }
+            
+            .login-header h1 {
+                font-size: 28px;
+            }
+            
+            .control-panel {
+                margin: 16px 12px;
+                padding: 20px 16px;
+            }
+            
+            .panel-title {
+                font-size: 20px;
+            }
+            
+            .action-btn {
+                padding: 16px 20px;
+                font-size: 15px;
+            }
+            
+            .top-header {
+                padding: 16px 20px;
+            }
+            
+            .header-left h1 {
+                font-size: 24px;
+            }
+            
+        /* 🎨 MICRO-INTERAÇÕES E ANIMAÇÕES - ESTILO CLAUDE */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .login-card {
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .main-system {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .action-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .action-btn:hover::before {
+            left: 100%;
+        }
+        
+        .form-group input {
+            position: relative;
+        }
+        
+        .form-group input:focus {
+            transform: translateY(-1px);
+        }
+        
+        .calendar-nav button:active {
+            transform: scale(0.98);
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* 🔔 NOTIFICAÇÕES ESTILO CLAUDE */
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 20px;
+            background: var(--claude-white);
+            border: 1px solid var(--claude-border);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px var(--claude-shadow-hover);
+            color: var(--claude-text);
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            max-width: 400px;
+            min-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid #10B981;
+            background: #F0FDF4;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #EF4444;
+            background: #FEF2F2;
+        }
+        
+        .notification.warning {
+            border-left: 4px solid var(--claude-orange);
+            background: #FFF8F6;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #3B82F6;
+            background: #F0F9FF;
+        }
+        
+        /* 🎯 MELHORIAS NO CALENDÁRIO */
+        .calendario {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .dia {
+            transition: all 0.2s ease;
+        }
+        
+        .dia:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--claude-shadow-hover);
+        }
+        
+        /* 📊 INDICADORES DE CARREGAMENTO */
+        .loading {
+            position: relative;
+        }
+        
+        .loading::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid var(--claude-border);
+            border-top-color: var(--claude-orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ✅ SISTEMA DE NOTIFICAÇÕES -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+    
+    <!-- 🔐 TELA DE LOGIN -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>🏢 Sistema de Gestão</h1>
+                <p>Obra 292 - Museu Nacional</p>
+            </div>
+            
+            <form class="login-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input 
+                        type="email" 
+                        id="loginEmail" 
+                        placeholder="seu@email.com" 
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input 
+                        type="password" 
+                        id="loginPassword" 
+                        placeholder="Digite sua senha" 
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+                
+                <div class="login-actions">
+                    <button type="button" class="btn-login" onclick="Auth.fazerLogin()">
+                        Entrar
+                    </button>
+                    <button type="button" class="btn-register" onclick="Auth.mostrarRegistro()">
+                        Criar nova conta
+                    </button>
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <a href="#" onclick="mostrarRecuperarSenha()">Esqueceu sua senha?</a>
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--claude-border); font-size: 13px; color: var(--claude-text-lighter);">
+                    Sistema de Gestão v1.0 • Obra 292
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 🏢 SISTEMA PRINCIPAL -->
+    <div id="mainContainer" class="main-system hidden">
+        <!-- Header Principal -->
+        <div class="top-header">
+            <div class="header-left">
+                <h1>Sistema de Gestão</h1>
+                <p>Obra 292 - Museu Nacional • <span id="dataAtual"></span></p>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Usuário</div>
+                        <div class="user-email" id="userEmail">email@exemplo.com</div>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="mostrarPerfilUsuario()">
+                        ⚙️ Perfil
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="Auth.fazerLogout()">
+                        🚪 Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Painel de Controle Principal -->
+        <div class="control-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">📅 Calendário da Equipe</h2>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span id="mesAno" style="font-weight: 500; color: #6b7280;">Carregando...</span>
+                    <button class="btn btn-info btn-sm" onclick="atualizarCalendario()">
+                        🔄 Atualizar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Ações Principais -->
+            <div class="main-actions">
+                <button class="action-btn primary" onclick="Events.mostrarNovoEvento()">
+                    📅 Novo Evento
+                </button>
+                
+                <button class="action-btn" onclick="PersonalAgenda.abrirMinhaAgenda(obterNomeUsuario())">
+                    📋 Minha Agenda
+                </button>
+                
+                <button class="action-btn" onclick="mostrarGerenciarFeriados()">
+                    🏖️ Feriados
+                </button>
+                
+                <button class="action-btn" onclick="Calendar.exportarPDF()">
+                    📄 Exportar PDF
+                </button>
+            </div>
+            
+            <!-- Container do Calendário -->
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <h3 class="calendar-title">
+                        <span id="mesAnoCalendario">Carregando calendário...</span>
+                    </h3>
+                    
+                    <div class="calendar-nav">
+                        <button onclick="Calendar.navegarMes(-1)">‹ Anterior</button>
+                        <button onclick="Calendar.irParaHoje()">Hoje</button>
+                        <button onclick="Calendar.navegarMes(1)">Próximo ›</button>
+                    </div>
+                </div>
+                
+                <!-- Grid do Calendário -->
+                <div id="calendarioContainer">
+                    <div class="calendario" id="calendario">
+                        <!-- Calendário será renderizado aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ✅ FUNÇÕES DE PRODUÇÃO - INTERFACE LIMPA
+        
+        // Atualizar data atual
+        function atualizarDataAtual() {
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            const elementoData = document.getElementById('dataAtual');
+            if (elementoData) {
+                elementoData.textContent = dataFormatada;
+            }
+        }
+        
+        // Atualizar informações do usuário
+        function atualizarInfoUsuario(user) {
+            if (!user) return;
+            
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            
+            if (userName) {
+                userName.textContent = user.displayName || user.email.split('@')[0];
+            }
+            
+            if (userEmail) {
+                userEmail.textContent = user.email;
+            }
+            
+            if (userAvatar) {
+                const inicial = (user.displayName || user.email).charAt(0).toUpperCase();
+                userAvatar.textContent = inicial;
+            }
+        }
+        
+        // Obter nome do usuário atual
+        function obterNomeUsuario() {
+            if (App.usuarioAtual) {
+                return App.usuarioAtual.displayName || App.usuarioAtual.email.split('@')[0];
+            }
+            return 'Usuário';
+        }
+        
+        // Atualizar calendário
+        function atualizarCalendario() {
+            if (typeof Calendar !== 'undefined' && Calendar.renderizarCalendario) {
+                Calendar.renderizarCalendario();
+                Notifications.success('Calendário atualizado!');
+            }
+        }
+        
+        // Mostrar gerenciar feriados
+        function mostrarGerenciarFeriados() {
+            if (typeof Events !== 'undefined' && Events.mostrarGerenciarFeriados) {
+                Events.mostrarGerenciarFeriados();
+            } else {
+                Notifications.info('Funcionalidade de feriados será implementada em breve');
+            }
+        }
+        
+        // Mostrar perfil do usuário
+        function mostrarPerfilUsuario() {
+            const user = App.usuarioAtual;
+            if (!user) return;
+            
+            alert(
+                `👤 PERFIL DO USUÁRIO\n\n` +
+                `Nome: ${user.displayName || 'Não informado'}\n` +
+                `Email: ${user.email}\n` +
+                `Último login: ${new Date().toLocaleString('pt-BR')}\n\n` +
+                `Sistema: v1.0.0`
+            );
+        }
+        
+        // Recuperar senha
+        function mostrarRecuperarSenha() {
+            const email = prompt('Digite seu email para recuperar a senha:');
+            if (email && typeof Auth !== 'undefined') {
+                Auth.recuperarSenha(email);
+            }
+        }
+        
+        // ✅ INTEGRAÇÃO COM SISTEMA DE AUTH
+        
+        // Override do callback de login sucesso para atualizar interface
+        const originalOnLoginSucesso = Auth._onLoginSucesso;
+        Auth._onLoginSucesso = function(user) {
+            // Chamar função original
+            originalOnLoginSucesso.call(this, user);
+            
+            // Atualizar interface de produção
+            atualizarInfoUsuario(user);
+            
+            // Verificar se Calendar está disponível e renderizar
+            setTimeout(() => {
+                if (typeof Calendar !== 'undefined' && Calendar.init) {
+                    Calendar.init();
+                    Calendar.renderizarCalendario();
+                }
+                
+                // Inicializar sincronização se disponível
+                if (typeof HybridSync !== 'undefined' && HybridSync.init) {
+                    HybridSync.init();
+                }
+                
+                // Aplicar tema Claude aos componentes existentes
+                aplicarTemaClaude();
+                
+            }, 1000);
+        };
+        
+        // ✅ APLICAR TEMA CLAUDE AOS COMPONENTES EXISTENTES
+        function aplicarTemaClaude() {
+            // Atualizar botões existentes para usar cores do Claude
+            const botoesExistentes = document.querySelectorAll('.btn-primary');
+            botoesExistentes.forEach(btn => {
+                btn.style.background = 'var(--claude-orange)';
+                btn.style.borderColor = 'var(--claude-orange)';
+                
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.background = 'var(--claude-orange-dark)';
+                });
+                
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.background = 'var(--claude-orange)';
+                });
+            });
+            
+            // Atualizar links e elementos com cor de destaque
+            const elementosDestaque = document.querySelectorAll('a, .text-primary');
+            elementosDestaque.forEach(el => {
+                el.style.color = 'var(--claude-orange)';
+            });
+            
+            console.log('🎨 Tema Claude aplicado aos componentes existentes');
+        }
+        
+        // ✅ INICIALIZAÇÃO DO SISTEMA DE PRODUÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🏢 Inicializando Sistema de Gestão - Versão Produção');
+            
+            // Atualizar data
+            atualizarDataAtual();
+            
+            // Atualizar data a cada minuto
+            setInterval(atualizarDataAtual, 60000);
+            
+            // Configurar eventos de teclado para login
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const loginScreen = document.getElementById('loginScreen');
+                    if (loginScreen && !loginScreen.classList.contains('hidden')) {
+                        Auth.fazerLogin();
+                    }
+                }
+            });
+            
+            // Verificar se há usuário logado
+            setTimeout(() => {
+                if (typeof Auth !== 'undefined') {
+                    Auth.verificarAutoLogin();
+                }
+            }, 500);
+            
+            // Inicializar dados do sistema se necessário
+            setTimeout(() => {
+                if (typeof App !== 'undefined' && typeof DataStructure !== 'undefined') {
+                    if (!App.dados) {
+                        App.dados = DataStructure.inicializarDados();
+                    }
+                }
+            }, 1000);
+        });
+        
+        // ✅ NOTIFICAÇÃO DE SISTEMA CARREGADO
+        setTimeout(() => {
+            console.log('✅ Sistema de Gestão carregado com sucesso!');
+        }, 2000);
+    </script>
+</body>
+</html>
