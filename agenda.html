@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Agenda - Sistema BIAPO</title>
+    
+    <!-- ✅ CSS DO SISTEMA -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/calendar.css">
+    
+    <!-- ✅ FIREBASE SCRIPTS -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- ✅ SISTEMA MODULARIZADO -->
+    <script src="assets/js/config/firebase.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    <script src="assets/js/modules/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/tasks.js"></script>
+    <script src="assets/js/modules/personal-agenda.js"></script>
+    <script src="assets/js/modules/hybrid.js"></script>
+
+    <style>
+        /* 🔴 CORES BIAPO */
+        :root {
+            --biapo-red: #C53030;
+            --biapo-red-light: #E53E3E;
+            --biapo-red-dark: #9B2C2C;
+            --biapo-orange: #DD6B20;
+            --biapo-gray: #2D3748;
+            --biapo-gray-light: #4A5568;
+            --biapo-gray-lighter: #718096;
+            --accent-green: #38A169;
+            --accent-yellow: #D69E2E;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .page-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 🔴 HEADER DA PÁGINA */
+        .page-header {
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(197, 48, 48, 0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-biapo {
+            height: 60px;
+            width: auto;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .user-email {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-header {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-header:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        /* 🎛️ CONTROLES PRINCIPAIS */
+        .main-controls {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .view-tabs {
+            display: flex;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .view-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--biapo-gray);
+        }
+
+        .view-tab.active {
+            background: var(--biapo-red);
+            color: white;
+            box-shadow: 0 2px 4px rgba(197, 48, 48, 0.3);
+        }
+
+        .filters-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--biapo-gray-lighter);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            color: var(--biapo-gray);
+            min-width: 140px;
+        }
+
+        .actions-section {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--biapo-red-dark) 0%, var(--biapo-red) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--biapo-gray);
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-success {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-info {
+            background: #06b6d4;
+            color: white;
+        }
+
+        /* 📅 GRID SEMANAL PRINCIPAL */
+        .agenda-views {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .weekly-navigation {
+            background: #f8fafc;
+            padding: 20px 32px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: var(--biapo-gray);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--biapo-red);
+            color: var(--biapo-red);
+        }
+
+        .current-week {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--biapo-gray);
+        }
+
+        .weekly-grid {
+            display: grid;
+            grid-template-columns: 120px repeat(7, 1fr);
+            min-height: 600px;
+            background: white;
+        }
+
+        /* 📋 CABEÇALHO DOS DIAS */
+        .time-column {
+            background: #f8fafc;
+            border-right: 2px solid #e2e8f0;
+            padding: 16px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--biapo-gray);
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 16px 8px;
+            text-align: center;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 2px solid var(--biapo-red);
+        }
+
+        .day-header.today {
+            background: linear-gradient(135deg, var(--biapo-red-light) 0%, var(--biapo-red) 100%);
+            color: white;
+        }
+
+        .day-name {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .day-date {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .day-tasks-count {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        /* 📋 COLUNA DE HORÁRIOS */
+        .time-slots {
+            background: #f8fafc;
+            border-right: 2px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .time-slot {
+            height: 60px;
+            padding: 8px 4px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--biapo-gray-lighter);
+        }
+
+        /* 📝 COLUNAS DOS DIAS */
+        .day-column {
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            position: relative;
+        }
+
+        .day-column:last-child {
+            border-right: none;
+        }
+
+        /* 🕐 SLOTS DE HORÁRIO NOS DIAS */
+        .hour-slot {
+            height: 60px;
+            border-bottom: 1px solid #f1f5f9;
+            position: relative;
+            padding: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .hour-slot:hover {
+            background-color: rgba(197, 48, 48, 0.05);
+        }
+
+        /* 📋 TAREFAS NO GRID */
+        .task-item {
+            background: white;
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin: 2px 0;
+            border-left: 4px solid var(--biapo-red);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .task-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .task-item.pessoal {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+
+        .task-item.equipe {
+            border-left-color: #06b6d4;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+
+        .task-item.projeto {
+            border-left-color: #8b5cf6;
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        }
+
+        .task-item.urgente {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .task-item.rotina {
+            border-left-color: #6b7280;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .task-time {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--biapo-gray);
+            margin-bottom: 2px;
+        }
+
+        .task-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--biapo-gray);
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .task-description {
+            font-size: 10px;
+            color: var(--biapo-gray-lighter);
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .task-priority {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-priority.baixa {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .task-priority.media {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .task-priority.alta {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .task-priority.critica {
+            background: #dc2626;
+            color: white;
+        }
+
+        .task-status {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .task-status.pendente {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .task-status.andamento {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .task-status.concluida {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .task-indicators {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .task-indicator {
+            font-size: 12px;
+        }
+
+        /* 🔄 LINHA DO TEMPO ATUAL */
+        .current-time-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--biapo-red);
+            z-index: 10;
+            box-shadow: 0 0 4px rgba(197, 48, 48, 0.5);
+        }
+
+        .current-time-line::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: -4px;
+            width: 10px;
+            height: 10px;
+            background: var(--biapo-red);
+            border-radius: 50%;
+        }
+
+        /* 📊 ESTATÍSTICAS */
+        .stats-bar {
+            background: #f8fafc;
+            padding: 20px 32px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--biapo-red);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--biapo-gray-lighter);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* 🔔 NOTIFICAÇÕES */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: none;
+        }
+
+        /* 📱 RESPONSIVIDADE */
+        @media (max-width: 1200px) {
+            .weekly-grid {
+                grid-template-columns: 100px repeat(7, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 12px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .main-controls {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 20px;
+            }
+            
+            .filters-section,
+            .actions-section {
+                justify-content: center;
+            }
+            
+            .weekly-grid {
+                grid-template-columns: 80px repeat(7, 1fr);
+                font-size: 12px;
+            }
+        }
+
+        /* 🎨 ANIMAÇÕES */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 🎯 ESTADOS ESPECIAIS */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--biapo-gray-lighter);
+            grid-column: 1 / -1;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--biapo-gray);
+        }
+
+        .empty-description {
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔔 NOTIFICAÇÕES -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <div class="page-container">
+        <!-- 🔴 HEADER DA PÁGINA -->
+        <div class="page-header">
+            <div class="header-left">
+                <img src="img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-biapo">
+                <div>
+                    <h1 class="header-title">📅 Minha Agenda Pessoal</h1>
+                    <p class="header-subtitle">Sistema de Gestão BIAPO - Obra 292</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info-badge">
+                    <div class="user-name" id="userName">Carregando...</div>
+                    <div class="user-email" id="userEmail">Verificando usuário...</div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-header" onclick="sincronizarDados()">
+                        🔄 Sincronizar
+                    </button>
+                    <button class="btn-header" onclick="voltarParaSistema()">
+                        🏠 Voltar ao Sistema
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🎛️ CONTROLES PRINCIPAIS -->
+        <div class="main-controls">
+            <div class="view-tabs">
+                <button class="view-tab active" onclick="alternarVisualizacao('grid')" data-view="grid">
+                    🗓️ Grid Semanal
+                </button>
+                <button class="view-tab" onclick="alternarVisualizacao('list')" data-view="list">
+                    📋 Lista de Tarefas
+                </button>
+            </div>
+
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label">Tipo</label>
+                    <select class="filter-select" id="filtroTipo" onchange="aplicarFiltros()">
+                        <option value="todos">🔄 Todos os tipos</option>
+                        <option value="urgente">🚨 Urgente</option>
+                        <option value="projeto">🏗️ Projeto</option>
+                        <option value="equipe">👥 Equipe</option>
+                        <option value="pessoal">👤 Pessoal</option>
+                        <option value="rotina">🔄 Rotina</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" id="filtroStatus" onchange="aplicarFiltros()">
+                        <option value="todos">⚡ Todos os status</option>
+                        <option value="pendente">⏳ Pendente</option>
+                        <option value="andamento">🔥 Em andamento</option>
+                        <option value="concluida">✅ Concluída</option>
+                        <option value="cancelada">❌ Cancelada</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Prioridade</label>
+                    <select class="filter-select" id="filtroPrioridade" onchange="aplicarFiltros()">
+                        <option value="todos">🎯 Todas as prioridades</option>
+                        <option value="critica">🔴 Crítica</option>
+                        <option value="alta">🟠 Alta</option>
+                        <option value="media">🟡 Média</option>
+                        <option value="baixa">🟢 Baixa</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <button class="btn btn-secondary" onclick="exportarAgenda()">
+                    📄 Exportar PDF
+                </button>
+                <button class="btn btn-info" onclick="mostrarRelatorios()">
+                    📊 Relatórios
+                </button>
+                <button class="btn btn-primary" onclick="novaTarefa()">
+                    ➕ Nova Tarefa
+                </button>
+            </div>
+        </div>
+
+        <!-- 📅 GRID SEMANAL PRINCIPAL -->
+        <div class="agenda-views">
+            <!-- 🗓️ GRID SEMANAL -->
+            <div class="weekly-grid-view active" id="gridView">
+                <div class="weekly-navigation">
+                    <button class="nav-btn" onclick="navegarSemana(-1)">← Semana Anterior</button>
+                    <span class="current-week" id="currentWeekDisplay">Carregando...</span>
+                    <button class="nav-btn" onclick="navegarSemana(1)">Próxima Semana →</button>
+                    <button class="nav-btn" onclick="irParaHoje()">🏠 Hoje</button>
+                </div>
+
+                <div class="weekly-grid" id="weeklyGrid">
+                    <!-- GRID SERÁ RENDERIZADO DINAMICAMENTE -->
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-title">Sua agenda está limpa</div>
+                        <div class="empty-description">
+                            Comece criando sua primeira tarefa ou evento para ver o grid semanal em ação.
+                        </div>
+                        <button class="btn btn-primary" onclick="novaTarefa()">
+                            ➕ Criar Primeira Tarefa
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 BARRA DE ESTATÍSTICAS -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalTasks">0</div>
+                    <div class="stat-label">Total de Tarefas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="pendingTasks">0</div>
+                    <div class="stat-label">Pendentes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="inProgressTasks">0</div>
+                    <div class="stat-label">Em Andamento</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="completedTasksTotal">0</div>
+                    <div class="stat-label">Concluídas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="productivityScore">0%</div>
+                    <div class="stat-label">Produtividade</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🎯 CLASSE PRINCIPAL DA AGENDA DEDICADA INTEGRADA
+        class AgendaDedicadaIntegrada {
+            constructor() {
+                this.visualizacaoAtiva = 'grid';
+                this.semanaAtual = new Date();
+                this.usuarioAtual = null;
+                this.tarefas = [];
+                this.filtros = {
+                    tipo: 'todos',
+                    status: 'todos',
+                    prioridade: 'todos'
+                };
+                
+                this.init();
+            }
+
+            // 🚀 INICIALIZAÇÃO
+            init() {
+                console.log('📅 Inicializando Agenda Dedicada Integrada v1.0...');
+                
+                this.verificarUsuario();
+                this.carregarDados();
+                this.configurarEventListeners();
+                this.renderizarGrid();
+                this.atualizarSemanaDisplay();
+                
+                console.log('✅ Agenda Dedicada carregada com sucesso!');
+            }
+
+            // 👤 VERIFICAR USUÁRIO LOGADO
+            verificarUsuario() {
+                try {
+                    // Verificar várias fontes de usuário
+                    if (App && App.usuarioAtual) {
+                        this.usuarioAtual = {
+                            nome: App.usuarioAtual.displayName || this.extrairNomeDoEmail(App.usuarioAtual.email),
+                            email: App.usuarioAtual.email
+                        };
+                    } else if (Auth && Auth.state && Auth.state.usuarioAtual) {
+                        this.usuarioAtual = {
+                            nome: Auth.state.usuarioAtual.displayName || this.extrairNomeDoEmail(Auth.state.usuarioAtual.email),
+                            email: Auth.state.usuarioAtual.email
+                        };
+                    } else {
+                        // Usuário de desenvolvimento
+                        this.usuarioAtual = {
+                            nome: 'Usuário Demo',
+                            email: 'demo@biapo.com.br'
+                        };
+                    }
+
+                    // Atualizar interface
+                    document.getElementById('userName').textContent = this.usuarioAtual.nome;
+                    document.getElementById('userEmail').textContent = this.usuarioAtual.email;
+
+                } catch (error) {
+                    console.error('❌ Erro ao verificar usuário:', error);
+                    this.usuarioAtual = { nome: 'Usuário', email: 'user@biapo.com.br' };
+                }
+            }
+
+            // 🔧 EXTRAIR NOME DO EMAIL
+            extrairNomeDoEmail(email) {
+                if (!email) return 'Usuário';
+                
+                const parteLocal = email.split('@')[0];
+                const mapaUsuarios = {
+                    'renatoremiro': 'Renato Remiro',
+                    'isabella': 'Isabella',
+                    'eduardo': 'Eduardo',
+                    'lara': 'Lara',
+                    'beto': 'Beto'
+                };
+                
+                return mapaUsuarios[parteLocal.toLowerCase()] || 
+                       parteLocal.charAt(0).toUpperCase() + parteLocal.slice(1);
+            }
+
+            // 📊 CARREGAR DADOS
+            carregarDados() {
+                try {
+                    if (App && App.dados && App.dados.tarefas) {
+                        // Filtrar tarefas do usuário atual
+                        this.tarefas = App.dados.tarefas.filter(tarefa => {
+                            return tarefa.responsavel === this.usuarioAtual?.nome ||
+                                   tarefa.pessoas?.includes(this.usuarioAtual?.nome);
+                        });
+                    } else {
+                        // Começar com array vazio para inserção manual
+                        this.tarefas = [];
+                    }
+
+                    console.log(`📋 ${this.tarefas.length} tarefas carregadas para ${this.usuarioAtual?.nome}`);
+
+                } catch (error) {
+                    console.error('❌ Erro ao carregar dados:', error);
+                    this.tarefas = [];
+                }
+            }
+
+            // 🎛️ CONFIGURAR EVENT LISTENERS
+            configurarEventListeners() {
+                // Filtros
+                document.getElementById('filtroTipo').addEventListener('change', () => {
+                    this.filtros.tipo = document.getElementById('filtroTipo').value;
+                    this.aplicarFiltros();
+                });
+
+                document.getElementById('filtroStatus').addEventListener('change', () => {
+                    this.filtros.status = document.getElementById('filtroStatus').value;
+                    this.aplicarFiltros();
+                });
+
+                document.getElementById('filtroPrioridade').addEventListener('change', () => {
+                    this.filtros.prioridade = document.getElementById('filtroPrioridade').value;
+                    this.aplicarFiltros();
+                });
+            }
+
+            // 🗓️ RENDERIZAR GRID SEMANAL DINÂMICO
+            renderizarGrid() {
+                const grid = document.getElementById('weeklyGrid');
+                const tarefasFiltradas = this.filtrarTarefas();
+
+                if (tarefasFiltradas.length === 0) {
+                    // Estado vazio
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <div class="empty-title">Sua agenda está limpa</div>
+                            <div class="empty-description">
+                                Comece criando sua primeira tarefa para ver o grid semanal em ação.
+                            </div>
+                            <button class="btn btn-primary" onclick="novaTarefa()">
+                                ➕ Criar Primeira Tarefa
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Renderizar grid completo
+                this.renderizarGridCompleto(grid, tarefasFiltradas);
+            }
+
+            // 🗓️ RENDERIZAR GRID COMPLETO
+            renderizarGridCompleto(grid, tarefas) {
+                const hoje = new Date();
+                const inicioSemana = new Date(this.semanaAtual);
+                inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
+
+                // HTML básico do grid
+                grid.innerHTML = `
+                    <!-- Coluna de horários -->
+                    <div class="time-column">
+                        <div style="font-size: 12px; color: var(--biapo-red); font-weight: 700;">HORÁRIOS</div>
+                    </div>
+
+                    <!-- Cabeçalhos dos dias -->
+                    ${this.gerarCabecalhosDias(inicioSemana, hoje)}
+
+                    <!-- Slots de horário -->
+                    <div class="time-slots">
+                        ${Array.from({length: 10}, (_, i) => {
+                            const hora = String(8 + i).padStart(2, '0');
+                            return `<div class="time-slot">${hora}:00</div>`;
+                        }).join('')}
+                    </div>
+
+                    <!-- Colunas dos dias -->
+                    ${this.gerarColunasDias(inicioSemana, tarefas)}
+                `;
+
+                // Adicionar linha do tempo se for hoje
+                this.adicionarLinhaTempo(grid);
+            }
+
+            // 📅 GERAR CABEÇALHOS DOS DIAS
+            gerarCabecalhosDias(inicioSemana, hoje) {
+                const diasSemana = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+                let html = '';
+
+                for (let i = 0; i < 7; i++) {
+                    const dia = new Date(inicioSemana);
+                    dia.setDate(inicioSemana.getDate() + i);
+                    
+                    const ehHoje = dia.toDateString() === hoje.toDateString();
+                    const tarefasDia = this.obterTarefasDoDia(dia);
+
+                    html += `
+                        <div class="day-header ${ehHoje ? 'today' : ''}">
+                            <div class="day-name">${diasSemana[i]}</div>
+                            <div class="day-date">${dia.getDate()}</div>
+                            <div class="day-tasks-count">${tarefasDia.length} tarefas</div>
+                        </div>
+                    `;
+                }
+
+                return html;
+            }
+
+            // 📝 GERAR COLUNAS DOS DIAS
+            gerarColunasDias(inicioSemana, tarefas) {
+                let html = '';
+
+                for (let i = 0; i < 7; i++) {
+                    const dia = new Date(inicioSemana);
+                    dia.setDate(inicioSemana.getDate() + i);
+                    const tarefasDia = this.obterTarefasDoDia(dia, tarefas);
+
+                    html += `
+                        <div class="day-column">
+                            ${Array.from({length: 10}, (_, h) => {
+                                const hora = 8 + h;
+                                const tarefasHora = tarefasDia.filter(t => {
+                                    const horarioTarefa = parseInt(t.horario?.split(':')[0] || '0');
+                                    return horarioTarefa === hora;
+                                });
+
+                                return `
+                                    <div class="hour-slot" onclick="criarTarefaRapida('${dia.toISOString().split('T')[0]}', '${String(hora).padStart(2, '0')}:00')">
+                                        ${tarefasHora.map(tarefa => this.renderizarTarefaGrid(tarefa)).join('')}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                }
+
+                return html;
+            }
+
+            // 📋 RENDERIZAR TAREFA NO GRID
+            renderizarTarefaGrid(tarefa) {
+                const tipoClass = tarefa.tipo || 'pessoal';
+                const prioridade = tarefa.prioridade || 'media';
+
+                return `
+                    <div class="task-item ${tipoClass} fade-in" onclick="editarTarefa(${tarefa.id})">
+                        <div class="task-time">${tarefa.horario || ''}</div>
+                        <div class="task-title">${tarefa.titulo}</div>
+                        ${tarefa.descricao ? `<div class="task-description">${tarefa.descricao}</div>` : ''}
+                        <div class="task-meta">
+                            <div class="task-priority ${prioridade}">${prioridade}</div>
+                            <div class="task-indicators">
+                                ${tarefa.sincronizada ? '<span class="task-indicator">🔄</span>' : ''}
+                                ${tarefa.promovido ? '<span class="task-indicator">⬆️</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 📅 OBTER TAREFAS DO DIA
+            obterTarefasDoDia(dia, tarefas = null) {
+                const tarefasParaFiltrar = tarefas || this.tarefas;
+                const dataStr = dia.toISOString().split('T')[0];
+                const diaSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'][dia.getDay()];
+
+                return tarefasParaFiltrar.filter(tarefa => {
+                    // Tarefas com data específica
+                    if (tarefa.dataInicio === dataStr || tarefa.dataFim === dataStr) {
+                        return true;
+                    }
+                    
+                    // Tarefas da agenda semanal (recorrentes)
+                    if (tarefa.agendaSemanal && tarefa.diaSemana === diaSemana) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+            }
+
+            // 🕐 ADICIONAR LINHA DO TEMPO
+            adicionarLinhaTempo(grid) {
+                const agora = new Date();
+                const hora = agora.getHours();
+                const minuto = agora.getMinutes();
+
+                if (hora >= 8 && hora <= 17) {
+                    const posicao = ((hora - 8) * 60) + minuto;
+                    const linha = document.createElement('div');
+                    linha.className = 'current-time-line';
+                    linha.style.top = `${posicao}px`;
+                    
+                    // Adicionar à coluna do dia atual
+                    const hoje = new Date();
+                    const diaHoje = hoje.getDay();
+                    const colunaHoje = grid.querySelector(`.day-column:nth-child(${diaHoje + 2})`);
+                    if (colunaHoje) {
+                        colunaHoje.appendChild(linha);
+                    }
+                }
+            }
+
+            // 📊 ATUALIZAR DISPLAY DA SEMANA
+            atualizarSemanaDisplay() {
+                const inicioSemana = new Date(this.semanaAtual);
+                inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
+                
+                const fimSemana = new Date(inicioSemana);
+                fimSemana.setDate(inicioSemana.getDate() + 6);
+
+                const display = `${inicioSemana.getDate()} - ${fimSemana.getDate()} ${fimSemana.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
+                document.getElementById('currentWeekDisplay').textContent = display;
+            }
+
+            // 🔍 FILTRAR TAREFAS
+            filtrarTarefas() {
+                return this.tarefas.filter(tarefa => {
+                    if (this.filtros.tipo !== 'todos' && tarefa.tipo !== this.filtros.tipo) return false;
+                    if (this.filtros.status !== 'todos' && tarefa.status !== this.filtros.status) return false;
+                    if (this.filtros.prioridade !== 'todos' && tarefa.prioridade !== this.filtros.prioridade) return false;
+                    return true;
+                });
+            }
+
+            // 📊 ATUALIZAR ESTATÍSTICAS
+            atualizarEstatisticas() {
+                const tarefasFiltradas = this.filtrarTarefas();
+                const pendentes = tarefasFiltradas.filter(t => t.status === 'pendente').length;
+                const andamento = tarefasFiltradas.filter(t => t.status === 'andamento').length;
+                const concluidas = tarefasFiltradas.filter(t => t.status === 'concluida').length;
+                const produtividade = tarefasFiltradas.length > 0 ? Math.round((concluidas / tarefasFiltradas.length) * 100) : 0;
+
+                document.getElementById('totalTasks').textContent = tarefasFiltradas.length;
+                document.getElementById('pendingTasks').textContent = pendentes;
+                document.getElementById('inProgressTasks').textContent = andamento;
+                document.getElementById('completedTasksTotal').textContent = concluidas;
+                document.getElementById('productivityScore').textContent = produtividade + '%';
+            }
+
+            // 🔄 APLICAR FILTROS
+            aplicarFiltros() {
+                this.renderizarGrid();
+                this.atualizarEstatisticas();
+            }
+
+            // 📅 NAVEGAR SEMANA
+            navegarSemana(direcao) {
+                this.semanaAtual.setDate(this.semanaAtual.getDate() + (direcao * 7));
+                this.atualizarSemanaDisplay();
+                this.renderizarGrid();
+            }
+
+            // 🏠 IR PARA HOJE
+            irParaHoje() {
+                this.semanaAtual = new Date();
+                this.atualizarSemanaDisplay();
+                this.renderizarGrid();
+            }
+        }
+
+        // 🚀 INSTÂNCIA GLOBAL
+        let agendaDedicada;
+
+        // 📋 FUNÇÕES GLOBAIS DA INTERFACE
+        function alternarVisualizacao(tipo) {
+            agendaDedicada.visualizacaoAtiva = tipo;
+            
+            // Atualizar tabs
+            document.querySelectorAll('.view-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${tipo}"]`).classList.add('active');
+
+            // Por enquanto, só temos grid - lista será implementada depois
+            if (tipo === 'list') {
+                alert('📋 Visualização em lista será implementada em breve. Use o grid semanal por enquanto!');
+                // Voltar para grid
+                document.querySelector('[data-view="grid"]').classList.add('active');
+                document.querySelector('[data-view="list"]').classList.remove('active');
+            }
+        }
+
+        function aplicarFiltros() {
+            agendaDedicada.aplicarFiltros();
+        }
+
+        function navegarSemana(direcao) {
+            agendaDedicada.navegarSemana(direcao);
+        }
+
+        function irParaHoje() {
+            agendaDedicada.irParaHoje();
+        }
+
+        function novaTarefa() {
+            if (typeof PersonalAgenda !== 'undefined' && typeof PersonalAgenda.mostrarNovaTarefa === 'function') {
+                PersonalAgenda.mostrarNovaTarefa();
+            } else {
+                alert('🆕 Abrindo formulário de nova tarefa...');
+                // Implementar modal simples ou redirecionar
+            }
+        }
+
+        function editarTarefa(id) {
+            if (typeof PersonalAgenda !== 'undefined') {
+                PersonalAgenda.editarTarefa(id);
+            } else {
+                alert(`✏️ Editando tarefa ID: ${id}`);
+            }
+        }
+
+        function criarTarefaRapida(data, horario) {
+            console.log(`🚀 Criação rápida: ${data} às ${horario}`);
+            // Implementar criação rápida
+            if (typeof PersonalAgenda !== 'undefined') {
+                PersonalAgenda.mostrarNovaTarefa('pessoal');
+            } else {
+                novaTarefa();
+            }
+        }
+
+        function sincronizarDados() {
+            if (typeof HybridSync !== 'undefined') {
+                HybridSync.sincronizarEventosParaTarefas();
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.success('🔄 Sincronização iniciada!');
+                } else {
+                    alert('🔄 Sincronização iniciada!');
+                }
+            } else {
+                alert('🔄 Sincronizando dados...');
+            }
+        }
+
+        function exportarAgenda() {
+            alert('📄 Exportando agenda em PDF...');
+        }
+
+        function mostrarRelatorios() {
+            alert('📊 Abrindo relatórios...');
+        }
+
+        function voltarParaSistema() {
+            window.location.href = 'index.html';
+        }
+
+        // 🚀 INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📅 Inicializando Agenda Dedicada Integrada...');
+            
+            // Aguardar carregamento dos módulos
+            setTimeout(() => {
+                agendaDedicada = new AgendaDedicadaIntegrada();
+            }, 1000);
+        });
+
+        // ⏰ ATUALIZAR LINHA DO TEMPO A CADA MINUTO
+        setInterval(() => {
+            if (agendaDedicada) {
+                agendaDedicada.renderizarGrid();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
