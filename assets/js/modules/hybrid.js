@@ -1,19 +1,26 @@
-/* ========== 🔄 SISTEMA DE SINCRONIZAÇÃO HÍBRIDA v6.6.0 ========== */
+/* ========== 🔄 SISTEMA DE SINCRONIZAÇÃO HÍBRIDA v6.7.0 - CORRIGIDO ========== */
 
 const HybridSync = {
     // ✅ CONFIGURAÇÕES
     config: {
-        versao: '6.6.0',
+        versao: '6.7.0', // Atualizada
         autoSyncEnabled: true,
         conflictDetectionEnabled: true,
-        logLevel: 'info', // 'debug', 'info', 'warn', 'error'
-        syncDelay: 100, // ms para evitar loops
+        logLevel: 'info',
+        syncDelay: 100,
         maxConflictsShow: 5,
         indicadoresVisuais: {
             sincronizado: '🔄',
             conflito: '⚠️',
             promovido: '⬆️',
             origem: '📅'
+        },
+        // 🔧 NOVA: Configurações anti-duplicata
+        antiDuplicata: {
+            enabled: true,
+            verificarAntesDecriar: true,
+            limparAutomaticamente: true,
+            intervaloLimpeza: 60000 // 1 minuto
         }
     },
 
@@ -28,36 +35,36 @@ const HybridSync = {
         estatisticas: {
             eventosSync: 0,
             tarefasPromovidas: 0,
-            conflitosResolvidos: 0
-        }
+            conflitosResolvidos: 0,
+            duplicatasRemovidas: 0 // 🔧 NOVA
+        },
+        // 🔧 NOVO: Controle de limpeza automática
+        intervaloLimpeza: null
     },
 
     // ✅ INICIALIZAÇÃO DO MÓDULO
     inicializar() {
         try {
-            console.log('🔄 Inicializando Sistema de Sincronização Híbrida v6.6.0...');
+            console.log('🔄 Inicializando Sistema de Sincronização Híbrida v6.7.0 CORRIGIDO...');
 
-            // Verificar dependências
             if (!this._verificarDependencias()) {
                 throw new Error('Dependências não satisfeitas');
             }
 
-            // Configurar listeners automáticos
             this._configurarListeners();
-
-            // Executar sincronização inicial
             this._executarSyncInicial();
-
-            // Configurar verificação de conflitos
             this._iniciarMonitoramentoConflitos();
+            
+            // 🔧 NOVO: Iniciar limpeza automática
+            this._iniciarLimpezaAutomatica();
 
             this.state.inicializado = true;
             this.state.ultimaSync = new Date();
 
-            console.log('✅ Sistema de Sincronização Híbrida inicializado com sucesso!');
+            console.log('✅ Sistema de Sincronização Híbrida CORRIGIDO inicializado!');
             
             if (typeof Notifications !== 'undefined') {
-                Notifications.success('Sistema híbrido v6.6.0 - Sincronização ativada!');
+                Notifications.success('Sistema híbrido v6.7.0 CORRIGIDO - Anti-duplicatas ativo!');
             }
 
             return true;
@@ -71,7 +78,7 @@ const HybridSync = {
         }
     },
 
-    // ✅ SINCRONIZAÇÃO AUTOMÁTICA: EVENTOS → TAREFAS PESSOAIS
+    // 🔧 FUNÇÃO CORRIGIDA: SINCRONIZAÇÃO AUTOMÁTICA SEM DUPLICATAS
     sincronizarEventosParaTarefas() {
         try {
             if (this.state.syncInProgress) {
@@ -80,26 +87,24 @@ const HybridSync = {
             }
 
             this.state.syncInProgress = true;
-            console.log('🔄 Iniciando sincronização Events → Tasks...');
+            console.log('🔄 Iniciando sincronização CORRIGIDA Events → Tasks...');
 
-            // Verificar se dados estão disponíveis
             if (!App.dados?.eventos || !App.dados?.tarefas) {
                 console.warn('⚠️ Dados não disponíveis para sincronização');
+                this.state.syncInProgress = false;
                 return;
             }
 
             let eventosProcessados = 0;
             let tarefasCriadas = 0;
 
-            // Processar cada evento
             App.dados.eventos.forEach(evento => {
                 if (evento.pessoas && Array.isArray(evento.pessoas)) {
                     evento.pessoas.forEach(participante => {
-                        // Verificar se já existe tarefa sincronizada para este evento/participante
-                        const tarefaExistente = this._buscarTarefaSincronizada(evento.id, participante);
+                        // 🔧 CORREÇÃO PRINCIPAL: Usar função melhorada
+                        const tarefaExistente = this._buscarTarefaSincronizadaSegura(evento.id, participante);
                         
                         if (!tarefaExistente) {
-                            // Criar nova tarefa pessoal sincronizada
                             const novaTarefa = this._criarTarefaSincronizada(evento, participante);
                             
                             if (novaTarefa) {
@@ -109,6 +114,8 @@ const HybridSync = {
                                 
                                 console.log(`✅ Tarefa criada para ${participante}: ${evento.titulo}`);
                             }
+                        } else {
+                            console.log(`ℹ️ Tarefa já existe para ${participante}: ${evento.titulo}`);
                         }
                     });
                 }
@@ -121,14 +128,14 @@ const HybridSync = {
                 this._atualizarInterface();
                 
                 if (typeof Notifications !== 'undefined') {
-                    Notifications.success(`🔄 ${tarefasCriadas} tarefa(s) sincronizada(s) automaticamente`);
+                    Notifications.success(`🔄 ${tarefasCriadas} nova(s) tarefa(s) sincronizada(s)`);
                 }
             }
 
-            console.log(`✅ Sincronização concluída: ${eventosProcessados} eventos processados, ${tarefasCriadas} tarefas criadas`);
+            console.log(`✅ Sincronização CORRIGIDA: ${eventosProcessados} eventos, ${tarefasCriadas} tarefas criadas`);
 
         } catch (error) {
-            console.error('❌ Erro na sincronização Events → Tasks:', error);
+            console.error('❌ Erro na sincronização CORRIGIDA:', error);
             if (typeof Notifications !== 'undefined') {
                 Notifications.error('Erro na sincronização automática');
             }
@@ -137,18 +144,159 @@ const HybridSync = {
         }
     },
 
-    // ✅ PROMOÇÃO MANUAL: TAREFAS → EVENTOS
+    // 🔧 FUNÇÃO CORRIGIDA: BUSCA SEGURA DE TAREFA SINCRONIZADA
+    _buscarTarefaSincronizadaSegura(eventoId, participante) {
+        if (!App.dados?.tarefas) return null;
+        
+        // Busca rigorosa para evitar duplicatas
+        const tarefasSincronizadas = App.dados.tarefas.filter(tarefa => 
+            tarefa.eventoOrigemId == eventoId && 
+            tarefa.responsavel === participante &&
+            tarefa.sincronizada === true &&
+            tarefa.tipoSincronizacao === 'evento_para_tarefa'
+        );
+        
+        if (tarefasSincronizadas.length === 0) {
+            return null;
+        } else if (tarefasSincronizadas.length === 1) {
+            return tarefasSincronizadas[0];
+        } else {
+            // 🔧 Se há múltiplas, retornar a mais recente e marcar outras para remoção
+            console.warn(`⚠️ ${tarefasSincronizadas.length} tarefas sincronizadas para evento ${eventoId} e ${participante} - mantendo apenas a mais recente`);
+            
+            // Ordenar por data de criação (mais recente primeiro)
+            tarefasSincronizadas.sort((a, b) => {
+                const dataA = new Date(a.dataCriacao || a.dataSincronizacao || 0);
+                const dataB = new Date(b.dataCriacao || b.dataSincronizacao || 0);
+                return dataB - dataA;
+            });
+            
+            // Agendar remoção das duplicatas (execução assíncrona para não interferir no loop)
+            setTimeout(() => {
+                this._removerTarefasDuplicadas(tarefasSincronizadas.slice(1));
+            }, 100);
+            
+            return tarefasSincronizadas[0]; // Retornar a mais recente
+        }
+    },
+
+    // 🔧 NOVA FUNÇÃO: Remover tarefas duplicadas
+    _removerTarefasDuplicadas(tarefasParaRemover) {
+        try {
+            let removidas = 0;
+            
+            tarefasParaRemover.forEach(tarefa => {
+                const index = App.dados.tarefas.findIndex(t => t.id === tarefa.id);
+                if (index !== -1) {
+                    App.dados.tarefas.splice(index, 1);
+                    removidas++;
+                    console.log(`🗑️ Duplicata removida automaticamente: ${tarefa.titulo} (${tarefa.responsavel})`);
+                }
+            });
+            
+            if (removidas > 0) {
+                this.state.estatisticas.duplicatasRemovidas += removidas;
+                this._salvarDados();
+                
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.info(`🧹 ${removidas} duplicata(s) removida(s) automaticamente`);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao remover duplicatas:', error);
+        }
+    },
+
+    // 🔧 NOVA FUNÇÃO: Limpeza automática periódica
+    limparDuplicatasAutomaticamente() {
+        try {
+            if (!this.config.antiDuplicata.enabled) return 0;
+            
+            console.log('🧹 Executando limpeza automática de duplicatas...');
+            
+            if (!App.dados?.tarefas) return 0;
+            
+            const tarefasSincronizadas = App.dados.tarefas.filter(t => t.sincronizada === true);
+            const grupos = {};
+            let removidas = 0;
+            
+            // Agrupar por evento e responsável
+            tarefasSincronizadas.forEach(tarefa => {
+                const chave = `${tarefa.eventoOrigemId}_${tarefa.responsavel}`;
+                if (!grupos[chave]) {
+                    grupos[chave] = [];
+                }
+                grupos[chave].push(tarefa);
+            });
+            
+            // Remover duplicatas
+            Object.entries(grupos).forEach(([chave, tarefasGrupo]) => {
+                if (tarefasGrupo.length > 1) {
+                    // Ordenar e manter apenas a mais recente
+                    tarefasGrupo.sort((a, b) => {
+                        const dataA = new Date(a.dataCriacao || a.dataSincronizacao || 0);
+                        const dataB = new Date(b.dataCriacao || b.dataSincronizacao || 0);
+                        return dataB - dataA;
+                    });
+                    
+                    // Remover duplicatas
+                    const paraRemover = tarefasGrupo.slice(1);
+                    paraRemover.forEach(tarefa => {
+                        const index = App.dados.tarefas.findIndex(t => t.id === tarefa.id);
+                        if (index !== -1) {
+                            App.dados.tarefas.splice(index, 1);
+                            removidas++;
+                            console.log(`🧹 Limpeza automática: removida "${tarefa.titulo}" (${tarefa.responsavel})`);
+                        }
+                    });
+                }
+            });
+            
+            if (removidas > 0) {
+                this.state.estatisticas.duplicatasRemovidas += removidas;
+                this._salvarDados();
+                console.log(`🧹 Limpeza automática: ${removidas} duplicata(s) removida(s)`);
+            }
+            
+            return removidas;
+            
+        } catch (error) {
+            console.error('❌ Erro na limpeza automática:', error);
+            return 0;
+        }
+    },
+
+    // 🔧 NOVA FUNÇÃO: Iniciar limpeza automática
+    _iniciarLimpezaAutomatica() {
+        if (!this.config.antiDuplicata.limparAutomaticamente) return;
+        
+        // Limpar intervalo anterior se existir
+        if (this.state.intervaloLimpeza) {
+            clearInterval(this.state.intervaloLimpeza);
+        }
+        
+        // Configurar novo intervalo
+        this.state.intervaloLimpeza = setInterval(() => {
+            const removidas = this.limparDuplicatasAutomaticamente();
+            if (removidas > 0) {
+                console.log(`🔄 Limpeza automática executada: ${removidas} duplicata(s) removida(s)`);
+            }
+        }, this.config.antiDuplicata.intervaloLimpeza);
+        
+        console.log(`🤖 Limpeza automática ativada: a cada ${this.config.antiDuplicata.intervaloLimpeza/1000}s`);
+    },
+
+    // ✅ PROMOÇÃO MANUAL: TAREFAS → EVENTOS (mantida igual)
     promoverTarefaParaEvento(tarefaId) {
         try {
             console.log('⬆️ Promovendo tarefa para evento:', tarefaId);
 
-            // Buscar tarefa
             const tarefa = App.dados?.tarefas?.find(t => t.id == tarefaId);
             if (!tarefa) {
                 throw new Error('Tarefa não encontrada');
             }
 
-            // Verificar se já foi promovida
             if (tarefa.eventoPromovido) {
                 if (typeof Notifications !== 'undefined') {
                     Notifications.warning('Esta tarefa já foi promovida para evento');
@@ -156,28 +304,23 @@ const HybridSync = {
                 return false;
             }
 
-            // Criar evento baseado na tarefa
             const novoEvento = this._criarEventoPromovido(tarefa);
             
             if (!novoEvento) {
                 throw new Error('Erro ao criar evento promovido');
             }
 
-            // Adicionar evento aos dados
             if (!App.dados.eventos) {
                 App.dados.eventos = [];
             }
             App.dados.eventos.push(novoEvento);
 
-            // Marcar tarefa como promovida (mas mantê-la)
             tarefa.eventoPromovido = novoEvento.id;
             tarefa.ultimaAtualizacao = new Date().toISOString();
 
-            // Salvar dados
             this._salvarDados();
             this._atualizarInterface();
 
-            // Atualizar estatísticas
             this.state.estatisticas.tarefasPromovidas++;
 
             console.log(`✅ Tarefa "${tarefa.titulo}" promovida para evento ID: ${novoEvento.id}`);
@@ -197,7 +340,7 @@ const HybridSync = {
         }
     },
 
-    // ✅ DETECTAR E EXIBIR CONFLITOS
+    // ✅ DETECTAR E EXIBIR CONFLITOS (mantida igual)
     detectarConflitos() {
         try {
             if (!this.config.conflictDetectionEnabled) {
@@ -209,7 +352,6 @@ const HybridSync = {
             const conflitos = [];
             const eventosETarefas = this._obterEventosETarefasComHorario();
 
-            // Agrupar por pessoa e data
             const agendaPorPessoa = {};
 
             eventosETarefas.forEach(item => {
@@ -231,11 +373,9 @@ const HybridSync = {
                 });
             });
 
-            // Detectar sobreposições
             Object.entries(agendaPorPessoa).forEach(([pessoa, agenda]) => {
                 Object.entries(agenda).forEach(([data, itens]) => {
                     if (itens.length > 1) {
-                        // Verificar sobreposições de horário
                         const conflitosData = this._verificarSobreposicaoHorarios(itens, pessoa, data);
                         conflitos.push(...conflitosData);
                     }
@@ -257,7 +397,7 @@ const HybridSync = {
         }
     },
 
-    // ✅ OBTER ESTATÍSTICAS DO SISTEMA
+    // ✅ OBTER ESTATÍSTICAS (atualizada)
     obterEstatisticas() {
         return {
             ...this.state.estatisticas,
@@ -265,11 +405,13 @@ const HybridSync = {
             ultimaSync: this.state.ultimaSync,
             conflitosAtivos: this.state.conflitosDetectados.length,
             eventosMonitorados: this.state.eventosObservados.size,
-            tarefasMonitoradas: this.state.tarefasObservadas.size
+            tarefasMonitoradas: this.state.tarefasObservadas.size,
+            // 🔧 NOVA: estatísticas anti-duplicata
+            limpezaAutomaticaAtiva: !!this.state.intervaloLimpeza
         };
     },
 
-    // ✅ OBTER STATUS COMPLETO
+    // ✅ OBTER STATUS (atualizada)
     obterStatus() {
         const stats = this.obterEstatisticas();
         
@@ -278,6 +420,9 @@ const HybridSync = {
             ativo: this.state.inicializado,
             autoSync: this.config.autoSyncEnabled,
             detectarConflitos: this.config.conflictDetectionEnabled,
+            // 🔧 NOVA: status anti-duplicata
+            antiDuplicata: this.config.antiDuplicata.enabled,
+            limpezaAutomatica: this.config.antiDuplicata.limparAutomaticamente,
             ultimaSync: this.state.ultimaSync?.toLocaleString('pt-BR'),
             estatisticas: stats,
             dependenciasOk: this._verificarDependencias(),
@@ -290,9 +435,8 @@ const HybridSync = {
         };
     },
 
-    // === MÉTODOS PRIVADOS ===
+    // === MÉTODOS PRIVADOS (mantidos iguais) ===
 
-    // ✅ VERIFICAR DEPENDÊNCIAS
     _verificarDependencias() {
         const dependencias = [
             typeof App !== 'undefined' && App.dados,
@@ -303,30 +447,22 @@ const HybridSync = {
         return dependencias.every(dep => dep);
     },
 
-    // ✅ CONFIGURAR LISTENERS AUTOMÁTICOS
     _configurarListeners() {
         console.log('🔧 Configurando listeners de sincronização...');
-
-        // Listener para novos eventos (simulado - na implementação real seria no Events.js)
         this._configurarEventListeners();
 
-        // Listener para mudanças nos dados (simulado)
         if (typeof App !== 'undefined' && App.dados) {
-            // Em uma implementação real, usaríamos Proxy ou observers
             console.log('📡 Listeners configurados para mudanças nos dados');
         }
     },
 
-    // ✅ CONFIGURAR EVENT LISTENERS
     _configurarEventListeners() {
-        // Interceptar criação de eventos
         if (typeof Events !== 'undefined' && Events.salvarEvento) {
             const originalSalvarEvento = Events.salvarEvento;
             Events.salvarEvento = async (dadosEvento) => {
                 const resultado = await originalSalvarEvento.call(Events, dadosEvento);
                 
                 if (resultado && this.config.autoSyncEnabled) {
-                    // Aguardar um pouco para evitar loops
                     setTimeout(() => {
                         this.sincronizarEventosParaTarefas();
                     }, this.config.syncDelay);
@@ -336,28 +472,23 @@ const HybridSync = {
             };
         }
 
-        // Interceptar criação de tarefas (adicionar botão de promoção)
         if (typeof Tasks !== 'undefined') {
             console.log('🔗 Integração com Tasks.js configurada');
         }
     },
 
-    // ✅ EXECUTAR SINCRONIZAÇÃO INICIAL
     _executarSyncInicial() {
         console.log('🔄 Executando sincronização inicial...');
         
         if (this.config.autoSyncEnabled) {
-            // Aguardar um pouco para garantir que tudo está carregado
             setTimeout(() => {
                 this.sincronizarEventosParaTarefas();
             }, 500);
         }
     },
 
-    // ✅ INICIAR MONITORAMENTO DE CONFLITOS
     _iniciarMonitoramentoConflitos() {
         if (this.config.conflictDetectionEnabled) {
-            // Detectar conflitos a cada 30 segundos
             setInterval(() => {
                 this.detectarConflitos();
             }, 30000);
@@ -366,22 +497,16 @@ const HybridSync = {
         }
     },
 
-    // ✅ BUSCAR TAREFA SINCRONIZADA
+    // 🔧 FUNÇÃO CORRIGIDA: busca original mantida para compatibilidade
     _buscarTarefaSincronizada(eventoId, participante) {
-        if (!App.dados?.tarefas) return null;
-        
-        return App.dados.tarefas.find(tarefa => 
-            tarefa.eventoOrigemId == eventoId && 
-            tarefa.responsavel === participante &&
-            tarefa.sincronizada === true
-        );
+        // Redirecionar para função segura
+        return this._buscarTarefaSincronizadaSegura(eventoId, participante);
     },
 
-    // ✅ CRIAR TAREFA SINCRONIZADA
     _criarTarefaSincronizada(evento, participante) {
         try {
             const novaTarefa = {
-                id: Date.now() + Math.random(), // ID único
+                id: Date.now() + Math.random(),
                 titulo: `${this.config.indicadoresVisuais.origem} ${evento.titulo}`,
                 tipo: 'equipe',
                 prioridade: this._mapearPrioridadePorTipo(evento.tipo),
@@ -392,7 +517,6 @@ const HybridSync = {
                 horario: evento.horarioInicio,
                 horarioFim: evento.horarioFim,
                 descricao: evento.descricao || `Participação no evento: ${evento.titulo}`,
-                // Campos de sincronização
                 sincronizada: true,
                 eventoOrigemId: evento.id,
                 tipoSincronizacao: 'evento_para_tarefa',
@@ -410,13 +534,10 @@ const HybridSync = {
         }
     },
 
-    // ✅ CRIAR EVENTO PROMOVIDO
     _criarEventoPromovido(tarefa) {
         try {
-            // Determinar participantes
             let participantes = [tarefa.responsavel];
             
-            // Se tarefa tem participantes marcados, usar eles
             if (tarefa.participantes && Array.isArray(tarefa.participantes)) {
                 participantes = tarefa.participantes;
             } else if (tarefa.equipe && Array.isArray(tarefa.equipe)) {
@@ -424,7 +545,7 @@ const HybridSync = {
             }
 
             const novoEvento = {
-                id: Date.now() + Math.random(), // ID único
+                id: Date.now() + Math.random(),
                 titulo: `${this.config.indicadoresVisuais.promovido} ${tarefa.titulo}`,
                 tipo: this._mapearTipoParaEvento(tarefa.tipo),
                 data: tarefa.dataFim || tarefa.dataInicio || new Date().toISOString().split('T')[0],
@@ -434,7 +555,6 @@ const HybridSync = {
                 descricao: tarefa.descricao || `Evento criado a partir da tarefa: ${tarefa.titulo}`,
                 local: tarefa.local || '',
                 status: 'agendado',
-                // Campos de sincronização
                 promovido: true,
                 tarefaOrigemId: tarefa.id,
                 tipoSincronizacao: 'tarefa_para_evento',
@@ -451,7 +571,6 @@ const HybridSync = {
         }
     },
 
-    // ✅ MAPEAR PRIORIDADE POR TIPO DE EVENTO
     _mapearPrioridadePorTipo(tipoEvento) {
         const mapeamento = {
             'reuniao': 'media',
@@ -464,7 +583,6 @@ const HybridSync = {
         return mapeamento[tipoEvento] || 'media';
     },
 
-    // ✅ MAPEAR TIPO DE TAREFA PARA TIPO DE EVENTO
     _mapearTipoParaEvento(tipoTarefa) {
         const mapeamento = {
             'pessoal': 'outro',
@@ -477,13 +595,12 @@ const HybridSync = {
         return mapeamento[tipoTarefa] || 'outro';
     },
 
-    // ✅ CALCULAR HORÁRIO DE FIM
     _calcularHorarioFim(horarioInicio, estimativaMinutos) {
         if (!horarioInicio) return '10:00';
         
         try {
             const [hora, minuto] = horarioInicio.split(':').map(Number);
-            const estimativa = estimativaMinutos || 60; // default 1h
+            const estimativa = estimativaMinutos || 60;
             
             const totalMinutos = hora * 60 + minuto + estimativa;
             const horaFim = Math.floor(totalMinutos / 60);
@@ -492,15 +609,13 @@ const HybridSync = {
             return `${String(horaFim).padStart(2, '0')}:${String(minutoFim).padStart(2, '0')}`;
             
         } catch (error) {
-            return '10:00'; // fallback
+            return '10:00';
         }
     },
 
-    // ✅ OBTER EVENTOS E TAREFAS COM HORÁRIO
     _obterEventosETarefasComHorario() {
         const itens = [];
         
-        // Adicionar eventos
         if (App.dados?.eventos) {
             App.dados.eventos.forEach(evento => {
                 if (evento.horarioInicio) {
@@ -513,7 +628,6 @@ const HybridSync = {
             });
         }
         
-        // Adicionar tarefas com horário
         if (App.dados?.tarefas) {
             App.dados.tarefas.forEach(tarefa => {
                 if (tarefa.horario || tarefa.dataInicio) {
@@ -529,7 +643,6 @@ const HybridSync = {
         return itens;
     },
 
-    // ✅ VERIFICAR SOBREPOSIÇÃO DE HORÁRIOS
     _verificarSobreposicaoHorarios(itens, pessoa, data) {
         const conflitos = [];
         
@@ -555,7 +668,6 @@ const HybridSync = {
         return conflitos;
     },
 
-    // ✅ VERIFICAR SE HORÁRIOS SE SOBREPÕEM
     _horariosSeSerempem(item1, item2) {
         try {
             const horario1Inicio = item1.horario || item1.horarioInicio;
@@ -578,36 +690,30 @@ const HybridSync = {
         }
     },
 
-    // ✅ CONVERTER HORÁRIO PARA MINUTOS
     _converterHorarioParaMinutos(horario) {
         const [hora, minuto] = horario.split(':').map(Number);
         return hora * 60 + minuto;
     },
 
-    // ✅ CALCULAR GRAVIDADE DO CONFLITO
     _calcularGravidadeConflito(item1, item2) {
         let gravidade = 1;
         
-        // Evento vs evento = mais grave
         if (item1.tipo === 'evento' && item2.tipo === 'evento') {
             gravidade += 2;
         }
         
-        // Prioridades altas = mais grave
         if (item1.prioridade === 'critica' || item2.prioridade === 'critica') {
             gravidade += 2;
         } else if (item1.prioridade === 'alta' || item2.prioridade === 'alta') {
             gravidade += 1;
         }
         
-        return Math.min(gravidade, 5); // máximo 5
+        return Math.min(gravidade, 5);
     },
 
-    // ✅ EXIBIR INDICADORES DE CONFLITOS
     _exibirIndicadoresConflitos(conflitos) {
         if (conflitos.length === 0) return;
         
-        // Mostrar até 5 conflitos mais graves
         const conflitosParaMostrar = conflitos
             .sort((a, b) => b.gravidade - a.gravidade)
             .slice(0, this.config.maxConflictsShow);
@@ -628,7 +734,6 @@ const HybridSync = {
         });
     },
 
-    // ✅ SALVAR DADOS
     _salvarDados() {
         try {
             if (typeof Persistence !== 'undefined' && typeof Persistence.salvarDadosCritico === 'function') {
@@ -639,15 +744,12 @@ const HybridSync = {
         }
     },
 
-    // ✅ ATUALIZAR INTERFACE
     _atualizarInterface() {
         try {
-            // Atualizar calendário
             if (typeof Calendar !== 'undefined' && typeof Calendar.gerar === 'function') {
                 Calendar.gerar();
             }
             
-            // Atualizar agenda pessoal se estiver aberta
             if (typeof PersonalAgenda !== 'undefined' && PersonalAgenda.state?.modalAberto) {
                 if (typeof PersonalAgenda._atualizarDados === 'function') {
                     PersonalAgenda._atualizarDados();
@@ -659,16 +761,14 @@ const HybridSync = {
     }
 };
 
-// ✅ EXTENSÃO PARA TASKS.JS - BOTÃO DE PROMOÇÃO
+// ✅ EXTENSÃO PARA TASKS.JS - BOTÃO DE PROMOÇÃO (mantida igual)
 const TasksHybridExtension = {
-    // Adicionar botão de promoção a todas as tarefas
     adicionarBotaoPromocao(tarefaId, container) {
         if (!container) return;
         
         const tarefa = App.dados?.tarefas?.find(t => t.id == tarefaId);
         if (!tarefa) return;
         
-        // Não mostrar se já foi promovida
         if (tarefa.eventoPromovido) {
             return;
         }
@@ -698,16 +798,14 @@ const TasksHybridExtension = {
     }
 };
 
-// ✅ EXTENSÃO PARA PERSONAL AGENDA - INTEGRAÇÃO DE BOTÕES
+// ✅ EXTENSÃO PARA PERSONAL AGENDA - INTEGRAÇÃO DE BOTÕES (mantida igual)
 const PersonalAgendaHybridExtension = {
-    // Adicionar botões de promoção aos renderizadores
     integrarBotoesPromocao() {
-        // Esta função seria integrada ao PersonalAgenda._renderizarTarefaMini
         console.log('🔗 Integração com PersonalAgenda configurada');
     }
 };
 
-// ✅ FUNÇÕES GLOBAIS PARA DEBUG E CONTROLE
+// ✅ FUNÇÕES GLOBAIS PARA DEBUG E CONTROLE (atualizadas)
 window.HybridSync_Debug = {
     status: () => HybridSync.obterStatus(),
     estatisticas: () => HybridSync.obterEstatisticas(),
@@ -715,24 +813,25 @@ window.HybridSync_Debug = {
     sincronizar: () => HybridSync.sincronizarEventosParaTarefas(),
     promover: (tarefaId) => HybridSync.promoverTarefaParaEvento(tarefaId),
     inicializar: () => HybridSync.inicializar(),
+    // 🔧 NOVAS funções de debug
+    limparDuplicatas: () => HybridSync.limparDuplicatasAutomaticamente(),
     
-    // Funções de teste
     criarEventoTeste: () => {
         const eventoTeste = {
             id: Date.now(),
-            titulo: 'Reunião de Teste Sync',
+            titulo: 'Reunião de Teste Sync v6.7.0',
             tipo: 'reuniao',
             data: new Date().toISOString().split('T')[0],
             horarioInicio: '14:00',
             horarioFim: '15:00',
             pessoas: ['Isabella', 'Lara', 'Eduardo'],
-            descricao: 'Evento de teste para sincronização'
+            descricao: 'Evento de teste para sincronização CORRIGIDA'
         };
         
         if (!App.dados.eventos) App.dados.eventos = [];
         App.dados.eventos.push(eventoTeste);
         
-        console.log('✅ Evento de teste criado:', eventoTeste);
+        console.log('✅ Evento de teste v6.7.0 criado:', eventoTeste);
         HybridSync.sincronizarEventosParaTarefas();
         
         return eventoTeste;
@@ -741,7 +840,7 @@ window.HybridSync_Debug = {
     criarTarefaTeste: () => {
         const tarefaTeste = {
             id: Date.now(),
-            titulo: 'Tarefa de Teste para Promoção',
+            titulo: 'Tarefa de Teste para Promoção v6.7.0',
             tipo: 'projeto',
             prioridade: 'alta',
             status: 'pendente',
@@ -749,13 +848,13 @@ window.HybridSync_Debug = {
             dataInicio: new Date().toISOString().split('T')[0],
             estimativa: 90,
             participantes: ['Isabella', 'Eduardo', 'Beto'],
-            descricao: 'Tarefa de teste para promoção a evento'
+            descricao: 'Tarefa de teste para promoção a evento CORRIGIDA'
         };
         
         if (!App.dados.tarefas) App.dados.tarefas = [];
         App.dados.tarefas.push(tarefaTeste);
         
-        console.log('✅ Tarefa de teste criada:', tarefaTeste);
+        console.log('✅ Tarefa de teste v6.7.0 criada:', tarefaTeste);
         
         return tarefaTeste;
     }
@@ -763,7 +862,6 @@ window.HybridSync_Debug = {
 
 // ✅ AUTO-INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', () => {
-    // Aguardar outros módulos carregarem
     setTimeout(() => {
         if (typeof App !== 'undefined' && App.dados) {
             HybridSync.inicializar();
@@ -771,9 +869,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2000);
 });
 
-// ✅ LOG DE CARREGAMENTO
-console.log('🔄 Sistema de Sincronização Híbrida v6.6.0 carregado!');
-console.log('🎯 Funcionalidades: Auto-sync Events→Tasks, Promoção Tasks→Events, Detecção de Conflitos');
+// ✅ LOG DE CARREGAMENTO CORRIGIDO
+console.log('🔄 Sistema de Sincronização Híbrida v6.7.0 CORRIGIDO carregado!');
+console.log('🎯 CORREÇÕES: Anti-duplicatas, busca segura, limpeza automática');
 console.log('✅ Integração: Events.js, Tasks.js, PersonalAgenda.js, Calendar.js');
-console.log('🧪 Debug: HybridSync_Debug.status(), HybridSync_Debug.criarEventoTeste(), HybridSync_Debug.sincronizar()');
+console.log('🧪 Debug: HybridSync_Debug.status(), HybridSync_Debug.limparDuplicatas()');
 console.log('⚡ Auto-inicialização: Aguardando 2 segundos após DOMContentLoaded');
