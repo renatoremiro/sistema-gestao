@@ -1,8 +1,8 @@
-/* ========== 🚀 CORE APP v6.3.0 - INTEGRAÇÃO CALENDAR.JS CORRIGIDA ========== */
+/* ========== 🚀 CORE APP v6.4.0 - LIMPO SEM DUPLICAÇÕES ========== */
 
 const App = {
     // ✅ VERSÃO E CONSTANTES
-    VERSAO_SISTEMA: '6.3.0',
+    VERSAO_SISTEMA: '6.4.0',
     VERSAO_DB: 6,
     INTERVALO_VERIFICACAO_PRAZOS: 3600000, // 1 hora
     MAX_EVENTOS_VISIVEIS: 5,
@@ -17,12 +17,11 @@ const App = {
         editandoAtividade: null,
         editandoEvento: null,
         pessoasSelecionadas: new Set(),
-        versaoSistema: '6.3.0',
+        versaoSistema: '6.4.0',
         usuarioEmail: null,
         usuarioNome: null,
         alertasPrazosExibidos: new Set(),
-        sistemaInicializado: false,
-        calendarCarregado: false // ✅ NOVO: tracking do calendar
+        sistemaInicializado: false
     },
 
     // ✅ VARIÁVEIS GLOBAIS
@@ -31,20 +30,16 @@ const App = {
     listenersDados: {},
     intervaloPrazos: null,
 
-    // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA - CORRIGIDA
+    // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA - LIMPA
     async inicializarSistema() {
         try {
-            console.log('🚀 Iniciando sistema v6.3.0...');
-            Helpers.performance.mark('inicializacao');
-
+            console.log('🚀 Iniciando sistema v6.4.0...');
+            
             // Verificar se já foi inicializado
             if (this.estadoSistema.sistemaInicializado) {
                 console.log('⚠️ Sistema já inicializado');
                 return;
             }
-
-            // Inicializar cache DOM
-            Helpers.initDOMCache();
 
             // Verificar conectividade Firebase
             const conectado = await this.verificarConectividade();
@@ -52,75 +47,31 @@ const App = {
                 Notifications.warning('Modo offline - algumas funcionalidades limitadas');
             }
 
-            // ✅ CORREÇÃO: Carregar dados ANTES de configurar interface
+            // Carregar dados ANTES de configurar interface
             await this.carregarDados();
 
             // Configurar interface
             this.configurarInterface();
 
-            // ✅ CORREÇÃO: Renderizar dashboard DEPOIS dos dados
+            // Renderizar dashboard DEPOIS dos dados
             this.renderizarDashboard();
 
             // Iniciar verificação de prazos
             this.iniciarVerificacaoPrazos();
 
-            // ✅ NOVO: Aguardar Calendar.js estar disponível e inicializar
-            this.aguardarEInicializarCalendar();
+            // ✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário
+            console.log('📅 Delegando controle total do calendário para Calendar.js');
 
             // Marcar como inicializado
             this.estadoSistema.sistemaInicializado = true;
 
-            const tempoInicializacao = Helpers.performance.measure('inicializacao');
-            console.log(`✅ Sistema inicializado em ${tempoInicializacao}ms`);
+            console.log(`✅ Sistema inicializado - Calendar.js assumiu controle do calendário`);
             Notifications.success('Sistema inicializado com sucesso!');
 
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
             Notifications.error('Erro ao inicializar sistema');
             this.mostrarErroInicializacao(error);
-        }
-    },
-
-    // ✅ NOVA FUNÇÃO: Aguardar e inicializar Calendar.js
-    aguardarEInicializarCalendar() {
-        console.log('📅 Aguardando Calendar.js estar disponível...');
-        
-        const tentarInicializar = () => {
-            if (typeof Calendar !== 'undefined' && this.dados) {
-                console.log('✅ Calendar.js disponível - inicializando...');
-                
-                // ✅ CORREÇÃO: Conectar estado do App ao Calendar
-                Calendar.config.mesAtual = this.estadoSistema.mesAtual;
-                Calendar.config.anoAtual = this.estadoSistema.anoAtual;
-                
-                // ✅ DELEGAÇÃO CORRETA: Usar Calendar.gerar() ao invés do método local
-                Calendar.gerar();
-                
-                this.estadoSistema.calendarCarregado = true;
-                console.log('📅 Calendar.js inicializado com sucesso!');
-                
-                return true;
-            }
-            return false;
-        };
-        
-        // Tentar imediatamente
-        if (!tentarInicializar()) {
-            // Se não conseguir, tentar a cada 100ms por até 5 segundos
-            let tentativas = 0;
-            const maxTentativas = 50;
-            
-            const interval = setInterval(() => {
-                tentativas++;
-                
-                if (tentarInicializar()) {
-                    clearInterval(interval);
-                } else if (tentativas >= maxTentativas) {
-                    clearInterval(interval);
-                    console.warn('⚠️ Calendar.js não pôde ser inicializado automaticamente');
-                    Notifications.warning('Módulo de calendário será carregado quando disponível');
-                }
-            }, 100);
         }
     },
 
@@ -141,7 +92,7 @@ const App = {
                 await this.salvarDados();
             }
 
-            // ✅ CORREÇÃO: Garantir estrutura de tarefas
+            // Garantir estrutura de tarefas
             if (!this.dados.tarefas) {
                 this.dados.tarefas = [];
                 console.log('📝 Estrutura de tarefas inicializada');
@@ -160,7 +111,6 @@ const App = {
                 Notifications.warning('Usando backup local - verifique conectividade');
             } else {
                 this.dados = DataStructure.inicializarDados();
-                // ✅ CORREÇÃO: Garantir estrutura de tarefas no fallback
                 if (!this.dados.tarefas) {
                     this.dados.tarefas = [];
                 }
@@ -185,8 +135,8 @@ const App = {
         // Configurar data atual
         this.atualizarDataAtual();
 
-        // Configurar mês/ano atual
-        this.atualizarMesAno();
+        // ✅ REMOVER: atualizarMesAno() - Calendar.js faz isso
+        // ✅ REMOVER: mudarMes() - Calendar.js controla
 
         // Configurar eventos globais
         this.configurarEventosGlobais();
@@ -208,8 +158,7 @@ const App = {
         // Atualizar estatísticas
         this.atualizarEstatisticas();
 
-        // ✅ CORREÇÃO: NÃO chamar gerarCalendario() aqui - será feito pelo Calendar.js
-        // this.gerarCalendario(); // ← REMOVIDO
+        // ✅ REMOVIDO: gerarCalendario() - Calendar.js controla 100%
 
         // Renderizar áreas
         this.renderizarAreas();
@@ -218,42 +167,30 @@ const App = {
         this.configurarBusca();
     },
 
-    // ✅ ATUALIZAR ESTATÍSTICAS
+    // ✅ ATUALIZAR ESTATÍSTICAS (mantido)
     atualizarEstatisticas() {
         if (!this.dados) return;
 
         const stats = DataStructure.calcularEstatisticas(this.dados);
-        const eventosDoMes = DataStructure.obterEventosDoMes(
-            this.dados, 
-            this.estadoSistema.mesAtual, 
-            this.estadoSistema.anoAtual
-        );
+        
+        // ✅ DELEGAÇÃO: usar Calendar.js para estatísticas do mês
+        let eventosDoMes = 0;
+        if (typeof Calendar !== 'undefined') {
+            const statsCalendar = Calendar.obterEstatisticasDoMes();
+            eventosDoMes = statsCalendar.totalEventos || 0;
+        }
 
         // Atualizar números
         this.atualizarElemento('statEmDia', stats.emDia);
         this.atualizarElemento('statAtencao', stats.atencao);
         this.atualizarElemento('statAtraso', stats.atraso);
-        this.atualizarElemento('statEventos', eventosDoMes.length);
+        this.atualizarElemento('statEventos', eventosDoMes);
 
         // Atualizar barras de progresso
-        const total = stats.total || 1; // Evitar divisão por zero
+        const total = stats.total || 1;
         this.atualizarProgresso('progressEmDia', (stats.emDia / total) * 100);
         this.atualizarProgresso('progressAtencao', (stats.atencao / total) * 100);
         this.atualizarProgresso('progressAtraso', (stats.atraso / total) * 100);
-    },
-
-    // ✅ MÉTODO CORRIGIDO: Delegar para Calendar.js
-    gerarCalendario() {
-        if (typeof Calendar !== 'undefined') {
-            console.log('📅 Delegando para Calendar.gerar()...');
-            Calendar.gerar();
-        } else {
-            console.warn('⚠️ Calendar.js ainda não disponível');
-            // Tentar novamente em 1 segundo
-            setTimeout(() => {
-                this.gerarCalendario();
-            }, 1000);
-        }
     },
 
     // ✅ RENDERIZAR ÁREAS DE TRABALHO
@@ -269,7 +206,7 @@ const App = {
         });
     },
 
-    // ✅ CRIAR CARD DE ÁREA
+    // ✅ CRIAR CARD DE ÁREA (mantido)
     criarCardArea(chave, area) {
         const card = document.createElement('div');
         card.className = 'card area-card';
@@ -307,7 +244,7 @@ const App = {
         return card;
     },
 
-    // ✅ CALCULAR ESTATÍSTICAS DA ÁREA
+    // ✅ CALCULAR ESTATÍSTICAS DA ÁREA (mantido)
     calcularStatsArea(area) {
         if (!area.atividades) {
             return { emDia: 0, atencao: 0, atraso: 0, total: 0 };
@@ -326,7 +263,7 @@ const App = {
         return stats;
     },
 
-    // ✅ NAVEGAÇÃO ENTRE TELAS
+    // ✅ NAVEGAÇÃO ENTRE TELAS (mantido)
     voltarDashboard() {
         document.getElementById('dashboardExecutivo').classList.remove('hidden');
         document.getElementById('painelArea').classList.add('hidden');
@@ -347,11 +284,10 @@ const App = {
 
     abrirArea(chaveArea) {
         this.estadoSistema.areaAtual = chaveArea;
-        // Implementação completa será no módulo de áreas
         console.log('🏢 Abrindo área:', chaveArea);
     },
 
-    // ✅ UTILITÁRIOS
+    // ✅ UTILITÁRIOS (mantidos)
     atualizarElemento(id, valor) {
         const elemento = document.getElementById(id);
         if (elemento) {
@@ -378,15 +314,6 @@ const App = {
         }
     },
 
-    atualizarMesAno() {
-        const mesAno = document.getElementById('mesAno');
-        if (mesAno) {
-            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            mesAno.textContent = `${meses[this.estadoSistema.mesAtual]} ${this.estadoSistema.anoAtual}`;
-        }
-    },
-
     atualizarBreadcrumb() {
         const breadcrumb = document.getElementById('breadcrumb');
         const breadcrumbPath = document.getElementById('breadcrumbPath');
@@ -410,7 +337,7 @@ const App = {
         breadcrumb.classList.remove('hidden');
     },
 
-    // ✅ CONFIGURAR EVENTOS GLOBAIS
+    // ✅ CONFIGURAR EVENTOS GLOBAIS (mantido)
     configurarEventosGlobais() {
         // Atalhos de teclado
         document.addEventListener('keydown', (e) => {
@@ -427,7 +354,7 @@ const App = {
         }
     },
 
-    // ✅ CONFIGURAR LISTENERS FIREBASE
+    // ✅ CONFIGURAR LISTENERS FIREBASE (atualizado)
     configurarListeners() {
         // Listener para mudanças nos dados
         this.listenersDados.principal = database.ref('dados').on('value', (snapshot) => {
@@ -446,7 +373,7 @@ const App = {
         });
     },
 
-    // ✅ VERIFICAÇÃO DE PRAZOS
+    // ✅ VERIFICAÇÃO DE PRAZOS (mantido)
     iniciarVerificacaoPrazos() {
         this.verificarPrazos();
         this.intervaloPrazos = setInterval(() => {
@@ -487,14 +414,13 @@ const App = {
         Notifications.mostrarNotificacao(mensagem, tipo, 8000);
     },
 
-    // ✅ MÉTODOS DELEGADOS AO CALENDAR.JS - CORRIGIDOS
+    // ✅ MÉTODOS AUXILIARES (mantidos)
     buscarGlobal() {
         console.log('🔍 Busca global - implementar no módulo de busca');
     },
 
     filtrarStatus(status, elemento) {
         console.log('🔽 Filtro:', status);
-        // Implementação no módulo de filtros
     },
 
     fecharTodosModals() {
@@ -503,48 +429,24 @@ const App = {
         });
     },
 
-    // ✅ CORREÇÃO CRÍTICA: Delegar para Calendar.js
+    // ✅ DELEGAÇÕES PARA OUTROS MÓDULOS - MANTIDAS
     mostrarDetalhesEvento(evento) {
         if (typeof Events !== 'undefined' && typeof Events.mostrarDetalhesEvento === 'function') {
             Events.mostrarDetalhesEvento(evento);
-        } else {
-            console.log('📅 Detalhes do evento:', evento);
-            Notifications.info('Módulo de eventos carregando...');
         }
     },
 
-    mostrarTodosEventosDia(data) {
-        if (typeof Calendar !== 'undefined' && typeof Calendar.mostrarTodosEventosDia === 'function') {
-            Calendar.mostrarTodosEventosDia(data);
-        } else {
-            console.log('📅 Todos eventos do dia:', data);
-            Notifications.info('Módulo de calendário carregando...');
-        }
-    },
+    // ✅ REMOVIDO: mudarMes() - Calendar.js controla 100%
+    // ✅ REMOVIDO: gerarCalendario() - Calendar.js controla 100%
+    // ✅ REMOVIDO: abrirDetalheDia() - Calendar.js controla 100%
 
-    abrirDetalheDia(data) {
-        // ✅ CORREÇÃO PRINCIPAL: Conectar ao Calendar.js real
-        if (typeof Calendar !== 'undefined' && typeof Calendar.mostrarTodosEventosDia === 'function') {
-            Calendar.mostrarTodosEventosDia(data);
-        } else {
-            console.log('📅 Detalhe do dia:', data);
-            Notifications.info('Módulo de calendário carregando...');
-            
-            // Tentar carregar quando disponível
-            setTimeout(() => {
-                this.abrirDetalheDia(data);
-            }, 500);
-        }
-    },
-
-    // ✅ SALVAMENTO DE DADOS (placeholder - será no módulo persistence)
+    // ✅ SALVAMENTO DE DADOS (placeholder)
     async salvarDados() {
         console.log('💾 Salvando dados...');
-        // Implementação no módulo de persistência
         return Promise.resolve();
     },
 
-    // ✅ TRATAMENTO DE ERROS
+    // ✅ TRATAMENTO DE ERROS (mantido)
     mostrarErroInicializacao(error) {
         const errorDiv = document.createElement('div');
         errorDiv.style.cssText = `
@@ -577,46 +479,16 @@ const App = {
         document.body.appendChild(errorDiv);
     },
 
-    // ✅ CONFIGURAÇÃO DE BUSCA
     configurarBusca() {
-        // Implementação básica - será expandida no módulo de busca
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.placeholder = 'Buscar atividades, pessoas, eventos...';
         }
     },
 
-    // ✅ NAVEGAÇÃO DE MÊS CORRIGIDA - Delegar para Calendar.js
-    mudarMes(direcao) {
-        // ✅ CORREÇÃO: Atualizar tanto App.js quanto Calendar.js
-        this.estadoSistema.mesAtual += direcao;
-        
-        if (this.estadoSistema.mesAtual > 11) {
-            this.estadoSistema.mesAtual = 0;
-            this.estadoSistema.anoAtual++;
-        } else if (this.estadoSistema.mesAtual < 0) {
-            this.estadoSistema.mesAtual = 11;
-            this.estadoSistema.anoAtual--;
-        }
-        
-        // Atualizar display
-        this.atualizarMesAno();
-        
-        // ✅ DELEGAÇÃO CORRETA: Usar Calendar.js para navegação
-        if (typeof Calendar !== 'undefined') {
-            Calendar.config.mesAtual = this.estadoSistema.mesAtual;
-            Calendar.config.anoAtual = this.estadoSistema.anoAtual;
-            Calendar.gerar();
-        }
-        
-        // Atualizar estatísticas
-        this.atualizarEstatisticas();
-    },
-
-    // ✅ NOVA FUNÇÃO: Verificar conectividade
+    // ✅ VERIFICAÇÃO DE CONECTIVIDADE (mantida)
     async verificarConectividade() {
         try {
-            // Implementação básica - será expandida
             return navigator.onLine;
         } catch (error) {
             console.warn('Erro ao verificar conectividade:', error);
@@ -624,12 +496,11 @@ const App = {
         }
     },
 
-    // ✅ NOVA FUNÇÃO: Status do sistema
+    // ✅ STATUS DO SISTEMA (atualizado)
     obterStatusSistema() {
         return {
             versao: this.VERSAO_SISTEMA,
             inicializado: this.estadoSistema.sistemaInicializado,
-            calendarCarregado: this.estadoSistema.calendarCarregado,
             dadosCarregados: !!this.dados,
             usuarioLogado: !!this.usuarioAtual,
             modulosDisponiveis: {
@@ -639,7 +510,9 @@ const App = {
                 PDF: typeof PDF !== 'undefined',
                 Notifications: typeof Notifications !== 'undefined',
                 Persistence: typeof Persistence !== 'undefined'
-            }
+            },
+            // ✅ REMOVIDO: calendarCarregado - Calendar.js gerencia isso
+            calendarioControlado: typeof Calendar !== 'undefined'
         };
     }
 };
@@ -654,7 +527,6 @@ auth.onAuthStateChanged((user) => {
         App.inicializarSistema();
     } else {
         console.log('👤 Usuário não autenticado - aguardando login');
-        // Mostrar tela de login (será implementado no módulo auth)
     }
 });
 
@@ -668,16 +540,12 @@ window.testarStatusApp = () => {
         console.log('📅 Testando Calendar.js...');
         const statusCalendar = Calendar.obterStatus();
         console.log('📅 Status Calendar:', statusCalendar);
-        
-        if (typeof Calendar_Debug !== 'undefined') {
-            console.log('🧪 Ativando debug mode...');
-            Calendar_Debug.enableDebug();
-        }
     }
     
     return status;
 };
 
-console.log('🚀 Core App v6.3.0 CORRIGIDO - Integração Calendar.js perfeita!');
-console.log('✅ Correções aplicadas: delegação Calendar.js, ordem de inicialização, métodos conectados');
+console.log('🚀 Core App v6.4.0 LIMPO - SEM DUPLICAÇÕES!');
+console.log('✅ REMOVIDO: mudarMes, gerarCalendario, abrirDetalheDia');
+console.log('✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário');
 console.log('🧪 Teste: window.testarStatusApp() para verificar integração');
