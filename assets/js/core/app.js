@@ -1,9 +1,9 @@
-/* ========== 🚀 CORE APP v6.4.0 - LIMPO SEM DUPLICAÇÕES ========== */
+/* ========== 🚀 CORE APP v7.3.0 - LIMPO SEM DUPLICAÇÕES ========== */
 
 const App = {
     // ✅ VERSÃO E CONSTANTES
-    VERSAO_SISTEMA: '6.4.0',
-    VERSAO_DB: 6,
+    VERSAO_SISTEMA: '7.3.0',
+    VERSAO_DB: 7,
     INTERVALO_VERIFICACAO_PRAZOS: 3600000, // 1 hora
     MAX_EVENTOS_VISIVEIS: 5,
 
@@ -17,7 +17,7 @@ const App = {
         editandoAtividade: null,
         editandoEvento: null,
         pessoasSelecionadas: new Set(),
-        versaoSistema: '6.4.0',
+        versaoSistema: '7.3.0',
         usuarioEmail: null,
         usuarioNome: null,
         alertasPrazosExibidos: new Set(),
@@ -33,18 +33,17 @@ const App = {
     // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA - LIMPA
     async inicializarSistema() {
         try {
-            console.log('🚀 Iniciando sistema v6.4.0...');
+            console.log('🚀 Iniciando sistema v7.3.0...');
             
             // Verificar se já foi inicializado
             if (this.estadoSistema.sistemaInicializado) {
-                console.log('⚠️ Sistema já inicializado');
                 return;
             }
 
             // Verificar conectividade Firebase
             const conectado = await this.verificarConectividade();
             if (!conectado) {
-                Notifications.warning('Modo offline - algumas funcionalidades limitadas');
+                Notifications.warning('Modo offline - funcionalidades limitadas');
             }
 
             // Carregar dados ANTES de configurar interface
@@ -60,13 +59,13 @@ const App = {
             this.iniciarVerificacaoPrazos();
 
             // ✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário
-            console.log('📅 Delegando controle total do calendário para Calendar.js');
+            console.log('📅 Calendar.js assumiu controle total do calendário');
 
             // Marcar como inicializado
             this.estadoSistema.sistemaInicializado = true;
 
-            console.log(`✅ Sistema inicializado - Calendar.js assumiu controle do calendário`);
-            Notifications.success('Sistema inicializado com sucesso!');
+            console.log('✅ Sistema inicializado com sucesso');
+            Notifications.success('Sistema inicializado!');
 
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
@@ -78,16 +77,12 @@ const App = {
     // ✅ CARREGAR DADOS DO FIREBASE
     async carregarDados() {
         try {
-            console.log('📊 Carregando dados...');
-            
             const snapshot = await database.ref('dados').once('value');
             const dadosFirebase = snapshot.val();
 
             if (dadosFirebase && DataStructure.validarEstrutura(dadosFirebase)) {
                 this.dados = dadosFirebase;
-                console.log('✅ Dados carregados do Firebase');
             } else {
-                console.log('🔄 Inicializando dados padrão...');
                 this.dados = DataStructure.inicializarDados();
                 await this.salvarDados();
             }
@@ -95,7 +90,6 @@ const App = {
             // Garantir estrutura de tarefas
             if (!this.dados.tarefas) {
                 this.dados.tarefas = [];
-                console.log('📝 Estrutura de tarefas inicializada');
             }
 
             // Configurar listeners para mudanças
@@ -108,13 +102,13 @@ const App = {
             const backup = Helpers.storage.get('sistemaBackup');
             if (backup) {
                 this.dados = backup;
-                Notifications.warning('Usando backup local - verifique conectividade');
+                Notifications.warning('Usando backup local');
             } else {
                 this.dados = DataStructure.inicializarDados();
                 if (!this.dados.tarefas) {
                     this.dados.tarefas = [];
                 }
-                Notifications.error('Erro ao carregar dados - usando padrão');
+                Notifications.error('Usando dados padrão');
             }
         }
     },
@@ -135,17 +129,12 @@ const App = {
         // Configurar data atual
         this.atualizarDataAtual();
 
-        // ✅ REMOVER: atualizarMesAno() - Calendar.js faz isso
-        // ✅ REMOVER: mudarMes() - Calendar.js controla
-
         // Configurar eventos globais
         this.configurarEventosGlobais();
     },
 
     // ✅ RENDERIZAR DASHBOARD PRINCIPAL
     renderizarDashboard() {
-        console.log('🎨 Renderizando dashboard...');
-
         // Mostrar container principal
         const mainContainer = document.getElementById('mainContainer');
         const loginScreen = document.getElementById('loginScreen');
@@ -158,8 +147,6 @@ const App = {
         // Atualizar estatísticas
         this.atualizarEstatisticas();
 
-        // ✅ REMOVIDO: gerarCalendario() - Calendar.js controla 100%
-
         // Renderizar áreas
         this.renderizarAreas();
 
@@ -167,7 +154,7 @@ const App = {
         this.configurarBusca();
     },
 
-    // ✅ ATUALIZAR ESTATÍSTICAS (mantido)
+    // ✅ ATUALIZAR ESTATÍSTICAS
     atualizarEstatisticas() {
         if (!this.dados) return;
 
@@ -206,7 +193,7 @@ const App = {
         });
     },
 
-    // ✅ CRIAR CARD DE ÁREA (mantido)
+    // ✅ CRIAR CARD DE ÁREA
     criarCardArea(chave, area) {
         const card = document.createElement('div');
         card.className = 'card area-card';
@@ -244,7 +231,7 @@ const App = {
         return card;
     },
 
-    // ✅ CALCULAR ESTATÍSTICAS DA ÁREA (mantido)
+    // ✅ CALCULAR ESTATÍSTICAS DA ÁREA
     calcularStatsArea(area) {
         if (!area.atividades) {
             return { emDia: 0, atencao: 0, atraso: 0, total: 0 };
@@ -263,7 +250,7 @@ const App = {
         return stats;
     },
 
-    // ✅ NAVEGAÇÃO ENTRE TELAS (mantido)
+    // ✅ NAVEGAÇÃO ENTRE TELAS
     voltarDashboard() {
         document.getElementById('dashboardExecutivo').classList.remove('hidden');
         document.getElementById('painelArea').classList.add('hidden');
@@ -287,7 +274,7 @@ const App = {
         console.log('🏢 Abrindo área:', chaveArea);
     },
 
-    // ✅ UTILITÁRIOS (mantidos)
+    // ✅ UTILITÁRIOS
     atualizarElemento(id, valor) {
         const elemento = document.getElementById(id);
         if (elemento) {
@@ -337,7 +324,7 @@ const App = {
         breadcrumb.classList.remove('hidden');
     },
 
-    // ✅ CONFIGURAR EVENTOS GLOBAIS (mantido)
+    // ✅ CONFIGURAR EVENTOS GLOBAIS
     configurarEventosGlobais() {
         // Atalhos de teclado
         document.addEventListener('keydown', (e) => {
@@ -354,7 +341,7 @@ const App = {
         }
     },
 
-    // ✅ CONFIGURAR LISTENERS FIREBASE (atualizado)
+    // ✅ CONFIGURAR LISTENERS FIREBASE
     configurarListeners() {
         // Listener para mudanças nos dados
         this.listenersDados.principal = database.ref('dados').on('value', (snapshot) => {
@@ -363,7 +350,7 @@ const App = {
                 this.dados = dadosAtualizados;
                 this.renderizarDashboard();
                 
-                // ✅ CORREÇÃO: Atualizar Calendar.js quando dados mudarem
+                // ✅ Atualizar Calendar.js quando dados mudarem
                 if (typeof Calendar !== 'undefined') {
                     Calendar.gerar();
                 }
@@ -373,7 +360,7 @@ const App = {
         });
     },
 
-    // ✅ VERIFICAÇÃO DE PRAZOS (mantido)
+    // ✅ VERIFICAÇÃO DE PRAZOS
     iniciarVerificacaoPrazos() {
         this.verificarPrazos();
         this.intervaloPrazos = setInterval(() => {
@@ -384,7 +371,6 @@ const App = {
     verificarPrazos() {
         if (!this.dados?.areas) return;
 
-        const hoje = new Date();
         const proximosDias = 3;
 
         Object.values(this.dados.areas).forEach(area => {
@@ -414,7 +400,7 @@ const App = {
         Notifications.mostrarNotificacao(mensagem, tipo, 8000);
     },
 
-    // ✅ MÉTODOS AUXILIARES (mantidos)
+    // ✅ MÉTODOS AUXILIARES
     buscarGlobal() {
         console.log('🔍 Busca global - implementar no módulo de busca');
     },
@@ -429,24 +415,20 @@ const App = {
         });
     },
 
-    // ✅ DELEGAÇÕES PARA OUTROS MÓDULOS - MANTIDAS
+    // ✅ DELEGAÇÕES PARA OUTROS MÓDULOS
     mostrarDetalhesEvento(evento) {
         if (typeof Events !== 'undefined' && typeof Events.mostrarDetalhesEvento === 'function') {
             Events.mostrarDetalhesEvento(evento);
         }
     },
 
-    // ✅ REMOVIDO: mudarMes() - Calendar.js controla 100%
-    // ✅ REMOVIDO: gerarCalendario() - Calendar.js controla 100%
-    // ✅ REMOVIDO: abrirDetalheDia() - Calendar.js controla 100%
-
-    // ✅ SALVAMENTO DE DADOS (placeholder)
+    // ✅ SALVAMENTO DE DADOS
     async salvarDados() {
         console.log('💾 Salvando dados...');
         return Promise.resolve();
     },
 
-    // ✅ TRATAMENTO DE ERROS (mantido)
+    // ✅ TRATAMENTO DE ERROS
     mostrarErroInicializacao(error) {
         const errorDiv = document.createElement('div');
         errorDiv.style.cssText = `
@@ -486,7 +468,7 @@ const App = {
         }
     },
 
-    // ✅ VERIFICAÇÃO DE CONECTIVIDADE (mantida)
+    // ✅ VERIFICAÇÃO DE CONECTIVIDADE
     async verificarConectividade() {
         try {
             return navigator.onLine;
@@ -496,7 +478,7 @@ const App = {
         }
     },
 
-    // ✅ STATUS DO SISTEMA (atualizado)
+    // ✅ STATUS DO SISTEMA
     obterStatusSistema() {
         return {
             versao: this.VERSAO_SISTEMA,
@@ -511,14 +493,26 @@ const App = {
                 Notifications: typeof Notifications !== 'undefined',
                 Persistence: typeof Persistence !== 'undefined'
             },
-            // ✅ REMOVIDO: calendarCarregado - Calendar.js gerencia isso
             calendarioControlado: typeof Calendar !== 'undefined'
         };
     }
 };
 
-// ✅ FUNÇÃO GLOBAL PARA INICIALIZAÇÃO (compatibilidade)
+// ✅ EXPOSIÇÃO CONSOLIDADA NO WINDOW GLOBAL (UMA ÚNICA VEZ)
+window.App = App;
 window.inicializarSistema = () => App.inicializarSistema();
+window.testarStatusApp = () => {
+    const status = App.obterStatusSistema();
+    console.log('📊 Status do Sistema:', status);
+    
+    // Testar integração com Calendar.js
+    if (status.modulosDisponiveis.Calendar) {
+        const statusCalendar = Calendar.obterStatus();
+        console.log('📅 Status Calendar:', statusCalendar);
+    }
+    
+    return status;
+};
 
 // ✅ INICIALIZAÇÃO AUTOMÁTICA QUANDO AUTENTICADO
 auth.onAuthStateChanged((user) => {
@@ -526,77 +520,8 @@ auth.onAuthStateChanged((user) => {
         App.usuarioAtual = user;
         App.inicializarSistema();
     } else {
-        console.log('👤 Usuário não autenticado - aguardando login');
+        console.log('👤 Aguardando login...');
     }
 });
 
-// ✅ FUNÇÕES GLOBAIS PARA COMPATIBILIDADE COM INDEX.HTML
-window.testarStatusApp = () => {
-    const status = App.obterStatusSistema();
-    console.log('📊 Status do Sistema:', status);
-    
-    // Testar integração com Calendar.js
-    if (status.modulosDisponiveis.Calendar) {
-        console.log('📅 Testando Calendar.js...');
-        const statusCalendar = Calendar.obterStatus();
-        console.log('📅 Status Calendar:', statusCalendar);
-    }
-    
-    return status;
-};
-
-console.log('🚀 Core App v6.4.0 LIMPO - SEM DUPLICAÇÕES!');
-console.log('✅ REMOVIDO: mudarMes, gerarCalendario, abrirDetalheDia');
-console.log('✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário');
-console.log('🧪 Teste: window.testarStatusApp() para verificar integração');
-
-// ✅ ADICIONE ESTAS LINHAS AO FINAL DO SEU app.js (antes do console.log final)
-
-// 🔧 EXPOSIÇÃO FORÇADA NO WINDOW GLOBAL
-window.App = App;
-window.testarStatusApp = () => {
-    const status = App.obterStatusSistema();
-    console.log('📊 Status do Sistema:', status);
-    
-    // Testar integração com Calendar.js
-    if (status.modulosDisponiveis.Calendar) {
-        console.log('📅 Testando Calendar.js...');
-        const statusCalendar = Calendar.obterStatus();
-        console.log('📅 Status Calendar:', statusCalendar);
-    }
-    
-    return status;
-};
-
-// ✅ GARANTIR QUE OUTROS OBJETOS TAMBÉM SEJAM EXPOSTOS
-setTimeout(() => {
-    if (typeof Tasks !== 'undefined') {
-        window.Tasks = Tasks;
-        console.log('✅ Tasks exposto no window');
-    }
-    
-    if (typeof Events !== 'undefined') {
-        window.Events = Events;
-        console.log('✅ Events exposto no window');
-    }
-    
-    if (typeof Calendar !== 'undefined') {
-        window.Calendar = Calendar;
-        console.log('✅ Calendar exposto no window');
-    }
-    
-    // Teste final
-    console.log('🧪 Objetos disponíveis:', {
-        App: typeof window.App !== 'undefined',
-        Tasks: typeof window.Tasks !== 'undefined',
-        Events: typeof window.Events !== 'undefined',
-        Calendar: typeof window.Calendar !== 'undefined',
-        PersonalAgenda: typeof window.PersonalAgenda !== 'undefined'
-    });
-}, 1000);
-
-console.log('🚀 Core App v6.4.0 LIMPO - SEM DUPLICAÇÕES!');
-console.log('✅ REMOVIDO: mudarMes, gerarCalendario, abrirDetalheDia');
-console.log('✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário');
-console.log('✅ EXPOSIÇÃO GARANTIDA: Todos os objetos no window');
-console.log('🧪 Teste: window.testarStatusApp() para verificar integração');
+console.log('🚀 Core App v7.3.0 LIMPO - ZERO DUPLICAÇÕES!');
