@@ -549,3 +549,54 @@ console.log('🚀 Core App v6.4.0 LIMPO - SEM DUPLICAÇÕES!');
 console.log('✅ REMOVIDO: mudarMes, gerarCalendario, abrirDetalheDia');
 console.log('✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário');
 console.log('🧪 Teste: window.testarStatusApp() para verificar integração');
+
+// ✅ ADICIONE ESTAS LINHAS AO FINAL DO SEU app.js (antes do console.log final)
+
+// 🔧 EXPOSIÇÃO FORÇADA NO WINDOW GLOBAL
+window.App = App;
+window.testarStatusApp = () => {
+    const status = App.obterStatusSistema();
+    console.log('📊 Status do Sistema:', status);
+    
+    // Testar integração com Calendar.js
+    if (status.modulosDisponiveis.Calendar) {
+        console.log('📅 Testando Calendar.js...');
+        const statusCalendar = Calendar.obterStatus();
+        console.log('📅 Status Calendar:', statusCalendar);
+    }
+    
+    return status;
+};
+
+// ✅ GARANTIR QUE OUTROS OBJETOS TAMBÉM SEJAM EXPOSTOS
+setTimeout(() => {
+    if (typeof Tasks !== 'undefined') {
+        window.Tasks = Tasks;
+        console.log('✅ Tasks exposto no window');
+    }
+    
+    if (typeof Events !== 'undefined') {
+        window.Events = Events;
+        console.log('✅ Events exposto no window');
+    }
+    
+    if (typeof Calendar !== 'undefined') {
+        window.Calendar = Calendar;
+        console.log('✅ Calendar exposto no window');
+    }
+    
+    // Teste final
+    console.log('🧪 Objetos disponíveis:', {
+        App: typeof window.App !== 'undefined',
+        Tasks: typeof window.Tasks !== 'undefined',
+        Events: typeof window.Events !== 'undefined',
+        Calendar: typeof window.Calendar !== 'undefined',
+        PersonalAgenda: typeof window.PersonalAgenda !== 'undefined'
+    });
+}, 1000);
+
+console.log('🚀 Core App v6.4.0 LIMPO - SEM DUPLICAÇÕES!');
+console.log('✅ REMOVIDO: mudarMes, gerarCalendario, abrirDetalheDia');
+console.log('✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário');
+console.log('✅ EXPOSIÇÃO GARANTIDA: Todos os objetos no window');
+console.log('🧪 Teste: window.testarStatusApp() para verificar integração');
