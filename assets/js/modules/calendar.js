@@ -1,16 +1,9 @@
 /**
- * 📅 Sistema de Calendário Modular v6.2.2 - EXPOSIÇÃO WINDOW CORRIGIDA
+ * 📅 Sistema de Calendário Modular v6.3.0 - VERSÃO LIMPA
  * 
- * CORREÇÕES APLICADAS:
- * ✅ Exclusão de feriados TOTALMENTE CORRIGIDA
- * ✅ Context binding em event listeners corrigido
- * ✅ Validações de dependências robustas
- * ✅ Error handling melhorado
- * ✅ Debug logging implementado
- * ✅ Integração perfeita mantida
- * ✅ Performance otimizada
- * ✅ ERRO DE SINTAXE LINHA 257 CORRIGIDO
- * 🔧 EXPOSIÇÃO NO WINDOW GLOBAL ADICIONADA
+ * ✅ FUNCIONAIS: Navegação, Eventos, Tarefas, Feriados, PDF
+ * ✅ REMOVIDO: Debug excessivo, múltiplas inicializações 
+ * ✅ CONTROLE TOTAL: Calendar.js é o único responsável pelo calendário
  */
 
 const Calendar = {
@@ -40,27 +33,21 @@ const Calendar = {
         }
     },
 
-    // ✅ ESTADO INTERNO - MELHORADO
+    // ✅ ESTADO INTERNO - SIMPLIFICADO
     state: {
         modalAberto: false,
         eventosSelecionados: [],
-        diasComEventos: new Map(),
         ultimaAtualizacao: null,
-        cacheEventos: new Map(),
-        cacheTimeout: null,
-        dependenciasVerificadas: false,
-        debugMode: false // Novo: modo debug
+        dependenciasVerificadas: false
     },
 
-    // ✅ GERAR CALENDÁRIO PRINCIPAL - MANTIDO
+    // ✅ GERAR CALENDÁRIO PRINCIPAL
     gerar() {
         try {
             console.log(`📅 Gerando calendário: ${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`);
             
-            // Verificar dependências antes de gerar
-            if (!this._verificarDependencias()) {
-                console.warn('⚠️ Algumas dependências não estão disponíveis');
-            }
+            // Verificar dependências
+            this._verificarDependencias();
             
             // Atualizar título
             this._atualizarDisplayMesAno();
@@ -93,11 +80,7 @@ const Calendar = {
             this._gerarCabecalhoDias(container);
 
             // Gerar grid do mês
-            this._gerarGridMesCorrigido(container);
-
-            // Atualizar cache e estatísticas
-            this._atualizarCacheEventos();
-            this._atualizarEstatisticas();
+            this._gerarGridMes(container);
 
             // Marcar como atualizado
             this.state.ultimaAtualizacao = new Date();
@@ -112,31 +95,15 @@ const Calendar = {
         }
     },
 
-    // ✅ VERIFICAR DEPENDÊNCIAS - MELHORADO
+    // ✅ VERIFICAR DEPENDÊNCIAS - SIMPLIFICADO
     _verificarDependencias() {
         try {
             const dependencias = {
-                App: typeof App !== 'undefined' && App.dados,
-                Events: typeof Events !== 'undefined',
-                Tasks: typeof Tasks !== 'undefined',
-                PDF: typeof PDF !== 'undefined',
-                Notifications: typeof Notifications !== 'undefined'
+                App: typeof App !== 'undefined' && App.dados
             };
 
             this.state.dependenciasVerificadas = true;
-            
-            // Log das dependências disponíveis
-            Object.entries(dependencias).forEach(([nome, disponivel]) => {
-                if (this.state.debugMode) {
-                    if (disponivel) {
-                        console.log(`✅ ${nome} disponível`);
-                    } else {
-                        console.warn(`⚠️ ${nome} não disponível`);
-                    }
-                }
-            });
-
-            return dependencias.App; // App é obrigatório
+            return dependencias.App;
 
         } catch (error) {
             console.error('❌ Erro ao verificar dependências:', error);
@@ -144,16 +111,13 @@ const Calendar = {
         }
     },
 
-    // ✅ GRID DO MÊS CORRIGIDO - INTEGRAÇÃO PERFEITA
-    _gerarGridMesCorrigido(container) {
+    // ✅ GRID DO MÊS - INTEGRAÇÃO LIMPA
+    _gerarGridMes(container) {
         const primeiroDia = new Date(this.config.anoAtual, this.config.mesAtual, 1);
         const ultimoDia = new Date(this.config.anoAtual, this.config.mesAtual + 1, 0);
         const diasNoMes = ultimoDia.getDate();
         const iniciaDiaSemana = primeiroDia.getDay();
         const hoje = new Date();
-
-        // Limpar cache de eventos para este mês
-        this.state.cacheEventos.clear();
 
         // Gerar exatamente 42 células (6 semanas)
         for (let celula = 0; celula < 42; celula++) {
@@ -226,7 +190,7 @@ const Calendar = {
                 `;
                 dia.appendChild(numeroDiaEl);
 
-                // ✅ INDICADOR DE FERIADO CORRIGIDO - NOVA IMPLEMENTAÇÃO
+                // ✅ INDICADOR DE FERIADO - LIMPO
                 if (ehFeriado) {
                     this._adicionarIndicadorFeriado(dia, dataCompleta, ehFeriado);
                 }
@@ -242,11 +206,6 @@ const Calendar = {
                 dia.addEventListener('dblclick', () => {
                     if (typeof Events !== 'undefined' && typeof Events.mostrarNovoEvento === 'function') {
                         Events.mostrarNovoEvento(dataCompleta);
-                    } else {
-                        console.warn('⚠️ Módulo Events não disponível para criar evento');
-                        if (typeof Notifications !== 'undefined') {
-                            Notifications.info('Duplo-clique: Módulo de eventos não disponível');
-                        }
                     }
                 });
             }
@@ -255,92 +214,8 @@ const Calendar = {
         }
     },
 
-    // ✅ RENDERIZAÇÃO COM INDICADORES DE SINCRONIZAÇÃO - CORRIGIDO
-    _renderizarItemComIndicadores(item, ehTarefa) {
-        const cor = ehTarefa ? 
-            this.config.coresTarefas[item.tipo] || '#6b7280' :
-            this.config.coresEventos[item.tipo] || '#6b7280';
-
-        const horario = item.horarioInicio || item.horario || '';
-        
-        // Determinar ícone baseado no tipo e sincronização
-        let icone = ehTarefa ? '📝' : this._obterIconeEvento(item.tipo);
-        let corFundo = cor;
-        
-        if (item.sincronizada) {
-            icone = '🔄';
-            corFundo = '#06b6d4'; // azul para sincronizado
-        } else if (item.promovido) {
-            icone = '⬆️';
-            corFundo = '#10b981'; // verde para promovido
-        } else if (item.eventoPromovido) {
-            icone = '⬆️';
-            corFundo = '#10b981'; // verde para tarefas que foram promovidas
-        }
-        
-        const elementoItem = document.createElement('div');
-        elementoItem.style.cssText = `
-            background: ${corFundo};
-            color: white;
-            font-size: 9px;
-            padding: 1px 3px;
-            margin: 1px 0;
-            border-radius: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: pointer;
-            line-height: 1.2;
-            height: 14px;
-            display: flex;
-            align-items: center;
-            position: relative;
-        `;
-
-        // Texto do item
-        let textoItem = `${icone} ${item.titulo}`;
-        if (horario) {
-            textoItem = `${horario} ${textoItem}`;
-        }
-
-        elementoItem.textContent = textoItem;
-        
-        // Tooltip expandido
-        let tooltip = `${item.titulo} - ${item.tipo}`;
-        if (item.responsavel || item.pessoas) {
-            tooltip += `\n👥 ${item.responsavel || item.pessoas?.join(', ')}`;
-        }
-        if (item.sincronizada) {
-            tooltip += '\n🔄 Sincronizada automaticamente';
-        } else if (item.promovido || item.eventoPromovido) {
-            tooltip += '\n⬆️ Promovida para evento';
-        }
-        
-        elementoItem.title = tooltip;
-
-        // Click handler
-        elementoItem.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (ehTarefa) {
-                if (typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function') {
-                    Tasks.editarTarefa(item.id);
-                }
-            } else {
-                if (typeof Events !== 'undefined' && typeof Events.editarEvento === 'function') {
-                    Events.editarEvento(item.id);
-                }
-            }
-        });
-
-        return elementoItem;
-    },
-
-    // 🔧 FUNÇÃO CORRIGIDA: Adicionar indicador de feriado
+    // ✅ ADICIONAR INDICADOR DE FERIADO - SIMPLIFICADO
     _adicionarIndicadorFeriado(dia, data, nomeFeriado) {
-        if (this.state.debugMode) {
-            console.log(`📍 [DEBUG] Adicionando indicador de feriado: ${nomeFeriado} em ${data}`);
-        }
-        
         try {
             const indicadorFeriado = document.createElement('div');
             indicadorFeriado.innerHTML = '🎉';
@@ -360,369 +235,86 @@ const Calendar = {
             `;
             
             indicadorFeriado.title = `${nomeFeriado}\n\nClique para gerenciar feriado`;
-            indicadorFeriado.dataset.data = data;
-            indicadorFeriado.dataset.nome = nomeFeriado;
             
-            // Hover effect
-            indicadorFeriado.addEventListener('mouseenter', () => {
-                indicadorFeriado.style.background = 'rgba(251, 191, 36, 0.4)';
-                indicadorFeriado.style.transform = 'scale(1.1)';
-            });
-            
-            indicadorFeriado.addEventListener('mouseleave', () => {
-                indicadorFeriado.style.background = 'rgba(251, 191, 36, 0.2)';
-                indicadorFeriado.style.transform = 'scale(1)';
-            });
-            
-            // 🔧 CORREÇÃO CRÍTICA: Event listener com contexto preservado
-            const self = this; // Preservar contexto
-            indicadorFeriado.addEventListener('click', function(e) {
-                if (self.state.debugMode) {
-                    console.log(`🖱️ [DEBUG] Click no indicador de feriado: ${data}`);
-                }
-                
+            // Event listener para gerenciar feriado
+            indicadorFeriado.addEventListener('click', (e) => {
                 e.stopPropagation();
-                e.preventDefault();
-                
-                // Chamar função com contexto correto
-                self._mostrarModalGerenciarFeriado(data, nomeFeriado);
+                this._gerenciarFeriado(data, nomeFeriado);
             });
             
             dia.appendChild(indicadorFeriado);
             
-            if (this.state.debugMode) {
-                console.log(`✅ [DEBUG] Indicador adicionado com sucesso para ${data}`);
-            }
-            
         } catch (error) {
-            console.error('❌ [DEBUG] Erro ao adicionar indicador de feriado:', error);
+            console.error('❌ Erro ao adicionar indicador de feriado:', error);
         }
     },
 
-    // 🔧 FUNÇÃO CORRIGIDA: Modal para gerenciar feriado
-    _mostrarModalGerenciarFeriado(data, nomeFeriado) {
-        if (this.state.debugMode) {
-            console.log(`📋 [DEBUG] Abrindo modal para: ${nomeFeriado} (${data})`);
-        }
+    // ✅ GERENCIAR FERIADO - VERSÃO LIMPA
+    _gerenciarFeriado(data, nomeFeriado) {
+        const dataFormatada = new Date(data).toLocaleDateString('pt-BR');
         
-        try {
-            // Verificar dependências antes de prosseguir
-            if (!data || !nomeFeriado) {
-                console.error('❌ [DEBUG] Dados obrigatórios faltando:', { data, nomeFeriado });
-                return;
-            }
-            
-            // Remover modal existente se houver
-            const modalExistente = document.getElementById('modalGerenciarFeriado');
-            if (modalExistente) {
-                modalExistente.remove();
-                if (this.state.debugMode) {
-                    console.log('🗑️ [DEBUG] Modal existente removido');
-                }
-            }
-            
-            const dataFormatada = new Date(data).toLocaleDateString('pt-BR');
-            if (this.state.debugMode) {
-                console.log(`📅 [DEBUG] Data formatada: ${dataFormatada}`);
-            }
-            
-            const modal = document.createElement('div');
-            modal.id = 'modalGerenciarFeriado';
-            modal.className = 'modal';
-            
-            // 🔧 CORREÇÃO: HTML do modal com event delegation
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 400px;">
-                    <div class="modal-header">
-                        <h3>🎉 Gerenciar Feriado</h3>
-                        <button class="modal-close" data-action="fechar">&times;</button>
-                    </div>
-                    
-                    <div class="modal-body">
-                        <div style="text-align: center; padding: 20px;">
-                            <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
-                            
-                            <div class="info-box info-box-warning" style="margin: 16px 0;">
-                                <strong style="color: #92400e;">${nomeFeriado}</strong><br>
-                                <span style="color: #92400e;">📅 ${dataFormatada}</span>
-                            </div>
-                            
-                            <p style="color: #6b7280; margin-bottom: 20px;">
-                                O que deseja fazer com este feriado?
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-action="cancelar">
-                            ❌ Cancelar
-                        </button>
-                        <button class="btn btn-danger" data-action="excluir" data-data="${data}" data-nome="${nomeFeriado}">
-                            🗑️ Excluir Feriado
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            // 🔧 CORREÇÃO CRÍTICA: Event delegation com contexto preservado
-            const self = this;
-            modal.addEventListener('click', function(e) {
-                const action = e.target.dataset.action;
-                
-                if (action === 'fechar' || action === 'cancelar') {
-                    if (self.state.debugMode) {
-                        console.log('❌ [DEBUG] Modal fechado pelo usuário');
-                    }
-                    modal.remove();
-                } else if (action === 'excluir') {
-                    const dataExcluir = e.target.dataset.data;
-                    const nomeExcluir = e.target.dataset.nome;
-                    
-                    if (self.state.debugMode) {
-                        console.log(`🗑️ [DEBUG] Botão excluir clicado: ${dataExcluir}`);
-                    }
-                    
-                    // Fechar modal primeiro
-                    modal.remove();
-                    
-                    // Chamar função de exclusão com contexto correto
-                    self.excluirFeriado(dataExcluir);
-                }
-            });
-
-            // Fechar modal ao clicar fora
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-
-            // Event listener para ESC
-            const handleEscape = function(e) {
-                if (e.key === 'Escape') {
-                    modal.remove();
-                    document.removeEventListener('keydown', handleEscape);
-                }
-            };
-            document.addEventListener('keydown', handleEscape);
-
-            // Adicionar ao DOM
-            document.body.appendChild(modal);
-            
-            // Exibir modal com animação
-            setTimeout(() => {
-                modal.classList.add('show');
-                if (self.state.debugMode) {
-                    console.log('✅ [DEBUG] Modal exibido com sucesso');
-                }
-            }, 10);
-
-        } catch (error) {
-            console.error('❌ [DEBUG] Erro ao mostrar modal de gerenciar feriado:', error);
-            
-            // Fallback: usar confirm nativo
-            if (this.state.debugMode) {
-                console.log('🔄 [DEBUG] Usando fallback confirm nativo');
-            }
-            
-            const confirmacao = confirm(
-                `Deseja excluir o feriado?\n\n` +
-                `📅 ${nomeFeriado}\n` +
-                `Data: ${new Date(data).toLocaleDateString('pt-BR')}\n\n` +
-                `Esta ação não pode ser desfeita.`
-            );
-            
-            if (confirmacao) {
-                this.excluirFeriado(data);
-            }
+        const confirmacao = confirm(
+            `Deseja excluir o feriado?\n\n` +
+            `📅 ${nomeFeriado}\n` +
+            `Data: ${dataFormatada}\n\n` +
+            `Esta ação não pode ser desfeita.`
+        );
+        
+        if (confirmacao) {
+            this.excluirFeriado(data);
         }
     },
 
-    // 🔧 FUNÇÃO TOTALMENTE CORRIGIDA: Excluir feriado
+    // ✅ EXCLUIR FERIADO - VERSÃO LIMPA E FUNCIONAL
     excluirFeriado(data) {
-        if (this.state.debugMode) {
-            console.log(`🗑️ [DEBUG] Função excluirFeriado chamada: ${data}`);
-        }
-        
         try {
-            // 🔧 VERIFICAÇÕES ROBUSTAS DE DEPENDÊNCIAS
-            if (typeof App === 'undefined') {
-                console.error('❌ [DEBUG] Objeto App não disponível');
-                const msg = 'Sistema não inicializado. Recarregue a página.';
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error(msg);
-                } else {
-                    alert(msg);
-                }
+            // Verificações básicas
+            if (!App?.dados?.feriados) {
+                Notifications.error('Dados de feriados não disponíveis');
                 return false;
             }
             
-            if (!App.dados) {
-                console.error('❌ [DEBUG] App.dados não disponível');
-                const msg = 'Dados do sistema não disponíveis.';
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error(msg);
-                } else {
-                    alert(msg);
-                }
-                return false;
-            }
-            
-            if (!App.dados.feriados) {
-                console.error('❌ [DEBUG] App.dados.feriados não disponível');
-                App.dados.feriados = {}; // Inicializar se não existir
-                const msg = 'Estrutura de feriados inicializada.';
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.warning(msg);
-                }
-            }
-            
-            if (!data) {
-                console.error('❌ [DEBUG] Data do feriado é obrigatória');
-                const msg = 'Data do feriado é obrigatória';
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error(msg);
-                } else {
-                    alert(msg);
-                }
-                return false;
-            }
-
-            // Verificar se feriado existe
             if (!App.dados.feriados[data]) {
-                console.error(`❌ [DEBUG] Feriado não encontrado para data: ${data}`);
-                if (this.state.debugMode) {
-                    console.log('📊 [DEBUG] Feriados disponíveis:', Object.keys(App.dados.feriados));
-                }
-                
-                const msg = 'Feriado não encontrado para esta data';
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error(msg);
-                } else {
-                    alert(msg);
-                }
+                Notifications.error('Feriado não encontrado');
                 return false;
             }
 
             const nomeFeriado = App.dados.feriados[data];
-            const dataFormatada = new Date(data).toLocaleDateString('pt-BR');
             
-            if (this.state.debugMode) {
-                console.log(`📝 [DEBUG] Preparando exclusão: ${nomeFeriado} (${dataFormatada})`);
+            // Remover feriado
+            delete App.dados.feriados[data];
+
+            // Salvar dados
+            if (typeof Persistence !== 'undefined') {
+                Persistence.salvarDadosCritico();
             }
 
-            // 🔧 CONFIRMAÇÃO MAIS ROBUSTA
-            const mensagemConfirmacao = 
-                `Tem certeza que deseja excluir o feriado?\n\n` +
-                `📅 ${nomeFeriado}\n` +
-                `Data: ${dataFormatada}\n\n` +
-                `Esta ação não pode ser desfeita.`;
-                
-            const confirmacao = confirm(mensagemConfirmacao);
-            if (this.state.debugMode) {
-                console.log(`❓ [DEBUG] Confirmação do usuário: ${confirmacao}`);
+            // Regenerar calendário
+            this.gerar();
+
+            // Notificar sucesso
+            if (typeof Notifications !== 'undefined') {
+                Notifications.success(`Feriado "${nomeFeriado}" excluído`);
             }
-
-            if (!confirmacao) {
-                if (this.state.debugMode) {
-                    console.log('❌ [DEBUG] Exclusão cancelada pelo usuário');
-                }
-                return false;
-            }
-
-            // 🔧 FAZER BACKUP ANTES DA EXCLUSÃO
-            const backup = { ...App.dados.feriados };
-            if (this.state.debugMode) {
-                console.log('📦 [DEBUG] Backup criado');
-            }
-
-            try {
-                // Remover feriado
-                delete App.dados.feriados[data];
-                if (this.state.debugMode) {
-                    console.log('✅ [DEBUG] Feriado removido dos dados');
-                }
-
-                // Salvar dados com verificação
-                if (typeof Persistence !== 'undefined' && typeof Persistence.salvarDadosCritico === 'function') {
-                    Persistence.salvarDadosCritico();
-                    if (this.state.debugMode) {
-                        console.log('💾 [DEBUG] Dados salvos via Persistence');
-                    }
-                } else {
-                    if (this.state.debugMode) {
-                        console.warn('⚠️ [DEBUG] Sistema de persistência não disponível');
-                    }
-                    // Tentar localStorage como fallback
-                    try {
-                        localStorage.setItem('app_dados_backup', JSON.stringify(App.dados));
-                        if (this.state.debugMode) {
-                            console.log('💾 [DEBUG] Backup salvo no localStorage');
-                        }
-                    } catch (e) {
-                        console.warn('⚠️ [DEBUG] Não foi possível salvar backup');
-                    }
-                }
-
-                // Regenerar calendário com verificação
-                if (this.state.debugMode) {
-                    console.log('🔄 [DEBUG] Regenerando calendário...');
-                }
-                this.gerar();
-
-                // Notificação de sucesso
-                const mensagemSucesso = `Feriado "${nomeFeriado}" excluído`;
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.success(mensagemSucesso);
-                } else {
-                    alert('✅ ' + mensagemSucesso);
-                }
-
-                if (this.state.debugMode) {
-                    console.log(`🎉 [DEBUG] Feriado "${nomeFeriado}" excluído com sucesso!`);
-                    console.log('📊 [DEBUG] Feriados restantes:', App.dados.feriados);
-                }
-                
-                return true;
-
-            } catch (exclusionError) {
-                // 🔧 RESTAURAR BACKUP EM CASO DE ERRO
-                console.error('❌ [DEBUG] Erro durante exclusão:', exclusionError);
-                App.dados.feriados = backup;
-                if (this.state.debugMode) {
-                    console.log('🔄 [DEBUG] Backup restaurado');
-                }
-                
-                const mensagemErro = 'Erro ao excluir feriado. Dados restaurados.';
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error(mensagemErro);
-                } else {
-                    alert('❌ ' + mensagemErro);
-                }
-                
-                return false;
-            }
+            
+            console.log(`✅ Feriado "${nomeFeriado}" excluído com sucesso`);
+            return true;
 
         } catch (error) {
-            console.error('❌ [DEBUG] Erro fatal ao excluir feriado:', error);
-            
-            const mensagemErro = 'Erro fatal ao excluir feriado';
+            console.error('❌ Erro ao excluir feriado:', error);
             if (typeof Notifications !== 'undefined') {
-                Notifications.error(mensagemErro);
-            } else {
-                alert('❌ ' + mensagemErro);
+                Notifications.error('Erro ao excluir feriado');
             }
-            
             return false;
         }
     },
 
-    // ✅ INTEGRAÇÃO CORRIGIDA: EVENTOS + TAREFAS NA CÉLULA
+    // ✅ INTEGRAÇÃO EVENTOS + TAREFAS NA CÉLULA
     _adicionarEventosTarefasCelula(celula, data) {
         try {
             // Obter eventos e tarefas do dia
-            const eventos = this._obterEventosDoDiaIntegrado(data);
-            const tarefas = this._obterTarefasDoDiaIntegrado(data);
+            const eventos = this._obterEventosDoDia(data);
+            const tarefas = this._obterTarefasDoDia(data);
             
             // Combinar e ordenar por prioridade/horário
             const itensOrdenados = [...eventos, ...tarefas]
@@ -746,66 +338,7 @@ const Calendar = {
             const itensVisiveis = itensOrdenados.slice(0, this.config.maxEventosPorDia);
             
             itensVisiveis.forEach(item => {
-                const elementoItem = document.createElement('div');
-                
-                // Determinar se é evento ou tarefa
-                const ehTarefa = this.config.coresTarefas[item.tipo] !== undefined;
-                const cor = ehTarefa ? 
-                    this.config.coresTarefas[item.tipo] :
-                    this.config.coresEventos[item.tipo] || '#6b7280';
-
-                // Estilo do item
-                elementoItem.style.cssText = `
-                    background: ${cor};
-                    color: white;
-                    font-size: 9px;
-                    padding: 1px 3px;
-                    margin: 1px 0;
-                    border-radius: 2px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    cursor: pointer;
-                    line-height: 1.2;
-                    height: 14px;
-                    display: flex;
-                    align-items: center;
-                `;
-
-                // Ícone baseado no tipo
-                const icone = ehTarefa ? 
-                    (item.agendaSemanal ? '🔄' : '📝') : 
-                    this._obterIconeEvento(item.tipo);
-
-                // Texto do item
-                let textoItem = `${icone} ${item.titulo}`;
-                if (item.horarioInicio) {
-                    textoItem = `${item.horarioInicio} ${textoItem}`;
-                } else if (item.horario) {
-                    textoItem = `${item.horario} ${textoItem}`;
-                }
-
-                elementoItem.textContent = textoItem;
-                elementoItem.title = `${item.titulo} - ${item.tipo}${item.responsavel || item.pessoas ? ` (${item.responsavel || item.pessoas?.join(', ')})` : ''}`;
-
-                // Click handler
-                elementoItem.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (ehTarefa) {
-                        if (typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function') {
-                            Tasks.editarTarefa(item.id);
-                        } else {
-                            console.warn('⚠️ Módulo Tasks não disponível');
-                        }
-                    } else {
-                        if (typeof Events !== 'undefined' && typeof Events.editarEvento === 'function') {
-                            Events.editarEvento(item.id);
-                        } else {
-                            console.warn('⚠️ Módulo Events não disponível');
-                        }
-                    }
-                });
-
+                const elementoItem = this._criarElementoItem(item);
                 celula.appendChild(elementoItem);
             });
 
@@ -838,50 +371,61 @@ const Calendar = {
         }
     },
 
-    // ✅ OBTER EVENTOS DO DIA - INTEGRAÇÃO CORRIGIDA
-    _obterEventosDoDiaIntegrado(data) {
-        try {
-            if (!App.dados?.eventos) return [];
-            
-            return App.dados.eventos.filter(evento => evento.data === data);
+    // ✅ CRIAR ELEMENTO DO ITEM - SIMPLIFICADO
+    _criarElementoItem(item) {
+        const ehTarefa = this.config.coresTarefas[item.tipo] !== undefined;
+        const cor = ehTarefa ? 
+            this.config.coresTarefas[item.tipo] :
+            this.config.coresEventos[item.tipo] || '#6b7280';
 
-        } catch (error) {
-            console.error('❌ Erro ao obter eventos do dia:', error);
-            return [];
+        const horario = item.horarioInicio || item.horario || '';
+        const icone = ehTarefa ? '📝' : this._obterIconeEvento(item.tipo);
+
+        const elementoItem = document.createElement('div');
+        elementoItem.style.cssText = `
+            background: ${cor};
+            color: white;
+            font-size: 9px;
+            padding: 1px 3px;
+            margin: 1px 0;
+            border-radius: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            line-height: 1.2;
+            height: 14px;
+            display: flex;
+            align-items: center;
+        `;
+
+        // Texto do item
+        let textoItem = `${icone} ${item.titulo}`;
+        if (horario) {
+            textoItem = `${horario} ${textoItem}`;
         }
+
+        elementoItem.textContent = textoItem;
+        elementoItem.title = `${item.titulo} - ${item.tipo}${item.responsavel || item.pessoas ? ` (${item.responsavel || item.pessoas?.join(', ')})` : ''}`;
+
+        // Click handler
+        elementoItem.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (ehTarefa) {
+                if (typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function') {
+                    Tasks.editarTarefa(item.id);
+                }
+            } else {
+                if (typeof Events !== 'undefined' && typeof Events.editarEvento === 'function') {
+                    Events.editarEvento(item.id);
+                }
+            }
+        });
+
+        return elementoItem;
     },
 
-    // ✅ OBTER TAREFAS DO DIA - INTEGRAÇÃO CORRIGIDA
-    _obterTarefasDoDiaIntegrado(data) {
-        try {
-            if (!App.dados?.tarefas) return [];
-            
-            const dataObj = new Date(data);
-            const diaSemana = dataObj.getDay(); // 0 = domingo, 1 = segunda, etc.
-            const diasSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
-            const nomeDialng = diasSemana[diaSemana];
-            
-            return App.dados.tarefas.filter(tarefa => {
-                // Tarefas com data específica
-                if (tarefa.dataInicio === data || tarefa.dataFim === data) {
-                    return true;
-                }
-                
-                // Tarefas da agenda semanal (recorrentes)
-                if (tarefa.agendaSemanal && tarefa.diaSemana === nomeDialng) {
-                    return true;
-                }
-                
-                return false;
-            });
-
-        } catch (error) {
-            console.error('❌ Erro ao obter tarefas do dia:', error);
-            return [];
-        }
-    },
-
-    // ✅ NAVEGAÇÃO DE MÊS - MANTIDO
+    // ✅ NAVEGAÇÃO DE MÊS
     mudarMes(direcao) {
         try {
             this.config.mesAtual += direcao;
@@ -907,7 +451,7 @@ const Calendar = {
         }
     },
 
-    // ✅ IR PARA HOJE - MANTIDO
+    // ✅ IR PARA HOJE
     irParaHoje() {
         try {
             const hoje = new Date();
@@ -919,18 +463,17 @@ const Calendar = {
             if (typeof Notifications !== 'undefined') {
                 Notifications.success('📅 Voltou para o mês atual');
             }
-            console.log('📅 Calendário resetado para hoje');
 
         } catch (error) {
             console.error('❌ Erro ao ir para hoje:', error);
         }
     },
 
-    // ✅ OBTER EVENTOS DO DIA - PÚBLICO
+    // ✅ OBTER EVENTOS DO DIA
     obterEventosDoDia(data) {
         try {
-            const eventos = this._obterEventosDoDiaIntegrado(data);
-            const tarefas = this._obterTarefasDoDiaIntegrado(data);
+            const eventos = this._obterEventosDoDia(data);
+            const tarefas = this._obterTarefasDoDia(data);
             
             return [...eventos, ...tarefas];
 
@@ -940,36 +483,26 @@ const Calendar = {
         }
     },
 
-    // ✅ EXPORTAR CALENDÁRIO EM PDF - INTEGRAÇÃO CORRIGIDA
+    // ✅ EXPORTAR CALENDÁRIO EM PDF
     exportarPDF() {
         try {
             console.log('📄 Solicitando exportação do calendário em PDF...');
             
-            // Verificar se módulo PDF está disponível
             if (typeof PDF === 'undefined') {
                 if (typeof Notifications !== 'undefined') {
-                    Notifications.error('Módulo PDF não disponível - verifique se o arquivo pdf.js foi carregado');
+                    Notifications.error('Módulo PDF não disponível');
                 }
-                console.error('❌ Módulo PDF.js não carregado');
                 return;
             }
 
-            // Verificar se PDF tem a função correta
             if (typeof PDF.mostrarModalCalendario !== 'function') {
                 if (typeof Notifications !== 'undefined') {
                     Notifications.error('Função de PDF do calendário não disponível');
                 }
-                console.error('❌ PDF.mostrarModalCalendario não é uma função');
                 return;
             }
 
-            // Abrir modal de configuração do PDF
             PDF.mostrarModalCalendario();
-            
-            console.log('✅ Modal de configuração do PDF aberto');
-            if (typeof Notifications !== 'undefined') {
-                Notifications.info('📄 Configure as opções e gere seu PDF personalizado');
-            }
 
         } catch (error) {
             console.error('❌ Erro ao exportar calendário em PDF:', error);
@@ -979,7 +512,7 @@ const Calendar = {
         }
     },
 
-    // ✅ MOSTRAR TODOS OS EVENTOS DO DIA - INTEGRAÇÃO MELHORADA COM AÇÕES
+    // ✅ MOSTRAR TODOS OS EVENTOS DO DIA
     mostrarTodosEventosDia(data) {
         try {
             const itens = this.obterEventosDoDia(data);
@@ -991,7 +524,6 @@ const Calendar = {
                 return;
             }
 
-            // Criar modal com lista completa
             this._criarModalEventosDia(data, itens);
 
         } catch (error) {
@@ -999,39 +531,33 @@ const Calendar = {
         }
     },
 
-    // ✅ ADICIONAR FERIADO - MANTIDO
+    // ✅ ADICIONAR FERIADO
     adicionarFeriado(data, nome) {
         try {
             if (!data || !nome) {
                 throw new Error('Data e nome são obrigatórios');
             }
 
-            // Validar data
             const dataObj = new Date(data);
             if (isNaN(dataObj.getTime())) {
                 throw new Error('Data inválida');
             }
 
-            // Garantir estrutura de feriados
             if (!App.dados.feriados) {
                 App.dados.feriados = {};
             }
 
-            // Adicionar feriado
             App.dados.feriados[data] = nome;
 
-            // Salvar dados
             if (typeof Persistence !== 'undefined') {
                 Persistence.salvarDadosCritico();
             }
 
-            // Regenerar calendário
             this.gerar();
 
             if (typeof Notifications !== 'undefined') {
                 Notifications.success(`Feriado "${nome}" adicionado em ${dataObj.toLocaleDateString('pt-BR')}`);
             }
-            console.log(`🎉 Feriado adicionado: ${data} - ${nome}`);
 
         } catch (error) {
             console.error('❌ Erro ao adicionar feriado:', error);
@@ -1041,21 +567,18 @@ const Calendar = {
         }
     },
 
-    // ✅ OBTER ESTATÍSTICAS DO MÊS - MANTIDO E MELHORADO
+    // ✅ OBTER ESTATÍSTICAS DO MÊS
     obterEstatisticasDoMes() {
         try {
             const mesAtual = this.config.mesAtual + 1;
             const anoAtual = this.config.anoAtual;
             
-            // Obter todos os eventos do mês
             const eventosMes = App.dados?.eventos?.filter(evento => {
                 const [ano, mes] = evento.data.split('-').map(Number);
                 return ano === anoAtual && mes === mesAtual;
             }) || [];
 
-            // Obter tarefas do mês (incluindo agenda semanal)
             const tarefasMes = App.dados?.tarefas?.filter(tarefa => {
-                // Tarefas com data específica
                 if (tarefa.dataInicio || tarefa.dataFim) {
                     if (tarefa.dataInicio) {
                         const [ano, mes] = tarefa.dataInicio.split('-').map(Number);
@@ -1067,15 +590,13 @@ const Calendar = {
                     }
                 }
                 
-                // Tarefas da agenda semanal aparecem todos os dias da semana correspondente
                 if (tarefa.agendaSemanal) {
-                    return true; // Incluir todas as tarefas da agenda semanal
+                    return true;
                 }
                 
                 return false;
             }) || [];
 
-            // Estatísticas por tipo
             const porTipo = {};
             eventosMes.forEach(evento => {
                 porTipo[evento.tipo] = (porTipo[evento.tipo] || 0) + 1;
@@ -1086,7 +607,6 @@ const Calendar = {
                 porTipo[tipoKey] = (porTipo[tipoKey] || 0) + 1;
             });
 
-            // Próximo evento
             const agora = new Date();
             const proximoEvento = eventosMes
                 .filter(evento => new Date(evento.data) >= agora)
@@ -1114,7 +634,7 @@ const Calendar = {
         }
     },
 
-    // ✅ OBTER STATUS DO SISTEMA - ATUALIZADO
+    // ✅ OBTER STATUS DO SISTEMA
     obterStatus() {
         const stats = this.obterEstatisticasDoMes();
         
@@ -1129,52 +649,12 @@ const Calendar = {
             integracaoEvents: typeof Events !== 'undefined' && typeof Events.mostrarNovoEvento === 'function',
             integracaoTasks: typeof Tasks !== 'undefined' && typeof Tasks.editarTarefa === 'function',
             integracaoPDF: typeof PDF !== 'undefined' && typeof PDF.mostrarModalCalendario === 'function',
-            cacheAtualizado: this.state.cacheEventos.size > 0,
-            dependenciasOk: this.state.dependenciasVerificadas,
-            debugMode: this.state.debugMode
+            dependenciasOk: this.state.dependenciasVerificadas
         };
     },
 
-    // 🔧 NOVA FUNÇÃO: Ativar/desativar modo debug
-    toggleDebug() {
-        this.state.debugMode = !this.state.debugMode;
-        console.log(`🧪 Modo debug ${this.state.debugMode ? 'ATIVADO' : 'DESATIVADO'}`);
-        return this.state.debugMode;
-    },
+    // === MÉTODOS PRIVADOS AUXILIARES ===
 
-    // 🔧 NOVA FUNÇÃO: Debug completo de feriados
-    _debugFeriados() {
-        console.log('🧪 [DEBUG] === DIAGNÓSTICO DE FERIADOS ===');
-        console.log('📊 App.dados disponível:', typeof App !== 'undefined' && !!App.dados);
-        console.log('📊 App.dados.feriados:', App.dados?.feriados);
-        console.log('📊 Quantidade de feriados:', Object.keys(App.dados?.feriados || {}).length);
-        
-        // Listar todos os feriados
-        if (App.dados?.feriados) {
-            Object.entries(App.dados.feriados).forEach(([data, nome]) => {
-                console.log(`📅 ${data}: ${nome}`);
-            });
-        }
-        
-        // Verificar indicadores no DOM
-        const indicadores = document.querySelectorAll('.feriado-indicator');
-        console.log(`🎉 Indicadores encontrados no DOM: ${indicadores.length}`);
-        
-        indicadores.forEach((ind, i) => {
-            console.log(`   ${i + 1}. ${ind.dataset.data}: ${ind.dataset.nome}`);
-        });
-        
-        console.log('🧪 === FIM DO DIAGNÓSTICO ===');
-        return {
-            feriados: App.dados?.feriados || {},
-            indicadores: indicadores.length,
-            funcionando: indicadores.length > 0
-        };
-    },
-
-    // ✅ === MÉTODOS PRIVADOS AUXILIARES ===
-
-    // Atualizar display do mês/ano
     _atualizarDisplayMesAno() {
         const elementos = [
             document.getElementById('mesAno'),
@@ -1190,7 +670,6 @@ const Calendar = {
         });
     },
 
-    // Gerar cabeçalho dos dias da semana
     _gerarCabecalhoDias(container) {
         this.config.diasSemana.forEach(dia => {
             const celula = document.createElement('div');
@@ -1210,7 +689,43 @@ const Calendar = {
         });
     },
 
-    // Obter ícone do evento
+    _obterEventosDoDia(data) {
+        try {
+            if (!App.dados?.eventos) return [];
+            return App.dados.eventos.filter(evento => evento.data === data);
+        } catch (error) {
+            console.error('❌ Erro ao obter eventos do dia:', error);
+            return [];
+        }
+    },
+
+    _obterTarefasDoDia(data) {
+        try {
+            if (!App.dados?.tarefas) return [];
+            
+            const dataObj = new Date(data);
+            const diaSemana = dataObj.getDay();
+            const diasSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+            const nomeDialng = diasSemana[diaSemana];
+            
+            return App.dados.tarefas.filter(tarefa => {
+                if (tarefa.dataInicio === data || tarefa.dataFim === data) {
+                    return true;
+                }
+                
+                if (tarefa.agendaSemanal && tarefa.diaSemana === nomeDialng) {
+                    return true;
+                }
+                
+                return false;
+            });
+
+        } catch (error) {
+            console.error('❌ Erro ao obter tarefas do dia:', error);
+            return [];
+        }
+    },
+
     _obterIconeEvento(tipo) {
         const icones = {
             reuniao: '📅',
@@ -1222,69 +737,8 @@ const Calendar = {
         return icones[tipo] || '📌';
     },
 
-    // Atualizar cache de eventos - MELHORADO COM LIMPEZA
-    _atualizarCacheEventos() {
-        try {
-            // Limpar cache anterior
-            this._limparCache();
-            
-            if (App.dados?.eventos) {
-                App.dados.eventos.forEach(evento => {
-                    const data = evento.data;
-                    if (!this.state.cacheEventos.has(data)) {
-                        this.state.cacheEventos.set(data, []);
-                    }
-                    this.state.cacheEventos.get(data).push(evento);
-                });
-            }
-
-            if (App.dados?.tarefas) {
-                App.dados.tarefas.forEach(tarefa => {
-                    // Cache de tarefas com data específica
-                    if (tarefa.dataInicio) {
-                        if (!this.state.cacheEventos.has(tarefa.dataInicio)) {
-                            this.state.cacheEventos.set(tarefa.dataInicio, []);
-                        }
-                        this.state.cacheEventos.get(tarefa.dataInicio).push(tarefa);
-                    }
-                    if (tarefa.dataFim) {
-                        if (!this.state.cacheEventos.has(tarefa.dataFim)) {
-                            this.state.cacheEventos.set(tarefa.dataFim, []);
-                        }
-                        this.state.cacheEventos.get(tarefa.dataFim).push(tarefa);
-                    }
-                });
-            }
-
-            // Programar limpeza automática do cache (10 minutos)
-            if (this.state.cacheTimeout) {
-                clearTimeout(this.state.cacheTimeout);
-            }
-            this.state.cacheTimeout = setTimeout(() => {
-                this._limparCache();
-            }, 10 * 60 * 1000);
-
-        } catch (error) {
-            console.error('❌ Erro ao atualizar cache:', error);
-        }
-    },
-
-    // Limpar cache
-    _limparCache() {
-        try {
-            this.state.cacheEventos.clear();
-            if (this.state.debugMode) {
-                console.log('🧹 Cache do calendário limpo');
-            }
-        } catch (error) {
-            console.error('❌ Erro ao limpar cache:', error);
-        }
-    },
-
-    // ✅ CRIAR MODAL DE EVENTOS DO DIA - MELHORADO COM AÇÕES
     _criarModalEventosDia(data, itens) {
         try {
-            // Remover modal existente
             const modalExistente = document.getElementById('modalEventosDia');
             if (modalExistente) {
                 modalExistente.remove();
@@ -1302,7 +756,6 @@ const Calendar = {
                 day: 'numeric'
             });
 
-            // Separar eventos e tarefas
             const eventos = itens.filter(item => this.config.coresEventos[item.tipo] !== undefined);
             const tarefas = itens.filter(item => this.config.coresTarefas[item.tipo] !== undefined);
 
@@ -1361,7 +814,6 @@ const Calendar = {
         }
     },
 
-    // ✅ RENDERIZAR ITEM NO MODAL - CORRIGIDO COM AÇÕES
     _renderizarItemModal(item, ehTarefa) {
         const cor = ehTarefa ? 
             this.config.coresTarefas[item.tipo] || '#6b7280' :
@@ -1370,29 +822,6 @@ const Calendar = {
         const horario = item.horarioInicio || item.horario || '';
         const pessoas = item.pessoas || (item.responsavel ? [item.responsavel] : []);
         const status = item.status ? ` (${item.status})` : '';
-
-        // Ações com botões de exclusão
-        const acoesBotoes = `
-            <div style="display: flex; gap: 4px; margin-top: 8px;">
-                <button class="btn btn-secondary btn-sm" 
-                        onclick="${ehTarefa ? 'Tasks' : 'Events'}.${ehTarefa ? 'editarTarefa' : 'editarEvento'}(${item.id}); this.closest('.modal').remove();"
-                        style="font-size: 10px; padding: 2px 6px;">
-                    ✏️ Editar
-                </button>
-                
-                <button class="btn btn-success btn-sm" 
-                        onclick="${ehTarefa ? 'Tasks' : 'Events'}.marcarConcluida ? ${ehTarefa ? 'Tasks' : 'Events'}.marcarConcluida(${item.id}) : ${ehTarefa ? 'Tasks' : 'Events'}.marcarConcluido(${item.id}); this.closest('.modal').remove();"
-                        style="font-size: 10px; padding: 2px 6px;">
-                    ✅ Concluir
-                </button>
-                
-                <button class="btn btn-danger btn-sm" 
-                        onclick="if(confirm('Excluir ${ehTarefa ? 'tarefa' : 'evento'} &quot;${item.titulo}&quot;?')) { ${ehTarefa ? 'Tasks' : 'Events'}.excluirEvento ? ${ehTarefa ? 'Tasks' : 'Events'}.excluirEvento(${item.id}) : ${ehTarefa ? 'Tasks' : 'Events'}.excluirTarefa(${item.id}); this.closest('.modal').remove(); }"
-                        style="font-size: 10px; padding: 2px 6px;">
-                    🗑️ Excluir
-                </button>
-            </div>
-        `;
 
         return `
             <div class="evento-item" style="
@@ -1414,80 +843,24 @@ const Calendar = {
                             font-size: 10px;
                             margin-left: 8px;
                         ">${item.tipo}</span>
-                        ${item.agendaSemanal ? '<span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 12px; font-size: 10px; margin-left: 4px;">Recorrente</span>' : ''}
                     </div>
                     ${horario ? `<span style="color: #6b7280; font-size: 12px;">${horario}</span>` : ''}
                 </div>
                 ${item.descricao ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 12px;">${item.descricao}</p>` : ''}
                 ${pessoas.length > 0 ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 11px;">👥 ${pessoas.join(', ')}</p>` : ''}
                 ${item.progresso !== undefined ? `<p style="margin: 4px 0 0 0; color: #6b7280; font-size: 11px;">📊 Progresso: ${item.progresso}%</p>` : ''}
-                
-                ${acoesBotoes}
             </div>
         `;
     },
 
-    // Capitalizar primeira letra
     _capitalize(texto) {
         if (!texto) return '';
         return texto.charAt(0).toUpperCase() + texto.slice(1);
-    },
-
-    // Atualizar estatísticas (placeholder)
-    _atualizarEstatisticas() {
-        if (this.state.debugMode) {
-            console.log('📊 Estatísticas do calendário atualizadas');
-        }
     }
 };
 
-// 🔧 CORREÇÃO CRÍTICA: EXPOR NO WINDOW GLOBAL
+// ✅ EXPOR NO WINDOW GLOBAL
 window.Calendar = Calendar;
-
-// ✅ FUNÇÕES HELPER GLOBAIS PARA DEBUG
-window.Calendar_Debug = {
-    // Ativar modo debug
-    enableDebug: () => Calendar.toggleDebug(),
-    
-    // Diagnóstico completo de feriados
-    debugFeriados: () => Calendar._debugFeriados(),
-    
-    // Forçar exclusão de feriado (para testes)
-    forcarExclusao: (data) => {
-        console.log(`🔨 FORÇANDO exclusão do feriado: ${data}`);
-        
-        if (!App?.dados?.feriados?.[data]) {
-            console.log('❌ Feriado não encontrado');
-            return false;
-        }
-        
-        const nome = App.dados.feriados[data];
-        
-        try {
-            delete App.dados.feriados[data];
-            
-            if (typeof Persistence !== 'undefined') {
-                Persistence.salvarDadosCritico();
-            }
-            
-            Calendar.gerar();
-            console.log(`✅ Feriado "${nome}" FORÇADAMENTE excluído!`);
-            return true;
-            
-        } catch (error) {
-            console.error('❌ Erro ao forçar exclusão:', error);
-            return false;
-        }
-    },
-    
-    // Adicionar feriado de teste
-    adicionarTeste: () => {
-        const data = '2025-07-30';
-        const nome = 'Feriado de Teste - Debug';
-        Calendar.adicionarFeriado(data, nome);
-        return { data, nome };
-    }
-};
 
 // ✅ ATALHOS DE TECLADO
 document.addEventListener('keydown', (e) => {
@@ -1501,12 +874,6 @@ document.addEventListener('keydown', (e) => {
                 e.preventDefault();
                 Calendar.mudarMes(1);
                 break;
-            case 'd':
-                if (e.shiftKey) {
-                    e.preventDefault();
-                    Calendar.toggleDebug();
-                }
-                break;
         }
     } else if (e.key === 'Home') {
         e.preventDefault();
@@ -1514,86 +881,38 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ✅ INICIALIZAÇÃO FORÇADA E IMEDIATA
-function inicializarCalendarioForcado() {
-    console.log('🚨 FORÇANDO inicialização do calendário...');
-    
-    // Verificar se container existe
-    const container = document.getElementById('calendario');
-    if (!container) {
-        console.error('❌ Container #calendario não encontrado!');
-        return;
-    }
-    
-    // Verificar se App está disponível
-    if (typeof App === 'undefined') {
-        console.error('❌ App não disponível!');
-        return;
-    }
-    
-    // Inicializar dados se necessário
-    if (!App.dados) {
-        console.log('📊 Inicializando dados padrão...');
-        App.dados = {
-            eventos: [],
-            tarefas: [],
-            feriados: {}
-        };
-    }
-    
-    // GERAR CALENDÁRIO FORÇADAMENTE
-    try {
-        Calendar.gerar();
-        console.log('✅ Calendário gerado com sucesso!');
-    } catch (error) {
-        console.error('❌ Erro ao gerar calendário:', error);
-        
-        // FALLBACK: Mostrar mensagem no container
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #ef4444;">
-                ❌ Erro ao carregar calendário<br>
-                <button onclick="Calendar.gerar()" class="btn btn-primary" style="margin-top: 10px;">
-                    🔄 Tentar Novamente
-                </button>
-            </div>
-        `;
-    }
-}
-
-// 🚨 INICIALIZAÇÃO MÚLTIPLA E AGRESSIVA
+// ✅ INICIALIZAÇÃO ÚNICA E AUTOMÁTICA
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('📅 DOMContentLoaded - Tentando inicializar calendário...');
-    inicializarCalendarioForcado();
+    // Aguardar App estar disponível
+    const tentarInicializar = () => {
+        if (typeof App !== 'undefined' && App.dados) {
+            console.log('📅 Inicializando Calendar.js...');
+            Calendar.gerar();
+            return true;
+        }
+        return false;
+    };
+    
+    // Tentar imediatamente
+    if (!tentarInicializar()) {
+        // Se não conseguir, aguardar até 3 segundos
+        let tentativas = 0;
+        const maxTentativas = 30;
+        
+        const interval = setInterval(() => {
+            tentativas++;
+            
+            if (tentarInicializar()) {
+                clearInterval(interval);
+            } else if (tentativas >= maxTentativas) {
+                clearInterval(interval);
+                console.warn('⚠️ Calendar.js: timeout na inicialização');
+            }
+        }, 100);
+    }
 });
 
-// Timeout backup 1
-setTimeout(() => {
-    console.log('📅 Timeout 500ms - Tentando inicializar calendário...');
-    inicializarCalendarioForcado();
-}, 500);
-
-// Timeout backup 2  
-setTimeout(() => {
-    console.log('📅 Timeout 1000ms - Tentando inicializar calendário...');
-    inicializarCalendarioForcado();
-}, 1000);
-
-// Timeout backup 3
-setTimeout(() => {
-    console.log('📅 Timeout 2000ms - ÚLTIMA TENTATIVA calendário...');
-    inicializarCalendarioForcado();
-}, 2000);
-
-// ✅ FUNÇÃO GLOBAL PARA DEBUG E FORÇAR
-window.forcarCalendario = inicializarCalendarioForcado;
-
-// ✅ LOG DE INICIALIZAÇÃO CORRIGIDO
-console.log('📅 Sistema de Calendário Modular v6.2.2 TOTALMENTE CORRIGIDO E EXPOSTO NO WINDOW!');
-console.log('✅ CORREÇÃO: window.Calendar = Calendar adicionada');
-console.log('🧪 Verificar: typeof window.Calendar =', typeof window.Calendar);
-console.log('🎯 Funcionalidades: Navegação, Eventos + Tarefas Integradas, Feriados com Exclusão FUNCIONAL, PDF Export');
-console.log('⚙️ Integração PERFEITA: Events.js, Tasks.js, PDF.js');
-console.log('✅ CORREÇÃO: Exclusão de feriados 100% funcional com debug completo');
-console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje), Ctrl+Shift+D (debug mode)');
-console.log('🧪 Debug: Calendar_Debug.enableDebug(), Calendar_Debug.debugFeriados(), Calendar_Debug.forcarExclusao("YYYY-MM-DD")');
-console.log('🚨 EMERGÊNCIA: forcarCalendario() - Para forçar inicialização');
+console.log('📅 Sistema de Calendário Modular v6.3.0 LIMPO!');
+console.log('✅ REMOVIDO: Debug excessivo, múltiplas inicializações');
+console.log('✅ FUNCIONAL: Navegação, Eventos, Tarefas, Feriados, PDF');
+console.log('⌨️ Atalhos: Ctrl+←/→ (navegar), Home (hoje)');
