@@ -1,4 +1,4 @@
-/* ========== 🔥 CONFIGURAÇÃO FIREBASE v6.2.1 - CORRIGIDO ========== */
+/* ========== 🔥 CONFIGURAÇÃO FIREBASE v7.3.0 - LIMPO ========== */
 
 // ✅ CONFIGURAÇÃO FIREBASE
 const firebaseConfig = {
@@ -19,12 +19,20 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const auth = firebase.auth();
 
-// 🔧 CORREÇÃO CRÍTICA: EXPOR NO WINDOW GLOBAL
+// ✅ EXPOSIÇÃO CONSOLIDADA NO WINDOW (uma única vez)
+window.firebase = firebase;
 window.database = database;
 window.auth = auth;
-window.firebase = firebase; // Garantir que firebase também está no window
 
-// ✅ VERIFICAÇÃO DE CONECTIVIDADE
+// ✅ CONSTANTES FIREBASE
+const FIREBASE_CONFIG = {
+    VERSAO_DB: 7,
+    TIMEOUT_OPERACAO: 10000,
+    MAX_TENTATIVAS: 3,
+    INTERVALO_RETRY: 1000
+};
+
+// ✅ FUNÇÃO DE CONECTIVIDADE (sem exposição redundante)
 function verificarConectividade() {
     return new Promise((resolve) => {
         database.ref('.info/connected').once('value', (snapshot) => {
@@ -33,36 +41,15 @@ function verificarConectividade() {
     });
 }
 
-// ✅ EXPOR FUNÇÃO NO WINDOW
-window.verificarConectividade = verificarConectividade;
-
-// ✅ CONSTANTES FIREBASE
-const FIREBASE_CONFIG = {
-    VERSAO_DB: 6,
-    TIMEOUT_OPERACAO: 10000, // 10 segundos
-    MAX_TENTATIVAS: 3,
-    INTERVALO_RETRY: 1000, // 1 segundo
-};
-
-// 🔧 EXPOR CONFIGURAÇÕES NO WINDOW
-window.FIREBASE_CONFIG = FIREBASE_CONFIG;
-
-// ✅ LOG DE INICIALIZAÇÃO
-console.log('🔥 Firebase configurado v6.2.1 - CORRIGIDO');
-
-// 🔧 VERIFICAÇÃO DA CORREÇÃO
-console.log('🧪 Verificando exposições no window:');
-console.log('  window.database:', typeof window.database);
-console.log('  window.auth:', typeof window.auth);
-console.log('  window.firebase:', typeof window.firebase);
-
-// ✅ VERIFICAÇÃO INICIAL DE CONECTIVIDADE
+// ✅ VERIFICAÇÃO INICIAL SIMPLIFICADA
 verificarConectividade().then(conectado => {
     if (conectado) {
-        console.log('✅ Firebase conectado na inicialização');
+        console.log('✅ Firebase conectado v7.3.0');
     } else {
-        console.warn('⚠️ Firebase desconectado na inicialização');
+        console.warn('⚠️ Firebase offline - modo limitado');
     }
 }).catch(error => {
-    console.error('❌ Erro na verificação de conectividade:', error);
+    console.error('❌ Erro conectividade Firebase:', error);
 });
+
+console.log('🔥 Firebase v7.3.0 LIMPO - exposições consolidadas');
