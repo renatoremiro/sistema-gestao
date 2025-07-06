@@ -43,7 +43,7 @@ const PersonalAgenda = {
         // URLs e navegação
         urls: {
             agendaDedicada: 'agenda.html',
-            sistemaprincipal: 'index-dev.html'
+            sistemaprincipal: 'index.html'
         }
     },
 
