@@ -23,39 +23,54 @@ function carregarConfigDeVariaveis() {
 }
 
 function carregarConfigDeArquivo() {
-    try {
-        var request = new XMLHttpRequest();
-        request.open('GET', 'assets/js/config/firebaseConfig.json', false); // sincronamente
-        request.send(null);
-        if (request.status === 200) {
-            return JSON.parse(request.responseText);
-        }
-    } catch (e) {
-        console.error('Erro ao carregar firebaseConfig.json', e);
-    }
-    return null;
+    return fetch('assets/js/config/firebaseConfig.json')
+        .then(response => response.ok ? response.json() : null)
+        .catch((e) => {
+            console.error('Erro ao carregar firebaseConfig.json', e);
+            return null;
+        });
 }
 
-const firebaseConfig = carregarConfigDeVariaveis() || carregarConfigDeArquivo();
+const firebaseConfigPromise = Promise
+    .resolve(carregarConfigDeVariaveis())
+    .then(cfg => cfg || carregarConfigDeArquivo());
 
-// ✅ INICIALIZAR FIREBASE
+// ✅ INICIALIZAR FIREBASE ASSINCRONAMENTE
 let database = null;
 let auth = null;
 
-if (firebaseConfig) {
-    firebase.initializeApp(firebaseConfig);
-    database = firebase.database();
-    auth = firebase.auth();
-} else {
-    console.error('Configuração do Firebase não encontrada.');
-}
+window.firebaseInitPromise = firebaseConfigPromise
+    .then(async (cfg) => {
+        if (!cfg) {
+            console.error('Configuração do Firebase não encontrada.');
+            return null;
+        }
+
+        firebase.initializeApp(cfg);
+        database = firebase.database();
+        auth = firebase.auth();
+
+        const conectado = await verificarConectividade();
+        if (conectado) {
+            console.log('✅ Firebase conectado v7.3.0');
+        } else {
+            console.warn('⚠️ Firebase offline - modo limitado');
+        }
+
+        return cfg;
+    })
+    .catch((error) => {
+        console.error('❌ Erro conectividade Firebase:', error);
+        return null;
+    })
+    .finally(() => {
+        window.firebase = firebase;
+        window.database = database;
+        window.auth = auth;
+        console.log('🔥 Firebase v7.3.0 LIMPO - exposições consolidadas');
+    });
 
 // ✅ CRIAR SERVIÇOS FIREBASE APENAS SE INICIALIZADO
-
-// ✅ EXPOSIÇÃO CONSOLIDADA NO WINDOW (uma única vez)
-window.firebase = firebase;
-window.database = database;
-window.auth = auth;
 
 // ✅ CONSTANTES FIREBASE
 const FIREBASE_CONFIG = {
@@ -74,15 +89,3 @@ function verificarConectividade() {
     });
 }
 
-// ✅ VERIFICAÇÃO INICIAL SIMPLIFICADA
-verificarConectividade().then(conectado => {
-    if (conectado) {
-        console.log('✅ Firebase conectado v7.3.0');
-    } else {
-        console.warn('⚠️ Firebase offline - modo limitado');
-    }
-}).catch(error => {
-    console.error('❌ Erro conectividade Firebase:', error);
-});
-
-console.log('🔥 Firebase v7.3.0 LIMPO - exposições consolidadas');
