@@ -551,7 +551,12 @@ const Auth = {
         console.log('🔐 Inicializando sistema de autenticação...');
 
         if (!firebaseAuth) {
-            Notifications.error('Serviço de autenticação indisponível');
+            const msg = 'Firebase não configurado. Consulte o README.md (seção "Configuração do Firebase")';
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error(msg);
+            } else {
+                console.error(msg);
+            }
             return;
         }
 
@@ -591,11 +596,22 @@ const Auth = {
 
 // ✅ INICIALIZAÇÃO AUTOMÁTICA
 document.addEventListener('DOMContentLoaded', async () => {
+    let cfg = null;
     if (window.firebaseInitPromise) {
-        await window.firebaseInitPromise;
+        cfg = await window.firebaseInitPromise;
     }
-    firebaseAuth = window.auth || (window.firebase ? window.firebase.auth() : null);
-    Auth.init();
+
+    if (cfg) {
+        firebaseAuth = window.auth || (window.firebase ? window.firebase.auth() : null);
+        Auth.init();
+    } else {
+        const msg = 'Firebase não configurado. Consulte o README.md (seção "Configuração do Firebase")';
+        if (typeof Notifications !== 'undefined') {
+            Notifications.error(msg);
+        } else {
+            console.error(msg);
+        }
+    }
 });
 
 // Disponibilizar objeto para handlers em inline scripts

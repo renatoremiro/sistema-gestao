@@ -78,7 +78,9 @@ window.firebaseInitPromise = firebaseConfigPromise
     .finally(() => {
         window.firebase = firebase;
         window.database = database;
-        window.auth = auth;
+        if (auth) {
+            window.auth = auth;
+        }
         console.log('🔥 Firebase v7.3.0 LIMPO - exposições consolidadas');
     });
 
