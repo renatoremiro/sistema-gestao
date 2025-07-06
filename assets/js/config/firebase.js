@@ -1,19 +1,49 @@
 /* ========== 🔥 CONFIGURAÇÃO FIREBASE v7.3.0 - LIMPO ========== */
 
-// ✅ CONFIGURAÇÃO FIREBASE
-const firebaseConfig = {
-    apiKey: "AIzaSyCT0UXyU6AeurlaZdgM4_MKhzJWIdYxWg4",
-    authDomain: "sistema-gestao-obra.firebaseapp.com",
-    databaseURL: "https://sistema-gestao-obra-default-rtdb.firebaseio.com",
-    projectId: "sistema-gestao-obra",
-    storageBucket: "sistema-gestao-obra.firebasestorage.app",
-    messagingSenderId: "686804029278",
-    appId: "1:686804029278:web:758190822a19ef935e89cf",
-    measurementId: "G-RE86WX5KY2"
-};
+// ✅ CARREGAR CONFIGURAÇÃO
+function carregarConfigDeVariaveis() {
+    if (typeof process !== 'undefined' && process.env && process.env.FIREBASE_API_KEY) {
+        return {
+            apiKey: process.env.FIREBASE_API_KEY,
+            authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+            databaseURL: process.env.FIREBASE_DATABASE_URL,
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+            appId: process.env.FIREBASE_APP_ID,
+            measurementId: process.env.FIREBASE_MEASUREMENT_ID
+        };
+    }
+
+    if (typeof window !== 'undefined' && window.firebaseConfig) {
+        return window.firebaseConfig;
+    }
+
+    return null;
+}
+
+function carregarConfigDeArquivo() {
+    try {
+        var request = new XMLHttpRequest();
+        request.open('GET', 'assets/js/config/firebaseConfig.json', false); // sincronamente
+        request.send(null);
+        if (request.status === 200) {
+            return JSON.parse(request.responseText);
+        }
+    } catch (e) {
+        console.error('Erro ao carregar firebaseConfig.json', e);
+    }
+    return null;
+}
+
+const firebaseConfig = carregarConfigDeVariaveis() || carregarConfigDeArquivo();
 
 // ✅ INICIALIZAR FIREBASE
-firebase.initializeApp(firebaseConfig);
+if (firebaseConfig) {
+    firebase.initializeApp(firebaseConfig);
+} else {
+    console.error('Configuração do Firebase não encontrada.');
+}
 
 // ✅ CRIAR SERVIÇOS FIREBASE
 const database = firebase.database();
