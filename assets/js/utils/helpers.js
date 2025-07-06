@@ -1,10 +1,14 @@
 /**
  * 🔧 Sistema de Utilitários (Helpers) v7.4.0 - PRODUCTION READY
- * 
+ *
  * ✅ OTIMIZADO: Debug reduzido 75% (8 → 2 logs essenciais)
  * ✅ PERFORMANCE: Operações otimizadas + cache eficiente
  * ✅ UTILITÁRIOS: Download, upload, formatação, validação
  * ✅ STORAGE: LocalStorage seguro + sanitização
+ *
+ * Este módulo comunica-se opcionalmente com `notifications.js` para exibir
+ * toasts e avisos. Caso `window.Notifications` não esteja disponível, todas as
+ * funcionalidades permanecem operacionais sem mensagens visuais.
  */
 
 const Helpers = {
@@ -25,15 +29,20 @@ const Helpers = {
         ultimaLimpeza: null
     },
 
+    // ✅ NOTIFICAÇÃO CENTRALIZADA - opcional
+    _notify(tipo, mensagem, titulo) {
+        if (typeof Notifications !== 'undefined' && typeof Notifications[tipo] === 'function') {
+            Notifications[tipo](mensagem, titulo);
+        }
+    },
+
     // === UTILITÁRIOS DE ARQUIVO ===
 
     // ✅ DOWNLOAD DE ARQUIVO - OTIMIZADO
     downloadFile(content, filename, mimeType = 'text/plain') {
         try {
             if (this.state.downloadAtivo) {
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.warning('Download já em andamento');
-                }
+                this._notify('warning', 'Download já em andamento');
                 return false;
             }
 
@@ -60,19 +69,14 @@ const Helpers = {
                 this.state.downloadAtivo = false;
             }, 1000);
 
-            if (typeof Notifications !== 'undefined') {
-                Notifications.success(`Arquivo "${filename}" baixado com sucesso!`);
-            }
+            this._notify('success', `Arquivo "${filename}" baixado com sucesso!`);
 
             return true;
 
         } catch (error) {
             console.error('❌ Erro ao fazer download:', error);
             this.state.downloadAtivo = false;
-            
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error('Erro ao fazer download do arquivo');
-            }
+            this._notify('error', 'Erro ao fazer download do arquivo');
             return false;
         }
     },
@@ -105,23 +109,17 @@ const Helpers = {
                         callback(content, file);
                     }
                     
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.success(`Arquivo "${file.name}" carregado com sucesso!`);
-                    }
+                    this._notify('success', `Arquivo "${file.name}" carregado com sucesso!`);
 
                 } catch (error) {
                     this.state.uploadAtivo = false;
-                    if (typeof Notifications !== 'undefined') {
-                        Notifications.error('Erro ao processar arquivo');
-                    }
+                    this._notify('error', 'Erro ao processar arquivo');
                 }
             };
 
             reader.onerror = () => {
                 this.state.uploadAtivo = false;
-                if (typeof Notifications !== 'undefined') {
-                    Notifications.error('Erro ao ler arquivo');
-                }
+                this._notify('error', 'Erro ao ler arquivo');
             };
 
             // Ler arquivo baseado no tipo
@@ -135,9 +133,7 @@ const Helpers = {
 
         } catch (error) {
             this.state.uploadAtivo = false;
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error(`Erro no upload: ${error.message}`);
-            }
+            this._notify('error', `Erro no upload: ${error.message}`);
             return false;
         }
     },
@@ -525,15 +521,11 @@ const Helpers = {
                 document.body.removeChild(textArea);
             }
 
-            if (typeof Notifications !== 'undefined') {
-                Notifications.success('Texto copiado para a área de transferência!');
-            }
+            this._notify('success', 'Texto copiado para a área de transferência!');
             return true;
 
         } catch (error) {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error('Erro ao copiar texto');
-            }
+            this._notify('error', 'Erro ao copiar texto');
             return false;
         }
     },

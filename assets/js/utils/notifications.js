@@ -1,4 +1,7 @@
 (function () {
+  // Sistema de notificações simples usado por outros módulos (ex: helpers.js)
+  // para exibição de toasts e confirmações. Pode ser substituído ou removido
+  // sem quebrar funcionalidades, já que chamadas são verificadas.
   const DURATION = 4000;
 
   function getContainer() {
@@ -62,4 +65,5 @@
     mostrarToast,
     mostrarConfirmacao,
   };
+  // Outros módulos verificam a existência deste objeto antes de utilizá-lo.
 })();
