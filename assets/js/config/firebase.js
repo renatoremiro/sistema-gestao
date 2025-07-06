@@ -39,15 +39,18 @@ function carregarConfigDeArquivo() {
 const firebaseConfig = carregarConfigDeVariaveis() || carregarConfigDeArquivo();
 
 // ✅ INICIALIZAR FIREBASE
+let database = null;
+let auth = null;
+
 if (firebaseConfig) {
     firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    auth = firebase.auth();
 } else {
     console.error('Configuração do Firebase não encontrada.');
 }
 
-// ✅ CRIAR SERVIÇOS FIREBASE
-const database = firebase.database();
-const auth = firebase.auth();
+// ✅ CRIAR SERVIÇOS FIREBASE APENAS SE INICIALIZADO
 
 // ✅ EXPOSIÇÃO CONSOLIDADA NO WINDOW (uma única vez)
 window.firebase = firebase;
