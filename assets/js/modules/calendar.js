@@ -904,9 +904,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Tentar imediatamente
     if (!tentarInicializar()) {
-        // Se não conseguir, aguardar até 3 segundos
+        // Se não conseguir, aguardar até 10 segundos
         let tentativas = 0;
-        const maxTentativas = 30;
+        const maxTentativas = 100;
         
         const interval = setInterval(() => {
             tentativas++;
