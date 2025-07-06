@@ -2,6 +2,7 @@
 
 const firebaseAuth = window.auth || (window.firebase ? window.firebase.auth() : null);
 
+
 const Auth = {
     // ✅ CONFIGURAÇÕES
     config: {
@@ -80,7 +81,11 @@ const Auth = {
                 await Persistence.salvarDadosCritico();
             }
             
-            await auth.signOut();
+            if (!firebaseAuth) {
+                Notifications.error('Serviço de autenticação indisponível');
+                return;
+            }
+            await firebaseAuth.signOut();
             this._onLogoutSucesso();
             
         } catch (error) {
@@ -104,7 +109,11 @@ const Auth = {
         try {
             this._mostrarIndicadorLogin('Criando conta...');
             
-            const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+            if (!firebaseAuth) {
+                Notifications.error('Serviço de autenticação indisponível');
+                return;
+            }
+            const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, senha);
             
             // Atualizar perfil com nome
             await userCredential.user.updateProfile({
@@ -124,7 +133,11 @@ const Auth = {
     // ✅ RECUPERAR SENHA
     async recuperarSenha(email) {
         try {
-            await auth.sendPasswordResetEmail(email);
+            if (!firebaseAuth) {
+                Notifications.error('Serviço de autenticação indisponível');
+                return;
+            }
+            await firebaseAuth.sendPasswordResetEmail(email);
             Notifications.success('Email de recuperação enviado!');
         } catch (error) {
             console.error('Erro na recuperação:', error);
@@ -580,5 +593,8 @@ const Auth = {
 document.addEventListener('DOMContentLoaded', () => {
     Auth.init();
 });
+
+// Disponibilizar objeto para handlers em inline scripts
+window.Auth = Auth;
 
 console.log('🔐 Sistema de Autenticação Firebase v6.2 carregado!');
