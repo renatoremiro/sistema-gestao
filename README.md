@@ -9,7 +9,14 @@ utilizados.
 
 ## Testes
 
-Para executar o teste de unidade do helper, rode:
+Execute a suíte completa utilizando o NPM:
+
+```bash
+npm test
+```
+
+Se preferir rodar um teste isolado basta chamar o arquivo diretamente com o
+Node.js, por exemplo:
 
 ```bash
 node tests/helpers.test.js
