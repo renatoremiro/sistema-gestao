@@ -435,14 +435,14 @@ class ChatEmpresarial {
         const container = document.getElementById('mensagensContainer');
         if (!container || !mensagem) return;
 
-        const isPropia = mensagem.autor === this.usuario.email;
+        const isPropria = mensagem.autor === this.usuario.email;
         const tempo = new Date(mensagem.timestamp).toLocaleTimeString('pt-BR', {
             hour: '2-digit',
             minute: '2-digit'
         });
 
         const mensagemEl = document.createElement('div');
-        mensagemEl.className = `mensagem-item ${isPropia ? 'propria' : 'externa'} ${mensagem.tipo || 'normal'}`;
+        mensagemEl.className = `mensagem-item ${isPropria ? 'propria' : 'externa'} ${mensagem.tipo || 'normal'}`;
         mensagemEl.setAttribute('data-msg-id', mensagem.id);
 
         if (mensagem.tipo === 'sistema') {
@@ -464,7 +464,7 @@ class ChatEmpresarial {
                 </div>
                 <div class="mensagem-conteudo">
                     <div class="mensagem-header">
-                        <span class="autor-nome">${isPropia ? 'Você' : mensagem.nomeAutor}</span>
+                        <span class="autor-nome">${isPropria ? 'Você' : mensagem.nomeAutor}</span>
                         <span class="autor-cargo">${mensagem.cargo}</span>
                         <span class="mensagem-tempo">${tempo}</span>
                     </div>

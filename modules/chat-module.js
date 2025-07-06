@@ -294,11 +294,11 @@ class ChatEmpresarialPro {
         const welcome = container.querySelector('.welcome');
         if (welcome) welcome.remove();
 
-        const isPropia = mensagem.autor === this.usuario.email;
+        const isPropria = mensagem.autor === this.usuario.email;
         const tempo = this.formatarTempo(mensagem.timestamp);
 
         const div = document.createElement('div');
-        div.className = `message ${isPropia ? 'own' : 'other'}`;
+        div.className = `message ${isPropria ? 'own' : 'other'}`;
         div.dataset.msgId = mensagem.id;
         
         div.innerHTML = `
@@ -307,7 +307,7 @@ class ChatEmpresarialPro {
             </div>
             <div class="message-content">
                 <div class="message-header">
-                    <span class="author">${isPropia ? 'Você' : mensagem.nomeAutor}</span>
+                    <span class="author">${isPropria ? 'Você' : mensagem.nomeAutor}</span>
                     <span class="time">${tempo}</span>
                 </div>
                 <div class="message-text">${this.processarTexto(mensagem.texto)}</div>
@@ -322,7 +322,7 @@ class ChatEmpresarialPro {
         }
 
         // Notificar se não estiver aberto
-        if (!this.isOpen && !isPropia) {
+        if (!this.isOpen && !isPropria) {
             this.notificar();
         }
     }
