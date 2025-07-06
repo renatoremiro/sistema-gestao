@@ -42,3 +42,8 @@ FIREBASE_MEASUREMENT_ID
 Caso as variáveis não estejam definidas, crie o arquivo `firebaseConfig.json`
 com o mesmo formato das credenciais fornecidas pelo Firebase e coloque-o em
 `assets/js/config/`.
+
+Se preferir, copie o arquivo de exemplo `assets/js/config/firebaseConfig.sample.json`,
+preencha cada campo com as suas credenciais e salve como
+`assets/js/config/firebaseConfig.json`. Sem esse arquivo ou variáveis de
+ambiente válidas o objeto `auth` ficará indefinido e o login não funcionará.
