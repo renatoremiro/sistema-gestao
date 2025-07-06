@@ -475,6 +475,9 @@
     min-width: 200px;
     animation: toast-in 0.3s ease;
 }
+.toast strong {
+    margin-right: 4px;
+}
 
 @keyframes toast-in {
     from { transform: translateX(100%); opacity: 0; }

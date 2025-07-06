@@ -28,7 +28,7 @@ const sandbox = {
   HybridSync: {},
   HybridSync_Debug: {},
   setTimeout: setTimeout,
-  setInterval: setInterval,
+  setInterval: () => ({ unref: () => {} }),
   alert: () => {}
 };
 vm.createContext(sandbox);

@@ -17,7 +17,17 @@
   function createToast(message, type, title) {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = title ? `<strong>${title}</strong> ${message}` : message;
+
+    if (title) {
+      const strong = document.createElement('strong');
+      strong.textContent = title;
+      toast.appendChild(strong);
+      toast.appendChild(document.createTextNode(' '));
+    }
+
+    const text = document.createTextNode(message);
+    toast.appendChild(text);
+
     toast.addEventListener('click', () => toast.remove());
     return toast;
   }
