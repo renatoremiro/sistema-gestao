@@ -1,6 +1,6 @@
 /* ========== 🔐 SISTEMA DE AUTENTICAÇÃO FIREBASE v6.2 ========== */
 
-const firebaseAuth = window.auth || (window.firebase ? window.firebase.auth() : null);
+let firebaseAuth = null;
 
 
 const Auth = {
@@ -590,7 +590,11 @@ const Auth = {
 };
 
 // ✅ INICIALIZAÇÃO AUTOMÁTICA
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    if (window.firebaseInitPromise) {
+        await window.firebaseInitPromise;
+    }
+    firebaseAuth = window.auth || (window.firebase ? window.firebase.auth() : null);
     Auth.init();
 });
 
