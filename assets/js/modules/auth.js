@@ -1,5 +1,7 @@
 /* ========== 🔐 SISTEMA DE AUTENTICAÇÃO FIREBASE v6.2 ========== */
 
+const firebaseAuth = window.auth || (window.firebase ? window.firebase.auth() : null);
+
 const Auth = {
     // ✅ CONFIGURAÇÕES
     config: {
@@ -37,18 +39,23 @@ const Auth = {
         }
 
         try {
+            if (!firebaseAuth) {
+                Notifications.error('Serviço de autenticação indisponível');
+                return;
+            }
+
             this.state.loginEmAndamento = true;
             this.state.tentativasLogin++;
-            
+
             this._mostrarIndicadorLogin('Fazendo login...');
-            
+
             // Timeout promise
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('Timeout no login')), this.config.TIMEOUT_LOGIN);
             });
 
             // Login promise
-            const loginPromise = auth.signInWithEmailAndPassword(email, senha);
+            const loginPromise = firebaseAuth?.signInWithEmailAndPassword(email, senha);
             
             // Race entre login e timeout
             const userCredential = await Promise.race([loginPromise, timeoutPromise]);
@@ -453,7 +460,13 @@ const Auth = {
         this.state.autoLoginTentado = true;
         
         return new Promise((resolve) => {
-            const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (!firebaseAuth) {
+                Notifications.error('Serviço de autenticação indisponível');
+                resolve(null);
+                return;
+            }
+
+            const unsubscribe = firebaseAuth?.onAuthStateChanged((user) => {
                 unsubscribe();
                 
                 if (user) {
@@ -523,15 +536,20 @@ const Auth = {
     // ✅ INICIALIZAÇÃO DO MÓDULO
     init() {
         console.log('🔐 Inicializando sistema de autenticação...');
-        
+
+        if (!firebaseAuth) {
+            Notifications.error('Serviço de autenticação indisponível');
+            return;
+        }
+
         // Configurar eventos de teclado
         this._configurarEventosTeclado();
-        
+
         // Verificar auto-login
         this.verificarAutoLogin();
-        
+
         // Configurar listener de mudanças de autenticação
-        const authListener = auth.onAuthStateChanged((user) => {
+        const authListener = firebaseAuth?.onAuthStateChanged((user) => {
             if (user && !this.state.usuarioAtual) {
                 // Usuário fez login
                 this._onLoginSucesso(user);
