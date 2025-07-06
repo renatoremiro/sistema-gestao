@@ -45,7 +45,7 @@ function verificarConectividade() {
 // ✅ VERIFICAÇÃO INICIAL SIMPLIFICADA
 verificarConectividade().then(conectado => {
     if (conectado) {
-        console.log('✅ Firebase conectado v7.3.0');
+        vLog('✅ Firebase conectado v7.3.0');
     } else {
         console.warn('⚠️ Firebase offline - modo limitado');
     }

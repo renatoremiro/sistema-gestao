@@ -34,7 +34,7 @@ const App = {
     // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA - LIMPA
     async inicializarSistema() {
         try {
-            console.log('🚀 Iniciando sistema v7.3.0...');
+            vLog('🚀 Iniciando sistema v7.3.0...');
             
             // Verificar se já foi inicializado
             if (this.estadoSistema.sistemaInicializado) {
@@ -65,7 +65,7 @@ const App = {
             // Marcar como inicializado
             this.estadoSistema.sistemaInicializado = true;
 
-            console.log('✅ Sistema inicializado com sucesso');
+            vLog('✅ Sistema inicializado com sucesso');
             Notifications.success('Sistema inicializado!');
 
         } catch (error) {
@@ -521,7 +521,7 @@ auth.onAuthStateChanged((user) => {
         App.usuarioAtual = user;
         App.inicializarSistema();
     } else {
-        console.log('👤 Aguardando login...');
+        vLog('👤 Aguardando login...');
     }
 });
 
