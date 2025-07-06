@@ -2,6 +2,7 @@
  * 💾 Sistema de Persistência v7.4.0 - PRODUCTION READY
  * 
  * ✅ OTIMIZADO: Debug reduzido 74% (19 → 5 logs essenciais)
+const vLog = window.vLog || function(){};
  * ✅ PERFORMANCE: Operações consolidadas + cache otimizado
  * ✅ ROBUSTEZ: Backup e recuperação melhorados
  * ✅ FUNCIONALIDADE: 100% preservada + melhorada
@@ -616,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG FINAL OTIMIZADO - PRODUCTION READY
-console.log('💾 Persistence.js v7.4.0 - PRODUCTION READY');
+vLog('💾 Persistence.js v7.4.0 - PRODUCTION READY');
 
 /*
 ✅ OTIMIZAÇÕES APLICADAS v7.4.0:

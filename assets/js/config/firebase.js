@@ -1,4 +1,5 @@
 /* ========== 🔥 CONFIGURAÇÃO FIREBASE v7.3.0 - LIMPO ========== */
+const vLog = window.vLog || function(){};
 
 // ✅ CONFIGURAÇÃO FIREBASE
 const firebaseConfig = {
@@ -52,4 +53,4 @@ verificarConectividade().then(conectado => {
     console.error('❌ Erro conectividade Firebase:', error);
 });
 
-console.log('🔥 Firebase v7.3.0 LIMPO - exposições consolidadas');
+vLog('🔥 Firebase v7.3.0 LIMPO - exposições consolidadas');

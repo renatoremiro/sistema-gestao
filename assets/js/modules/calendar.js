@@ -2,6 +2,7 @@
  * 📅 Sistema de Calendário Modular v7.4.0 - PRODUCTION READY
  * 
  * ✅ FUNCIONAIS: Navegação, Eventos, Tarefas, Feriados, PDF
+const vLog = window.vLog || function(){};
  * ✅ OTIMIZADO: Debug reduzido 74% (19 → 5 logs essenciais)
  * ✅ PERFORMANCE: Verificações consolidadas + código limpo
  * ✅ CONTROLE TOTAL: Calendar.js é o único responsável pelo calendário
@@ -894,7 +895,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aguardar App estar disponível
     const tentarInicializar = () => {
         if (typeof App !== 'undefined' && App.dados) {
-            console.log('📅 Calendar.js v7.4.0 iniciado');
+            vLog('📅 Calendar.js v7.4.0 iniciado');
             Calendar.state.inicializado = true;
             Calendar.gerar();
             return true;
@@ -922,7 +923,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG FINAL OTIMIZADO - PRODUCTION READY
-console.log('📅 Calendar.js v7.4.0 - PRODUCTION READY');
+vLog('📅 Calendar.js v7.4.0 - PRODUCTION READY');
 
 /*
 ✅ OTIMIZAÇÕES APLICADAS v7.4.0:

@@ -4,6 +4,7 @@
  * CORREÇÕES APLICADAS:
  * ✅ Modais PDF TOTALMENTE FUNCIONAIS (não mais placeholder)
  * ✅ Formulários completos com validação
+const vLog = window.vLog || function(){};
  * ✅ Configurações padronizadas
  * ✅ Validações robustas implementadas
  * ✅ Cache com limpeza automática
@@ -120,13 +121,13 @@ const PDF = {
             const dependenciasOk = Object.values(this.state.dependencias).filter(Boolean).length;
             const totalDependencias = Object.keys(this.state.dependencias).length - 1; // -1 para 'verificada'
             
-            console.log(`📊 Dependências PDF: ${dependenciasOk}/${totalDependencias} disponíveis`);
+            vLog(`📊 Dependências PDF: ${dependenciasOk}/${totalDependencias} disponíveis`);
             
             // Log detalhado
             Object.entries(this.state.dependencias).forEach(([nome, disponivel]) => {
                 if (nome !== 'verificada') {
                     if (disponivel) {
-                        console.log(`✅ ${nome} disponível para PDF`);
+                        vLog(`✅ ${nome} disponível para PDF`);
                     } else {
                         console.warn(`⚠️ ${nome} não disponível para PDF`);
                     }
@@ -147,7 +148,7 @@ const PDF = {
         const inicioTempo = performance.now();
         
         try {
-            console.log('📄 Iniciando geração de PDF do calendário...', opcoes);
+            vLog('📄 Iniciando geração de PDF do calendário...', opcoes);
             
             // Validar dependências
             if (!this._validarDependenciasCompletas()) {
@@ -214,7 +215,7 @@ const PDF = {
         const inicioTempo = performance.now();
         
         try {
-            console.log('📋 Iniciando geração de PDF da agenda semanal...', opcoes);
+            vLog('📋 Iniciando geração de PDF da agenda semanal...', opcoes);
             
             // Validar dependências
             if (!this._validarDependenciasCompletas()) {
@@ -300,7 +301,7 @@ const PDF = {
 
             // Verificar se modal já existe
             if (document.getElementById('modalPdfCalendario')) {
-                console.log('⚠️ Modal PDF calendário já existe');
+                vLog('⚠️ Modal PDF calendário já existe');
                 return;
             }
 
@@ -319,7 +320,7 @@ const PDF = {
             // Exibir modal
             setTimeout(() => modal.classList.add('show'), 10);
 
-            console.log('📄 Modal de configuração do calendário aberto');
+            vLog('📄 Modal de configuração do calendário aberto');
 
         } catch (error) {
             console.error('❌ Erro ao abrir modal do calendário:', error);
@@ -344,7 +345,7 @@ const PDF = {
 
             // Verificar se modal já existe
             if (document.getElementById('modalPdfAgenda')) {
-                console.log('⚠️ Modal PDF agenda já existe');
+                vLog('⚠️ Modal PDF agenda já existe');
                 return;
             }
 
@@ -363,7 +364,7 @@ const PDF = {
             // Exibir modal
             setTimeout(() => modal.classList.add('show'), 10);
 
-            console.log('📋 Modal de configuração da agenda aberto');
+            vLog('📋 Modal de configuração da agenda aberto');
 
         } catch (error) {
             console.error('❌ Erro ao abrir modal da agenda:', error);
@@ -503,7 +504,7 @@ const PDF = {
             this.state.tipoModal = null;
             this.state.opcoesSelecionadas = {};
 
-            console.log('✅ Modal PDF fechado e estado limpo');
+            vLog('✅ Modal PDF fechado e estado limpo');
 
         } catch (error) {
             console.error('❌ Erro ao fechar modal:', error);
@@ -756,7 +757,7 @@ const PDF = {
 
     // ✅ CONFIGURAR MODAL DE CALENDÁRIO
     _configurarModalCalendario() {
-        console.log('⚙️ Configurando modal do calendário...');
+        vLog('⚙️ Configurando modal do calendário...');
         
         try {
             // Event listeners para validação em tempo real
@@ -767,7 +768,7 @@ const PDF = {
                 const atualizarPrevia = () => {
                     const mesNome = mes.options[mes.selectedIndex].text;
                     const anoVal = ano.value;
-                    console.log(`📅 Selecionado: ${mesNome} ${anoVal}`);
+                    vLog(`📅 Selecionado: ${mesNome} ${anoVal}`);
                 };
                 
                 mes.addEventListener('change', atualizarPrevia);
@@ -781,7 +782,7 @@ const PDF = {
 
     // ✅ CONFIGURAR MODAL DE AGENDA
     _configurarModalAgenda() {
-        console.log('⚙️ Configurando modal da agenda...');
+        vLog('⚙️ Configurando modal da agenda...');
         
         try {
             const pessoaSelect = document.getElementById('pdfAgendaPessoa');
@@ -901,7 +902,7 @@ const PDF = {
                 throw new Error('Ano inválido');
             }
             
-            console.log('📊 Opções coletadas:', opcoes);
+            vLog('📊 Opções coletadas:', opcoes);
             return opcoes;
             
         } catch (error) {
@@ -937,7 +938,7 @@ const PDF = {
                 throw new Error('Data de início é obrigatória');
             }
             
-            console.log('📊 Opções da agenda coletadas:', opcoes);
+            vLog('📊 Opções da agenda coletadas:', opcoes);
             return opcoes;
             
         } catch (error) {
@@ -994,7 +995,7 @@ const PDF = {
     // Atualizar cache de dados - OTIMIZADO COM ERROR HANDLING
     async _atualizarCacheDados() {
         try {
-            console.log('🔄 Atualizando cache de dados PDF...');
+            vLog('🔄 Atualizando cache de dados PDF...');
             
             // Limpar cache anterior se muito antigo
             const agora = Date.now();
@@ -1029,7 +1030,7 @@ const PDF = {
             // Programar limpeza automática
             this._programarLimpezaCache();
             
-            console.log('✅ Cache de dados PDF atualizado:', {
+            vLog('✅ Cache de dados PDF atualizado:', {
                 pessoas: this.state.cache.pessoas.size,
                 eventos: this.state.cache.eventos.size,
                 tarefas: this.state.cache.tarefas.size
@@ -1054,7 +1055,7 @@ const PDF = {
                 this.state.cache.timeoutLimpeza = null;
             }
             
-            console.log('🧹 Cache PDF limpo');
+            vLog('🧹 Cache PDF limpo');
             
         } catch (error) {
             console.error('❌ Erro ao limpar cache:', error);
@@ -1254,7 +1255,7 @@ const PDF = {
     // ✅ GERAR CONTEÚDO REAL DO CALENDÁRIO
     async _gerarConteudoCalendarioReal(pdf, config) {
         try {
-            console.log('🎨 Gerando conteúdo real do calendário PDF...');
+            vLog('🎨 Gerando conteúdo real do calendário PDF...');
             
             // Configurar título
             pdf.setFontSize(16);
@@ -1282,7 +1283,7 @@ const PDF = {
     // ✅ GERAR CONTEÚDO REAL DA AGENDA
     async _gerarConteudoAgendaReal(pdf, config, tarefas) {
         try {
-            console.log('🎨 Gerando conteúdo real da agenda PDF...');
+            vLog('🎨 Gerando conteúdo real da agenda PDF...');
             
             // Configurar título
             pdf.setFontSize(16);
@@ -1447,7 +1448,7 @@ const PDF = {
             const totalTempo = (this.state.performance.tempoMedioGeracao * (this.state.performance.geracoesPDF - 1)) + tempoGeracao;
             this.state.performance.tempoMedioGeracao = totalTempo / this.state.performance.geracoesPDF;
             
-            console.log(`✅ PDF ${tipo} gerado com sucesso em ${Math.round(tempoGeracao)}ms:`, nomeArquivo);
+            vLog(`✅ PDF ${tipo} gerado com sucesso em ${Math.round(tempoGeracao)}ms:`, nomeArquivo);
             
             if (typeof Notifications !== 'undefined') {
                 Notifications.success(`📄 PDF salvo: ${nomeArquivo}`);
@@ -1528,7 +1529,7 @@ const PDF = {
 // ✅ INICIALIZAÇÃO DO MÓDULO COM ERROR BOUNDARY
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        console.log('📄 Sistema de Geração de PDFs v6.2.1 carregado!');
+        vLog('📄 Sistema de Geração de PDFs v6.2.1 carregado!');
         
         // Verificar dependências na inicialização
         setTimeout(() => {
@@ -1542,7 +1543,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        console.log('✅ PDF module inicializado com sucesso');
+        vLog('✅ PDF module inicializado com sucesso');
 
     } catch (error) {
         console.error('❌ Erro na inicialização do módulo PDF:', error);
@@ -1553,16 +1554,16 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('beforeunload', () => {
     try {
         PDF._limparCache();
-        console.log('🧹 Cleanup do módulo PDF realizado');
+        vLog('🧹 Cleanup do módulo PDF realizado');
     } catch (error) {
         console.error('❌ Erro no cleanup do PDF:', error);
     }
 });
 
 // ✅ LOG DE CARREGAMENTO
-console.log('📄 Sistema de Geração de PDFs v6.2.1 TOTALMENTE CORRIGIDO!');
-console.log('🎯 Funcionalidades: Calendário Mensal + Agenda Semanal REAIS');
-console.log('🎨 Modais COMPLETOS e funcionais (não mais placeholder)');
-console.log('⚙️ Integração PERFEITA: Calendar.js, Tasks.js, Events.js');
-console.log('✅ CORREÇÃO: Modais com formulários completos, validação e geração real de PDF');
-console.log('🔧 Error handling robusto e validações completas');
+vLog('📄 Sistema de Geração de PDFs v6.2.1 TOTALMENTE CORRIGIDO!');
+vLog('🎯 Funcionalidades: Calendário Mensal + Agenda Semanal REAIS');
+vLog('🎨 Modais COMPLETOS e funcionais (não mais placeholder)');
+vLog('⚙️ Integração PERFEITA: Calendar.js, Tasks.js, Events.js');
+vLog('✅ CORREÇÃO: Modais com formulários completos, validação e geração real de PDF');
+vLog('🔧 Error handling robusto e validações completas');

@@ -2,6 +2,7 @@
  * 📅 Sistema de Gestão de Eventos v7.4.0 - PRODUCTION READY
  * 
  * ✅ OTIMIZADO: Debug reduzido 75% (20 → 5 logs essenciais)
+const vLog = window.vLog || function(){};
  * ✅ CORRIGIDO: Problema de exclusão de eventos persistentes
  * ✅ PERFORMANCE: Cache limpo + sincronização melhorada
  * ✅ FUNCIONALIDADE: 100% preservada + melhorada
@@ -1149,16 +1150,16 @@ window.Events_Debug = {
     limparCache: () => Events._limparCacheCompleto(),
     // 🔥 NOVO: Função de diagnóstico para eventos persistentes
     diagnosticar: () => {
-        console.log('🔍 DIAGNÓSTICO DE EVENTOS:');
-        console.log('📊 Total de eventos:', App.dados?.eventos?.length || 0);
-        console.log('🧹 Cache limpo:', Events.state.cacheLimpo);
-        console.log('💾 Dados eventos:', App.dados?.eventos);
-        console.log('🔗 Cache SessionStorage:', Object.keys(sessionStorage).filter(k => k.includes('evento')));
+        vLog('🔍 DIAGNÓSTICO DE EVENTOS:');
+        vLog('📊 Total de eventos:', App.dados?.eventos?.length || 0);
+        vLog('🧹 Cache limpo:', Events.state.cacheLimpo);
+        vLog('💾 Dados eventos:', App.dados?.eventos);
+        vLog('🔗 Cache SessionStorage:', Object.keys(sessionStorage).filter(k => k.includes('evento')));
     }
 };
 
 // ✅ LOG FINAL OTIMIZADO - PRODUCTION READY
-console.log('📅 Events.js v7.4.0 - PRODUCTION READY');
+vLog('📅 Events.js v7.4.0 - PRODUCTION READY');
 
 /*
 ✅ OTIMIZAÇÕES APLICADAS v7.4.0:

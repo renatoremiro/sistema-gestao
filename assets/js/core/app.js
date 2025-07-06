@@ -1,4 +1,5 @@
 /* ========== 🚀 CORE APP v7.3.0 - LIMPO SEM DUPLICAÇÕES ========== */
+const vLog = window.vLog || function(){};
 
 const App = {
     // ✅ VERSÃO E CONSTANTES
@@ -59,7 +60,7 @@ const App = {
             this.iniciarVerificacaoPrazos();
 
             // ✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário
-            console.log('📅 Calendar.js assumiu controle total do calendário');
+            vLog('📅 Calendar.js assumiu controle total do calendário');
 
             // Marcar como inicializado
             this.estadoSistema.sistemaInicializado = true;
@@ -271,7 +272,7 @@ const App = {
 
     abrirArea(chaveArea) {
         this.estadoSistema.areaAtual = chaveArea;
-        console.log('🏢 Abrindo área:', chaveArea);
+        vLog('🏢 Abrindo área:', chaveArea);
     },
 
     // ✅ UTILITÁRIOS
@@ -402,11 +403,11 @@ const App = {
 
     // ✅ MÉTODOS AUXILIARES
     buscarGlobal() {
-        console.log('🔍 Busca global - implementar no módulo de busca');
+        vLog('🔍 Busca global - implementar no módulo de busca');
     },
 
     filtrarStatus(status, elemento) {
-        console.log('🔽 Filtro:', status);
+        vLog('🔽 Filtro:', status);
     },
 
     fecharTodosModals() {
@@ -424,7 +425,7 @@ const App = {
 
     // ✅ SALVAMENTO DE DADOS
     async salvarDados() {
-        console.log('💾 Salvando dados...');
+        vLog('💾 Salvando dados...');
         return Promise.resolve();
     },
 
@@ -503,12 +504,12 @@ window.App = App;
 window.inicializarSistema = () => App.inicializarSistema();
 window.testarStatusApp = () => {
     const status = App.obterStatusSistema();
-    console.log('📊 Status do Sistema:', status);
+    vLog('📊 Status do Sistema:', status);
     
     // Testar integração com Calendar.js
     if (status.modulosDisponiveis.Calendar) {
         const statusCalendar = Calendar.obterStatus();
-        console.log('📅 Status Calendar:', statusCalendar);
+        vLog('📅 Status Calendar:', statusCalendar);
     }
     
     return status;
@@ -524,4 +525,4 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
-console.log('🚀 Core App v7.3.0 LIMPO - ZERO DUPLICAÇÕES!');
+vLog('🚀 Core App v7.3.0 LIMPO - ZERO DUPLICAÇÕES!');

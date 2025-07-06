@@ -1,4 +1,5 @@
 /* ========== 🔐 SISTEMA DE AUTENTICAÇÃO FIREBASE v6.2 ========== */
+const vLog = window.vLog || function(){};
 
 const Auth = {
     // ✅ CONFIGURAÇÕES
@@ -457,10 +458,10 @@ const Auth = {
                 unsubscribe();
                 
                 if (user) {
-                    console.log('👤 Usuário já autenticado:', user.email);
+                    vLog('👤 Usuário já autenticado:', user.email);
                     this._onLoginSucesso(user);
                 } else {
-                    console.log('👤 Usuário não autenticado');
+                    vLog('👤 Usuário não autenticado');
                     this._mostrarTelaLogin();
                     
                     // Pré-popular email se lembrado
@@ -522,7 +523,7 @@ const Auth = {
 
     // ✅ INICIALIZAÇÃO DO MÓDULO
     init() {
-        console.log('🔐 Inicializando sistema de autenticação...');
+        vLog('🔐 Inicializando sistema de autenticação...');
         
         // Configurar eventos de teclado
         this._configurarEventosTeclado();
@@ -543,7 +544,7 @@ const Auth = {
         
         this.state.listeners.add(authListener);
         
-        console.log('✅ Sistema de autenticação inicializado');
+        vLog('✅ Sistema de autenticação inicializado');
     },
 
     // ✅ LIMPEZA DO MÓDULO
@@ -563,4 +564,4 @@ document.addEventListener('DOMContentLoaded', () => {
     Auth.init();
 });
 
-console.log('🔐 Sistema de Autenticação Firebase v6.2 carregado!');
+vLog('🔐 Sistema de Autenticação Firebase v6.2 carregado!');

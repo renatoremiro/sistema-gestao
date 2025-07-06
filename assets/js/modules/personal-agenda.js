@@ -1,4 +1,5 @@
 /* ========== 📋 SISTEMA HÍBRIDO - MINHA AGENDA v6.6.0 - PÁGINA DEDICADA INTEGRADA ========== */
+const vLog = window.vLog || function(){};
 
 const PersonalAgenda = {
     // ✅ CONFIGURAÇÕES HÍBRIDAS COMPLETAS
@@ -61,7 +62,7 @@ const PersonalAgenda = {
     // ✅ INICIALIZAÇÃO
     init() {
         try {
-            console.log('📋 Inicializando PersonalAgenda v6.6.0 (Página Dedicada Integrada)...');
+            vLog('📋 Inicializando PersonalAgenda v6.6.0 (Página Dedicada Integrada)...');
             
             // Definir usuário atual dinamicamente
             this._definirUsuarioAtual();
@@ -75,8 +76,8 @@ const PersonalAgenda = {
             // Atualizar estado
             this.state.ultimaAtualizacao = new Date().toISOString();
             
-            console.log(`✅ PersonalAgenda inicializado para: ${this.state.pessoaAtual}`);
-            console.log(`🔄 Modo: ${this.state.tipoSistema} → ${this.config.urls.agendaDedicada}`);
+            vLog(`✅ PersonalAgenda inicializado para: ${this.state.pessoaAtual}`);
+            vLog(`🔄 Modo: ${this.state.tipoSistema} → ${this.config.urls.agendaDedicada}`);
             
         } catch (error) {
             console.error('❌ Erro ao inicializar PersonalAgenda:', error);
@@ -89,12 +90,12 @@ const PersonalAgenda = {
     // 🔧 FUNÇÃO PRINCIPAL: ABRIR AGENDA DEDICADA
     abrirMinhaAgenda(pessoa = null) {
         try {
-            console.log('📋 Abrindo agenda dedicada...');
+            vLog('📋 Abrindo agenda dedicada...');
             
             // Definir usuário se fornecido
             if (pessoa) {
                 this.state.pessoaAtual = pessoa;
-                console.log(`👤 Usuário definido: ${pessoa}`);
+                vLog(`👤 Usuário definido: ${pessoa}`);
             } else {
                 this._definirUsuarioAtual();
             }
@@ -122,7 +123,7 @@ const PersonalAgenda = {
             }
             
             // Fazer redirecionamento
-            console.log(`🔄 Redirecionando para: ${urlCompleta}`);
+            vLog(`🔄 Redirecionando para: ${urlCompleta}`);
             window.location.href = urlCompleta;
             
         } catch (error) {
@@ -136,7 +137,7 @@ const PersonalAgenda = {
     // ✅ ABRIR AGENDA EM NOVA ABA
     abrirAgendaNovaAba() {
         try {
-            console.log('🔗 Abrindo agenda em nova aba...');
+            vLog('🔗 Abrindo agenda em nova aba...');
             
             this._definirUsuarioAtual();
             this._salvarEstadoNavegacao();
@@ -159,7 +160,7 @@ const PersonalAgenda = {
                 if (typeof Notifications !== 'undefined') {
                     Notifications.success(`🔗 Agenda de ${this.state.pessoaAtual} aberta em nova aba!`);
                 }
-                console.log('✅ Nova aba aberta com sucesso');
+                vLog('✅ Nova aba aberta com sucesso');
             } else {
                 throw new Error('Popup bloqueado ou erro ao abrir nova aba');
             }
@@ -229,7 +230,7 @@ const PersonalAgenda = {
 
             this.state.pessoaAtual = usuarioDetectado;
             
-            console.log(`👤 Usuário detectado: ${usuarioDetectado} (fonte: ${fonte})`);
+            vLog(`👤 Usuário detectado: ${usuarioDetectado} (fonte: ${fonte})`);
             
         } catch (error) {
             console.error('❌ Erro ao definir usuário atual:', error);
@@ -289,7 +290,7 @@ const PersonalAgenda = {
             // Salvar no sessionStorage para a página agenda acessar
             sessionStorage.setItem('agenda_navegacao', JSON.stringify(estado));
             
-            console.log('💾 Estado de navegação salvo:', {
+            vLog('💾 Estado de navegação salvo:', {
                 usuario: estado.usuario,
                 origem: estado.origem,
                 temDados: !!estado.dadosApp
@@ -321,7 +322,7 @@ const PersonalAgenda = {
     // 🔧 FALLBACK: NOVA ABA SE REDIRECIONAMENTO FALHAR
     _fallbackNovaAba() {
         try {
-            console.log('🔄 Tentando fallback: nova aba...');
+            vLog('🔄 Tentando fallback: nova aba...');
             
             const urlSimples = this.config.urls.agendaDedicada;
             window.open(urlSimples, '_blank');
@@ -362,13 +363,13 @@ const PersonalAgenda = {
             Object.entries(dependencias).forEach(([nome, disponivel]) => {
                 if (disponivel) {
                     dependenciasOk++;
-                    console.log(`✅ ${nome} disponível`);
+                    vLog(`✅ ${nome} disponível`);
                 } else {
                     console.warn(`⚠️ ${nome} não disponível`);
                 }
             });
             
-            console.log(`📊 Dependências: ${dependenciasOk}/${dependenciasTotal} disponíveis`);
+            vLog(`📊 Dependências: ${dependenciasOk}/${dependenciasTotal} disponíveis`);
             
             return dependencias.Storage; // Pelo menos storage deve funcionar
             
@@ -384,7 +385,7 @@ const PersonalAgenda = {
             // Listener para mudanças no localStorage/sessionStorage
             window.addEventListener('storage', (e) => {
                 if (e.key === 'agenda_navegacao' || e.key === 'agenda_acao') {
-                    console.log('🔄 Estado de navegação alterado externamente');
+                    vLog('🔄 Estado de navegação alterado externamente');
                 }
             });
             
@@ -393,7 +394,7 @@ const PersonalAgenda = {
                 this._salvarEstadoNavegacao();
             });
             
-            console.log('⚙️ Eventos globais configurados');
+            vLog('⚙️ Eventos globais configurados');
             
         } catch (error) {
             console.warn('⚠️ Erro ao configurar eventos globais:', error);
@@ -403,7 +404,7 @@ const PersonalAgenda = {
     // ✅ FUNÇÃO DE COMPATIBILIDADE: MOSTRAR NOVA TAREFA
     mostrarNovaTarefa(tipo = 'pessoal', responsavel = null) {
         try {
-            console.log(`📝 Criando nova tarefa tipo: ${tipo}`);
+            vLog(`📝 Criando nova tarefa tipo: ${tipo}`);
             
             const responsavelFinal = responsavel || this.state.pessoaAtual;
             
@@ -430,7 +431,7 @@ const PersonalAgenda = {
         try {
             const titulo = prompt(`📝 Título da nova tarefa ${tipo}:`);
             if (!titulo || titulo.trim() === '') {
-                console.log('⏹️ Criação de tarefa cancelada');
+                vLog('⏹️ Criação de tarefa cancelada');
                 return;
             }
             
@@ -465,7 +466,7 @@ const PersonalAgenda = {
                 timestamp: new Date().toISOString()
             }));
             
-            console.log('✅ Tarefa rápida criada:', novaTarefa.titulo);
+            vLog('✅ Tarefa rápida criada:', novaTarefa.titulo);
             
             if (typeof Notifications !== 'undefined') {
                 Notifications.success(`📝 Tarefa "${novaTarefa.titulo}" criada!`);
@@ -489,7 +490,7 @@ const PersonalAgenda = {
     
     // Editar tarefa - redireciona para agenda
     editarTarefa(tarefaId) {
-        console.log(`✏️ Redirecionando para edição da tarefa: ${tarefaId}`);
+        vLog(`✏️ Redirecionando para edição da tarefa: ${tarefaId}`);
         
         sessionStorage.setItem('agenda_acao', JSON.stringify({
             tipo: 'editar',
@@ -502,7 +503,7 @@ const PersonalAgenda = {
 
     // Sincronizar e abrir agenda
     sincronizarComCalendario() {
-        console.log('🔄 Sincronizando e abrindo agenda...');
+        vLog('🔄 Sincronizando e abrindo agenda...');
         
         try {
             // Tentar sincronizar se HybridSync disponível
@@ -529,7 +530,7 @@ const PersonalAgenda = {
 
     // Marcar tarefa como concluída (compatibilidade)
     marcarConcluida(tarefaId) {
-        console.log(`✅ Marcando tarefa como concluída: ${tarefaId}`);
+        vLog(`✅ Marcando tarefa como concluída: ${tarefaId}`);
         
         sessionStorage.setItem('agenda_acao', JSON.stringify({
             tipo: 'marcar_concluida',
@@ -542,7 +543,7 @@ const PersonalAgenda = {
 
     // Excluir tarefa (compatibilidade)
     excluirTarefa(tarefaId) {
-        console.log(`🗑️ Redirecionando para exclusão da tarefa: ${tarefaId}`);
+        vLog(`🗑️ Redirecionando para exclusão da tarefa: ${tarefaId}`);
         
         sessionStorage.setItem('agenda_acao', JSON.stringify({
             tipo: 'excluir',
@@ -663,12 +664,12 @@ const PersonalAgenda = {
     debug() {
         const status = this.obterStatus();
         console.group('🧪 DEBUG PersonalAgenda v6.6.0');
-        console.log('📊 Status completo:', status);
-        console.log('👤 Usuário atual:', this.state.pessoaAtual);
-        console.log('🔗 URL da agenda:', this.config.urls.agendaDedicada);
-        console.log('💾 Estado salvo:', sessionStorage.getItem('agenda_navegacao'));
-        console.log('📋 Minhas tarefas:', this._obterMinhasTarefas().length);
-        console.log('📅 Agenda semanal:', this._obterAgendaSemanal());
+        vLog('📊 Status completo:', status);
+        vLog('👤 Usuário atual:', this.state.pessoaAtual);
+        vLog('🔗 URL da agenda:', this.config.urls.agendaDedicada);
+        vLog('💾 Estado salvo:', sessionStorage.getItem('agenda_navegacao'));
+        vLog('📋 Minhas tarefas:', this._obterMinhasTarefas().length);
+        vLog('📅 Agenda semanal:', this._obterAgendaSemanal());
         console.groupEnd();
         
         return status;
@@ -687,10 +688,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ✅ FUNÇÃO GLOBAL DE TESTE
 window.testarPersonalAgenda = () => {
-    console.log('🧪 Testando PersonalAgenda...');
+    vLog('🧪 Testando PersonalAgenda...');
     
     const status = PersonalAgenda.obterStatus();
-    console.log('📊 Status:', status);
+    vLog('📊 Status:', status);
     
     if (typeof Notifications !== 'undefined') {
         Notifications.info(`✅ PersonalAgenda v${status.versao} funcionando!`);
@@ -700,11 +701,11 @@ window.testarPersonalAgenda = () => {
 };
 
 // ✅ LOG DE INICIALIZAÇÃO COMPLETO
-console.log('📋 PersonalAgenda v6.6.0 - PÁGINA DEDICADA INTEGRADA carregado!');
-console.log('🔄 MUDANÇA PRINCIPAL: Modal → Redirecionamento para agenda.html');
-console.log('📱 Uso principal: PersonalAgenda.abrirMinhaAgenda()');
-console.log('🆕 Novas funções: PersonalAgenda.abrirAgendaNovaAba()');
-console.log('✅ Compatibilidade: 100% mantida com código existente');
-console.log('🧪 Debug: PersonalAgenda.debug() ou testarPersonalAgenda()');
-console.log('📊 Status: PersonalAgenda.obterStatus()');
-console.log('🎯 Sistema pronto para integração com agenda dedicada!');
+vLog('📋 PersonalAgenda v6.6.0 - PÁGINA DEDICADA INTEGRADA carregado!');
+vLog('🔄 MUDANÇA PRINCIPAL: Modal → Redirecionamento para agenda.html');
+vLog('📱 Uso principal: PersonalAgenda.abrirMinhaAgenda()');
+vLog('🆕 Novas funções: PersonalAgenda.abrirAgendaNovaAba()');
+vLog('✅ Compatibilidade: 100% mantida com código existente');
+vLog('🧪 Debug: PersonalAgenda.debug() ou testarPersonalAgenda()');
+vLog('📊 Status: PersonalAgenda.obterStatus()');
+vLog('🎯 Sistema pronto para integração com agenda dedicada!');

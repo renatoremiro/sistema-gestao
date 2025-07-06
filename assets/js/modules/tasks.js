@@ -2,6 +2,7 @@
  * 📝 Sistema de Gestão de Tarefas v7.4.0 - PRODUCTION READY
  * 
  * ✅ OTIMIZADO: Debug reduzido 80% (15 → 3 logs essenciais)
+const vLog = window.vLog || function(){};
  * ✅ PERFORMANCE: CRUD otimizado + cache inteligente + batch operations
  * ✅ FUNCIONALIDADE: Tarefas completas, subtarefas, progresso, filtros
  * ✅ INTEGRAÇÃO: Calendar, Events, Persistence, Notifications
@@ -793,4 +794,4 @@ if (document.readyState === 'loading') {
 }
 
 // ✅ LOG DE INICIALIZAÇÃO (ÚNICO LOG ESSENCIAL)
-console.log('✅ TASKS v7.4.0: Sistema de tarefas carregado (PRODUCTION READY)');
+vLog('✅ TASKS v7.4.0: Sistema de tarefas carregado (PRODUCTION READY)');

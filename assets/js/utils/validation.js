@@ -3,15 +3,16 @@
  * 
  * ✅ PROBLEMA 1: Validation.isValidEmail is not a function
  * ✅ PROBLEMA 2: Notifications is not defined  
+const vLog = window.vLog || function(){};
  * ✅ SOLUÇÃO: Implementação fallback completa de ambos os sistemas
  * ✅ URGÊNCIA: Execução automática e monitoramento contínuo
  */
 
-console.log('🚨 INICIANDO CORREÇÃO CRÍTICA COMPLETA v7.4.0 - EMERGÊNCIA!');
+vLog('🚨 INICIANDO CORREÇÃO CRÍTICA COMPLETA v7.4.0 - EMERGÊNCIA!');
 
 // ✅ IMPLEMENTAÇÃO VALIDATION FALLBACK
 function implementarValidationCompleto() {
-    console.log('🛡️ Implementando Validation completo...');
+    vLog('🛡️ Implementando Validation completo...');
     
     window.Validation = {
         config: {
@@ -123,12 +124,12 @@ function implementarValidationCompleto() {
         }
     };
 
-    console.log('✅ Validation emergency implementado!');
+    vLog('✅ Validation emergency implementado!');
 }
 
 // ✅ IMPLEMENTAÇÃO NOTIFICATIONS FALLBACK
 function implementarNotificationsCompleto() {
-    console.log('🔔 Implementando Notifications completo...');
+    vLog('🔔 Implementando Notifications completo...');
     
     window.Notifications = {
         // Estados do sistema
@@ -183,7 +184,7 @@ function implementarNotificationsCompleto() {
 
                 // Fallback - console se DOM falhar
                 const emoji = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-                console.log(`${emoji[type]} ${title}: ${message}`);
+                vLog(`${emoji[type]} ${title}: ${message}`);
 
             } catch (error) {
                 // Fallback absoluto - alert nativo
@@ -314,7 +315,7 @@ function implementarNotificationsCompleto() {
     `;
     document.head.appendChild(styles);
 
-    console.log('✅ Notifications emergency implementado!');
+    vLog('✅ Notifications emergency implementado!');
 }
 
 // ✅ VERIFICAÇÕES DE INTEGRIDADE
@@ -359,7 +360,7 @@ function verificarSistemas() {
 
 // ✅ FUNÇÃO PRINCIPAL DE CORREÇÃO COMPLETA
 function executarCorrecaoCompleta() {
-    console.log('🔧 EXECUTANDO CORREÇÃO COMPLETA DE EMERGÊNCIA...');
+    vLog('🔧 EXECUTANDO CORREÇÃO COMPLETA DE EMERGÊNCIA...');
     
     // 1. Implementar sistemas
     implementarValidationCompleto();
@@ -368,15 +369,15 @@ function executarCorrecaoCompleta() {
     // 2. Verificar funcionamento
     const resultados = verificarSistemas();
     
-    console.log('📊 RESULTADOS DA CORREÇÃO:');
-    console.log('- Validation:', resultados.validation ? '✅' : '❌');
-    console.log('- Notifications:', resultados.notifications ? '✅' : '❌');
-    console.log('- Integração Auth:', resultados.integracao_auth ? '✅' : '❌');
+    vLog('📊 RESULTADOS DA CORREÇÃO:');
+    vLog('- Validation:', resultados.validation ? '✅' : '❌');
+    vLog('- Notifications:', resultados.notifications ? '✅' : '❌');
+    vLog('- Integração Auth:', resultados.integracao_auth ? '✅' : '❌');
     
     const sucesso = Object.values(resultados).every(r => r === true);
     
     if (sucesso) {
-        console.log('🎉 CORREÇÃO COMPLETA SUCESSO!');
+        vLog('🎉 CORREÇÃO COMPLETA SUCESSO!');
         
         // Testar com notificação real
         setTimeout(() => {
@@ -392,7 +393,7 @@ function executarCorrecaoCompleta() {
 
 // ✅ MONITORAMENTO CONTÍNUO MELHORADO
 function monitorarSistemasEmergencia() {
-    console.log('🔍 Iniciando monitoramento de emergência...');
+    vLog('🔍 Iniciando monitoramento de emergência...');
     
     const intervalo = setInterval(() => {
         const status = verificarSistemas();
@@ -411,7 +412,7 @@ function monitorarSistemasEmergencia() {
     // Parar após 10 minutos
     setTimeout(() => {
         clearInterval(intervalo);
-        console.log('🏁 Monitoramento de emergência concluído');
+        vLog('🏁 Monitoramento de emergência concluído');
     }, 600000);
     
     return intervalo;
@@ -419,7 +420,7 @@ function monitorarSistemasEmergencia() {
 
 // ✅ TESTE COMPLETO DO AUTH
 function testarIntegracaoAuth() {
-    console.log('🔐 Testando integração específica com Auth...');
+    vLog('🔐 Testando integração específica com Auth...');
     
     try {
         // Simular validação que o auth.js faz
@@ -429,12 +430,12 @@ function testarIntegracaoAuth() {
         const emailValido = window.Validation.isValidEmail(emailTeste);
         const senhaValida = window.Validation.isValidPassword(senhaTeste);
         
-        console.log('📧 Email válido:', emailValido);
-        console.log('🔑 Senha válida:', senhaValida);
+        vLog('📧 Email válido:', emailValido);
+        vLog('🔑 Senha válida:', senhaValida);
         
         // Testar notificação
         if (window.Notifications) {
-            console.log('🔔 Testando notificação...');
+            vLog('🔔 Testando notificação...');
             window.Notifications.info('Teste de integração Auth realizado', 'Sistema Funcionando');
         }
         
@@ -448,7 +449,7 @@ function testarIntegracaoAuth() {
 
 // ✅ EXECUÇÃO AUTOMÁTICA DE EMERGÊNCIA
 (function() {
-    console.log('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA AUTOMÁTICA...');
+    vLog('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA AUTOMÁTICA...');
     
     // Executar correção imediata
     const sucesso = executarCorrecaoCompleta();
@@ -471,9 +472,9 @@ function testarIntegracaoAuth() {
             })
         };
         
-        console.log('🎯 SISTEMA DE EMERGÊNCIA ATIVO!');
-        console.log('📝 Para verificar: CorrecaoEmergencia.verificar()');
-        console.log('🧪 Para testar Auth: CorrecaoEmergencia.testarAuth()');
+        vLog('🎯 SISTEMA DE EMERGÊNCIA ATIVO!');
+        vLog('📝 Para verificar: CorrecaoEmergencia.verificar()');
+        vLog('🧪 Para testar Auth: CorrecaoEmergencia.testarAuth()');
         
         // Notificar usuário se tudo ok
         if (authOk) {
@@ -489,4 +490,4 @@ function testarIntegracaoAuth() {
 })();
 
 // ✅ LOG FINAL
-console.log('✅ CORREÇÃO CRÍTICA COMPLETA v7.4.0: Sistema de emergência carregado!');
+vLog('✅ CORREÇÃO CRÍTICA COMPLETA v7.4.0: Sistema de emergência carregado!');

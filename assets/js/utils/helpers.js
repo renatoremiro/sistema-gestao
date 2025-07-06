@@ -10,6 +10,7 @@
  * toasts e avisos. Caso `window.Notifications` não esteja disponível, todas as
  * funcionalidades permanecem operacionais sem mensagens visuais.
  */
+const vLog = window.vLog || function(){};
 
 const Helpers = {
     // ✅ CONFIGURAÇÕES
@@ -667,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG FINAL OTIMIZADO - PRODUCTION READY
-console.log('🔧 Helpers.js v7.4.0 - PRODUCTION READY');
+vLog('🔧 Helpers.js v7.4.0 - PRODUCTION READY');
 
 /*
 ✅ OTIMIZAÇÕES APLICADAS v7.4.0:
