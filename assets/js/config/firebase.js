@@ -43,6 +43,12 @@ window.firebaseInitPromise = firebaseConfigPromise
     .then(async (cfg) => {
         if (!cfg) {
             console.error('Configuração do Firebase não encontrada.');
+            const msg = 'Firebase não configurado. Consulte o README.md (seção "Configuração do Firebase")';
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error(msg);
+            } else if (typeof alert === 'function') {
+                alert(msg);
+            }
             return null;
         }
 
@@ -61,6 +67,12 @@ window.firebaseInitPromise = firebaseConfigPromise
     })
     .catch((error) => {
         console.error('❌ Erro conectividade Firebase:', error);
+        const msg = 'Falha ao inicializar o Firebase. Consulte o README.md (seção "Configuração do Firebase")';
+        if (typeof Notifications !== 'undefined') {
+            Notifications.error(msg);
+        } else if (typeof alert === 'function') {
+            alert(msg);
+        }
         return null;
     })
     .finally(() => {

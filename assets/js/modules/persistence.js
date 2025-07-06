@@ -92,10 +92,19 @@ const Persistence = {
                 this._salvarBackupLocal(dadosPreparados);
                 
                 // Executar salvamento no Firebase
+                if (!database) {
+                    this._ocultarIndicadorSalvamento();
+                    if (typeof Notifications !== 'undefined') {
+                        Notifications.error('Firebase não configurado');
+                    }
+                    reject('Firebase não configurado');
+                    return;
+                }
+
                 const timeoutPromise = new Promise((_, reject) => {
                     setTimeout(() => reject(new Error('Timeout na operação')), this.config.TIMEOUT_OPERACAO);
                 });
-                
+
                 const savePromise = database.ref('dados').set(dadosPreparados);
                 
                 Promise.race([savePromise, timeoutPromise])
@@ -121,10 +130,16 @@ const Persistence = {
     // ✅ SALVAMENTO TRADICIONAL - OTIMIZADO E SILENCIOSO
     async _executarSalvamento() {
         if (!this.state.dadosParaSalvar) return;
-        
+
         try {
+            if (!database) {
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('Firebase não configurado');
+                }
+                return;
+            }
             const dadosPreparados = this._prepararDadosParaSalvamento(this.state.dadosParaSalvar);
-            
+
             await database.ref('dados').set(dadosPreparados);
             
             this.state.dadosParaSalvar = null;
@@ -469,11 +484,12 @@ const Persistence = {
     // ✅ VERIFICAÇÃO DE CONECTIVIDADE - OTIMIZADA
     async verificarConectividade() {
         try {
-            if (typeof database !== 'undefined') {
+            if (typeof database !== 'undefined' && database) {
                 const snapshot = await database.ref('.info/connected').once('value');
                 this.state.conectividade = snapshot.val() === true;
                 return this.state.conectividade;
             }
+            this.state.conectividade = false;
             return false;
         } catch (error) {
             this.state.conectividade = false;
@@ -492,7 +508,7 @@ const Persistence = {
                 return false;
             }
             
-            if (typeof database !== 'undefined') {
+            if (typeof database !== 'undefined' && database) {
                 const snapshot = await database.ref('dados').once('value');
                 const dadosRemoto = snapshot.val();
                 
