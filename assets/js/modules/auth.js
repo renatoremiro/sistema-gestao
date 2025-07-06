@@ -18,7 +18,9 @@ const Auth = {
         tentativasLogin: 0,
         loginEmAndamento: false,
         autoLoginTentado: false,
-        listeners: new Set()
+        listeners: new Set(),
+        loginCallbacks: new Set(),
+        logoutCallbacks: new Set()
     },
 
     // ✅ FAZER LOGIN
@@ -173,6 +175,9 @@ const Auth = {
         // Redirecionar após delay
         setTimeout(() => {
             this._mostrarSistema();
+            this.state.loginCallbacks.forEach(cb => {
+                try { cb(user); } catch (e) { console.error(e); }
+            });
         }, this.config.AUTO_REDIRECT_DELAY);
     },
 
@@ -226,7 +231,11 @@ const Auth = {
         
         this._limparSessaoLocal();
         this._mostrarTelaLogin();
-        
+
+        this.state.logoutCallbacks.forEach(cb => {
+            try { cb(); } catch (e) { console.error(e); }
+        });
+
         Notifications.info('Logout realizado com sucesso');
     },
 
@@ -546,6 +555,18 @@ const Auth = {
         return !!this.state.usuarioAtual;
     },
 
+    onLogin(callback) {
+        if (typeof callback === 'function') {
+            this.state.loginCallbacks.add(callback);
+        }
+    },
+
+    onLogout(callback) {
+        if (typeof callback === 'function') {
+            this.state.logoutCallbacks.add(callback);
+        }
+    },
+
     // ✅ INICIALIZAÇÃO DO MÓDULO
     init() {
         console.log('🔐 Inicializando sistema de autenticação...');
@@ -586,6 +607,8 @@ const Auth = {
             }
         });
         this.state.listeners.clear();
+        this.state.loginCallbacks.clear();
+        this.state.logoutCallbacks.clear();
     }
 };
 

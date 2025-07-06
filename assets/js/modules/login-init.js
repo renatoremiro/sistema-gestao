@@ -268,31 +268,16 @@
             }, 1000);
         });
         
-        // ✅ INTERCEPTAR LOGIN SUCESSO PARA MOSTRAR SISTEMA
-        if (typeof Auth !== 'undefined') {
-            // Sobrescrever função de sucesso do Auth para integrar com nossa interface
-            const originalOnLoginSucesso = Auth._onLoginSucesso;
-            Auth._onLoginSucesso = function(user) {
-                // Chamar função original
-                originalOnLoginSucesso.call(this, user);
-                
-                // Mostrar sistema principal
+        // ✅ REGISTRAR LISTENERS DE LOGIN/LOGOUT
+        if (typeof Auth !== 'undefined' && typeof Auth.onLogin === 'function') {
+            Auth.onLogin(() => {
                 mostrarSistemaPrincipal();
-                
                 console.log('✅ Login realizado - sistema principal exibido');
-            };
-            
-            // Sobrescrever logout para mostrar tela de login
-            const originalOnLogoutSucesso = Auth._onLogoutSucesso;
-            Auth._onLogoutSucesso = function() {
-                // Chamar função original
-                originalOnLogoutSucesso.call(this);
-                
-                // Mostrar tela de login
+            });
+            Auth.onLogout(() => {
                 mostrarTelaLogin();
-                
                 console.log('✅ Logout realizado - tela de login exibida');
-            };
+            });
         }
         
         // Atualizar estatísticas a cada 30 segundos
