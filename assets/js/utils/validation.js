@@ -363,7 +363,9 @@ function executarCorrecaoCompleta() {
     
     // 1. Implementar sistemas
     implementarValidationCompleto();
-    implementarNotificationsCompleto();
+    if (!window.Notifications) {
+        implementarNotificationsCompleto();
+    }
     
     // 2. Verificar funcionamento
     const resultados = verificarSistemas();
@@ -378,10 +380,12 @@ function executarCorrecaoCompleta() {
     if (sucesso) {
         console.log('🎉 CORREÇÃO COMPLETA SUCESSO!');
         
-        // Testar com notificação real
-        setTimeout(() => {
-            window.Notifications.success('Sistema de emergência ativado com sucesso!', 'Correção Aplicada');
-        }, 500);
+        // Testar com notificação real se disponível
+        if (window.Notifications && typeof window.Notifications.success === 'function') {
+            setTimeout(() => {
+                window.Notifications.success('Sistema de emergência ativado com sucesso!', 'Correção Aplicada');
+            }, 500);
+        }
         
         return true;
     } else {
@@ -402,7 +406,7 @@ function monitorarSistemasEmergencia() {
             implementarValidationCompleto();
         }
         
-        if (!status.notifications) {
+        if (!status.notifications && !window.Notifications) {
             console.warn('⚠️ Notifications perdido, restaurando...');
             implementarNotificationsCompleto();
         }
@@ -476,7 +480,7 @@ function testarIntegracaoAuth() {
         console.log('🧪 Para testar Auth: CorrecaoEmergencia.testarAuth()');
         
         // Notificar usuário se tudo ok
-        if (authOk) {
+        if (authOk && window.Notifications && typeof window.Notifications.success === 'function') {
             setTimeout(() => {
                 window.Notifications.success('Todos os sistemas funcionando!', 'Correção Completa');
             }, 1000);

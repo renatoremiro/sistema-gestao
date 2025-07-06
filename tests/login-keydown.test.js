@@ -53,4 +53,5 @@ handlerAfter({ key: 'Enter' });
 assert.strictEqual(callCount, 1);
 
 console.log('✔ login-keydown.test.js passou');
+process.exit(0);
 
