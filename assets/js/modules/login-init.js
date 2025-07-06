@@ -298,15 +298,6 @@
         // Atualizar estatísticas a cada 30 segundos
         setInterval(atualizarEstatisticasHybrid, 30000);
         
-        // ✅ EVENTOS DE TECLADO PARA LOGIN
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const loginScreen = document.getElementById('loginScreen');
-                if (loginScreen && !loginScreen.classList.contains('hidden')) {
-                    Auth.fazerLogin();
-                }
-            }
-        });
         
         // ✅ MOSTRAR/OCULTAR SEÇÕES DE DEBUG BASEADO NO USUÁRIO
         function toggleDebugSections() {
