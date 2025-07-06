@@ -259,13 +259,21 @@
         console.log('📦 Autenticação + Módulos base + agenda pessoal + sincronização');
         
         // ✅ INICIALIZAÇÃO AUTOMÁTICA COM LOGIN v7.2.0
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log('🔐 Inicializando sistema BIAPO com autenticação...');
-            
-            // Aguardar carregamento dos módulos
-            setTimeout(() => {
+
+            try {
+                if (window.firebaseInitPromise) {
+                    await window.firebaseInitPromise;
+                }
+
                 inicializarSistemaComLogin();
-            }, 1000);
+            } catch (error) {
+                console.error('❌ Erro ao aguardar inicialização do Firebase:', error);
+                if (window.Notifications && typeof Notifications.error === 'function') {
+                    Notifications.error('Erro ao inicializar o Firebase');
+                }
+            }
         });
         
         // ✅ REGISTRAR LISTENERS DE LOGIN/LOGOUT
