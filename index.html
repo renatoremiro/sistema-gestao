@@ -35,7 +35,18 @@
     
     <!-- 4. MÓDULOS FUNCIONAIS COMPLETOS -->
     <script src="assets/js/modules/persistence.js"></script>
-    <script src="assets/js/modules/auth.js"></script>
+    <script id="authScript" src="assets/js/modules/auth.js"></script>
+    <script>
+        const authScript = document.getElementById('authScript');
+        if (authScript) {
+            authScript.addEventListener('error', () => {
+                console.error('❌ Falha ao carregar o módulo de autenticação (assets/js/modules/auth.js)');
+                if (window.Notifications && typeof Notifications.error === 'function') {
+                    Notifications.error('Erro ao carregar módulo de autenticação. Recarregue a página.');
+                }
+            });
+        }
+    </script>
     <script src="assets/js/modules/calendar.js"></script>
     <script src="assets/js/modules/events.js"></script>
     <script src="assets/js/modules/tasks.js"></script>
@@ -669,9 +680,9 @@
         // ✅ INICIALIZAÇÃO COM LOGIN DINÂMICO
         function inicializarSistemaComLogin() {
             console.log('🔐 Inicializando sistema com login dinâmico...');
-            
+
             // Verificar se Auth está disponível
-            if (typeof Auth !== 'undefined') {
+            if (window.Auth && typeof Auth.verificarAutoLogin === 'function') {
                 // Verificar auto-login
                 Auth.verificarAutoLogin().then((user) => {
                     if (user) {
@@ -687,7 +698,10 @@
                     mostrarTelaLogin();
                 });
             } else {
-                console.warn('⚠️ Sistema de autenticação não disponível');
+                console.error('❌ Módulo de autenticação não disponível');
+                if (window.Notifications && typeof Notifications.error === 'function') {
+                    Notifications.error('Módulo de autenticação não carregado.');
+                }
                 mostrarTelaLogin();
             }
         }
