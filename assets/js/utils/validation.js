@@ -1,13 +1,14 @@
 /**
- * 🚨 CORREÇÃO CRÍTICA COMPLETA v7.4.0 - Sistema de Emergência
+ * 🚨 CORREÇÃO CRÍTICA COMPLETA v7.4.1 - NOTIFICAÇÃO REMOVIDA
  * 
  * ✅ PROBLEMA 1: Validation.isValidEmail is not a function
  * ✅ PROBLEMA 2: Notifications is not defined  
- * ✅ SOLUÇÃO: Implementação fallback completa de ambos os sistemas
- * ✅ URGÊNCIA: Execução automática e monitoramento contínuo
+ * 🔥 PROBLEMA 3: Notificação de teste removida
+ * 🔥 PROBLEMA 4: Erro appendChild corrigido
+ * ✅ SOLUÇÃO: Implementação fallback completa sem spam
  */
 
-console.log('🚨 INICIANDO CORREÇÃO CRÍTICA COMPLETA v7.4.0 - EMERGÊNCIA!');
+console.log('🚨 INICIANDO CORREÇÃO CRÍTICA v7.4.1 - SEM NOTIFICAÇÕES DE TESTE!');
 
 // ✅ IMPLEMENTAÇÃO VALIDATION FALLBACK
 function implementarValidationCompleto() {
@@ -110,7 +111,7 @@ function implementarValidationCompleto() {
         obterStatus() {
             return {
                 modulo: 'Validation',
-                versao: '7.4.0-EMERGENCY',
+                versao: '7.4.1-EMERGENCY',
                 status: 'EMERGENCY_FALLBACK',
                 debug: 'ATIVO',
                 funcionalidades: {
@@ -126,7 +127,7 @@ function implementarValidationCompleto() {
     console.log('✅ Validation emergency implementado!');
 }
 
-// ✅ IMPLEMENTAÇÃO NOTIFICATIONS FALLBACK
+// ✅ IMPLEMENTAÇÃO NOTIFICATIONS FALLBACK - CORRIGIDA
 function implementarNotificationsCompleto() {
     console.log('🔔 Implementando Notifications completo...');
     
@@ -136,7 +137,9 @@ function implementarNotificationsCompleto() {
         config: {
             duration: 4000,
             maxToasts: 5,
-            position: 'top-right'
+            position: 'top-right',
+            // 🔥 NOVO: Modo silencioso para evitar spam
+            modoSilencioso: true
         },
 
         // Métodos principais que o auth.js usa
@@ -153,12 +156,43 @@ function implementarNotificationsCompleto() {
         },
 
         info(message, title = 'Informação') {
+            // 🔥 FILTRO: Bloquear notificações de teste
+            if (this._ehNotificacaoTeste(message, title)) {
+                console.log('🚫 Notificação de teste bloqueada:', message);
+                return;
+            }
             this._mostrarToast(message, 'info', title);
         },
 
-        // Método interno para mostrar toast
+        // 🔥 NOVO: Filtro para notificações de teste
+        _ehNotificacaoTeste(message, title) {
+            const testsStrings = [
+                'teste de integração',
+                'sistema funcionando',
+                'auth realizado',
+                'teste de integração auth',
+                'sistema de emergência ativado',
+                'todos os sistemas funcionando'
+            ];
+            
+            const msgLower = message.toLowerCase();
+            const titleLower = title.toLowerCase();
+            
+            return testsStrings.some(test => 
+                msgLower.includes(test) || titleLower.includes(test)
+            );
+        },
+
+        // Método interno para mostrar toast - CORRIGIDO
         _mostrarToast(message, type = 'info', title = '') {
             try {
+                // 🔥 VERIFICAÇÃO: DOM deve estar pronto
+                if (!document.body) {
+                    console.warn('⚠️ DOM não pronto, agendando notificação...');
+                    setTimeout(() => this._mostrarToast(message, type, title), 100);
+                    return;
+                }
+
                 // Criar container se não existir
                 this._criarContainer();
 
@@ -179,33 +213,58 @@ function implementarNotificationsCompleto() {
                     setTimeout(() => {
                         this._removerToast(toast);
                     }, this.config.duration);
+                } else {
+                    console.warn('⚠️ Container de notificações não encontrado');
                 }
 
-                // Fallback - console se DOM falhar
+                // Log silencioso para debug
                 const emoji = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
                 console.log(`${emoji[type]} ${title}: ${message}`);
 
             } catch (error) {
-                // Fallback absoluto - alert nativo
-                console.error('NOTIFICATIONS FALLBACK ERRO:', error);
-                alert(`${title}: ${message}`);
+                console.error('❌ Erro na notificação:', error);
+                
+                // Fallback apenas para erros críticos
+                if (type === 'error') {
+                    alert(`ERRO: ${message}`);
+                }
             }
         },
 
+        // 🔥 CORRIGIDO: Verificação robusta do DOM
         _criarContainer() {
+            // Verificar se container já existe
             if (document.getElementById('notifications-container')) return;
 
-            const container = document.createElement('div');
-            container.id = 'notifications-container';
-            container.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 10000;
-                max-width: 400px;
-                pointer-events: none;
-            `;
-            document.body.appendChild(container);
+            // 🔥 VERIFICAÇÃO: Garantir que body existe
+            if (!document.body) {
+                console.warn('⚠️ document.body não disponível para criar container');
+                return;
+            }
+
+            try {
+                const container = document.createElement('div');
+                container.id = 'notifications-container';
+                container.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 10000;
+                    max-width: 400px;
+                    pointer-events: none;
+                `;
+                
+                // 🔥 VERIFICAÇÃO: appendChild seguro
+                if (document.body && typeof document.body.appendChild === 'function') {
+                    document.body.appendChild(container);
+                    console.log('✅ Container de notificações criado');
+                } else {
+                    console.error('❌ Não foi possível adicionar container ao body');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao criar container:', error);
+            }
         },
 
         _criarToast(message, type, title) {
@@ -292,29 +351,33 @@ function implementarNotificationsCompleto() {
         obterStatus() {
             return {
                 modulo: 'Notifications',
-                versao: '7.4.0-EMERGENCY',
+                versao: '7.4.1-EMERGENCY',
                 status: 'EMERGENCY_FALLBACK',
                 debug: 'ATIVO',
+                modoSilencioso: this.config.modoSilencioso,
                 funcionalidades: {
                     toasts: true,
                     modals: false,
-                    confirmacao: true
+                    confirmacao: true,
+                    filtro_teste: true
                 }
             };
         }
     };
 
     // Adicionar CSS básico
-    const styles = document.createElement('style');
-    styles.textContent = `
-        .toast.show {
-            opacity: 1 !important;
-            transform: translateX(0) !important;
-        }
-    `;
-    document.head.appendChild(styles);
+    if (document.head) {
+        const styles = document.createElement('style');
+        styles.textContent = `
+            .toast.show {
+                opacity: 1 !important;
+                transform: translateX(0) !important;
+            }
+        `;
+        document.head.appendChild(styles);
+    }
 
-    console.log('✅ Notifications emergency implementado!');
+    console.log('✅ Notifications emergency implementado com filtros!');
 }
 
 // ✅ VERIFICAÇÕES DE INTEGRIDADE
@@ -378,15 +441,7 @@ function executarCorrecaoCompleta() {
     const sucesso = Object.values(resultados).every(r => r === true);
     
     if (sucesso) {
-        console.log('🎉 CORREÇÃO COMPLETA SUCESSO!');
-        
-        // Testar com notificação real se disponível
-        if (window.Notifications && typeof window.Notifications.success === 'function') {
-            setTimeout(() => {
-                window.Notifications.success('Sistema de emergência ativado com sucesso!', 'Correção Aplicada');
-            }, 500);
-        }
-        
+        console.log('🎉 CORREÇÃO COMPLETA SUCESSO - SEM SPAM!');
         return true;
     } else {
         console.error('❌ CORREÇÃO FALHOU EM ALGUNS PONTOS!');
@@ -394,9 +449,9 @@ function executarCorrecaoCompleta() {
     }
 }
 
-// ✅ MONITORAMENTO CONTÍNUO MELHORADO
+// ✅ MONITORAMENTO CONTÍNUO SILENCIOSO
 function monitorarSistemasEmergencia() {
-    console.log('🔍 Iniciando monitoramento de emergência...');
+    console.log('🔍 Iniciando monitoramento silencioso...');
     
     const intervalo = setInterval(() => {
         const status = verificarSistemas();
@@ -410,20 +465,20 @@ function monitorarSistemasEmergencia() {
             console.warn('⚠️ Notifications perdido, restaurando...');
             implementarNotificationsCompleto();
         }
-    }, 5000); // Verificar a cada 5 segundos
+    }, 10000); // Verificar a cada 10 segundos
     
-    // Parar após 10 minutos
+    // Parar após 5 minutos
     setTimeout(() => {
         clearInterval(intervalo);
         console.log('🏁 Monitoramento de emergência concluído');
-    }, 600000);
+    }, 300000);
     
     return intervalo;
 }
 
-// ✅ TESTE COMPLETO DO AUTH
-function testarIntegracaoAuth() {
-    console.log('🔐 Testando integração específica com Auth...');
+// 🔥 TESTE SILENCIOSO DO AUTH - SEM NOTIFICAÇÕES
+function testarIntegracaoAuthSilencioso() {
+    console.log('🔐 Testando integração Auth (modo silencioso)...');
     
     try {
         // Simular validação que o auth.js faz
@@ -436,11 +491,10 @@ function testarIntegracaoAuth() {
         console.log('📧 Email válido:', emailValido);
         console.log('🔑 Senha válida:', senhaValida);
         
-        // Testar notificação
-        if (window.Notifications) {
-            console.log('🔔 Testando notificação...');
-            window.Notifications.info('Teste de integração Auth realizado', 'Sistema Funcionando');
-        }
+        // 🔥 REMOVIDO: Não mostrar notificação de teste
+        // NÃO MAIS: window.Notifications.info('Teste de integração Auth realizado', 'Sistema Funcionando');
+        
+        console.log('✅ Teste Auth concluído sem notificações');
         
         return emailValido && senhaValida;
         
@@ -450,47 +504,53 @@ function testarIntegracaoAuth() {
     }
 }
 
-// ✅ EXECUÇÃO AUTOMÁTICA DE EMERGÊNCIA
+// ✅ EXECUÇÃO AUTOMÁTICA DE EMERGÊNCIA - SILENCIOSA
 (function() {
-    console.log('🚀 INICIANDO CORREÇÃO DE EMERGÊNCIA AUTOMÁTICA...');
+    console.log('🚀 INICIANDO CORREÇÃO SILENCIOSA v7.4.1...');
     
-    // Executar correção imediata
-    const sucesso = executarCorrecaoCompleta();
-    
-    if (sucesso) {
-        // Iniciar monitoramento
-        const monitor = monitorarSistemasEmergencia();
+    // Aguardar DOM estar pronto
+    const inicializar = () => {
+        // Executar correção imediata
+        const sucesso = executarCorrecaoCompleta();
         
-        // Testar integração auth
-        const authOk = testarIntegracaoAuth();
-        
-        // Expor funções globais para debug
-        window.CorrecaoEmergencia = {
-            executar: executarCorrecaoCompleta,
-            verificar: verificarSistemas,
-            testarAuth: testarIntegracaoAuth,
-            status: () => ({
-                validation: window.Validation?.obterStatus(),
-                notifications: window.Notifications?.obterStatus()
-            })
-        };
-        
-        console.log('🎯 SISTEMA DE EMERGÊNCIA ATIVO!');
-        console.log('📝 Para verificar: CorrecaoEmergencia.verificar()');
-        console.log('🧪 Para testar Auth: CorrecaoEmergencia.testarAuth()');
-        
-        // Notificar usuário se tudo ok
-        if (authOk && window.Notifications && typeof window.Notifications.success === 'function') {
-            setTimeout(() => {
-                window.Notifications.success('Todos os sistemas funcionando!', 'Correção Completa');
-            }, 1000);
+        if (sucesso) {
+            // Iniciar monitoramento silencioso
+            const monitor = monitorarSistemasEmergencia();
+            
+            // Testar integração auth (sem notificação)
+            const authOk = testarIntegracaoAuthSilencioso();
+            
+            // Expor funções globais para debug
+            window.CorrecaoEmergencia = {
+                executar: executarCorrecaoCompleta,
+                verificar: verificarSistemas,
+                testarAuth: testarIntegracaoAuthSilencioso,
+                status: () => ({
+                    validation: window.Validation?.obterStatus(),
+                    notifications: window.Notifications?.obterStatus()
+                })
+            };
+            
+            console.log('🎯 SISTEMA DE EMERGÊNCIA ATIVO (MODO SILENCIOSO)!');
+            console.log('📝 Para verificar: CorrecaoEmergencia.verificar()');
+            console.log('🧪 Para testar Auth: CorrecaoEmergencia.testarAuth()');
+            
+            // 🔥 REMOVIDO: Não mostrar notificações automáticas
+            
+        } else {
+            console.error('💥 FALHA CRÍTICA NA CORREÇÃO DE EMERGÊNCIA!');
+            // Alert apenas para falhas críticas
+            alert('ERRO CRÍTICO: Sistema não conseguiu ser corrigido automaticamente. Recarregue a página.');
         }
-        
+    };
+
+    // Executar quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', inicializar);
     } else {
-        console.error('💥 FALHA CRÍTICA NA CORREÇÃO DE EMERGÊNCIA!');
-        alert('ERRO CRÍTICO: Sistema não conseguiu ser corrigido automaticamente. Recarregue a página.');
+        inicializar();
     }
 })();
 
 // ✅ LOG FINAL
-console.log('✅ CORREÇÃO CRÍTICA COMPLETA v7.4.0: Sistema de emergência carregado!');
+console.log('✅ CORREÇÃO CRÍTICA v7.4.1: Sistema silencioso sem notificações de teste!');
