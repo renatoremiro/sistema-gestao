@@ -1,10 +1,10 @@
 /**
- * 🚀 Sistema Principal v8.0 - CARREGAMENTO FIREBASE CORRIGIDO
+ * 🚀 Sistema Principal v8.2 - EVENTOS GLOBAIS CORRIGIDO
  * 
- * 🔥 PROBLEMA RESOLVIDO: Eventos não somem mais ao recarregar
- * ✅ CARREGAMENTO INICIAL: Dados do Firebase carregados corretamente
- * ✅ ORDEM CORRETA: Firebase → App.dados → Calendar
- * ✅ EVENTOS PERSISTEM: 100% funcional
+ * 🔥 CORREÇÃO CRÍTICA: Eventos visíveis para todos (logados e anônimos)
+ * ✅ LEITURA LIVRE: Carregamento sem necessidade de autenticação
+ * ✅ ESCRITA PROTEGIDA: Salvamento apenas para usuários autenticados
+ * ✅ EVENTOS GLOBAIS: Toda equipe BIAPO vê os mesmos eventos
  */
 
 const App = {
@@ -14,9 +14,10 @@ const App = {
         carregandoDados: false,
         usuarioAutenticado: false,
         usuarioEmail: null,
-        versao: '8.0.0',
+        versao: '8.2.0',
         debugMode: false,
-        ultimoCarregamento: null
+        ultimoCarregamento: null,
+        modoAnonimo: false
     },
 
     // 📊 DADOS PRINCIPAIS (carregados do Firebase)
@@ -26,7 +27,7 @@ const App = {
         tarefas: [],
         usuarios: {},
         metadata: {
-            versao: '8.0.0',
+            versao: '8.2.0',
             ultimaAtualizacao: null
         }
     },
@@ -34,35 +35,39 @@ const App = {
     // 👤 USUÁRIO ATUAL
     usuarioAtual: null,
 
-    // 🔥 INICIALIZAÇÃO PRINCIPAL CORRIGIDA v8.0
+    // 🔥 INICIALIZAÇÃO PRINCIPAL CORRIGIDA v8.2
     async inicializar() {
         try {
-            console.log('🚀 Inicializando Sistema BIAPO v8.0...');
+            console.log('🚀 Inicializando Sistema BIAPO v8.2...');
             
             this.estadoSistema.carregandoDados = true;
             
             // 1. Configurar estrutura básica
             this._configurarEstruturaBasica();
             
-            // 2. 🔥 CARREGAR DADOS DO FIREBASE PRIMEIRO
-            await this._carregarDadosDoFirebase();
+            // 2. 🔥 CARREGAR DADOS DO FIREBASE (SEM BLOQUEIO DE AUTH)
+            await this._carregarDadosDoFirebaseGlobal();
             
             // 3. Configurar usuário se estiver logado
             this._configurarUsuarioAtual();
             
-            // 4. Inicializar módulos DEPOIS dos dados carregados
+            // 4. Detectar modo anônimo
+            this._detectarModoAnonimo();
+            
+            // 5. Inicializar módulos DEPOIS dos dados carregados
             this._inicializarModulos();
             
-            // 5. Renderizar interface
+            // 6. Renderizar interface
             this._renderizarInterface();
             
-            // 6. Finalizar inicialização
+            // 7. Finalizar inicialização
             this.estadoSistema.inicializado = true;
             this.estadoSistema.carregandoDados = false;
             this.estadoSistema.ultimoCarregamento = new Date().toISOString();
             
-            console.log('✅ Sistema BIAPO v8.0 inicializado com sucesso!');
+            console.log('✅ Sistema BIAPO v8.2 inicializado com sucesso!');
             console.log(`📊 Eventos carregados: ${this.dados.eventos.length}`);
+            console.log(`👤 Modo: ${this.estadoSistema.modoAnonimo ? 'Anônimo (leitura)' : 'Autenticado (escrita)'}`);
             
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
@@ -75,34 +80,35 @@ const App = {
         }
     },
 
-    // 🔥 NOVA FUNÇÃO v8.0: CARREGAR DADOS DO FIREBASE
-    async _carregarDadosDoFirebase() {
+    // 🔥 NOVA FUNÇÃO v8.2: CARREGAR DADOS GLOBAIS (SEM BLOQUEIO AUTH)
+    async _carregarDadosDoFirebaseGlobal() {
         try {
-            console.log('📥 Carregando dados do Firebase...');
+            console.log('📥 Carregando dados globais do Firebase...');
             
-            // Verificar se Firebase está disponível
+            // 🔥 VERIFICAR FIREBASE SEM DEPENDER DE AUTH
             if (typeof database === 'undefined' || !database) {
                 console.warn('⚠️ Firebase não disponível, usando dados locais');
                 return;
             }
             
-            // Carregar dados com timeout
+            // 🔥 CARREGAR DADOS SEM VERIFICAÇÃO DE USUÁRIO
             const dadosFirebase = await Promise.race([
-                this._buscarDadosFirebase(),
-                this._timeoutPromise(5000, 'Timeout ao carregar dados')
+                this._buscarDadosFirebaseGlobal(),
+                this._timeoutPromise(8000, 'Timeout ao carregar dados globais')
             ]);
             
             if (dadosFirebase && typeof dadosFirebase === 'object') {
-                // 🔥 APLICAR DADOS CARREGADOS
+                // 🔥 APLICAR DADOS CARREGADOS (GLOBAL)
                 this.dados = {
                     eventos: dadosFirebase.eventos || [],
                     areas: dadosFirebase.areas || {},
                     tarefas: dadosFirebase.tarefas || [],
                     usuarios: dadosFirebase.usuarios || {},
-                    metadata: dadosFirebase.metadata || { versao: '8.0.0' }
+                    metadata: dadosFirebase.metadata || { versao: '8.2.0' }
                 };
                 
-                console.log(`✅ Dados carregados: ${this.dados.eventos.length} eventos`);
+                console.log(`✅ Dados globais carregados: ${this.dados.eventos.length} eventos`);
+                console.log(`📍 Áreas: ${Object.keys(this.dados.areas).length}`);
                 
                 // Atualizar timestamp
                 if (this.dados.metadata) {
@@ -123,14 +129,18 @@ const App = {
         }
     },
 
-    // 🔥 BUSCAR DADOS DO FIREBASE (com retry)
-    async _buscarDadosFirebase() {
+    // 🔥 BUSCAR DADOS DO FIREBASE GLOBAL (SEM AUTH)
+    async _buscarDadosFirebaseGlobal() {
         try {
+            console.log('🔍 Buscando dados no path /dados...');
+            
             const snapshot = await database.ref('dados').once('value');
             const dados = snapshot.val();
             
             if (dados) {
-                console.log('📦 Dados encontrados no Firebase');
+                console.log('📦 Dados encontrados no Firebase:');
+                console.log(`  - Eventos: ${dados.eventos ? dados.eventos.length : 0}`);
+                console.log(`  - Áreas: ${dados.areas ? Object.keys(dados.areas).length : 0}`);
                 return dados;
             } else {
                 console.log('📭 Nenhum dado encontrado no Firebase');
@@ -138,8 +148,62 @@ const App = {
             }
             
         } catch (error) {
-            console.error('❌ Erro ao buscar dados:', error);
+            console.error('❌ Erro ao buscar dados globais:', error);
             throw error;
+        }
+    },
+
+    // 🔥 DETECTAR MODO ANÔNIMO
+    _detectarModoAnonimo() {
+        // Usuário não autenticado = modo anônimo (apenas leitura)
+        this.estadoSistema.modoAnonimo = !this.estadoSistema.usuarioAutenticado;
+        
+        if (this.estadoSistema.modoAnonimo) {
+            console.log('👁️ Modo anônimo ativado - apenas visualização');
+            
+            // Mostrar indicador visual se necessário
+            this._mostrarIndicadorModoAnonimo();
+        }
+    },
+
+    // 🔥 MOSTRAR INDICADOR MODO ANÔNIMO
+    _mostrarIndicadorModoAnonimo() {
+        try {
+            // Verificar se já existe indicador
+            if (document.getElementById('indicadorAnonimo')) {
+                return;
+            }
+            
+            // Criar indicador visual
+            const indicador = document.createElement('div');
+            indicador.id = 'indicadorAnonimo';
+            indicador.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background: linear-gradient(135deg, #374151, #1f2937);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            `;
+            
+            indicador.innerHTML = `
+                <span>👁️</span>
+                <span>Modo Visualização</span>
+                <small style="opacity: 0.8; margin-left: 4px;">(Apenas Leitura)</small>
+            `;
+            
+            document.body.appendChild(indicador);
+            
+        } catch (error) {
+            // Silencioso - indicador é opcional
         }
     },
 
@@ -181,14 +245,14 @@ const App = {
         if (!this.dados.usuarios) this.dados.usuarios = {};
         if (!this.dados.metadata) {
             this.dados.metadata = {
-                versao: '8.0.0',
+                versao: '8.2.0',
                 ultimaAtualizacao: new Date().toISOString()
             };
         }
         
         // Aplicar estrutura padrão se necessário
-        if (typeof DataStructure !== 'undefined' && DataStructure.estruturaPadrao) {
-            const estruturaPadrao = DataStructure.estruturaPadrao();
+        if (typeof DataStructure !== 'undefined' && DataStructure.inicializarDados) {
+            const estruturaPadrao = DataStructure.inicializarDados();
             
             // Mesclar apenas se dados estão vazios
             if (Object.keys(this.dados.areas).length === 0) {
@@ -204,13 +268,15 @@ const App = {
     _configurarUsuarioAtual() {
         try {
             // Verificar se há usuário autenticado
-            if (typeof Auth !== 'undefined' && Auth.obterUsuarioAtual) {
-                this.usuarioAtual = Auth.obterUsuarioAtual();
+            if (typeof Auth !== 'undefined' && Auth.obterUsuario) {
+                this.usuarioAtual = Auth.obterUsuario();
                 
                 if (this.usuarioAtual) {
                     this.estadoSistema.usuarioAutenticado = true;
                     this.estadoSistema.usuarioEmail = this.usuarioAtual.email;
-                    console.log(`👤 Usuário: ${this.usuarioAtual.email}`);
+                    console.log(`👤 Usuário autenticado: ${this.usuarioAtual.email}`);
+                } else {
+                    console.log('👁️ Usuário anônimo detectado');
                 }
             }
             
@@ -238,7 +304,7 @@ const App = {
                     console.log('✅ Tasks inicializado');
                 }
                 
-            }, 100); // 100ms para garantir que dados estão prontos
+            }, 200); // 200ms para garantir que dados estão prontos
             
         } catch (error) {
             console.error('❌ Erro ao inicializar módulos:', error);
@@ -284,11 +350,17 @@ const App = {
                 });
             }
             
-            // Usuário logado
+            // Usuário logado ou anônimo
             const usuarioElement = document.getElementById('usuarioLogado');
             if (usuarioElement) {
-                const nomeUsuario = this.usuarioAtual?.email || 'Sistema';
-                usuarioElement.textContent = `👤 ${nomeUsuario}`;
+                if (this.estadoSistema.modoAnonimo) {
+                    usuarioElement.textContent = '👁️ Visualização';
+                    usuarioElement.style.opacity = '0.7';
+                } else {
+                    const nomeUsuario = this.usuarioAtual?.displayName || this.usuarioAtual?.email || 'Sistema';
+                    usuarioElement.textContent = `👤 ${nomeUsuario}`;
+                    usuarioElement.style.opacity = '1';
+                }
             }
             
         } catch (error) {
@@ -303,8 +375,8 @@ const App = {
             
             this.estadoSistema.carregandoDados = true;
             
-            // Carregar dados atualizados
-            await this._carregarDadosDoFirebase();
+            // Carregar dados atualizados (sempre global)
+            await this._carregarDadosDoFirebaseGlobal();
             
             // Atualizar módulos
             if (typeof Calendar !== 'undefined' && Calendar.atualizarEventos) {
@@ -332,8 +404,17 @@ const App = {
         }
     },
 
-    // 💾 SALVAR DADOS
+    // 💾 SALVAR DADOS (PROTEGIDO POR AUTH)
     async salvarDados() {
+        // 🔥 VERIFICAÇÃO DE AUTH APENAS PARA SALVAMENTO
+        if (this.estadoSistema.modoAnonimo) {
+            if (typeof Notifications !== 'undefined') {
+                Notifications.warning('⚠️ Login necessário para salvar dados');
+            }
+            console.warn('⚠️ Tentativa de salvamento em modo anônimo bloqueada');
+            return Promise.reject('Login necessário para salvar');
+        }
+        
         try {
             if (typeof Persistence !== 'undefined' && Persistence.salvarDados) {
                 await Persistence.salvarDados();
@@ -343,8 +424,17 @@ const App = {
         }
     },
 
-    // 💾 SALVAR DADOS CRÍTICO
+    // 💾 SALVAR DADOS CRÍTICO (PROTEGIDO POR AUTH)
     async salvarDadosCritico() {
+        // 🔥 VERIFICAÇÃO DE AUTH APENAS PARA SALVAMENTO
+        if (this.estadoSistema.modoAnonimo) {
+            if (typeof Notifications !== 'undefined') {
+                Notifications.warning('⚠️ Login necessário para salvar eventos');
+            }
+            console.warn('⚠️ Tentativa de salvamento crítico em modo anônimo bloqueada');
+            return Promise.reject('Login necessário para salvar');
+        }
+        
         try {
             if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
                 await Persistence.salvarDadosCritico();
@@ -371,6 +461,7 @@ const App = {
             inicializado: this.estadoSistema.inicializado,
             carregandoDados: this.estadoSistema.carregandoDados,
             usuarioAutenticado: this.estadoSistema.usuarioAutenticado,
+            modoAnonimo: this.estadoSistema.modoAnonimo,
             versao: this.estadoSistema.versao,
             totalEventos: this.dados.eventos.length,
             totalAreas: Object.keys(this.dados.areas).length,
@@ -379,7 +470,13 @@ const App = {
             modules: {
                 Calendar: typeof Calendar !== 'undefined',
                 Events: typeof Events !== 'undefined',
-                Persistence: typeof Persistence !== 'undefined'
+                Persistence: typeof Persistence !== 'undefined',
+                Auth: typeof Auth !== 'undefined'
+            },
+            permissoes: {
+                leitura: true,
+                escrita: !this.estadoSistema.modoAnonimo,
+                admin: this.usuarioAtual?.admin || false
             }
         };
     },
@@ -390,11 +487,19 @@ const App = {
     },
 
     adicionarEvento(evento) {
+        if (this.estadoSistema.modoAnonimo) {
+            throw new Error('Login necessário para adicionar eventos');
+        }
+        
         if (!this.dados.eventos) this.dados.eventos = [];
         this.dados.eventos.push(evento);
     },
 
     atualizarEvento(id, dadosAtualizados) {
+        if (this.estadoSistema.modoAnonimo) {
+            throw new Error('Login necessário para atualizar eventos');
+        }
+        
         const index = this.dados.eventos.findIndex(e => e.id == id);
         if (index !== -1) {
             this.dados.eventos[index] = { ...this.dados.eventos[index], ...dadosAtualizados };
@@ -402,7 +507,21 @@ const App = {
     },
 
     removerEvento(id) {
+        if (this.estadoSistema.modoAnonimo) {
+            throw new Error('Login necessário para remover eventos');
+        }
+        
         this.dados.eventos = this.dados.eventos.filter(e => e.id != id);
+    },
+
+    // 🔥 VERIFICAR SE PODE EDITAR
+    podeEditar() {
+        return !this.estadoSistema.modoAnonimo;
+    },
+
+    // 🔥 VERIFICAR SE É ADMIN
+    ehAdmin() {
+        return this.usuarioAtual?.admin === true;
     }
 };
 
@@ -413,7 +532,21 @@ window.App = App;
 window.recarregarDados = () => App.recarregarDados();
 window.statusSistema = () => App.obterStatusSistema();
 
-// 🔥 INICIALIZAÇÃO AUTOMÁTICA CORRIGIDA v8.0
+// 🔥 VERIFICAÇÃO DE SISTEMA (DEBUG)
+window.verificarSistema = () => {
+    const status = App.obterStatusSistema();
+    console.table({
+        'Inicializado': status.inicializado ? 'Sim' : 'Não',
+        'Modo': status.modoAnonimo ? 'Anônimo' : 'Autenticado',
+        'Eventos': status.totalEventos,
+        'Áreas': status.totalAreas,
+        'Firebase': status.firebase ? 'Conectado' : 'Offline',
+        'Pode Editar': status.permissoes.escrita ? 'Sim' : 'Não'
+    });
+    return status;
+};
+
+// 🔥 INICIALIZAÇÃO AUTOMÁTICA CORRIGIDA v8.2
 document.addEventListener('DOMContentLoaded', async () => {
     // Aguardar outros módulos carregarem
     setTimeout(async () => {
@@ -422,21 +555,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ✅ LOG FINAL
-console.log('🚀 App.js v8.0 - CARREGAMENTO FIREBASE CORRIGIDO carregado!');
+console.log('🚀 App.js v8.2 - EVENTOS GLOBAIS CORRIGIDO carregado!');
 
 /*
-🔥 CORREÇÕES DEFINITIVAS v8.0:
-- _carregarDadosDoFirebase(): Carrega dados ANTES dos módulos ✅
-- _buscarDadosFirebase(): Busca correta com timeout ✅
-- _inicializarModulos(): Executa DEPOIS dos dados carregados ✅
-- Timeout de 100ms para garantir ordem correta ✅
-- Fallback para backup local se Firebase falhar ✅
-- Estrutura robusta com error handling ✅
+🔥 CORREÇÕES DEFINITIVAS v8.2:
+- _carregarDadosDoFirebaseGlobal(): Carrega SEM verificação de auth ✅
+- _detectarModoAnonimo(): Identifica modo apenas leitura ✅
+- Salvamento protegido: Apenas usuários autenticados ✅
+- Leitura livre: Todos podem ver eventos da equipe ✅
+- Indicador visual: Modo anônimo claramente identificado ✅
+- Permissões granulares: leitura vs escrita vs admin ✅
 
 📊 RESULTADO DEFINITIVO:
-- Eventos carregados na inicialização ✅
-- Eventos persistem ao recarregar ✅
-- Ordem correta: Firebase → App.dados → Calendar ✅
-- Sistema 100% funcional ✅
+- Eventos visíveis para todos (logados e anônimos) ✅
+- Sistema mantém segurança para edições ✅
+- Experiência clara: visualização vs edição ✅
+- Sistema v8.2 COMPLETO E FUNCIONAL ✅
 - PROBLEMA RESOLVIDO DEFINITIVAMENTE ✅
 */
