@@ -469,6 +469,9 @@ const Auth = {
     init() {
         console.log('🔐 Inicializando Auth Simples BIAPO v8.1...');
         
+        // 🔥 ESCONDER SISTEMA DE LOGIN ANTIGO
+        this._esconderLoginAntigo();
+        
         // Tentar auto-login primeiro
         const autoLoginSucesso = this.autoLogin();
         
@@ -480,6 +483,34 @@ const Auth = {
         }
         
         console.log('✅ Auth Simples BIAPO v8.1 inicializado');
+    },
+
+    // 🔥 ESCONDER SISTEMA DE LOGIN ANTIGO
+    _esconderLoginAntigo() {
+        // Esconder possíveis telas de login antigas
+        const loginScreens = [
+            '#loginScreen',
+            '.login-screen', 
+            '.auth-screen',
+            '#authContainer',
+            '.modal-login'
+        ];
+        
+        loginScreens.forEach(selector => {
+            const elemento = document.querySelector(selector);
+            if (elemento) {
+                elemento.style.display = 'none';
+                console.log(`🚫 Escondido login antigo: ${selector}`);
+            }
+        });
+        
+        // Forçar esconder qualquer modal de auth ativo
+        const modals = document.querySelectorAll('.modal, [id*="login"], [id*="auth"]');
+        modals.forEach(modal => {
+            if (modal.id !== 'loginSimplesBiapo') {
+                modal.style.display = 'none';
+            }
+        });
     }
 };
 
