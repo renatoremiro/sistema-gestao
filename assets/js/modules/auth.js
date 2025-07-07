@@ -1,1163 +1,531 @@
-/* ========== 🔐 SISTEMA DE AUTENTICAÇÃO + GESTÃO DE USUÁRIOS v7.4.2 ========== */
-
-let firebaseAuth = null;
+/* ========== 🔐 AUTH SIMPLES BIAPO v8.1 ========== */
 
 const Auth = {
-    // ✅ CONFIGURAÇÕES
+    // ✅ VERSÃO SIMPLES
     config: {
-        TIMEOUT_LOGIN: 10000, // 10 segundos
-        MAX_TENTATIVAS_LOGIN: 3,
-        AUTO_REDIRECT_DELAY: 1500, // 1.5 segundos
-        REMEMBER_USER: true
+        versao: '8.1.0',
+        autoLogin: true,
+        lembrarUsuario: true
     },
 
-    // ✅ ESTADO DO SISTEMA DE AUTH
+    // 👥 EQUIPE BIAPO - LOGIN POR PRIMEIRO NOME
+    equipeBiapo: {
+        "renato": {
+            nomeCompleto: "Renato Remiro",
+            admin: true,
+            ativo: true
+        },
+        "bruna": {
+            nomeCompleto: "Bruna Britto",
+            admin: false,
+            ativo: true
+        },
+        "lara": {
+            nomeCompleto: "Lara Coutinho",
+            admin: false,
+            ativo: true
+        },
+        "isabella": {
+            nomeCompleto: "Isabella",
+            admin: false,
+            ativo: true
+        },
+        "eduardo": {
+            nomeCompleto: "Eduardo Santos",
+            admin: false,
+            ativo: true
+        },
+        "carlos": {
+            nomeCompleto: "Carlos Mendonça (Beto)",
+            admin: false,
+            ativo: true
+        },
+        "beto": { // Alternativa para Carlos
+            nomeCompleto: "Carlos Mendonça (Beto)",
+            admin: false,
+            ativo: true
+        },
+        "alex": {
+            nomeCompleto: "Alex",
+            admin: false,
+            ativo: true
+        },
+        "nominato": {
+            nomeCompleto: "Nominato Pires",
+            admin: false,
+            ativo: true
+        },
+        "nayara": {
+            nomeCompleto: "Nayara Alencar",
+            admin: false,
+            ativo: true
+        },
+        "jean": {
+            nomeCompleto: "Jean (Estagiário)",
+            admin: false,
+            ativo: true
+        },
+        "juliana": {
+            nomeCompleto: "Juliana (Rede Interna)",
+            admin: false,
+            ativo: true
+        }
+    },
+
+    // ✅ ESTADO ATUAL
     state: {
         usuarioAtual: null,
-        tentativasLogin: 0,
-        loginEmAndamento: false,
-        autoLoginTentado: false,
-        listeners: new Set(),
-        loginCallbacks: new Set(),
-        logoutCallbacks: new Set()
+        logado: false
     },
 
-    // ✅ FAZER LOGIN
-    async fazerLogin() {
-        if (this.state.loginEmAndamento) {
-            Notifications.warning('Login já em andamento...');
-            return;
-        }
+    // ✅ PROPRIEDADE COMPATÍVEL COM SISTEMA ATUAL
+    get usuario() {
+        return this.state.usuarioAtual;
+    },
 
-        const email = document.getElementById('loginEmail')?.value?.trim();
-        const senha = document.getElementById('loginPassword')?.value;
+    set usuario(valor) {
+        this.state.usuarioAtual = valor;
+        this.state.logado = !!valor;
+    },
 
-        // Validar campos
-        const validacao = this._validarCamposLogin(email, senha);
-        if (!validacao.valido) {
-            Notifications.error(validacao.erro);
-            this._destacarCamposErro(validacao.campos);
-            return;
-        }
-
+    // 🔐 LOGIN SIMPLES
+    login(nomeUsuario) {
         try {
-            if (!firebaseAuth) {
-                Notifications.error('Serviço de autenticação indisponível');
-                return;
+            const nome = nomeUsuario.toLowerCase().trim();
+            
+            if (!nome) {
+                this._mostrarMensagem('Digite seu nome', 'warning');
+                return false;
             }
 
-            this.state.loginEmAndamento = true;
-            this.state.tentativasLogin++;
-
-            this._mostrarIndicadorLogin('Fazendo login...');
-
-            // Timeout promise
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Timeout no login')), this.config.TIMEOUT_LOGIN);
-            });
-
-            // Login promise
-            const loginPromise = firebaseAuth?.signInWithEmailAndPassword(email, senha);
+            const dadosUsuario = this.equipeBiapo[nome];
             
-            // Race entre login e timeout
-            const userCredential = await Promise.race([loginPromise, timeoutPromise]);
+            if (!dadosUsuario) {
+                this._mostrarMensagem(`"${nomeUsuario}" não encontrado na equipe BIAPO`, 'error');
+                return false;
+            }
+
+            if (!dadosUsuario.ativo) {
+                this._mostrarMensagem('Usuário inativo', 'error');
+                return false;
+            }
+
+            // Criar objeto de usuário compatível
+            this.usuario = {
+                email: `${nome}@biapo.com.br`,
+                displayName: dadosUsuario.nomeCompleto,
+                uid: `biapo_${nome}`,
+                nome: dadosUsuario.nomeCompleto,
+                primeiroNome: nome,
+                admin: dadosUsuario.admin,
+                ativo: dadosUsuario.ativo
+            };
+
+            // Salvar preferência
+            if (this.config.lembrarUsuario) {
+                localStorage.setItem('ultimoUsuarioBiapo', nome);
+            }
+
+            // Atualizar App global
+            if (typeof App !== 'undefined') {
+                App.usuarioAtual = this.usuario;
+                App.estadoSistema = App.estadoSistema || {};
+                App.estadoSistema.usuarioEmail = this.usuario.email;
+                App.estadoSistema.usuarioNome = this.usuario.displayName;
+            }
+
+            this._mostrarMensagem(`Bem-vindo, ${dadosUsuario.nomeCompleto}! 👋`, 'success');
             
-            this._onLoginSucesso(userCredential.user);
-            
+            // Esconder tela de login se existir
+            setTimeout(() => {
+                this._esconderTelaLogin();
+                this._executarCallbacksLogin();
+            }, 1000);
+
+            return true;
+
         } catch (error) {
-            this._onLoginErro(error);
-        } finally {
-            this.state.loginEmAndamento = false;
-            this._ocultarIndicadorLogin();
+            console.error('❌ Erro no login:', error);
+            this._mostrarMensagem('Erro no login', 'error');
+            return false;
         }
     },
 
-    // ✅ FAZER LOGOUT
-    async fazerLogout() {
+    // 🚪 LOGOUT SIMPLES
+    logout() {
         try {
-            Notifications.info('Fazendo logout...');
+            const nomeAnterior = this.usuario?.displayName;
             
-            // Salvar dados antes do logout se houver
-            if (App.dados && Persistence.state.dadosParaSalvar) {
-                await Persistence.salvarDadosCritico();
+            this.usuario = null;
+            
+            // Limpar App global
+            if (typeof App !== 'undefined') {
+                App.usuarioAtual = null;
+                App.estadoSistema = App.estadoSistema || {};
+                App.estadoSistema.usuarioEmail = null;
+                App.estadoSistema.usuarioNome = null;
             }
+
+            this._mostrarMensagem(`Até logo, ${nomeAnterior}! 👋`, 'info');
             
-            if (!firebaseAuth) {
-                Notifications.error('Serviço de autenticação indisponível');
-                return;
-            }
-            await firebaseAuth.signOut();
-            this._onLogoutSucesso();
-            
+            // Mostrar tela de login se existir
+            setTimeout(() => {
+                this._mostrarTelaLogin();
+            }, 1000);
+
+            return true;
+
         } catch (error) {
-            console.error('Erro no logout:', error);
-            Notifications.error('Erro ao fazer logout');
-            
-            // Forçar logout local mesmo com erro
-            this._limparSessaoLocal();
-            this._mostrarTelaLogin();
+            console.error('❌ Erro no logout:', error);
+            return false;
         }
     },
 
-    // ✅ REGISTRAR NOVO USUÁRIO
-    async mostrarRegistro() {
-        // Criar modal de registro dinamicamente
-        const modalRegistro = this._criarModalRegistro();
-        document.body.appendChild(modalRegistro);
-    },
-
-    async registrarUsuario(email, senha, nome) {
+    // 🔄 AUTO-LOGIN (se lembrar usuário)
+    autoLogin() {
         try {
-            this._mostrarIndicadorLogin('Criando conta...');
-            
-            if (!firebaseAuth) {
-                Notifications.error('Serviço de autenticação indisponível');
-                return;
+            if (!this.config.autoLogin || this.state.logado) {
+                return false;
             }
-            const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, senha);
-            
-            // Atualizar perfil com nome
-            await userCredential.user.updateProfile({
-                displayName: nome
-            });
 
-            // 🔥 NOVO: Adicionar usuário à estrutura de dados
-            if (typeof DataStructure !== 'undefined') {
-                const dadosUsuario = {
-                    nome: nome,
-                    email: email,
-                    cargo: 'Colaborador',
-                    departamento: 'Gestão Geral',
-                    administrador: false
-                };
-                DataStructure.adicionarUsuario(dadosUsuario);
+            const ultimoUsuario = localStorage.getItem('ultimoUsuarioBiapo');
+            
+            if (ultimoUsuario && this.equipeBiapo[ultimoUsuario]) {
+                console.log(`🔄 Auto-login: ${ultimoUsuario}`);
+                return this.login(ultimoUsuario);
             }
-            
-            this._onLoginSucesso(userCredential.user);
-            Notifications.success('Conta criada com sucesso!');
-            
+
+            return false;
+
         } catch (error) {
-            this._onRegistroErro(error);
-        } finally {
-            this._ocultarIndicadorLogin();
+            console.error('❌ Erro no auto-login:', error);
+            return false;
         }
     },
 
-    // ✅ RECUPERAR SENHA
-    async recuperarSenha(email) {
-        try {
-            if (!firebaseAuth) {
-                Notifications.error('Serviço de autenticação indisponível');
-                return;
-            }
-            await firebaseAuth.sendPasswordResetEmail(email);
-            Notifications.success('Email de recuperação enviado!');
-        } catch (error) {
-            console.error('Erro na recuperação:', error);
-            Notifications.error('Erro ao enviar email de recuperação');
-        }
-    },
+    // 📋 LISTAR EQUIPE DISPONÍVEL
+    listarEquipe() {
+        const equipe = Object.entries(this.equipeBiapo)
+            .filter(([_, dados]) => dados.ativo)
+            .map(([nome, dados]) => ({
+                login: nome,
+                nome: dados.nomeCompleto,
+                admin: dados.admin
+            }));
 
-    // 🔥 NOVO: SISTEMA DE GESTÃO DE USUÁRIOS
-    mostrarGerenciarUsuarios() {
-        try {
-            this._criarModalGerenciarUsuarios();
-        } catch (error) {
-            console.error('❌ Erro ao mostrar gestão de usuários:', error);
-            Notifications.error('Erro ao abrir gestão de usuários');
-        }
-    },
-
-    _criarModalGerenciarUsuarios() {
-        // Remover modal existente
-        const modalExistente = document.getElementById('modalGerenciarUsuarios');
-        if (modalExistente) {
-            modalExistente.remove();
-        }
-
-        // Obter lista de usuários
-        const usuarios = DataStructure ? DataStructure.listarUsuarios() : [];
-
-        const modal = document.createElement('div');
-        modal.id = 'modalGerenciarUsuarios';
-        modal.className = 'modal';
+        console.log('👥 Equipe BIAPO disponível:');
+        console.table(equipe);
         
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 900px; max-height: 80vh; overflow-y: auto;">
-                <div class="modal-header">
-                    <h3>👥 Gerenciar Equipe BIAPO</h3>
-                    <button class="modal-close" onclick="Auth._fecharModalUsuarios()">&times;</button>
+        return equipe;
+    },
+
+    // ✅ VERIFICAÇÕES
+    estaLogado() {
+        return this.state.logado && !!this.usuario;
+    },
+
+    ehAdmin() {
+        return this.usuario?.admin || false;
+    },
+
+    // 🔧 CRIAR INTERFACE DE LOGIN SIMPLES
+    criarInterfaceLogin() {
+        // Remover interface existente
+        const loginExistente = document.getElementById('loginSimplesBiapo');
+        if (loginExistente) {
+            loginExistente.remove();
+        }
+
+        const loginDiv = document.createElement('div');
+        loginDiv.id = 'loginSimplesBiapo';
+        loginDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+        `;
+
+        loginDiv.innerHTML = `
+            <div style="
+                background: white;
+                padding: 48px;
+                border-radius: 16px;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+                text-align: center;
+                max-width: 400px;
+                width: 90%;
+            ">
+                <div style="margin-bottom: 32px;">
+                    <h2 style="
+                        color: #1f2937;
+                        margin: 0 0 8px 0;
+                        font-size: 28px;
+                        font-weight: 700;
+                    ">🏗️ Sistema BIAPO</h2>
+                    <p style="
+                        color: #6b7280;
+                        margin: 0;
+                        font-size: 16px;
+                    ">Gestão de Eventos - Obra 292</p>
                 </div>
-                
-                <div class="modal-body">
-                    <!-- Adicionar Novo Usuário -->
-                    <div class="form-section" style="margin-bottom: 24px;">
-                        <h4>➕ Adicionar Novo Usuário</h4>
-                        <form id="formNovoUsuario" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
-                            <div class="form-group">
-                                <label for="novoUsuarioNome">👤 Nome Completo:</label>
-                                <input type="text" id="novoUsuarioNome" placeholder="Ex: João Silva" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="novoUsuarioEmail">📧 Email:</label>
-                                <input type="email" id="novoUsuarioEmail" placeholder="joao@biapo.com.br" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="novoUsuarioCargo">💼 Cargo:</label>
-                                <select id="novoUsuarioCargo" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="Coordenador Geral">Coordenador Geral</option>
-                                    <option value="Coordenador">Coordenador</option>
-                                    <option value="Supervisor de Obra">Supervisor de Obra</option>
-                                    <option value="Engenheiro">Engenheiro</option>
-                                    <option value="Arquiteto">Arquiteto</option>
-                                    <option value="Analista">Analista</option>
-                                    <option value="Especialista">Especialista</option>
-                                    <option value="Técnico">Técnico</option>
-                                    <option value="Estagiário">Estagiário</option>
-                                    <option value="Colaborador">Colaborador</option>
-                                </select>
-                            </div>
-                            
-                            <button type="button" class="btn btn-primary" onclick="Auth._adicionarUsuario()">
-                                ➕ Adicionar
-                            </button>
-                        </form>
-                    </div>
+
+                <div style="margin-bottom: 24px;">
+                    <label style="
+                        display: block;
+                        margin-bottom: 8px;
+                        color: #374151;
+                        font-weight: 600;
+                        text-align: left;
+                    ">👤 Digite seu primeiro nome:</label>
                     
-                    <!-- Lista de Usuários -->
-                    <div class="form-section">
-                        <h4>📋 Equipe BIAPO (${usuarios.length} usuários)</h4>
-                        
-                        ${usuarios.length > 0 ? `
-                            <div class="usuarios-grid" style="display: grid; gap: 12px; max-height: 400px; overflow-y: auto;">
-                                ${usuarios.map(usuario => `
-                                    <div class="usuario-card" style="
-                                        display: grid;
-                                        grid-template-columns: 2fr 1fr 1fr 1fr auto;
-                                        gap: 12px;
-                                        align-items: center;
-                                        padding: 16px;
-                                        background: ${usuario.ativo ? '#f8fafc' : '#fef2f2'};
-                                        border-radius: 8px;
-                                        border: 1px solid ${usuario.ativo ? '#e5e7eb' : '#fecaca'};
-                                        border-left: 4px solid ${usuario.administrador ? '#c53030' : '#10b981'};
-                                    ">
-                                        <div>
-                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                                <strong style="color: ${usuario.ativo ? '#1f2937' : '#6b7280'};">
-                                                    ${usuario.administrador ? '👑 ' : '👤 '}${usuario.nome}
-                                                </strong>
-                                                ${!usuario.ativo ? '<span style="color: #dc2626; font-size: 12px; padding: 2px 6px; background: #fecaca; border-radius: 4px;">Inativo</span>' : ''}
-                                            </div>
-                                            <div style="font-size: 12px; color: #6b7280;">${usuario.email}</div>
-                                        </div>
-                                        
-                                        <div style="font-size: 14px; color: #374151;">
-                                            💼 ${usuario.cargo}
-                                        </div>
-                                        
-                                        <div style="font-size: 14px; color: #374151;">
-                                            🏢 ${usuario.departamento}
-                                        </div>
-                                        
-                                        <div style="font-size: 12px; color: #6b7280;">
-                                            📅 ${new Date(usuario.dataIngresso).toLocaleDateString('pt-BR')}
-                                        </div>
-                                        
-                                        <div style="display: flex; gap: 4px;">
-                                            <button class="btn btn-sm btn-secondary" 
-                                                    onclick="Auth._editarUsuario('${usuario.email}')" 
-                                                    title="Editar usuário">
-                                                ✏️
-                                            </button>
-                                            ${usuario.ativo ? `
-                                                <button class="btn btn-sm btn-warning" 
-                                                        onclick="Auth._desativarUsuario('${usuario.email}')" 
-                                                        title="Desativar usuário">
-                                                    🚫
-                                                </button>
-                                            ` : `
-                                                <button class="btn btn-sm btn-success" 
-                                                        onclick="Auth._ativarUsuario('${usuario.email}')" 
-                                                        title="Reativar usuário">
-                                                    ✅
-                                                </button>
-                                            `}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : `
-                            <div class="info-box info-box-info">
-                                📭 Nenhum usuário adicional cadastrado. Use o formulário acima para adicionar novos membros.
-                            </div>
-                        `}
-                    </div>
-                    
-                    <!-- Estatísticas -->
-                    <div class="form-section" style="margin-top: 24px;">
-                        <h4>📊 Estatísticas da Equipe</h4>
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
-                            <div style="text-align: center; padding: 12px; background: #f0f9ff; border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: bold; color: #0369a1;">${usuarios.length}</div>
-                                <div style="font-size: 12px; color: #6b7280;">Total de Usuários</div>
-                            </div>
-                            <div style="text-align: center; padding: 12px; background: #f0fdf4; border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: bold; color: #059669;">${usuarios.filter(u => u.ativo).length}</div>
-                                <div style="font-size: 12px; color: #6b7280;">Usuários Ativos</div>
-                            </div>
-                            <div style="text-align: center; padding: 12px; background: #fef7ff; border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: bold; color: #7c3aed;">${usuarios.filter(u => u.administrador).length}</div>
-                                <div style="font-size: 12px; color: #6b7280;">Administradores</div>
-                            </div>
-                            <div style="text-align: center; padding: 12px; background: #fffbeb; border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: bold; color: #d97706;">${new Set(usuarios.map(u => u.departamento)).size}</div>
-                                <div style="font-size: 12px; color: #6b7280;">Departamentos</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Ações em Lote -->
-                    <div class="form-section" style="margin-top: 24px;">
-                        <h4>⚙️ Ações Administrativas</h4>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                            <button class="btn btn-secondary" onclick="Auth._exportarUsuarios()">
-                                📄 Exportar Lista
-                            </button>
-                            <button class="btn btn-warning" onclick="Auth._resetarSenhas()">
-                                🔑 Reset Senhas
-                            </button>
-                            <button class="btn btn-info" onclick="Auth._sincronizarUsuarios()">
-                                🔄 Sincronizar
-                            </button>
-                        </div>
-                    </div>
+                    <input 
+                        type="text" 
+                        id="inputNomeUsuario" 
+                        placeholder="Ex: renato, bruna, lara..."
+                        style="
+                            width: 100%;
+                            padding: 16px;
+                            border: 2px solid #e5e7eb;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            text-align: center;
+                            box-sizing: border-box;
+                            transition: border-color 0.2s;
+                        "
+                        onkeydown="if(event.key==='Enter') Auth.tentarLogin()"
+                        onfocus="this.style.borderColor='#C53030'"
+                        onblur="this.style.borderColor='#e5e7eb'"
+                    >
                 </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="Auth._fecharModalUsuarios()">
-                        ✅ Fechar
-                    </button>
+
+                <button 
+                    onclick="Auth.tentarLogin()" 
+                    style="
+                        width: 100%;
+                        background: linear-gradient(135deg, #C53030 0%, #9B2C2C 100%);
+                        color: white;
+                        border: none;
+                        padding: 16px;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                    "
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='translateY(0)'"
+                >
+                    🔐 Entrar
+                </button>
+
+                <div style="margin-top: 24px;">
+                    <p style="
+                        color: #6b7280;
+                        font-size: 14px;
+                        margin: 0 0 12px 0;
+                    ">Equipe disponível:</p>
+                    
+                    <div style="
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 8px;
+                        font-size: 12px;
+                        color: #374151;
+                    ">
+                        <span onclick="Auth.preencherNome('renato')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">renato</span>
+                        <span onclick="Auth.preencherNome('bruna')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">bruna</span>
+                        <span onclick="Auth.preencherNome('lara')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">lara</span>
+                        <span onclick="Auth.preencherNome('isabella')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">isabella</span>
+                        <span onclick="Auth.preencherNome('eduardo')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">eduardo</span>
+                        <span onclick="Auth.preencherNome('carlos')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">carlos</span>
+                        <span onclick="Auth.preencherNome('alex')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">alex</span>
+                        <span onclick="Auth.preencherNome('nominato')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">nominato</span>
+                        <span onclick="Auth.preencherNome('nayara')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">nayara</span>
+                        <span onclick="Auth.preencherNome('jean')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">jean</span>
+                        <span onclick="Auth.preencherNome('juliana')" style="cursor:pointer; padding: 4px; background: #f3f4f6; border-radius: 4px;">juliana</span>
+                    </div>
                 </div>
             </div>
         `;
+
+        document.body.appendChild(loginDiv);
         
-        document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('show'), 10);
-        
-        // Focar no campo nome
-        document.getElementById('novoUsuarioNome').focus();
-    },
-
-    _adicionarUsuario() {
-        try {
-            const nome = document.getElementById('novoUsuarioNome').value.trim();
-            const email = document.getElementById('novoUsuarioEmail').value.trim();
-            const cargo = document.getElementById('novoUsuarioCargo').value;
-
-            // Validações
-            if (!nome || nome.length < 2) {
-                Notifications.error('Nome deve ter pelo menos 2 caracteres');
-                return;
-            }
-
-            if (!email || !email.includes('@')) {
-                Notifications.error('Email inválido');
-                return;
-            }
-
-            if (!cargo) {
-                Notifications.error('Cargo é obrigatório');
-                return;
-            }
-
-            // Determinar departamento baseado no cargo
-            let departamento = 'Gestão Geral';
-            if (['Supervisor de Obra', 'Engenheiro', 'Arquiteto', 'Técnico'].includes(cargo)) {
-                departamento = 'Obra e Construção';
-            } else if (['Especialista', 'Coordenador de Rede'].includes(cargo) && email.includes('redeinterna')) {
-                departamento = 'Museu Nacional';
-            }
-
-            const dadosUsuario = {
-                nome: nome,
-                email: email,
-                cargo: cargo,
-                departamento: departamento,
-                administrador: cargo === 'Coordenador Geral'
-            };
-
-            // Adicionar usuário
-            if (DataStructure && DataStructure.adicionarUsuario(dadosUsuario)) {
-                // Limpar campos
-                document.getElementById('novoUsuarioNome').value = '';
-                document.getElementById('novoUsuarioEmail').value = '';
-                document.getElementById('novoUsuarioCargo').value = '';
-
-                // Recriar modal para mostrar o novo usuário
-                this._criarModalGerenciarUsuarios();
-
-                Notifications.success(`Usuário "${nome}" adicionado com sucesso!`);
-            } else {
-                Notifications.error('Erro ao adicionar usuário. Verifique se o email já existe.');
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao adicionar usuário:', error);
-            Notifications.error('Erro ao adicionar usuário');
-        }
-    },
-
-    _editarUsuario(email) {
-        try {
-            const usuario = DataStructure.obterUsuario(email);
-            if (!usuario) {
-                Notifications.error('Usuário não encontrado');
-                return;
-            }
-
-            // Criar modal de edição
-            const modalEdicao = this._criarModalEdicaoUsuario(usuario);
-            document.body.appendChild(modalEdicao);
-
-        } catch (error) {
-            console.error('❌ Erro ao editar usuário:', error);
-            Notifications.error('Erro ao abrir edição de usuário');
-        }
-    },
-
-    _criarModalEdicaoUsuario(usuario) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.zIndex = '3001'; // Sobrepor modal principal
-        
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 500px;">
-                <div class="modal-header">
-                    <h3>✏️ Editar Usuário</h3>
-                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
-                </div>
-                
-                <form id="formEditarUsuario" class="modal-body">
-                    <div class="form-group">
-                        <label for="editNome">👤 Nome Completo:</label>
-                        <input type="text" id="editNome" value="${usuario.nome}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="editEmail">📧 Email:</label>
-                        <input type="email" id="editEmail" value="${usuario.email}" readonly 
-                               style="background: #f3f4f6; color: #6b7280;">
-                        <small style="color: #6b7280;">Email não pode ser alterado</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="editCargo">💼 Cargo:</label>
-                        <select id="editCargo" required>
-                            <option value="Coordenador Geral" ${usuario.cargo === 'Coordenador Geral' ? 'selected' : ''}>Coordenador Geral</option>
-                            <option value="Coordenador" ${usuario.cargo === 'Coordenador' ? 'selected' : ''}>Coordenador</option>
-                            <option value="Supervisor de Obra" ${usuario.cargo === 'Supervisor de Obra' ? 'selected' : ''}>Supervisor de Obra</option>
-                            <option value="Engenheiro" ${usuario.cargo === 'Engenheiro' ? 'selected' : ''}>Engenheiro</option>
-                            <option value="Arquiteto" ${usuario.cargo === 'Arquiteto' ? 'selected' : ''}>Arquiteto</option>
-                            <option value="Analista" ${usuario.cargo === 'Analista' ? 'selected' : ''}>Analista</option>
-                            <option value="Especialista" ${usuario.cargo === 'Especialista' ? 'selected' : ''}>Especialista</option>
-                            <option value="Técnico" ${usuario.cargo === 'Técnico' ? 'selected' : ''}>Técnico</option>
-                            <option value="Estagiário" ${usuario.cargo === 'Estagiário' ? 'selected' : ''}>Estagiário</option>
-                            <option value="Colaborador" ${usuario.cargo === 'Colaborador' ? 'selected' : ''}>Colaborador</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="editDepartamento">🏢 Departamento:</label>
-                        <select id="editDepartamento" required>
-                            <option value="Gestão Geral" ${usuario.departamento === 'Gestão Geral' ? 'selected' : ''}>Gestão Geral</option>
-                            <option value="Obra e Construção" ${usuario.departamento === 'Obra e Construção' ? 'selected' : ''}>Obra e Construção</option>
-                            <option value="Museu Nacional" ${usuario.departamento === 'Museu Nacional' ? 'selected' : ''}>Museu Nacional</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="editTelefone">📱 Telefone:</label>
-                        <input type="tel" id="editTelefone" value="${usuario.telefone || ''}" 
-                               placeholder="(11) 99999-9999">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" id="editAdministrador" ${usuario.administrador ? 'checked' : ''}>
-                            <span>👑 Privilégios de Administrador</span>
-                        </label>
-                    </div>
-                </form>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">
-                        ❌ Cancelar
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="Auth._salvarEdicaoUsuario('${usuario.email}', this)">
-                        ✅ Salvar
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        return modal;
-    },
-
-    _salvarEdicaoUsuario(email, botao) {
-        try {
-            const modal = botao.closest('.modal');
-            
-            const dadosAtualizacao = {
-                nome: modal.querySelector('#editNome').value.trim(),
-                cargo: modal.querySelector('#editCargo').value,
-                departamento: modal.querySelector('#editDepartamento').value,
-                telefone: modal.querySelector('#editTelefone').value.trim(),
-                administrador: modal.querySelector('#editAdministrador').checked
-            };
-
-            if (DataStructure && DataStructure.atualizarUsuario(email, dadosAtualizacao)) {
-                modal.remove();
-                this._criarModalGerenciarUsuarios();
-                Notifications.success('Usuário atualizado com sucesso!');
-            } else {
-                Notifications.error('Erro ao atualizar usuário');
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao salvar edição:', error);
-            Notifications.error('Erro ao salvar alterações');
-        }
-    },
-
-    _desativarUsuario(email) {
-        try {
-            const usuario = DataStructure.obterUsuario(email);
-            if (!usuario) {
-                Notifications.error('Usuário não encontrado');
-                return;
-            }
-
-            const confirmacao = confirm(
-                `Tem certeza que deseja desativar o usuário?\n\n` +
-                `👤 ${usuario.nome}\n` +
-                `📧 ${usuario.email}\n\n` +
-                `O usuário não poderá mais fazer login no sistema.`
-            );
-
-            if (!confirmacao) return;
-
-            if (DataStructure && DataStructure.desativarUsuario(email)) {
-                this._criarModalGerenciarUsuarios();
-                Notifications.success(`Usuário "${usuario.nome}" desativado com sucesso!`);
-            } else {
-                Notifications.error('Erro ao desativar usuário');
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao desativar usuário:', error);
-            Notifications.error('Erro ao desativar usuário');
-        }
-    },
-
-    _ativarUsuario(email) {
-        try {
-            const usuario = DataStructure.obterUsuario(email);
-            if (!usuario) {
-                Notifications.error('Usuário não encontrado');
-                return;
-            }
-
-            const dadosAtualizacao = { ativo: true };
-            if (DataStructure && DataStructure.atualizarUsuario(email, dadosAtualizacao)) {
-                this._criarModalGerenciarUsuarios();
-                Notifications.success(`Usuário "${usuario.nome}" reativado com sucesso!`);
-            } else {
-                Notifications.error('Erro ao reativar usuário');
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao reativar usuário:', error);
-            Notifications.error('Erro ao reativar usuário');
-        }
-    },
-
-    _exportarUsuarios() {
-        try {
-            const usuarios = DataStructure ? DataStructure.listarUsuarios() : [];
-            
-            if (usuarios.length === 0) {
-                Notifications.warning('Nenhum usuário para exportar');
-                return;
-            }
-
-            // Gerar CSV
-            const headers = ['Nome', 'Email', 'Cargo', 'Departamento', 'Ativo', 'Admin', 'Data Ingresso'];
-            const rows = usuarios.map(u => [
-                u.nome,
-                u.email,
-                u.cargo,
-                u.departamento,
-                u.ativo ? 'Sim' : 'Não',
-                u.administrador ? 'Sim' : 'Não',
-                new Date(u.dataIngresso).toLocaleDateString('pt-BR')
-            ]);
-
-            const csvContent = [headers, ...rows]
-                .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
-                .join('\n');
-
-            // Download do arquivo
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `usuarios_biapo_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            Notifications.success('Lista de usuários exportada com sucesso!');
-
-        } catch (error) {
-            console.error('❌ Erro ao exportar usuários:', error);
-            Notifications.error('Erro ao exportar lista de usuários');
-        }
-    },
-
-    _resetarSenhas() {
-        Notifications.info('Funcionalidade em desenvolvimento. Entre em contato com o administrador do sistema.');
-    },
-
-    _sincronizarUsuarios() {
-        try {
-            // Força sincronização com Firebase
-            if (typeof Persistence !== 'undefined') {
-                Persistence.salvarDadosCritico();
-            }
-            
-            Notifications.success('Sincronização concluída!');
-        } catch (error) {
-            console.error('❌ Erro na sincronização:', error);
-            Notifications.error('Erro na sincronização');
-        }
-    },
-
-    _fecharModalUsuarios() {
-        const modal = document.getElementById('modalGerenciarUsuarios');
-        if (modal) {
-            modal.remove();
-        }
-    },
-
-    // ✅ CALLBACKS DE SUCESSO E ERRO - MANTIDOS
-    _onLoginSucesso(user) {
-        this.state.usuarioAtual = user;
-        this.state.tentativasLogin = 0;
-        
-        // Atualizar estado global do App
-        App.usuarioAtual = user;
-        App.estadoSistema.usuarioEmail = user.email;
-        App.estadoSistema.usuarioNome = user.displayName || user.email;
-        
-        // Salvar preferência de login se habilitado
-        if (this.config.REMEMBER_USER) {
-            Helpers.storage.set('ultimoUsuario', {
-                email: user.email,
-                nome: user.displayName,
-                timestamp: Date.now()
-            });
-        }
-        
-        // Limpar campos de login
-        this._limparCamposLogin();
-        
-        // Notificar sucesso
-        Notifications.success(`Bem-vindo, ${user.displayName || user.email}!`);
-        
-        // Redirecionar após delay
+        // Focar no input
         setTimeout(() => {
-            this._mostrarSistema();
-            this.state.loginCallbacks.forEach(cb => {
-                try { cb(user); } catch (e) { console.error(e); }
-            });
-        }, this.config.AUTO_REDIRECT_DELAY);
+            const input = document.getElementById('inputNomeUsuario');
+            if (input) input.focus();
+        }, 100);
+
+        return loginDiv;
     },
 
-    _onLoginErro(error) {
-        console.error('Erro no login:', error);
-        
-        let mensagemErro = 'Erro no login';
-        let sugestao = '';
-        
-        switch (error.code) {
-            case 'auth/user-not-found':
-                mensagemErro = 'Usuário não encontrado';
-                sugestao = 'Verifique o email ou registre-se';
-                break;
-            case 'auth/wrong-password':
-                mensagemErro = 'Senha incorreta';
-                sugestao = 'Verifique sua senha ou recupere-a';
-                break;
-            case 'auth/invalid-email':
-                mensagemErro = 'Email inválido';
-                sugestao = 'Verifique o formato do email';
-                break;
-            case 'auth/too-many-requests':
-                mensagemErro = 'Muitas tentativas';
-                sugestao = 'Aguarde alguns minutos';
-                break;
-            case 'auth/network-request-failed':
-                mensagemErro = 'Erro de conexão';
-                sugestao = 'Verifique sua internet';
-                break;
-            default:
-                mensagemErro = error.message || 'Erro desconhecido';
-        }
-        
-        Notifications.error(`${mensagemErro}${sugestao ? ` - ${sugestao}` : ''}`);
-        
-        // Verificar limite de tentativas
-        if (this.state.tentativasLogin >= this.config.MAX_TENTATIVAS_LOGIN) {
-            this._bloquearLogin();
-        }
-    },
-
-    _onLogoutSucesso() {
-        this.state.usuarioAtual = null;
-        
-        // Limpar estado global do App
-        App.usuarioAtual = null;
-        App.dados = null;
-        App.estadoSistema.usuarioEmail = null;
-        App.estadoSistema.usuarioNome = null;
-        
-        this._limparSessaoLocal();
-        this._mostrarTelaLogin();
-
-        this.state.logoutCallbacks.forEach(cb => {
-            try { cb(); } catch (e) { console.error(e); }
-        });
-
-        Notifications.info('Logout realizado com sucesso');
-    },
-
-    _onRegistroErro(error) {
-        console.error('Erro no registro:', error);
-        
-        let mensagemErro = 'Erro ao criar conta';
-        
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                mensagemErro = 'Email já está em uso';
-                break;
-            case 'auth/weak-password':
-                mensagemErro = 'Senha muito fraca';
-                break;
-            case 'auth/invalid-email':
-                mensagemErro = 'Email inválido';
-                break;
-            default:
-                mensagemErro = error.message || 'Erro desconhecido';
-        }
-        
-        Notifications.error(mensagemErro);
-    },
-
-    // [MANTÉM TODOS OS OUTROS MÉTODOS EXISTENTES...]
-
-    // ✅ VALIDAÇÃO DE CAMPOS
-    _validarCamposLogin(email, senha) {
-        const campos = [];
-        let erro = '';
-        
-        if (!email) {
-            erro = 'Email é obrigatório';
-            campos.push('loginEmail');
-        } else if (!Validation.isValidEmail(email)) {
-            erro = 'Email inválido';
-            campos.push('loginEmail');
-        }
-        
-        if (!senha) {
-            erro = erro || 'Senha é obrigatória';
-            campos.push('loginPassword');
-        } else if (senha.length < 6) {
-            erro = erro || 'Senha deve ter pelo menos 6 caracteres';
-            campos.push('loginPassword');
-        }
-        
-        return {
-            valido: campos.length === 0,
-            erro,
-            campos
-        };
-    },
-
-    _destacarCamposErro(campos) {
-        // Limpar erros anteriores
-        document.querySelectorAll('.input-error').forEach(el => {
-            el.classList.remove('input-error');
-        });
-        
-        // Destacar campos com erro
-        campos.forEach(campoId => {
-            const campo = document.getElementById(campoId);
-            if (campo) {
-                campo.classList.add('input-error');
-                campo.focus();
+    // 🔧 MÉTODO AUXILIAR PARA INTERFACE
+    tentarLogin() {
+        const input = document.getElementById('inputNomeUsuario');
+        if (input) {
+            const nome = input.value.trim();
+            if (nome) {
+                this.login(nome);
+            } else {
+                this._mostrarMensagem('Digite seu nome', 'warning');
             }
-        });
+        }
     },
 
-    // ✅ INTERFACE - MOSTRAR/OCULTAR TELAS
+    preencherNome(nome) {
+        const input = document.getElementById('inputNomeUsuario');
+        if (input) {
+            input.value = nome;
+            input.focus();
+        }
+    },
+
+    // 🎯 MÉTODOS AUXILIARES
     _mostrarTelaLogin() {
-        const loginScreen = document.getElementById('loginScreen');
+        // Esconder sistema principal
         const mainContainer = document.getElementById('mainContainer');
-        
-        if (loginScreen && mainContainer) {
-            loginScreen.classList.remove('hidden');
-            mainContainer.classList.add('hidden');
+        if (mainContainer) {
+            mainContainer.style.display = 'none';
         }
         
-        // Limpar dados sensíveis
-        this._limparCamposLogin();
+        // Mostrar interface de login
+        this.criarInterfaceLogin();
     },
 
-    _mostrarSistema() {
-        const loginScreen = document.getElementById('loginScreen');
-        const mainContainer = document.getElementById('mainContainer');
-        
-        if (loginScreen && mainContainer) {
-            loginScreen.classList.add('hidden');
-            mainContainer.classList.remove('hidden');
+    _esconderTelaLogin() {
+        // Remover interface de login
+        const loginDiv = document.getElementById('loginSimplesBiapo');
+        if (loginDiv) {
+            loginDiv.remove();
         }
         
+        // Mostrar sistema principal
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.style.display = 'block';
+        }
+    },
+
+    _executarCallbacksLogin() {
         // Inicializar sistema se necessário
-        if (App && typeof App.inicializarSistema === 'function') {
+        if (typeof App !== 'undefined' && App.inicializarSistema) {
             App.inicializarSistema();
         }
     },
 
-    // ✅ INDICADORES VISUAIS
-    _mostrarIndicadorLogin(texto) {
-        // Encontrar botão de login
-        const btnLogin = document.querySelector('#loginScreen .btn-primary');
-        if (btnLogin) {
-            btnLogin.innerHTML = `<div class="loading"></div> ${texto}`;
-            btnLogin.disabled = true;
-        }
-    },
-
-    _ocultarIndicadorLogin() {
-        const btnLogin = document.querySelector('#loginScreen .btn-primary');
-        if (btnLogin) {
-            btnLogin.innerHTML = 'Entrar';
-            btnLogin.disabled = false;
-        }
-    },
-
-    // ✅ BLOQUEIO TEMPORÁRIO APÓS MUITAS TENTATIVAS
-    _bloquearLogin() {
-        const tempoBloquei = 5 * 60 * 1000; // 5 minutos
-        const btnLogin = document.querySelector('#loginScreen .btn-primary');
-        
-        if (btnLogin) {
-            btnLogin.disabled = true;
-            btnLogin.innerHTML = '🔒 Bloqueado (5min)';
-        }
-        
-        Notifications.error('Login bloqueado por 5 minutos após muitas tentativas');
-        
-        setTimeout(() => {
-            this.state.tentativasLogin = 0;
-            this._ocultarIndicadorLogin();
-            Notifications.info('Bloqueio removido - pode tentar novamente');
-        }, tempoBloquei);
-    },
-
-    // ✅ LIMPEZA DE DADOS
-    _limparCamposLogin() {
-        const campos = ['loginEmail', 'loginPassword'];
-        campos.forEach(id => {
-            const campo = document.getElementById(id);
-            if (campo) {
-                campo.value = '';
-                campo.classList.remove('input-error');
+    _mostrarMensagem(mensagem, tipo = 'info') {
+        // Usar Notifications se disponível
+        if (typeof Notifications !== 'undefined') {
+            switch (tipo) {
+                case 'success': 
+                    if (Notifications.success) Notifications.success(mensagem);
+                    break;
+                case 'error': 
+                    if (Notifications.error) Notifications.error(mensagem);
+                    break;
+                case 'warning': 
+                    if (Notifications.warning) Notifications.warning(mensagem);
+                    break;
+                default: 
+                    if (Notifications.info) Notifications.info(mensagem);
             }
-        });
-    },
-
-    _limparSessaoLocal() {
-        // Limpar dados locais sensíveis, mas manter preferências
-        const backup = Helpers.storage.get('ultimoUsuario');
-        Persistence.limparDadosAntigos();
-        
-        if (backup && this.config.REMEMBER_USER) {
-            Helpers.storage.set('ultimoUsuario', backup);
-        }
-    },
-
-    // ✅ MODAL DE REGISTRO - MANTIDO
-    _criarModalRegistro() {
-        const modal = document.createElement('div');
-        modal.className = 'modal active';
-        modal.style.zIndex = '3000';
-        
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 400px;">
-                <h3 style="margin-bottom: 24px;">🔐 Criar Nova Conta</h3>
-                
-                <div class="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" id="registroNome" placeholder="Seu nome completo" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="registroEmail" placeholder="seu@email.com" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" id="registroSenha" placeholder="Mínimo 6 caracteres" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Confirmar Senha</label>
-                    <input type="password" id="registroConfirmarSenha" placeholder="Digite a senha novamente" required>
-                </div>
-                
-                <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px;">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">
-                        Cancelar
-                    </button>
-                    <button class="btn btn-primary" onclick="Auth._processarRegistro(this)">
-                        Criar Conta
-                    </button>
-                </div>
-                
-                <div style="margin-top: 16px; text-align: center; font-size: 14px; color: #6b7280;">
-                    Já tem conta? <a href="#" onclick="this.closest('.modal').remove()" style="color: #3b82f6;">Faça login</a>
-                </div>
-            </div>
-        `;
-        
-        return modal;
-    },
-
-    _processarRegistro(botao) {
-        const modal = botao.closest('.modal');
-        const nome = modal.querySelector('#registroNome').value.trim();
-        const email = modal.querySelector('#registroEmail').value.trim();
-        const senha = modal.querySelector('#registroSenha').value;
-        const confirmarSenha = modal.querySelector('#registroConfirmarSenha').value;
-        
-        // Validações
-        if (!nome || nome.length < 2) {
-            Notifications.error('Nome deve ter pelo menos 2 caracteres');
-            return;
-        }
-        
-        if (!Validation.isValidEmail(email)) {
-            Notifications.error('Email inválido');
-            return;
-        }
-        
-        if (senha.length < 6) {
-            Notifications.error('Senha deve ter pelo menos 6 caracteres');
-            return;
-        }
-        
-        if (senha !== confirmarSenha) {
-            Notifications.error('Senhas não conferem');
-            return;
-        }
-        
-        // Processar registro
-        this.registrarUsuario(email, senha, nome).then(() => {
-            modal.remove();
-        });
-    },
-
-    // [MANTÉM TODOS OS OUTROS MÉTODOS EXISTENTES COMO auto-login, configuração, etc.]
-
-    // ✅ AUTO-LOGIN SE USUÁRIO JÁ LOGADO
-    async verificarAutoLogin() {
-        if (this.state.autoLoginTentado) return;
-        
-        this.state.autoLoginTentado = true;
-        
-        return new Promise((resolve) => {
-            if (!firebaseAuth) {
-                Notifications.error('Serviço de autenticação indisponível');
-                resolve(null);
-                return;
-            }
-
-            const unsubscribe = firebaseAuth?.onAuthStateChanged((user) => {
-                unsubscribe();
-                
-                if (user) {
-                    console.log('👤 Usuário já autenticado:', user.email);
-                    this._onLoginSucesso(user);
-                } else {
-                    console.log('👤 Usuário não autenticado');
-                    this._mostrarTelaLogin();
-                    
-                    // Pré-popular email se lembrado
-                    this._preencherUltimoUsuario();
-                }
-                
-                resolve(user);
-            });
-        });
-    },
-
-    _preencherUltimoUsuario() {
-        if (!this.config.REMEMBER_USER) return;
-        
-        const ultimoUsuario = Helpers.storage.get('ultimoUsuario');
-        if (ultimoUsuario && ultimoUsuario.email) {
-            const emailInput = document.getElementById('loginEmail');
-            if (emailInput) {
-                emailInput.value = ultimoUsuario.email;
-                
-                // Focar no campo senha
-                const senhaInput = document.getElementById('loginPassword');
-                if (senhaInput) {
-                    senhaInput.focus();
-                }
+        } else {
+            // Fallback para console
+            console.log(`${tipo.toUpperCase()}: ${mensagem}`);
+            
+            // Fallback para alert se for erro
+            if (tipo === 'error') {
+                alert(`❌ ${mensagem}`);
             }
         }
     },
 
-    // ✅ CONFIGURAR EVENTOS DE TECLADO
-    _configurarEventosTeclado() {
-        // Enter para fazer login
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const loginScreen = document.getElementById('loginScreen');
-                if (loginScreen && !loginScreen.classList.contains('hidden')) {
-                    this.fazerLogin();
-                }
-            }
-        });
-    },
-
-    // ✅ OBTER STATUS DE AUTENTICAÇÃO
+    // 📊 STATUS E DEBUG
     obterStatus() {
         return {
-            usuarioAtual: this.state.usuarioAtual,
-            email: this.state.usuarioAtual?.email || null,
-            nome: this.state.usuarioAtual?.displayName || null,
-            autenticado: !!this.state.usuarioAtual,
-            tentativasLogin: this.state.tentativasLogin,
-            loginEmAndamento: this.state.loginEmAndamento,
-            totalUsuarios: DataStructure ? Object.keys(DataStructure.usuariosBiapo).length : 0
+            versao: this.config.versao,
+            logado: this.state.logado,
+            usuario: this.usuario?.displayName || null,
+            primeiroNome: this.usuario?.primeiroNome || null,
+            admin: this.ehAdmin(),
+            totalEquipe: Object.keys(this.equipeBiapo).length,
+            equipeBiapoCarregada: true
         };
     },
 
-    // ✅ VERIFICAR SE USUÁRIO ESTÁ AUTENTICADO
-    estaAutenticado() {
-        return !!this.state.usuarioAtual;
+    debug() {
+        console.log('🔐 Auth Simples BIAPO - Status:', this.obterStatus());
+        console.log('👥 Equipe:', this.listarEquipe());
+        return this.obterStatus();
     },
 
-    onLogin(callback) {
-        if (typeof callback === 'function') {
-            this.state.loginCallbacks.add(callback);
-        }
-    },
-
-    onLogout(callback) {
-        if (typeof callback === 'function') {
-            this.state.logoutCallbacks.add(callback);
-        }
-    },
-
-    // ✅ INICIALIZAÇÃO DO MÓDULO
+    // 🚀 INICIALIZAÇÃO
     init() {
-        console.log('🔐 Inicializando sistema de autenticação...');
-
-        if (!firebaseAuth) {
-            Notifications.error('Serviço de autenticação indisponível');
-            return;
+        console.log('🔐 Inicializando Auth Simples BIAPO v8.1...');
+        
+        // Tentar auto-login primeiro
+        const autoLoginSucesso = this.autoLogin();
+        
+        if (!autoLoginSucesso) {
+            // Se não conseguiu auto-login, mostrar tela de login
+            this._mostrarTelaLogin();
+        } else {
+            console.log('✅ Auto-login realizado com sucesso');
         }
-
-        // Configurar eventos de teclado
-        this._configurarEventosTeclado();
-
-        // Verificar auto-login
-        this.verificarAutoLogin();
-
-        // Configurar listener de mudanças de autenticação
-        const authListener = firebaseAuth?.onAuthStateChanged((user) => {
-            if (user && !this.state.usuarioAtual) {
-                // Usuário fez login
-                this._onLoginSucesso(user);
-            } else if (!user && this.state.usuarioAtual) {
-                // Usuário fez logout
-                this._onLogoutSucesso();
-            }
-        });
         
-        this.state.listeners.add(authListener);
-        
-        console.log('✅ Sistema de autenticação inicializado');
-    },
-
-    // ✅ LIMPEZA DO MÓDULO
-    destroy() {
-        // Limpar listeners
-        this.state.listeners.forEach(listener => {
-            if (typeof listener === 'function') {
-                listener();
-            }
-        });
-        this.state.listeners.clear();
-        this.state.loginCallbacks.clear();
-        this.state.logoutCallbacks.clear();
+        console.log('✅ Auth Simples BIAPO v8.1 inicializado');
     }
 };
 
-// ✅ INICIALIZAÇÃO AUTOMÁTICA
-document.addEventListener('DOMContentLoaded', async () => {
-    if (window.firebaseInitPromise) {
-        await window.firebaseInitPromise;
-    }
-    firebaseAuth = window.auth || (window.firebase ? window.firebase.auth() : null);
-    Auth.init();
-});
-
-// Disponibilizar objeto para handlers em inline scripts
+// ✅ EXPOSIÇÃO GLOBAL
 window.Auth = Auth;
 
-console.log('🔐 Sistema de Autenticação + Gestão de Usuários v7.4.2 carregado!');
+// 🚀 AUTO-INICIALIZAÇÃO
+document.addEventListener('DOMContentLoaded', () => {
+    // Aguardar um pouco para outros scripts carregarem
+    setTimeout(() => {
+        Auth.init();
+    }, 500);
+});
+
+// 📊 COMANDOS ÚTEIS NO CONSOLE
+window.loginBiapo = (nome) => Auth.login(nome);
+window.logoutBiapo = () => Auth.logout();
+window.statusAuth = () => Auth.debug();
+window.equipeBiapo = () => Auth.listarEquipe();
+
+console.log('🔐 Auth Simples BIAPO v8.1 carregado!');
 
 /*
-✅ NOVIDADES v7.4.2:
-- 🔥 Sistema completo de gestão de usuários
-- 🔥 Modal de gerenciamento com CRUD completo
-- 🔥 Interface moderna e responsiva
-- 🔥 Integração com DataStructure
-- 🔥 Estatísticas da equipe
-- 🔥 Exportação de dados
-- 🔥 Administração de permissões
+✅ SISTEMA AUTH SIMPLES v8.1:
 
-👥 FUNCIONALIDADES:
-- Adicionar novos usuários ✅
-- Editar usuários existentes ✅
-- Ativar/Desativar usuários ✅
-- Controle de permissões ✅
-- Exportar lista de usuários ✅
-- Interface administrativa completa ✅
+🎯 FUNCIONALIDADES:
+- ✅ Login apenas com primeiro nome (sem senha)
+- ✅ Equipe BIAPO completa (11 pessoas) 
+- ✅ Interface visual simples e bonita
+- ✅ Auto-login (lembra último usuário)
+- ✅ Compatibilidade total com sistema atual
+- ✅ Admin para Renato Remiro
 
-🎯 RESULTADO:
-- Gestão de equipe: 100% funcional ✅
-- Interface: Moderna e intuitiva ✅
-- Integração: Com sistema existente ✅
+👥 EQUIPE DISPONÍVEL:
+renato, bruna, lara, isabella, eduardo, carlos/beto, 
+alex, nominato, nayara, jean, juliana
+
+🔧 COMANDOS ÚTEIS:
+loginBiapo('renato')  - Fazer login
+logoutBiapo()         - Fazer logout  
+statusAuth()          - Ver status
+equipeBiapo()         - Listar equipe
+
+🚀 RESULTADO:
+- Sistema pronto para usar ✅
+- Login super simples ✅
+- Zero complexidade ✅
+- Totalmente funcional ✅
 */
