@@ -627,6 +627,39 @@
         
         console.log('🔍 Sistema de Verificações BIAPO v7.4.5 carregado!');
         console.log('📋 Comandos: verificarSistema() | verificacaoRapida()');
+// 🔧 FUNÇÕES GLOBAIS ADICIONAIS
+window.abrirMinhaAgendaDinamica = function() {
+    if (typeof PersonalAgenda !== 'undefined' && PersonalAgenda.abrirMinhaAgenda) {
+        PersonalAgenda.abrirMinhaAgenda();
+    } else {
+        console.warn('⚠️ PersonalAgenda não disponível - tentando fallback');
+        alert('📋 Função de agenda em desenvolvimento. Use o calendário principal.');
+    }
+};
+
+window.salvarDadosCritico = function() {
+    try {
+        if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
+            Persistence.salvarDadosCritico();
+        } else if (typeof App !== 'undefined' && App.salvarDados) {
+            App.salvarDados();
+        } else {
+            console.warn('⚠️ Sistema de persistência não disponível');
+            if (typeof Notifications !== 'undefined') {
+                Notifications.warning('Sistema de salvamento não disponível no momento');
+            } else {
+                alert('⚠️ Sistema de salvamento não disponível no momento');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erro ao salvar dados:', error);
+        if (typeof Notifications !== 'undefined') {
+            Notifications.error('Erro ao salvar dados');
+        }
+    }
+};
+
+console.log('✅ Funções globais adicionais carregadas!');
     </script>
 </body>
 </html>
