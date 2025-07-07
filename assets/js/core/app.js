@@ -1,8 +1,8 @@
-/* ========== 🚀 CORE APP v7.4.2 - TODAS AS CORREÇÕES APLICADAS ========== */
+/* ========== 🚀 CORE APP v7.4.5 - FIREBASE CORRIGIDO ========== */
 
 const App = {
     // ✅ VERSÃO E CONSTANTES
-    VERSAO_SISTEMA: '7.4.2',
+    VERSAO_SISTEMA: '7.4.5',
     VERSAO_DB: 7,
     INTERVALO_VERIFICACAO_PRAZOS: 3600000, // 1 hora
     MAX_EVENTOS_VISIVEIS: 5,
@@ -17,7 +17,7 @@ const App = {
         editandoAtividade: null,
         editandoEvento: null,
         pessoasSelecionadas: new Set(),
-        versaoSistema: '7.4.2',
+        versaoSistema: '7.4.5',
         usuarioEmail: null,
         usuarioNome: null,
         alertasPrazosExibidos: new Set(),
@@ -33,7 +33,7 @@ const App = {
     // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA - LIMPA E CORRIGIDA
     async inicializarSistema() {
         try {
-            console.log('🚀 Iniciando sistema v7.4.2...');
+            console.log('🚀 Iniciando sistema v7.4.5...');
             
             // Verificar se já foi inicializado
             if (this.estadoSistema.sistemaInicializado) {
@@ -87,9 +87,15 @@ const App = {
                 await this.salvarDados();
             }
 
-            // Garantir estrutura de tarefas
+            // 🔥 CORREÇÃO: Garantir estruturas SEMPRE existem
             if (!this.dados.tarefas) {
                 this.dados.tarefas = [];
+            }
+            if (!this.dados.eventos) {
+                this.dados.eventos = [];
+            }
+            if (!this.dados.areas) {
+                this.dados.areas = {};
             }
 
             // Configurar listeners para mudanças
@@ -105,8 +111,15 @@ const App = {
                 Notifications.warning('Usando backup local');
             } else {
                 this.dados = DataStructure.inicializarDados();
+                // 🔥 CORREÇÃO: Garantir estruturas no fallback também
                 if (!this.dados.tarefas) {
                     this.dados.tarefas = [];
+                }
+                if (!this.dados.eventos) {
+                    this.dados.eventos = [];
+                }
+                if (!this.dados.areas) {
+                    this.dados.areas = {};
                 }
                 Notifications.error('Usando dados padrão');
             }
@@ -559,14 +572,31 @@ window.testarStatusApp = () => {
     return status;
 };
 
-// ✅ INICIALIZAÇÃO AUTOMÁTICA QUANDO AUTENTICADO
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        App.usuarioAtual = user;
-        App.inicializarSistema();
-    } else {
-        console.log('👤 Aguardando login...');
-    }
-});
+// 🔥 CORREÇÃO CRÍTICA: VERIFICAR AUTH ANTES DE USAR
+if (typeof auth !== 'undefined' && auth && typeof auth.onAuthStateChanged === 'function') {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            App.usuarioAtual = user;
+            App.inicializarSistema();
+        } else {
+            console.log('👤 Aguardando login...');
+        }
+    });
+} else {
+    console.warn('⚠️ Firebase Auth não disponível, aguardando...');
+    // Tentar novamente após 2 segundos
+    setTimeout(() => {
+        if (typeof auth !== 'undefined' && auth && typeof auth.onAuthStateChanged === 'function') {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    App.usuarioAtual = user;
+                    App.inicializarSistema();
+                } else {
+                    console.log('👤 Aguardando login...');
+                }
+            });
+        }
+    }, 2000);
+}
 
-console.log('🚀 Core App v7.4.2 LIMPO - TODAS AS CORREÇÕES APLICADAS!');
+console.log('🚀 Core App v7.4.5 - FIREBASE AUTH CORRIGIDO!');
