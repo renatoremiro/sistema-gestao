@@ -733,6 +733,9 @@ window.salvarDados = () => Persistence.salvarDados();
 window.salvarDadosCritico = () => Persistence.salvarDadosCritico();
 window.salvarDadosImediato = () => Persistence.salvarDadosCritico(); // Alias
 
+// ✅ EXPOSIÇÃO GLOBAL DO PERSISTENCE
+window.Persistence = Persistence;
+
 // ✅ FUNÇÃO GLOBAL PARA DEBUG - OTIMIZADA
 window.Persistence_Debug = {
     status: () => Persistence.obterStatus(),
