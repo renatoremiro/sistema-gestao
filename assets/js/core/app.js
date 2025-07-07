@@ -1,8 +1,8 @@
-/* ========== 🚀 CORE APP v7.3.0 - LIMPO SEM DUPLICAÇÕES ========== */
+/* ========== 🚀 CORE APP v7.4.2 - TODAS AS CORREÇÕES APLICADAS ========== */
 
 const App = {
     // ✅ VERSÃO E CONSTANTES
-    VERSAO_SISTEMA: '7.3.0',
+    VERSAO_SISTEMA: '7.4.2',
     VERSAO_DB: 7,
     INTERVALO_VERIFICACAO_PRAZOS: 3600000, // 1 hora
     MAX_EVENTOS_VISIVEIS: 5,
@@ -17,7 +17,7 @@ const App = {
         editandoAtividade: null,
         editandoEvento: null,
         pessoasSelecionadas: new Set(),
-        versaoSistema: '7.3.0',
+        versaoSistema: '7.4.2',
         usuarioEmail: null,
         usuarioNome: null,
         alertasPrazosExibidos: new Set(),
@@ -30,10 +30,10 @@ const App = {
     listenersDados: {},
     intervaloPrazos: null,
 
-    // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA - LIMPA
+    // ✅ INICIALIZAÇÃO PRINCIPAL DO SISTEMA - LIMPA E CORRIGIDA
     async inicializarSistema() {
         try {
-            console.log('🚀 Iniciando sistema v7.3.0...');
+            console.log('🚀 Iniciando sistema v7.4.2...');
             
             // Verificar se já foi inicializado
             if (this.estadoSistema.sistemaInicializado) {
@@ -55,7 +55,7 @@ const App = {
             // Renderizar dashboard DEPOIS dos dados
             this.renderizarDashboard();
 
-            // Iniciar verificação de prazos
+            // Iniciar verificação de prazos com verificação de dependências
             this.iniciarVerificacaoPrazos();
 
             // ✅ DELEGAÇÃO TOTAL: Calendar.js controla 100% do calendário
@@ -360,8 +360,19 @@ const App = {
         });
     },
 
-    // ✅ VERIFICAÇÃO DE PRAZOS
+    // ✅ VERIFICAÇÃO DE PRAZOS - COM VERIFICAÇÃO DE DEPENDÊNCIAS CORRIGIDA
     iniciarVerificacaoPrazos() {
+        // Verificar se Helpers está disponível
+        if (typeof Helpers === 'undefined' || typeof Helpers.calcularDiasAte !== 'function') {
+            console.warn('⚠️ Helpers não disponível, aguardando...');
+            
+            // Tentar novamente em 1 segundo
+            setTimeout(() => {
+                this.iniciarVerificacaoPrazos();
+            }, 1000);
+            return;
+        }
+
         this.verificarPrazos();
         this.intervaloPrazos = setInterval(() => {
             this.verificarPrazos();
@@ -369,6 +380,12 @@ const App = {
     },
 
     verificarPrazos() {
+        // Verificação dupla de segurança
+        if (typeof Helpers === 'undefined' || typeof Helpers.calcularDiasAte !== 'function') {
+            console.warn('⚠️ Helpers.calcularDiasAte não disponível, pulando verificação de prazos');
+            return;
+        }
+
         if (!this.dados?.areas) return;
 
         const proximosDias = 3;
@@ -376,28 +393,48 @@ const App = {
         Object.values(this.dados.areas).forEach(area => {
             if (area.atividades) {
                 area.atividades.forEach(atividade => {
-                    const diasAte = Helpers.calcularDiasAte(atividade.prazo);
-                    
-                    if (diasAte <= proximosDias && diasAte >= 0) {
-                        const alertaId = `prazo-${atividade.id}`;
+                    try {
+                        const diasAte = Helpers.calcularDiasAte(atividade.prazo);
                         
-                        if (!this.estadoSistema.alertasPrazosExibidos.has(alertaId)) {
-                            this.mostrarAlertaPrazo(atividade, diasAte);
-                            this.estadoSistema.alertasPrazosExibidos.add(alertaId);
+                        if (diasAte !== null && diasAte <= proximosDias && diasAte >= 0) {
+                            const alertaId = `prazo-${atividade.id}`;
+                            
+                            if (!this.estadoSistema.alertasPrazosExibidos.has(alertaId)) {
+                                this.mostrarAlertaPrazo(atividade, diasAte);
+                                this.estadoSistema.alertasPrazosExibidos.add(alertaId);
+                            }
                         }
+                    } catch (error) {
+                        console.error('❌ Erro ao verificar prazo da atividade:', atividade.id, error);
                     }
                 });
             }
         });
     },
 
+    // ✅ MOSTRAR ALERTA DE PRAZO - CORRIGIDA PARA USAR NOTIFICATIONS CORRETO
     mostrarAlertaPrazo(atividade, dias) {
         const tipo = dias === 0 ? 'error' : 'warning';
         const mensagem = dias === 0 
             ? `⏰ PRAZO HOJE: ${atividade.nome}`
             : `⚠️ Prazo em ${dias} dia(s): ${atividade.nome}`;
         
-        Notifications.mostrarNotificacao(mensagem, tipo, 8000);
+        // Usar as funções corretas do Notifications
+        try {
+            if (typeof Notifications !== 'undefined') {
+                if (typeof Notifications[tipo] === 'function') {
+                    Notifications[tipo](mensagem);
+                } else if (typeof Notifications.mostrarToast === 'function') {
+                    Notifications.mostrarToast(mensagem, tipo, 8000);
+                } else {
+                    console.log(`📢 ${mensagem}`);
+                }
+            } else {
+                console.log(`📢 ${mensagem}`);
+            }
+        } catch (error) {
+            console.log(`📢 ${mensagem}`);
+        }
     },
 
     // ✅ MÉTODOS AUXILIARES
@@ -491,9 +528,14 @@ const App = {
                 Tasks: typeof Tasks !== 'undefined',
                 PDF: typeof PDF !== 'undefined',
                 Notifications: typeof Notifications !== 'undefined',
-                Persistence: typeof Persistence !== 'undefined'
+                Persistence: typeof Persistence !== 'undefined',
+                Helpers: typeof Helpers !== 'undefined'
             },
-            calendarioControlado: typeof Calendar !== 'undefined'
+            calendarioControlado: typeof Calendar !== 'undefined',
+            dependenciasResolvidas: {
+                helpers: typeof Helpers !== 'undefined' && typeof Helpers.calcularDiasAte === 'function',
+                notifications: typeof Notifications !== 'undefined' && typeof Notifications.error === 'function'
+            }
         };
     }
 };
@@ -511,6 +553,9 @@ window.testarStatusApp = () => {
         console.log('📅 Status Calendar:', statusCalendar);
     }
     
+    // Testar dependências críticas
+    console.log('🔍 Dependências críticas:', status.dependenciasResolvidas);
+    
     return status;
 };
 
@@ -524,4 +569,4 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
-console.log('🚀 Core App v7.3.0 LIMPO - ZERO DUPLICAÇÕES!');
+console.log('🚀 Core App v7.4.2 LIMPO - TODAS AS CORREÇÕES APLICADAS!');
