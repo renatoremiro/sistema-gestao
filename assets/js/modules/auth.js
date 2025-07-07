@@ -551,21 +551,55 @@ const Auth = {
         console.log('✅ Interface corrigida');
     },
 
-    // 🚀 INICIALIZAÇÃO COM INTEGRAÇÃO APP v8.0
+    // 🆘 FUNÇÃO DE EMERGÊNCIA PARA JANELA ANÔNIMA
+    emergencia() {
+        console.log('🆘 Modo emergência ativado!');
+        
+        // Limpar qualquer estado confuso
+        this.state.logado = false;
+        this.state.usuarioAtual = null;
+        
+        // Forçar exibição do login
+        this._mostrarTelaLogin();
+        
+        // Esconder sistema principal
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.style.display = 'none';
+            mainContainer.classList.add('hidden');
+        }
+        
+        console.log('✅ Modo emergência aplicado - tela de login deve aparecer');
+    },
+
+    // 🚀 INICIALIZAÇÃO ROBUSTA PARA JANELA ANÔNIMA
     init() {
         console.log('🔐 Inicializando Auth Simples BIAPO v8.1...');
         
         // 🔥 ESCONDER SISTEMA DE LOGIN ANTIGO
         this._esconderLoginAntigo();
         
-        // Tentar auto-login primeiro
-        const autoLoginSucesso = this.autoLogin();
+        // 🔥 VERIFICAR SE É INICIALIZAÇÃO FRIA (janela anônima)
+        const inicializacaoFria = !localStorage.getItem('ultimoUsuarioBiapo');
         
-        if (!autoLoginSucesso) {
-            // Se não conseguiu auto-login, mostrar tela de login
-            this._mostrarTelaLogin();
+        if (inicializacaoFria) {
+            console.log('❄️ Inicialização fria detectada - forçando login');
+            // Para janela anônima, sempre mostrar login
+            setTimeout(() => {
+                this._mostrarTelaLogin();
+            }, 100);
         } else {
-            console.log('✅ Auto-login realizado com sucesso');
+            // Tentar auto-login para usuários conhecidos
+            const autoLoginSucesso = this.autoLogin();
+            
+            if (!autoLoginSucesso) {
+                // Se não conseguiu auto-login, mostrar tela de login
+                setTimeout(() => {
+                    this._mostrarTelaLogin();
+                }, 100);
+            } else {
+                console.log('✅ Auto-login realizado com sucesso');
+            }
         }
         
         console.log('✅ Auth Simples BIAPO v8.1 inicializado');
@@ -603,12 +637,68 @@ const Auth = {
 // ✅ EXPOSIÇÃO GLOBAL
 window.Auth = Auth;
 
-// 🚀 AUTO-INICIALIZAÇÃO COM INTEGRAÇÃO APP v8.0
+// 🚀 AUTO-INICIALIZAÇÃO ROBUSTA PARA JANELA ANÔNIMA
 document.addEventListener('DOMContentLoaded', () => {
-    // Aguardar App e outros módulos carregarem
+    console.log('📄 DOM carregado - iniciando Auth...');
+    
+    // Múltiplas tentativas de inicialização para garantir
+    const tentarInicializar = () => {
+        try {
+            if (typeof Auth !== 'undefined') {
+                Auth.init();
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.warn('⚠️ Erro na inicialização Auth:', error);
+            return false;
+        }
+    };
+    
+    // Primeira tentativa imediata
+    if (!tentarInicializar()) {
+        // Segunda tentativa após 300ms
+        setTimeout(() => {
+            if (!tentarInicializar()) {
+                // Terceira tentativa após 600ms  
+                setTimeout(() => {
+                    if (!tentarInicializar()) {
+                        // Quarta tentativa forçada após 1000ms
+                        setTimeout(() => {
+                            console.warn('⚠️ Auth não inicializou - forçando manualmente');
+                            if (typeof Auth !== 'undefined') {
+                                Auth._mostrarTelaLogin();
+                            } else {
+                                console.error('❌ Auth.js não carregou corretamente');
+                            }
+                        }, 1000);
+                    }
+                }, 600);
+            }
+        }, 300);
+    }
+});
+
+// 🔧 FALLBACK PARA WINDOW LOAD (garante que tudo carregou)
+window.addEventListener('load', () => {
     setTimeout(() => {
-        Auth.init();
-    }, 600); // 600ms para garantir que App v8.0 carregue primeiro
+        // Verificar se login está visível
+        const loginDiv = document.getElementById('loginSimplesBiapo');
+        const mainContainer = document.getElementById('mainContainer');
+        
+        if (!loginDiv && (!Auth?.state?.logado)) {
+            console.log('🔧 Fallback: forçando login na window.load');
+            if (typeof Auth !== 'undefined') {
+                Auth._mostrarTelaLogin();
+            }
+        }
+        
+        // Garantir que main container está configurado corretamente
+        if (mainContainer && !Auth?.state?.logado) {
+            mainContainer.style.display = 'none';
+            mainContainer.classList.add('hidden');
+        }
+    }, 500);
 });
 
 // 📊 COMANDOS ÚTEIS NO CONSOLE
@@ -616,9 +706,10 @@ window.loginBiapo = (nome) => Auth.login(nome);
 window.logoutBiapo = () => Auth.logout();
 window.statusAuth = () => Auth.debug();
 window.equipeBiapo = () => Auth.listarEquipe();
-window.corrigirInterface = () => Auth.corrigirInterface(); // NOVO: Correção manual
+window.corrigirInterface = () => Auth.corrigirInterface();
+window.emergenciaAuth = () => Auth.emergencia(); // NOVO: Para janela anônima
 
-console.log('🔐 Auth Simples BIAPO v8.1 - INTEGRAÇÃO APP v8.0 carregado!');
+console.log('🔐 Auth Simples BIAPO v8.1 - INTEGRAÇÃO APP v8.0 + CORREÇÃO JANELA ANÔNIMA carregado!');
 
 /*
 ✅ SISTEMA AUTH SIMPLES v8.1 - INTEGRAÇÃO COMPLETA COM APP v8.0:
@@ -649,11 +740,15 @@ logoutBiapo()         - Fazer logout
 statusAuth()          - Ver status
 equipeBiapo()         - Listar equipe
 corrigirInterface()   - Corrigir interface manualmente
+emergenciaAuth()      - EMERGÊNCIA: forçar login (janela anônima)
 
 🚀 RESULTADO:
 - Sistema pronto para usar ✅
 - Login super simples ✅
 - Integração total com App v8.0 ✅
+- Funciona em janela anônima ✅
+- Múltiplas tentativas de inicialização ✅
+- Função de emergência incluída ✅
 - Zero complexidade ✅
 - Totalmente funcional ✅
 */
