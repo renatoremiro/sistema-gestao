@@ -1,7 +1,7 @@
 /**
- * 🔔 Sistema de Notificações v7.4.5 - MODO PRODUÇÃO
+ * 🔔 Sistema de Notificações v7.4.6 - NOTIFICAÇÃO AUTH REMOVIDA
  * 
- * 🔥 OTIMIZADO: Removidas notificações de debug e teste
+ * 🔥 CORRIGIDO: Removida notificação "Sistema Funcionando: Teste de integração Auth realizado"
  * ✅ PRODUÇÃO: Apenas notificações relevantes para usuário final
  * ✅ CONTROLE: Flag para ativar/desativar diferentes tipos
  */
@@ -22,6 +22,7 @@ const Notifications = {
         MOSTRAR_DEBUG: false,
         MOSTRAR_SISTEMA: false,
         MOSTRAR_AUTH_SUCESSO: false,
+        MOSTRAR_AUTH_TESTE: false,
         MOSTRAR_SINCRONIZACAO: false,
         MOSTRAR_DADOS_SALVOS: false
     },
@@ -39,6 +40,11 @@ const Notifications = {
         if (this.config.MODO_PRODUCAO) {
             // Bloquear mensagens de debug/sistema
             if (this._ehMensagemDebug(mensagem)) {
+                return;
+            }
+            
+            // 🔥 NOVO: Bloquear especificamente a notificação de teste de auth
+            if (this._ehMensagemAuthTeste(mensagem)) {
                 return;
             }
             
@@ -77,7 +83,22 @@ const Notifications = {
         }
     },
 
-    // 🔥 NOVOS FILTROS DE PRODUÇÃO
+    // 🔥 NOVO FILTRO: BLOQUEAR NOTIFICAÇÃO DE TESTE DE AUTH
+    _ehMensagemAuthTeste(mensagem) {
+        const auth_teste_keywords = [
+            'sistema funcionando',
+            'teste de integração auth realizado',
+            'teste de integração',
+            'auth realizado',
+            'integração auth',
+            'funcionando: teste'
+        ];
+        
+        const msgLower = mensagem.toLowerCase();
+        return auth_teste_keywords.some(keyword => msgLower.includes(keyword));
+    },
+
+    // 🔥 FILTROS DE PRODUÇÃO EXISTENTES
     _ehMensagemDebug(mensagem) {
         const debug_keywords = [
             'debug', 'teste', 'desenvolvimento', 'dev',
@@ -344,7 +365,8 @@ const Notifications = {
         console.log('🔔 Notificações configuradas para produção:', {
             modoProducao: this.config.MODO_PRODUCAO,
             mostrarDebug: this.config.MOSTRAR_DEBUG,
-            mostrarSistema: this.config.MOSTRAR_SISTEMA
+            mostrarSistema: this.config.MOSTRAR_SISTEMA,
+            mostrarAuthTeste: this.config.MOSTRAR_AUTH_TESTE
         });
     },
 
@@ -370,25 +392,26 @@ document.addEventListener('DOMContentLoaded', () => {
         MOSTRAR_DEBUG: false,
         MOSTRAR_SISTEMA: false,
         MOSTRAR_AUTH_SUCESSO: false,
+        MOSTRAR_AUTH_TESTE: false,
         MOSTRAR_SINCRONIZACAO: false,
         MOSTRAR_DADOS_SALVOS: false
     });
 });
 
 // ✅ LOG FINAL OTIMIZADO
-console.log('🔔 Notifications v7.4.5 - MODO PRODUÇÃO ATIVO!');
+console.log('🔔 Notifications v7.4.6 - NOTIFICAÇÃO AUTH TESTE REMOVIDA!');
 
 /*
-🔥 OTIMIZAÇÕES v7.4.5 MODO PRODUÇÃO:
+🔥 OTIMIZAÇÕES v7.4.6 CORREÇÃO AUTH:
+- ✅ Filtro específico para "Sistema Funcionando: Teste de integração Auth realizado"
+- ✅ Função _ehMensagemAuthTeste() para bloquear notificações de teste
+- ✅ Controle MOSTRAR_AUTH_TESTE configurado como false
 - ✅ Filtros automáticos para mensagens de debug/teste
-- ✅ Controle granular de tipos de notificação
-- ✅ Função importante() para notificações críticas
 - ✅ Configuração automática para produção
-- ✅ Interface limpa para usuário final
 
 🎯 RESULTADO:
-- Não aparecerão mais notificações de "teste de integração" ✅
+- Não aparecerá mais a notificação de teste de auth ✅
 - Notificações apenas relevantes para usuário ✅
 - Sistema mais profissional ✅
-- Controle total sobre exibição ✅
+- Interface limpa ✅
 */
