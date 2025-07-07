@@ -616,7 +616,192 @@
 
     <script src="assets/js/modules/login-init.js"></script>
     
-    <!-- 🔴 CHAT SERÁ ATIVADO EM PRÓXIMA VERSÃO -->
+    <!-- 🔍 SISTEMA DE VERIFICAÇÕES INTEGRADO -->
+    <script>
+        // Sistema de Verificações BIAPO v7.4.2 - Integrado
+        const VerificacoesBiapo = {
+            async verificacaoRapida() {
+                console.log('🚀 VERIFICAÇÃO RÁPIDA SISTEMA BIAPO v7.4.2');
+                
+                const checks = [
+                    { nome: 'Firebase', test: () => typeof window.firebase !== 'undefined' },
+                    { nome: 'Auth', test: () => typeof window.Auth !== 'undefined' && (Auth.estaAutenticado ? Auth.estaAutenticado() : false) },
+                    { nome: 'DataStructure', test: () => typeof window.DataStructure !== 'undefined' },
+                    { nome: 'Events', test: () => typeof window.Events !== 'undefined' },
+                    { nome: 'Tasks', test: () => typeof window.Tasks !== 'undefined' },
+                    { nome: 'Calendar', test: () => typeof window.Calendar !== 'undefined' },
+                    { nome: 'Chat Desabilitado', test: () => !document.querySelector('script[src*="chat-module"]') },
+                    { nome: 'Usuários BIAPO', test: () => DataStructure?.usuariosBiapo && Object.keys(DataStructure.usuariosBiapo).length >= 10 },
+                    { nome: 'Participantes Events', test: () => Events?._obterListaPessoas && Events._obterListaPessoas().length >= 10 },
+                    { nome: 'Participantes Tasks', test: () => Tasks?._obterListaParticipantes && Tasks._obterListaParticipantes().length >= 10 }
+                ];
+                
+                let aprovados = 0;
+                let detalhes = {};
+                
+                for (const check of checks) {
+                    try {
+                        const resultado = check.test();
+                        detalhes[check.nome] = resultado;
+                        console.log(`${resultado ? '✅' : '❌'} ${check.nome}`);
+                        if (resultado) aprovados++;
+                    } catch (e) {
+                        detalhes[check.nome] = false;
+                        console.log(`❌ ${check.nome} (erro: ${e.message})`);
+                    }
+                }
+                
+                const porcentagem = (aprovados / checks.length) * 100;
+                const status = porcentagem >= 90 ? '🟢 EXCELENTE' : 
+                             porcentagem >= 75 ? '🟡 BOM' : 
+                             porcentagem >= 50 ? '🟠 REGULAR' : '🔴 CRÍTICO';
+                
+                console.log(`\n📊 RESULTADO: ${status} - ${aprovados}/${checks.length} (${porcentagem.toFixed(1)}%)`);
+                
+                // Verificações específicas
+                if (detalhes['Auth']) {
+                    console.log(`👤 Usuário logado: ${Auth.state?.usuarioAtual?.email || 'N/A'}`);
+                }
+                
+                if (detalhes['Usuários BIAPO']) {
+                    console.log(`👥 Total usuários BIAPO: ${Object.keys(DataStructure.usuariosBiapo).length}`);
+                }
+                
+                return { porcentagem, aprovados, total: checks.length, detalhes };
+            },
+
+            async testarParticipantes() {
+                console.log('👥 TESTE DE PARTICIPANTES:');
+                
+                try {
+                    if (typeof Events !== 'undefined' && Events._obterListaPessoas) {
+                        const participantesEventos = Events._obterListaPessoas();
+                        console.log(`📅 Participantes Events: ${participantesEventos.length}`);
+                        console.log('  Lista:', participantesEventos.slice(0, 5).join(', ') + (participantesEventos.length > 5 ? '...' : ''));
+                    }
+                    
+                    if (typeof Tasks !== 'undefined' && Tasks._obterListaParticipantes) {
+                        const participantesTasks = Tasks._obterListaParticipantes();
+                        console.log(`📝 Participantes Tasks: ${participantesTasks.length}`);
+                        console.log('  Lista:', participantesTasks.slice(0, 5).join(', ') + (participantesTasks.length > 5 ? '...' : ''));
+                    }
+                    
+                    if (typeof DataStructure !== 'undefined' && DataStructure.usuariosBiapo) {
+                        const usuarios = Object.keys(DataStructure.usuariosBiapo);
+                        console.log(`👤 Usuários BIAPO: ${usuarios.length}`);
+                        console.log('  Emails:', usuarios.slice(0, 3).join(', ') + (usuarios.length > 3 ? '...' : ''));
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao testar participantes:', error);
+                }
+            },
+
+            async testarModais() {
+                console.log('🎭 TESTE DE MODAIS:');
+                
+                try {
+                    // Testar modal de eventos
+                    if (typeof Events !== 'undefined' && Events.mostrarNovoEvento) {
+                        console.log('✅ Modal de Eventos disponível');
+                        console.log('  💡 Execute: Events.mostrarNovoEvento()');
+                    }
+                    
+                    // Testar modal de tarefas
+                    if (typeof Tasks !== 'undefined' && Tasks.mostrarModalTarefa) {
+                        console.log('✅ Modal de Tarefas disponível');
+                        console.log('  💡 Execute: Tasks.mostrarModalTarefa()');
+                    }
+                    
+                    // Testar gestão de usuários
+                    if (typeof Auth !== 'undefined' && Auth.mostrarGerenciarUsuarios) {
+                        console.log('✅ Gestão de Usuários disponível');
+                        console.log('  💡 Execute: Auth.mostrarGerenciarUsuarios()');
+                    }
+                    
+                    // Testar feriados
+                    if (typeof Events !== 'undefined' && Events.mostrarGerenciarFeriados) {
+                        console.log('✅ Gestão de Feriados disponível');
+                        console.log('  💡 Execute: Events.mostrarGerenciarFeriados()');
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao testar modais:', error);
+                }
+            },
+
+            async diagnosticoCompleto() {
+                console.log('🔍 ============ DIAGNÓSTICO COMPLETO SISTEMA BIAPO ============');
+                console.log('⏰ Iniciando em:', new Date().toLocaleString('pt-BR'));
+                
+                // 1. Verificação rápida
+                const resultado = await this.verificacaoRapida();
+                
+                // 2. Teste de participantes
+                console.log('\n👥 TESTANDO PARTICIPANTES...');
+                await this.testarParticipantes();
+                
+                // 3. Teste de modais
+                console.log('\n🎭 TESTANDO MODAIS...');
+                await this.testarModais();
+                
+                // 4. Status dos módulos principais
+                console.log('\n📦 STATUS DOS MÓDULOS:');
+                const modulos = ['Firebase', 'Auth', 'DataStructure', 'Events', 'Tasks', 'Calendar', 'Notifications', 'Helpers'];
+                modulos.forEach(modulo => {
+                    const disponivel = typeof window[modulo] !== 'undefined';
+                    let extra = '';
+                    
+                    if (disponivel) {
+                        try {
+                            if (modulo === 'Auth' && Auth.state) {
+                                extra = Auth.state.usuarioAtual ? ` (Logado: ${Auth.state.usuarioAtual.email})` : ' (Sem login)';
+                            } else if (modulo === 'DataStructure' && DataStructure.usuariosBiapo) {
+                                extra = ` (${Object.keys(DataStructure.usuariosBiapo).length} usuários)`;
+                            }
+                        } catch (e) {
+                            extra = ' (erro ao obter info)';
+                        }
+                    }
+                    
+                    console.log(`  ${disponivel ? '✅' : '❌'} ${modulo}${extra}`);
+                });
+                
+                // 5. Recomendações
+                console.log('\n💡 RECOMENDAÇÕES:');
+                if (resultado.porcentagem >= 90) {
+                    console.log('  🎉 Sistema funcionando perfeitamente!');
+                    console.log('  ✅ Todos os ajustes foram implementados com sucesso');
+                    console.log('  🚀 Sistema pronto para uso em produção');
+                } else if (resultado.porcentagem >= 75) {
+                    console.log('  👍 Sistema funcionando bem');
+                    console.log('  🔧 Algumas correções menores podem ser necessárias');
+                } else {
+                    console.log('  ⚠️ Sistema precisa de atenção');
+                    console.log('  🛠️ Verifique os módulos marcados com ❌');
+                }
+                
+                console.log('\n⏰ Diagnóstico concluído em:', new Date().toLocaleString('pt-BR'));
+                console.log('🔍 ============================================================');
+                
+                return resultado;
+            }
+        };
+
+        // Exposição global das funções
+        window.verificarSistema = () => VerificacoesBiapo.diagnosticoCompleto();
+        window.verificacaoRapida = () => VerificacoesBiapo.verificacaoRapida();
+        window.testarParticipantes = () => VerificacoesBiapo.testarParticipantes();
+        window.testarModais = () => VerificacoesBiapo.testarModais();
+        
+        // Log de disponibilidade
+        console.log('🔍 Sistema de Verificações BIAPO v7.4.2 carregado!');
+        console.log('📋 Comandos disponíveis:');
+        console.log('  • verificarSistema() - Diagnóstico completo');
+        console.log('  • verificacaoRapida() - Verificação básica');
+        console.log('  • testarParticipantes() - Teste de participantes');
+        console.log('  • testarModais() - Teste de modais');
+    </script>
+    
+    <!-- 🔴 CHAT DESABILITADO PARA PRÓXIMA VERSÃO -->
     <script>
         // Placeholder para próxima versão do chat
         console.log('💬 Chat será ativado na próxima versão');
