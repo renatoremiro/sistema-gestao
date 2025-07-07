@@ -8,7 +8,8 @@
     <!-- ✅ CSS MODULARIZADO -->
     <link rel="stylesheet" href="assets/css/main.css">
   
-    <link rel="stylesheet" href="modules/chat-styles.css">
+    <!-- 🔴 CHAT DESABILITADO PARA PRÓXIMA VERSÃO -->
+    <!-- <link rel="stylesheet" href="modules/chat-styles.css"> -->
     
     <!-- ✅ BIBLIOTECAS EXTERNAS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -56,8 +57,8 @@
 
     <!-- 6. SISTEMA DE SINCRONIZAÇÃO BIDIRECIONAL -->
 
-    <!-- 7. CHAT EXISTENTE -->
-    <script src="modules/chat-module.js"></script>
+    <!-- 🔴 CHAT DESABILITADO PARA PRÓXIMA VERSÃO -->
+    <!-- <script src="modules/chat-module.js"></script> -->
 
     <style>
         /* 🔴 CORES BIAPO - APLICADAS SOBRE O SISTEMA EXISTENTE */
@@ -86,7 +87,7 @@
             box-shadow: 0 8px 25px rgba(197, 48, 48, 0.3) !important;
         }
         
-        /* 🔐 TELA DE LOGIN */
+        /* 🔐 TELA DE LOGIN APRIMORADA */
         #loginScreen {
             position: fixed;
             top: 0;
@@ -363,6 +364,18 @@
             display: none !important;
         }
         
+        /* 🆕 NOVA AÇÃO: CADASTRAR USUÁRIOS */
+        .btn-admin {
+            background: linear-gradient(135deg, var(--biapo-orange) 0%, #F56500 100%);
+            border-color: var(--biapo-orange);
+            color: white;
+        }
+        
+        .btn-admin:hover {
+            background: linear-gradient(135deg, #C05621 0%, var(--biapo-orange) 100%);
+            border-color: #C05621;
+        }
+        
         /* 📱 RESPONSIVIDADE */
         @media (max-width: 768px) {
             .header {
@@ -389,7 +402,7 @@
     </style>
 </head>
 <body>
-    <!-- 🔐 TELA DE LOGIN -->
+    <!-- 🔐 TELA DE LOGIN APRIMORADA -->
     <div id="loginScreen" class="hidden">
         <div class="login-container">
             <img src="assets/img/Logo-biapo.jpg" alt="Logo BIAPO" class="login-logo">
@@ -433,9 +446,9 @@
                         <h1>Sistema de Gestão BIAPO</h1>
                         <p>Obra 292 - Museu Nacional</p>
                         <p style="font-size: 12px; margin-top: 4px;">
-                            <strong>v7.2.0 Login Dinâmico</strong>
+                            <strong>v7.4.2 Sistema Completo</strong>
                             <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                                SISTEMA HÍBRIDO ✅
+                                PRODUCTION READY ✅
                             </span>
                         </p>
                     </div>
@@ -453,6 +466,9 @@
                     <div style="display: flex; gap: 8px;">
                         <button class="btn btn-warning btn-sm" onclick="abrirMinhaAgendaDinamica()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                             📋 Minha Agenda
+                        </button>
+                        <button class="btn btn-admin btn-sm" onclick="Auth.mostrarGerenciarUsuarios()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                            👥 Usuários
                         </button>
                         <button class="btn btn-secondary btn-sm" onclick="mostrarStatusHybrid()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                             🔄 Status
@@ -482,6 +498,12 @@
                     <span class="action-icon">🏖️</span>
                     <div class="action-title">Feriados</div>
                     <div class="action-desc">Gerenciar datas especiais</div>
+                </div>
+                
+                <div class="action-card" onclick="Auth.mostrarGerenciarUsuarios()">
+                    <span class="action-icon">👥</span>
+                    <div class="action-title">Equipe BIAPO</div>
+                    <div class="action-desc">Gerenciar usuários</div>
                 </div>
                 
                 <div class="action-card" onclick="Calendar.exportarPDF()">
@@ -581,6 +603,9 @@
                     <button class="btn btn-pdf" onclick="Tasks.exportarAgendaPDF()" style="padding: 12px;">
                         📋 PDF Agenda
                     </button>
+                    <button class="btn btn-admin" onclick="Auth.mostrarGerenciarUsuarios()" style="padding: 12px;">
+                        👥 Equipe
+                    </button>
                     <button class="btn btn-secondary" onclick="mostrarStatusHybrid()" style="padding: 12px;">
                         📊 Status Sistema
                     </button>
@@ -590,5 +615,11 @@
     </div>
 
     <script src="assets/js/modules/login-init.js"></script>
+    
+    <!-- 🔴 CHAT SERÁ ATIVADO EM PRÓXIMA VERSÃO -->
+    <script>
+        // Placeholder para próxima versão do chat
+        console.log('💬 Chat será ativado na próxima versão');
+    </script>
 </body>
 </html>
