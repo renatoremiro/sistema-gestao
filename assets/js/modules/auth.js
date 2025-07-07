@@ -388,14 +388,17 @@ const Auth = {
 
     // 🎯 MÉTODOS AUXILIARES
     _mostrarTelaLogin() {
-        // Esconder sistema principal
+        // Esconder sistema principal - CORREÇÃO DEFINITIVA
         const mainContainer = document.getElementById('mainContainer');
         if (mainContainer) {
+            mainContainer.classList.add('hidden');
             mainContainer.style.display = 'none';
+            console.log("✅ Sistema principal escondido");
         }
         
         // Mostrar interface de login
         this.criarInterfaceLogin();
+        console.log("✅ Tela de login exibida");
     },
 
     _esconderTelaLogin() {
@@ -405,18 +408,49 @@ const Auth = {
             loginDiv.remove();
         }
         
-        // Mostrar sistema principal
+        // Mostrar sistema principal - CORREÇÃO DEFINITIVA
         const mainContainer = document.getElementById('mainContainer');
         if (mainContainer) {
+            mainContainer.classList.remove('hidden');
             mainContainer.style.display = 'block';
+            console.log("✅ Sistema principal exibido");
         }
+        
+        // Inicializar App se necessário
+        setTimeout(() => {
+            if (typeof App !== 'undefined' && App.inicializar) {
+                try {
+                    App.inicializar();
+                    console.log("✅ App inicializado");
+                } catch (error) {
+                    console.warn("⚠️ Erro ao inicializar App:", error);
+                }
+            }
+        }, 100);
     },
 
     _executarCallbacksLogin() {
-        // Inicializar sistema se necessário
-        if (typeof App !== 'undefined' && App.inicializarSistema) {
-            App.inicializarSistema();
-        }
+        // Inicializar sistema se necessário - CORREÇÃO AMPLIADA
+        setTimeout(() => {
+            if (typeof App !== 'undefined') {
+                try {
+                    if (App.inicializar) {
+                        App.inicializar();
+                    } else if (App.inicializarSistema) {
+                        App.inicializarSistema();
+                    }
+                    
+                    // Atualizar header com usuário
+                    if (document.getElementById('usuarioLogado')) {
+                        document.getElementById('usuarioLogado').textContent = `👤 ${this.usuario.displayName}`;
+                    }
+                    
+                    console.log("✅ Sistema totalmente inicializado após login");
+                } catch (error) {
+                    console.warn("⚠️ Erro na inicialização pós-login:", error);
+                }
+            }
+        }, 200);
     },
 
     _mostrarMensagem(mensagem, tipo = 'info') {
@@ -460,9 +494,31 @@ const Auth = {
     },
 
     debug() {
-        console.log('🔐 Auth Simples BIAPO - Status:', this.obterStatus());
+        const info = this.obterStatus();
+        console.log('🔐 Auth Simples BIAPO - Status:', info);
         console.log('👥 Equipe:', this.listarEquipe());
-        return this.obterStatus();
+        
+        // Debug adicional da interface
+        console.log('🖥️ Interface:', {
+            loginDiv: !!document.getElementById('loginSimplesBiapo'),
+            mainContainer: !!document.getElementById('mainContainer'),
+            mainContainerVisible: document.getElementById('mainContainer')?.style.display !== 'none'
+        });
+        
+        return info;
+    },
+
+    // 🔧 FUNÇÃO DE CORREÇÃO MANUAL
+    corrigirInterface() {
+        console.log('🔧 Corrigindo interface manualmente...');
+        
+        if (this.state.logado) {
+            this._esconderTelaLogin();
+        } else {
+            this._mostrarTelaLogin();
+        }
+        
+        console.log('✅ Interface corrigida');
     },
 
     // 🚀 INICIALIZAÇÃO
@@ -530,6 +586,7 @@ window.loginBiapo = (nome) => Auth.login(nome);
 window.logoutBiapo = () => Auth.logout();
 window.statusAuth = () => Auth.debug();
 window.equipeBiapo = () => Auth.listarEquipe();
+window.corrigirInterface = () => Auth.corrigirInterface(); // NOVO: Correção manual
 
 console.log('🔐 Auth Simples BIAPO v8.1 carregado!');
 
