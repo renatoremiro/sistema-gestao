@@ -1,18 +1,19 @@
 /**
- * 📊 Sistema de Estrutura de Dados v7.4.0 - PRODUCTION READY
+ * 📊 Sistema de Estrutura de Dados v7.4.1 - CORRIGIDO PARA APP.JS
  * 
  * ✅ OTIMIZADO: Debug reduzido 85% (logs apenas para operações críticas)
  * ✅ PERFORMANCE: Cache otimizado + operações consolidadas
  * ✅ ESTRUTURA: Dados iniciais, templates, configurações, schemas
  * ✅ VALIDAÇÃO: Integridade de dados + auto-correção
  * ✅ BACKUP: Estruturas de fallback + recovery automático
+ * ✅ CORRIGIDO: Exposição global + funções para app.js
  */
 
 const DataStructure = {
     // ✅ CONFIGURAÇÕES GLOBAIS
     config: {
-        versao: '7.4.0',
-        dataAtualizacao: '2025-07-04',
+        versao: '7.4.1',
+        dataAtualizacao: '2025-07-07',
         autoSave: true,
         validacao: true,
         cache: true,
@@ -239,6 +240,159 @@ const DataStructure = {
         }
     },
 
+    // ✅ FUNÇÃO ESPECÍFICA PARA APP.JS - INICIALIZAR DADOS
+    inicializarDados() {
+        return {
+            areas: {
+                "area-geral": {
+                    nome: "Gestão Geral",
+                    coordenador: "Renato Remiro",
+                    cor: "#C53030",
+                    equipe: ["Renato Remiro", "Administrador", "Isabella", "Eduardo", "Lara", "Beto"],
+                    atividades: [
+                        {
+                            id: 'ativ_001',
+                            nome: 'Planejamento Semanal',
+                            responsavel: 'Renato Remiro',
+                            prazo: '2025-07-10',
+                            status: 'verde',
+                            progresso: 85,
+                            descricao: 'Organizar cronograma da semana'
+                        },
+                        {
+                            id: 'ativ_002',
+                            nome: 'Relatório Mensal',
+                            responsavel: 'Administração',
+                            prazo: '2025-07-15',
+                            status: 'amarelo',
+                            progresso: 60,
+                            descricao: 'Compilar dados do mês'
+                        }
+                    ]
+                },
+                "area-obra": {
+                    nome: "Obra e Construção", 
+                    coordenador: "Supervisor de Obra",
+                    cor: "#DD6B20",
+                    equipe: ["Equipe Técnica", "Supervisor", "Engenheiro", "Arquiteto"],
+                    atividades: [
+                        {
+                            id: 'ativ_003',
+                            nome: 'Inspeção Estrutural',
+                            responsavel: 'Engenheiro',
+                            prazo: '2025-07-08',
+                            status: 'vermelho',
+                            progresso: 30,
+                            descricao: 'Verificar integridade estrutural'
+                        },
+                        {
+                            id: 'ativ_004',
+                            nome: 'Instalações Elétricas',
+                            responsavel: 'Equipe Técnica',
+                            prazo: '2025-07-12',
+                            status: 'verde',
+                            progresso: 90,
+                            descricao: 'Finalizar instalações elétricas'
+                        }
+                    ]
+                },
+                "area-museu": {
+                    nome: "Museu Nacional",
+                    coordenador: "Curadoria",
+                    cor: "#2D3748",
+                    equipe: ["Curador", "Restaurador", "Historiador"],
+                    atividades: [
+                        {
+                            id: 'ativ_005',
+                            nome: 'Catalogação de Peças',
+                            responsavel: 'Curador',
+                            prazo: '2025-07-20',
+                            status: 'verde',
+                            progresso: 75,
+                            descricao: 'Catalogar novas aquisições'
+                        }
+                    ]
+                }
+            },
+            eventos: {},
+            tarefas: [],
+            configuracoes: this.modulosConfig,
+            metadata: {
+                versao: this.config.versao,
+                ultimaAtualizacao: new Date().toISOString(),
+                ultimoUsuario: this._obterUsuarioAtual()
+            }
+        };
+    },
+
+    // ✅ FUNÇÃO ESPECÍFICA PARA APP.JS - VALIDAR ESTRUTURA
+    validarEstrutura(dados) {
+        if (!dados || typeof dados !== 'object') {
+            return false;
+        }
+        
+        // Validação básica da estrutura
+        const camposObrigatorios = ['areas', 'eventos', 'tarefas'];
+        
+        for (const campo of camposObrigatorios) {
+            if (!dados.hasOwnProperty(campo)) {
+                console.warn(`❌ DATA: Campo obrigatório ausente: ${campo}`);
+                return false;
+            }
+        }
+        
+        // Validar estrutura das áreas
+        if (dados.areas && typeof dados.areas === 'object') {
+            for (const [chave, area] of Object.entries(dados.areas)) {
+                if (!area.nome || !area.coordenador) {
+                    console.warn(`❌ DATA: Área ${chave} com estrutura inválida`);
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    },
+
+    // ✅ FUNÇÃO ESPECÍFICA PARA APP.JS - CALCULAR ESTATÍSTICAS
+    calcularEstatisticas(dados) {
+        if (!dados || !dados.areas) {
+            return { emDia: 0, atencao: 0, atraso: 0, total: 0 };
+        }
+
+        let stats = { emDia: 0, atencao: 0, atraso: 0, total: 0 };
+
+        Object.values(dados.areas).forEach(area => {
+            if (area.atividades && Array.isArray(area.atividades)) {
+                area.atividades.forEach(atividade => {
+                    stats.total++;
+                    switch (atividade.status) {
+                        case 'verde':
+                        case 'concluido':
+                        case 'concluída':
+                            stats.emDia++;
+                            break;
+                        case 'amarelo':
+                        case 'atencao':
+                        case 'em andamento':
+                            stats.atencao++;
+                            break;
+                        case 'vermelho':
+                        case 'atraso':
+                        case 'atrasado':
+                            stats.atraso++;
+                            break;
+                        default:
+                            // Status desconhecido, considerar como atenção
+                            stats.atencao++;
+                    }
+                });
+            }
+        });
+
+        return stats;
+    },
+
     _criarEstruturaBase() {
         // Estrutura base do localStorage
         const estruturaBase = {
@@ -415,6 +569,17 @@ const DataStructure = {
 
     _obterUsuarioAtual() {
         try {
+            // Tentar Auth primeiro
+            if (window.Auth && window.Auth.state && window.Auth.state.usuarioAtual) {
+                return window.Auth.state.usuarioAtual.email || window.Auth.state.usuarioAtual.displayName || 'Sistema';
+            }
+            
+            // Tentar App
+            if (window.App && window.App.usuarioAtual) {
+                return window.App.usuarioAtual.email || window.App.usuarioAtual.displayName || 'Sistema';
+            }
+            
+            // Tentar localStorage
             const user = JSON.parse(localStorage.getItem('biapo_currentUser') || '{}');
             return user.email || user.nome || 'Sistema';
         } catch {
@@ -531,6 +696,9 @@ const DataStructure = {
     }
 };
 
+// ✅ EXPOSIÇÃO GLOBAL CORRIGIDA - ESSENCIAL PARA APP.JS
+window.DataStructure = DataStructure;
+
 // ✅ DEBUG OTIMIZADO
 window.DataStructure_Debug = {
     status: () => DataStructure.obterStatus(),
@@ -547,6 +715,17 @@ window.DataStructure_Debug = {
         criar: () => DataStructure.criarBackupEstrutura(),
         listar: () => DataStructure._obterBackups(),
         restaurar: (indice) => DataStructure.restaurarBackup(indice)
+    },
+    // Funções específicas para debug do app.js
+    testarFuncoes: () => {
+        console.log('inicializarDados:', typeof DataStructure.inicializarDados);
+        console.log('validarEstrutura:', typeof DataStructure.validarEstrutura);
+        console.log('calcularEstatisticas:', typeof DataStructure.calcularEstatisticas);
+        return {
+            inicializarDados: typeof DataStructure.inicializarDados === 'function',
+            validarEstrutura: typeof DataStructure.validarEstrutura === 'function',
+            calcularEstatisticas: typeof DataStructure.calcularEstatisticas === 'function'
+        };
     }
 };
 
@@ -560,4 +739,4 @@ if (document.readyState === 'loading') {
 }
 
 // ✅ LOG DE INICIALIZAÇÃO (ÚNICO LOG ESSENCIAL)
-console.log('✅ DATA v7.4.0: Estrutura de dados carregada (PRODUCTION READY)');
+console.log('✅ DATA v7.4.1: Estrutura de dados CORRIGIDA + exposição global (PRODUCTION READY)');
