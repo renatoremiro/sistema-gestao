@@ -494,6 +494,66 @@ const Calendar = {
         }
     },
 
+    // ✅ OBTER ESTATÍSTICAS DO MÊS - MÉTODO CRÍTICO PARA APP.JS
+    obterEstatisticasDoMes() {
+        try {
+            const mesAtual = this.config.mesAtual + 1;
+            const anoAtual = this.config.anoAtual;
+            
+            // Obter eventos do mês atual
+            const eventosMes = (App.dados?.eventos || []).filter(evento => {
+                if (!evento.data) return false;
+                const [ano, mes] = evento.data.split('-').map(Number);
+                return ano === anoAtual && mes === mesAtual;
+            });
+
+            // Obter tarefas do mês atual  
+            const tarefasMes = (App.dados?.tarefas || []).filter(tarefa => {
+                if (tarefa.dataInicio) {
+                    const [ano, mes] = tarefa.dataInicio.split('-').map(Number);
+                    if (ano === anoAtual && mes === mesAtual) return true;
+                }
+                if (tarefa.dataFim) {
+                    const [ano, mes] = tarefa.dataFim.split('-').map(Number);
+                    if (ano === anoAtual && mes === mesAtual) return true;
+                }
+                return false;
+            });
+
+            // Calcular tipos
+            const porTipo = {};
+            eventosMes.forEach(evento => {
+                porTipo[evento.tipo] = (porTipo[evento.tipo] || 0) + 1;
+            });
+
+            // Próximo evento
+            const agora = new Date();
+            const proximoEvento = eventosMes
+                .filter(evento => new Date(evento.data) >= agora)
+                .sort((a, b) => new Date(a.data) - new Date(b.data))[0];
+
+            return {
+                totalEventos: eventosMes.length,
+                totalTarefas: tarefasMes.length,
+                total: eventosMes.length + tarefasMes.length,
+                porTipo,
+                proximoEvento,
+                mesAno: `${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`
+            };
+
+        } catch (error) {
+            console.error('❌ Erro ao obter estatísticas do mês:', error);
+            return {
+                totalEventos: 0,
+                totalTarefas: 0,
+                total: 0,
+                porTipo: {},
+                proximoEvento: null,
+                mesAno: `${this.config.mesesNomes[this.config.mesAtual]} ${this.config.anoAtual}`
+            };
+        }
+    },
+
     // ✅ OBTER STATUS
     obterStatus() {
         return {
