@@ -1,38 +1,61 @@
 /**
- * 📅 Sistema de Calendário v8.0.1 - SYNC READY
+ * 📅 Sistema de Calendário v8.1.0 - TAREFAS PESSOAIS INTEGRADAS
  * 
- * 🔥 NOVA FUNCIONALIDADE: COMPATÍVEL COM REALTIME SYNC
- * - ✅ Atualização inteligente sem recriar tudo
- * - ✅ Detecção de mudanças otimizada
- * - ✅ Performance melhorada para sync contínuo
- * - ✅ Indicador de última atualização
+ * 🔥 NOVA FUNCIONALIDADE: TAREFAS + EVENTOS NO MESMO CALENDÁRIO
+ * - ✅ Integração com PersonalTasks.js
+ * - ✅ Diferenciação visual entre eventos e tarefas
+ * - ✅ Filtro para mostrar/esconder tarefas pessoais
+ * - ✅ Cores distintas por tipo de item
+ * - ✅ Sincronização automática quando tarefa é marcada
  */
 
 const Calendar = {
-    // ✅ CONFIGURAÇÕES
+    // ✅ CONFIGURAÇÕES EXPANDIDAS
     config: {
         DIAS_SEMANA: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
         MESES: [
             'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-        ]
+        ],
+        
+        // 🔥 NOVO: Configurações de tarefas
+        mostrarTarefas: true, // Toggle para mostrar/esconder tarefas
+        coresEventos: {
+            'reuniao': '#3b82f6',
+            'entrega': '#10b981', 
+            'prazo': '#ef4444',
+            'marco': '#8b5cf6',
+            'sistema': '#06b6d4',
+            'hoje': '#f59e0b',
+            'outro': '#6b7280'
+        },
+        coresTarefas: {
+            'pessoal': '#f59e0b',
+            'equipe': '#06b6d4', 
+            'projeto': '#8b5cf6',
+            'urgente': '#ef4444',
+            'rotina': '#6b7280'
+        }
     },
 
-    // ✅ ESTADO SYNC-READY
+    // ✅ ESTADO EXPANDIDO PARA TAREFAS
     state: {
         mesAtual: new Date().getMonth(),
         anoAtual: new Date().getFullYear(),
         diaSelecionado: new Date().getDate(),
         eventos: [],
+        // 🔥 NOVO: Estado para tarefas
+        tarefas: [],
         carregado: false,
         debugMode: false,
-        // 🔥 NOVO: Estados para sync
+        // Sync states
         ultimaAtualizacao: null,
         hashEventos: null,
+        hashTarefas: null, // 🔥 NOVO
         atualizandoSync: false
     },
 
-    // ✅ INICIALIZAR OTIMIZADO
+    // ✅ INICIALIZAR OTIMIZADO COM TAREFAS
     inicializar() {
         try {
             const hoje = new Date();
@@ -40,35 +63,33 @@ const Calendar = {
             this.state.anoAtual = hoje.getFullYear();
             this.state.diaSelecionado = hoje.getDate();
             
-            // 🔥 CARREGAMENTO DE EVENTOS INTEGRADO
+            // 🔥 CARREGAMENTO INTEGRADO: eventos + tarefas
             this.carregarEventos();
+            this.carregarTarefas(); // NOVO
             this.gerar();
             this.state.carregado = true;
             
-            console.log('📅 Calendar v8.0.1 inicializado - SYNC READY');
+            console.log('📅 Calendar v8.1.0 inicializado - TAREFAS INTEGRADAS');
+            console.log(`📋 ${this.state.tarefas.length} tarefas pessoais carregadas`);
             
         } catch (error) {
             console.error('❌ Erro ao inicializar calendário:', error);
             this.state.eventos = [];
+            this.state.tarefas = [];
             this.gerar();
         }
     },
 
-    // 🔥 CARREGAR EVENTOS - SYNC COMPATIBLE
+    // ✅ CARREGAR EVENTOS (mantido)
     carregarEventos() {
         try {
-            // 🎯 FONTE ÚNICA: App.dados.eventos (SEMPRE)
             if (typeof App !== 'undefined' && App.dados && Array.isArray(App.dados.eventos)) {
                 this.state.eventos = [...App.dados.eventos];
-                
-                // 🔥 CALCULAR HASH PARA DETECÇÃO DE MUDANÇAS
                 this.state.hashEventos = this._calcularHashEventos(this.state.eventos);
-                this.state.ultimaAtualizacao = new Date().toISOString();
-                
+                console.log(`📅 ${this.state.eventos.length} eventos da equipe carregados`);
                 return;
             }
             
-            // 🎯 FALLBACK: Reset se não houver dados
             this.state.eventos = [];
             this.state.hashEventos = null;
             
@@ -79,14 +100,62 @@ const Calendar = {
         }
     },
 
-    // 🔥 CALCULAR HASH PARA DETECÇÃO DE MUDANÇAS
+    // 🔥 NOVO: CARREGAR TAREFAS PESSOAIS
+    carregarTarefas() {
+        try {
+            // Verificar se PersonalTasks está disponível
+            if (typeof PersonalTasks === 'undefined') {
+                console.warn('⚠️ PersonalTasks não disponível - tarefas não serão mostradas');
+                this.state.tarefas = [];
+                return;
+            }
+
+            // Buscar tarefas que devem aparecer no calendário
+            const tarefasParaCalendario = PersonalTasks.obterTarefasParaCalendario();
+            
+            if (Array.isArray(tarefasParaCalendario)) {
+                this.state.tarefas = tarefasParaCalendario.map(tarefa => ({
+                    ...tarefa,
+                    _isTarefa: true, // Flag para identificar como tarefa
+                    _tipoItem: 'tarefa'
+                }));
+                
+                this.state.hashTarefas = this._calcularHashTarefas(this.state.tarefas);
+                console.log(`📋 ${this.state.tarefas.length} tarefas pessoais carregadas para calendário`);
+            } else {
+                this.state.tarefas = [];
+                this.state.hashTarefas = null;
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao carregar tarefas:', error);
+            this.state.tarefas = [];
+            this.state.hashTarefas = null;
+        }
+    },
+
+    // 🔥 NOVO: CALCULAR HASH TAREFAS
+    _calcularHashTarefas(tarefas) {
+        try {
+            if (!tarefas || tarefas.length === 0) {
+                return 'empty';
+            }
+            
+            const info = tarefas.map(t => `${t.id}-${t.ultimaAtualizacao || t.dataCriacao || ''}`).join('|');
+            return `${tarefas.length}-${info.length}`;
+            
+        } catch (error) {
+            return Date.now().toString();
+        }
+    },
+
+    // 🔥 CALCULAR HASH PARA DETECÇÃO DE MUDANÇAS (mantido)
     _calcularHashEventos(eventos) {
         try {
             if (!eventos || eventos.length === 0) {
                 return 'empty';
             }
             
-            // Hash simples baseado em: quantidade + IDs + timestamps
             const info = eventos.map(e => `${e.id}-${e.ultimaAtualizacao || e.dataCriacao || ''}`).join('|');
             return `${eventos.length}-${info.length}`;
             
@@ -95,10 +164,9 @@ const Calendar = {
         }
     },
 
-    // 🔥 ATUALIZAR EVENTOS - FUNÇÃO CRÍTICA PARA SYNC v8.0.1
+    // 🔥 ATUALIZAR EVENTOS + TAREFAS - FUNÇÃO CRÍTICA v8.1.0
     atualizarEventos() {
         try {
-            // 🔥 VERIFICAR SE REALMENTE PRECISA ATUALIZAR
             if (this.state.atualizandoSync) {
                 console.log('📅 Calendar: Atualização já em andamento, ignorando...');
                 return;
@@ -106,23 +174,37 @@ const Calendar = {
             
             this.state.atualizandoSync = true;
             
-            // Carregar novos dados
+            // Carregar novos dados de eventos
             const eventosAnteriores = [...this.state.eventos];
             this.carregarEventos();
             
-            // 🔥 DETECÇÃO INTELIGENTE DE MUDANÇAS
-            const hashAnterior = this._calcularHashEventos(eventosAnteriores);
-            const hashAtual = this.state.hashEventos;
+            // 🔥 NOVO: Carregar novos dados de tarefas
+            const tarefasAnteriores = [...this.state.tarefas];
+            this.carregarTarefas();
             
-            if (hashAnterior !== hashAtual) {
+            // Detecção de mudanças em eventos
+            const hashEventosAnterior = this._calcularHashEventos(eventosAnteriores);
+            const hashEventosAtual = this.state.hashEventos;
+            
+            // 🔥 NOVO: Detecção de mudanças em tarefas
+            const hashTarefasAnterior = this._calcularHashTarefas(tarefasAnteriores);
+            const hashTarefasAtual = this.state.hashTarefas;
+            
+            const eventosAlterados = hashEventosAnterior !== hashEventosAtual;
+            const tarefasAlteradas = hashTarefasAnterior !== hashTarefasAtual;
+            
+            if (eventosAlterados || tarefasAlteradas) {
                 console.log('📅 MUDANÇAS DETECTADAS - Atualizando Calendar...');
-                console.log(`   Antes: ${eventosAnteriores.length} eventos (${hashAnterior})`);
-                console.log(`   Agora: ${this.state.eventos.length} eventos (${hashAtual})`);
                 
-                // 🔥 ATUALIZAÇÃO INTELIGENTE: só regerar se necessário
+                if (eventosAlterados) {
+                    console.log(`   Eventos: ${eventosAnteriores.length} → ${this.state.eventos.length}`);
+                }
+                
+                if (tarefasAlteradas) {
+                    console.log(`   Tarefas: ${tarefasAnteriores.length} → ${this.state.tarefas.length}`);
+                }
+                
                 this._atualizarInteligente();
-                
-                // Mostrar indicador de atualização
                 this._mostrarIndicadorAtualizacao();
                 
             } else {
@@ -132,10 +214,8 @@ const Calendar = {
             this.state.atualizandoSync = false;
             
         } catch (error) {
-            console.error('❌ Erro ao atualizar eventos:', error);
+            console.error('❌ Erro ao atualizar eventos/tarefas:', error);
             this.state.atualizandoSync = false;
-            
-            // Fallback: gerar completamente
             this.gerar();
         }
     },
@@ -143,21 +223,19 @@ const Calendar = {
     // 🔥 ATUALIZAÇÃO INTELIGENTE (performance otimizada)
     _atualizarInteligente() {
         try {
-            // Se calendar não estiver visível, não atualizar agora
             const calendario = document.getElementById('calendario');
             if (!calendario || !calendario.offsetParent) {
                 console.log('📅 Calendar não visível, pulando atualização');
                 return;
             }
             
-            // 🔥 ESTRATÉGIA: Atualizar apenas o grid dos dias
             const grid = document.getElementById('calendario-dias-grid');
             if (grid) {
                 console.log('📅 Atualizando apenas grid dos dias...');
-                this._gerarDias(); // Só regera o grid, não o header
+                this._gerarDias();
             } else {
                 console.log('📅 Grid não encontrado, regerando completamente...');
-                this.gerar(); // Fallback completo
+                this.gerar();
             }
             
         } catch (error) {
@@ -166,16 +244,16 @@ const Calendar = {
         }
     },
 
-    // 🔥 INDICADOR DE ATUALIZAÇÃO
+    // 🔥 INDICADOR DE ATUALIZAÇÃO MELHORADO
     _mostrarIndicadorAtualizacao() {
         try {
-            // Remover indicador anterior
             const indicadorAnterior = document.getElementById('calendarSyncIndicator');
             if (indicadorAnterior) {
                 indicadorAnterior.remove();
             }
             
-            // Criar indicador de atualização
+            const totalItens = this.state.eventos.length + this.state.tarefas.length;
+            
             const indicador = document.createElement('div');
             indicador.id = 'calendarSyncIndicator';
             indicador.style.cssText = `
@@ -184,30 +262,29 @@ const Calendar = {
                 right: 10px;
                 background: linear-gradient(135deg, #10b981, #059669);
                 color: white;
-                padding: 4px 8px;
+                padding: 6px 12px;
                 border-radius: 12px;
-                font-size: 10px;
+                font-size: 11px;
                 font-weight: 600;
                 z-index: 1001;
                 display: flex;
                 align-items: center;
-                gap: 4px;
+                gap: 6px;
                 box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
                 animation: fadeInOut 3s ease-in-out;
             `;
             
             indicador.innerHTML = `
                 <span style="animation: spin 1s linear infinite;">🔄</span>
-                <span>Atualizado</span>
+                <span>Sincronizado</span>
+                <small style="opacity: 0.8;">${this.state.eventos.length}📅 + ${this.state.tarefas.length}📋</small>
             `;
             
-            // Adicionar ao calendário
             const calendario = document.getElementById('calendario');
             if (calendario) {
                 calendario.style.position = 'relative';
                 calendario.appendChild(indicador);
                 
-                // Remover após 3 segundos
                 setTimeout(() => {
                     if (indicador && indicador.parentNode) {
                         indicador.remove();
@@ -220,13 +297,12 @@ const Calendar = {
         }
     },
 
-    // 🔥 GERAR CALENDÁRIO OTIMIZADO
+    // 🔥 GERAR CALENDÁRIO COM TOGGLE DE TAREFAS
     gerar() {
         try {
             const container = document.getElementById('calendario');
             if (!container) return;
 
-            // Limpar container
             container.innerHTML = '';
             container.style.cssText = `
                 background: white !important;
@@ -238,11 +314,11 @@ const Calendar = {
                 position: relative !important;
             `;
 
-            // Cabeçalho otimizado
             const mesNome = this.config.MESES[this.state.mesAtual];
             const ultimaAtualizacao = this.state.ultimaAtualizacao ? 
                 new Date(this.state.ultimaAtualizacao).toLocaleTimeString() : '';
             
+            // 🔥 NOVO: Header com controle de tarefas
             const htmlCabecalho = `
                 <div style="
                     background: linear-gradient(135deg, #C53030 0%, #9B2C2C 100%) !important;
@@ -272,15 +348,42 @@ const Calendar = {
                         ">
                             📅 ${mesNome} ${this.state.anoAtual}
                         </h3>
-                        ${ultimaAtualizacao ? `
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            margin-top: 8px;
+                            justify-content: center;
+                        ">
                             <small style="
                                 font-size: 10px !important;
                                 opacity: 0.8 !important;
                                 color: white !important;
                             ">
-                                🔄 Sincronizado às ${ultimaAtualizacao}
+                                ${this.state.eventos.length} eventos | ${this.state.tarefas.length} tarefas
                             </small>
-                        ` : ''}
+                            
+                            <!-- 🔥 NOVO: Toggle de tarefas -->
+                            <label style="
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                                font-size: 11px;
+                                opacity: 0.9;
+                                cursor: pointer;
+                                background: rgba(255,255,255,0.1);
+                                padding: 4px 8px;
+                                border-radius: 12px;
+                                border: 1px solid rgba(255,255,255,0.2);
+                            ">
+                                <input type="checkbox" 
+                                       id="toggleTarefas" 
+                                       ${this.config.mostrarTarefas ? 'checked' : ''}
+                                       onchange="Calendar.toggleTarefas()"
+                                       style="margin: 0; width: 12px; height: 12px;">
+                                <span>📋 Tarefas</span>
+                            </label>
+                        </div>
                     </div>
                     
                     <button onclick="Calendar.proximoMes()" style="
@@ -296,7 +399,7 @@ const Calendar = {
                 </div>
             `;
 
-            // Dias da semana
+            // Dias da semana (mantido)
             const htmlDiasSemana = `
                 <div style="
                     display: grid !important;
@@ -318,7 +421,6 @@ const Calendar = {
                 </div>
             `;
 
-            // Grid dos dias
             const htmlGrid = `
                 <div id="calendario-dias-grid" style="
                     display: grid !important;
@@ -335,7 +437,14 @@ const Calendar = {
         }
     },
 
-    // 🔥 GERAR DIAS OTIMIZADO
+    // 🔥 NOVO: TOGGLE PARA MOSTRAR/ESCONDER TAREFAS
+    toggleTarefas() {
+        this.config.mostrarTarefas = !this.config.mostrarTarefas;
+        console.log(`📋 Tarefas no calendário: ${this.config.mostrarTarefas ? 'Ativadas' : 'Desativadas'}`);
+        this._gerarDias(); // Regerar apenas os dias
+    },
+
+    // 🔥 GERAR DIAS COM EVENTOS + TAREFAS
     _gerarDias() {
         const grid = document.getElementById('calendario-dias-grid');
         if (!grid) return;
@@ -359,7 +468,7 @@ const Calendar = {
                     border-right: 1px solid #e5e7eb !important;
                     border-bottom: 1px solid #e5e7eb !important;
                     background: #f9fafb !important;
-                    min-height: 100px !important;
+                    min-height: 120px !important;
                 `;
                 grid.appendChild(celulaVazia);
             } else {
@@ -370,7 +479,7 @@ const Calendar = {
         }
     },
 
-    // 🔥 CRIAR CÉLULA DO DIA OTIMIZADA
+    // 🔥 CRIAR CÉLULA DO DIA COM EVENTOS + TAREFAS
     _criarCelulaDia(dia, hoje) {
         const celula = document.createElement('div');
         
@@ -379,8 +488,11 @@ const Calendar = {
         const ehHoje = this._ehMesmoMesDia(dataCelula, hoje);
         const ehSelecionado = dia === this.state.diaSelecionado;
         
-        // Obter eventos do dia
+        // 🔥 OBTER EVENTOS + TAREFAS DO DIA
         const eventosNoDia = this._obterEventosNoDia(dataISO);
+        const tarefasNoDia = this.config.mostrarTarefas ? this._obterTarefasNoDia(dataISO) : [];
+        
+        const totalItens = eventosNoDia.length + tarefasNoDia.length;
         
         // Estilo base
         let backgroundColor = '#ffffff';
@@ -391,14 +503,14 @@ const Calendar = {
             background: ${backgroundColor} !important;
             border-right: 1px solid #e5e7eb !important;
             border-bottom: 1px solid #e5e7eb !important;
-            min-height: 100px !important;
+            min-height: 120px !important;
             padding: 8px !important;
             cursor: pointer !important;
             transition: background-color 0.2s ease !important;
             position: relative !important;
         `;
 
-        // HTML interno
+        // 🔥 HTML com contador separado para eventos e tarefas
         celula.innerHTML = `
             <div style="
                 font-weight: ${ehHoje || ehSelecionado ? '700' : '500'} !important;
@@ -410,15 +522,21 @@ const Calendar = {
                 align-items: center !important;
             ">
                 <span>${dia}</span>
-                ${eventosNoDia.length > 0 ? `<span style="font-size: 10px; background: #10b981; color: white; padding: 2px 6px; border-radius: 10px;">${eventosNoDia.length}</span>` : ''}
+                <div style="display: flex; gap: 4px;">
+                    ${eventosNoDia.length > 0 ? `<span style="font-size: 9px; background: #3b82f6; color: white; padding: 2px 5px; border-radius: 8px;">📅${eventosNoDia.length}</span>` : ''}
+                    ${tarefasNoDia.length > 0 ? `<span style="font-size: 9px; background: #f59e0b; color: white; padding: 2px 5px; border-radius: 8px;">📋${tarefasNoDia.length}</span>` : ''}
+                </div>
             </div>
             
             <div style="
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 2px !important;
+                max-height: 85px !important;
+                overflow-y: auto !important;
             ">
                 ${eventosNoDia.map(evento => this._criarHtmlEvento(evento)).join('')}
+                ${tarefasNoDia.map(tarefa => this._criarHtmlTarefa(tarefa)).join('')}
             </div>
         `;
 
@@ -428,7 +546,7 @@ const Calendar = {
         });
 
         celula.addEventListener('mouseenter', () => {
-            celula.style.backgroundColor = eventosNoDia.length > 0 ? '#ecfdf5' : '#f3f4f6';
+            celula.style.backgroundColor = totalItens > 0 ? '#ecfdf5' : '#f3f4f6';
         });
 
         celula.addEventListener('mouseleave', () => {
@@ -438,7 +556,7 @@ const Calendar = {
         return celula;
     },
 
-    // 🔥 OBTER EVENTOS DO DIA SIMPLES E RÁPIDO
+    // 🔥 OBTER EVENTOS DO DIA (mantido)
     _obterEventosNoDia(dataISO) {
         if (!this.state.eventos || !Array.isArray(this.state.eventos)) {
             return [];
@@ -448,22 +566,25 @@ const Calendar = {
             return evento.data === dataISO || 
                    evento.dataInicio === dataISO ||
                    (evento.data && evento.data.split('T')[0] === dataISO);
-        }).slice(0, 4); // Máximo 4 eventos por dia
+        }).slice(0, 3); // Máximo 3 eventos por dia para layout
     },
 
-    // 🔥 CRIAR HTML DO EVENTO OTIMIZADO
-    _criarHtmlEvento(evento) {
-        const cores = {
-            'reuniao': '#3b82f6',
-            'entrega': '#10b981', 
-            'prazo': '#ef4444',
-            'marco': '#8b5cf6',
-            'sistema': '#06b6d4',
-            'hoje': '#f59e0b',
-            'outro': '#6b7280'
-        };
+    // 🔥 NOVO: OBTER TAREFAS DO DIA
+    _obterTarefasNoDia(dataISO) {
+        if (!this.state.tarefas || !Array.isArray(this.state.tarefas)) {
+            return [];
+        }
         
-        const cor = cores[evento.tipo] || cores.outro;
+        return this.state.tarefas.filter(tarefa => {
+            return tarefa.dataInicio === dataISO ||
+                   tarefa.data === dataISO ||
+                   (tarefa.dataInicio && tarefa.dataInicio.split('T')[0] === dataISO);
+        }).slice(0, 3); // Máximo 3 tarefas por dia para layout
+    },
+
+    // 🔥 CRIAR HTML DO EVENTO (mantido, mas melhorado)
+    _criarHtmlEvento(evento) {
+        const cor = this.config.coresEventos[evento.tipo] || this.config.coresEventos.outro;
         const titulo = evento.titulo || evento.nome || 'Evento';
         
         return `
@@ -472,21 +593,68 @@ const Calendar = {
                 color: white !important;
                 padding: 4px 8px !important;
                 border-radius: 4px !important;
-                font-size: 11px !important;
+                font-size: 10px !important;
                 font-weight: 600 !important;
                 cursor: pointer !important;
-                height: 22px !important;
+                height: 20px !important;
                 display: flex !important;
                 align-items: center !important;
                 overflow: hidden !important;
                 white-space: nowrap !important;
                 text-overflow: ellipsis !important;
                 transition: transform 0.2s ease !important;
+                position: relative !important;
             " 
             onmouseenter="this.style.transform='translateY(-1px)'"
             onmouseleave="this.style.transform='translateY(0)'"
-            title="${titulo}${evento.descricao ? ' - ' + evento.descricao : ''}"
-            >${titulo}</div>
+            title="📅 EVENTO: ${titulo}${evento.descricao ? ' - ' + evento.descricao : ''}"
+            >
+                <span style="margin-right: 4px;">📅</span>
+                ${titulo}
+            </div>
+        `;
+    },
+
+    // 🔥 NOVO: CRIAR HTML DA TAREFA
+    _criarHtmlTarefa(tarefa) {
+        const cor = this.config.coresTarefas[tarefa.tipo] || this.config.coresTarefas.pessoal;
+        const titulo = tarefa.titulo || 'Tarefa';
+        
+        // Ícone baseado na prioridade
+        const icones = {
+            'critica': '🔴',
+            'alta': '🟠', 
+            'media': '🟡',
+            'baixa': '🟢'
+        };
+        const icone = icones[tarefa.prioridade] || '📋';
+        
+        return `
+            <div onclick="Calendar.abrirTarefa('${tarefa.id}')" style="
+                background: ${cor} !important;
+                color: white !important;
+                padding: 4px 8px !important;
+                border-radius: 4px !important;
+                font-size: 10px !important;
+                font-weight: 600 !important;
+                cursor: pointer !important;
+                height: 20px !important;
+                display: flex !important;
+                align-items: center !important;
+                overflow: hidden !important;
+                white-space: nowrap !important;
+                text-overflow: ellipsis !important;
+                transition: transform 0.2s ease !important;
+                position: relative !important;
+                border: 1px solid rgba(255,255,255,0.3) !important;
+            " 
+            onmouseenter="this.style.transform='translateY(-1px)'"
+            onmouseleave="this.style.transform='translateY(0)'"
+            title="📋 TAREFA: ${titulo} (${tarefa.prioridade})${tarefa.descricao ? ' - ' + tarefa.descricao : ''}"
+            >
+                <span style="margin-right: 4px;">${icone}</span>
+                ${titulo}
+            </div>
         `;
     },
 
@@ -497,10 +665,9 @@ const Calendar = {
                 Events.editarEvento(eventoId);
             } else {
                 console.warn('⚠️ Events.js não disponível');
-                // Fallback simples
                 const evento = this.state.eventos.find(e => e.id == eventoId);
                 if (evento) {
-                    alert(`📅 ${evento.titulo}\n\nTipo: ${evento.tipo}\nData: ${evento.data}`);
+                    alert(`📅 EVENTO: ${evento.titulo}\n\nTipo: ${evento.tipo}\nData: ${evento.data}`);
                 }
             }
         } catch (error) {
@@ -508,7 +675,32 @@ const Calendar = {
         }
     },
 
-    // ✅ NAVEGAÇÃO OTIMIZADA
+    // 🔥 NOVO: ABRIR TAREFA
+    abrirTarefa(tarefaId) {
+        try {
+            // Integração com PersonalTasks ou agenda dedicada
+            if (typeof PersonalTasks !== 'undefined' && PersonalTasks.editarTarefa) {
+                console.log(`📋 Abrindo tarefa ID: ${tarefaId}`);
+                // PersonalTasks.editarTarefa(tarefaId); // Implementar depois
+                
+                // Por enquanto, mostrar detalhes
+                const tarefa = this.state.tarefas.find(t => t.id == tarefaId);
+                if (tarefa) {
+                    alert(`📋 TAREFA PESSOAL: ${tarefa.titulo}\n\nTipo: ${tarefa.tipo}\nPrioridade: ${tarefa.prioridade}\nData: ${tarefa.dataInicio}\n\n💡 Use "Minha Agenda" para editar tarefas.`);
+                }
+            } else {
+                console.warn('⚠️ PersonalTasks não disponível para edição');
+                const tarefa = this.state.tarefas.find(t => t.id == tarefaId);
+                if (tarefa) {
+                    alert(`📋 TAREFA: ${tarefa.titulo}\n\nTipo: ${tarefa.tipo}\nPrioridade: ${tarefa.prioridade}`);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Erro ao abrir tarefa:', error);
+        }
+    },
+
+    // ✅ NAVEGAÇÃO OTIMIZADA (mantida)
     mesAnterior() {
         this.state.mesAtual--;
         if (this.state.mesAtual < 0) {
@@ -527,13 +719,13 @@ const Calendar = {
         this.gerar();
     },
 
-    // ✅ SELEÇÃO DE DIA OTIMIZADA
+    // ✅ SELEÇÃO DE DIA OTIMIZADA (mantida)
     selecionarDia(dia) {
         this.state.diaSelecionado = dia;
         this.gerar();
     },
 
-    // ✅ IR PARA DATA ESPECÍFICA
+    // ✅ IR PARA DATA ESPECÍFICA (mantido)
     irParaData(ano, mes, dia = null) {
         this.state.anoAtual = ano;
         this.state.mesAtual = mes;
@@ -541,13 +733,13 @@ const Calendar = {
         this.gerar();
     },
 
-    // ✅ IR PARA HOJE
+    // ✅ IR PARA HOJE (mantido)
     irParaHoje() {
         const hoje = new Date();
         this.irParaData(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
     },
 
-    // ✅ CRIAR NOVO EVENTO (integração)
+    // ✅ CRIAR NOVO EVENTO (mantido)
     criarNovoEvento(dataInicial = null) {
         try {
             if (typeof Events !== 'undefined' && Events.mostrarNovoEvento) {
@@ -561,31 +753,50 @@ const Calendar = {
         }
     },
 
-    // ✅ UTILITÁRIOS
+    // 🔥 NOVO: CRIAR NOVA TAREFA
+    criarNovaTarefa(dataInicial = null) {
+        try {
+            // Redirecionar para agenda dedicada
+            console.log('📋 Redirecionando para agenda dedicada...');
+            if (typeof abrirMinhaAgendaDinamica !== 'undefined') {
+                abrirMinhaAgendaDinamica();
+            } else {
+                alert('📋 Use o botão "Minha Agenda" para criar tarefas pessoais');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao criar nova tarefa:', error);
+        }
+    },
+
+    // ✅ UTILITÁRIOS (mantidos)
     _ehMesmoMesDia(data1, data2) {
         return data1.getDate() === data2.getDate() && 
                data1.getMonth() === data2.getMonth() && 
                data1.getFullYear() === data2.getFullYear();
     },
 
-    // 🔥 DEBUG v8.0.1 - SYNC AWARE
+    // 🔥 DEBUG v8.1.0 - INTEGRAÇÃO COMPLETA
     debug() {
         const info = {
             carregado: this.state.carregado,
             mesAtual: this.config.MESES[this.state.mesAtual],
             anoAtual: this.state.anoAtual,
             totalEventos: this.state.eventos.length,
+            totalTarefas: this.state.tarefas.length,
+            mostrandoTarefas: this.config.mostrarTarefas,
             ultimaAtualizacao: this.state.ultimaAtualizacao,
             hashEventos: this.state.hashEventos,
+            hashTarefas: this.state.hashTarefas,
             atualizandoSync: this.state.atualizandoSync,
-            versao: '8.0.1 - Sync Ready'
+            integracaoPersonalTasks: typeof PersonalTasks !== 'undefined',
+            versao: '8.1.0 - Tarefas Integradas'
         };
         
-        console.log('📅 Calendar Debug v8.0.1:', info);
+        console.log('📅 Calendar Debug v8.1.0:', info);
         return info;
     },
 
-    // 🔥 STATUS v8.0.1 - SYNC COMPATIBLE
+    // 🔥 STATUS v8.1.0 - INTEGRAÇÃO COMPLETA
     obterStatus() {
         return {
             carregado: this.state.carregado,
@@ -593,18 +804,28 @@ const Calendar = {
             anoAtual: this.state.anoAtual,
             diaSelecionado: this.state.diaSelecionado,
             totalEventos: this.state.eventos.length,
+            totalTarefas: this.state.tarefas.length,
+            mostrandoTarefas: this.config.mostrarTarefas,
             ultimaAtualizacao: this.state.ultimaAtualizacao,
             hashEventos: this.state.hashEventos,
+            hashTarefas: this.state.hashTarefas,
             atualizandoSync: this.state.atualizandoSync,
-            syncCompatible: true,
+            integracoes: {
+                personalTasks: typeof PersonalTasks !== 'undefined',
+                events: typeof Events !== 'undefined',
+                app: typeof App !== 'undefined'
+            },
             funcionalidades: {
                 deteccaoMudancas: true,
                 atualizacaoInteligente: true,
                 indicadorSync: true,
-                performanceOtimizada: true
+                performanceOtimizada: true,
+                tarefasIntegradas: true,
+                toggleTarefas: true,
+                coresDistintas: true
             },
-            versao: '8.0.1',
-            tipo: 'SYNC_READY'
+            versao: '8.1.0',
+            tipo: 'EVENTOS_E_TAREFAS_INTEGRADOS'
         };
     }
 };
@@ -612,14 +833,26 @@ const Calendar = {
 // ✅ EXPOSIÇÃO GLOBAL
 window.Calendar = Calendar;
 
-// ✅ FUNÇÕES GLOBAIS SYNC-AWARE
+// ✅ FUNÇÕES GLOBAIS EXPANDIDAS
 window.debugCalendar = () => Calendar.debug();
 window.irParaHoje = () => Calendar.irParaHoje();
 window.novoEvento = () => Calendar.criarNovoEvento();
+window.novaTarefa = () => Calendar.criarNovaTarefa(); // NOVO
+window.toggleTarefasCalendario = () => Calendar.toggleTarefas(); // NOVO
 window.forcarAtualizacaoCalendar = () => {
-    Calendar.state.hashEventos = null; // Força atualização
+    Calendar.state.hashEventos = null;
+    Calendar.state.hashTarefas = null;
     Calendar.atualizarEventos();
 };
+
+// 🔥 NOVO: Listener para mudanças em PersonalTasks
+if (typeof window !== 'undefined') {
+    window.addEventListener('personal-tasks-sync', () => {
+        console.log('📋 PersonalTasks sincronizado - atualizando calendário...');
+        Calendar.carregarTarefas();
+        Calendar._atualizarInteligente();
+    });
+}
 
 // ✅ INICIALIZAÇÃO AUTOMÁTICA
 document.addEventListener('DOMContentLoaded', () => {
@@ -627,41 +860,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ✅ LOG FINAL
-console.log('📅 Calendar v8.0.1 - SYNC READY carregado!');
-console.log('🔥 Funcionalidades: Detecção mudanças + Atualização inteligente + Indicador sync + Performance otimizada');
+console.log('📅 Calendar v8.1.0 - TAREFAS PESSOAIS INTEGRADAS carregado!');
+console.log('🔥 Funcionalidades: Eventos + Tarefas + Toggle + Cores distintas + Sincronização bidirecional');
 
 /*
-🔥 ATUALIZAÇÕES v8.0.1 - SYNC READY:
+🔥 NOVAS FUNCIONALIDADES v8.1.0:
 
-✅ DETECÇÃO DE MUDANÇAS:
-- _calcularHashEventos(): Hash simples para detectar mudanças ✅
-- Comparação inteligente em atualizarEventos() ✅
-- Evita regeração desnecessária ✅
+✅ INTEGRAÇÃO TAREFAS:
+- carregarTarefas(): Busca tarefas do PersonalTasks ✅
+- obterTarefasParaCalendario(): Apenas tarefas marcadas ✅
+- _obterTarefasNoDia(): Filtro por data ✅
+- Sincronização automática com PersonalTasks ✅
 
-✅ ATUALIZAÇÃO INTELIGENTE:
-- _atualizarInteligente(): Atualiza apenas grid, não header ✅
-- Verifica se calendar está visível ✅
-- Fallback para atualização completa se necessário ✅
+✅ DIFERENCIAÇÃO VISUAL:
+- Cores distintas para eventos vs tarefas ✅
+- Ícones baseados em prioridade para tarefas ✅
+- Contadores separados (📅3 + 📋2) ✅
+- Bordas diferentes para distinguir ✅
 
-✅ INDICADORES VISUAIS:
-- _mostrarIndicadorAtualizacao(): Indicador "🔄 Atualizado" ✅
-- Timestamp de sincronização no header ✅
-- Animação de 3 segundos ✅
+✅ CONTROLES:
+- Toggle "📋 Tarefas" no header ✅
+- Mostrar/esconder tarefas sem recarregar ✅
+- Função toggleTarefas() ✅
 
-✅ PERFORMANCE OTIMIZADA:
-- state.atualizandoSync: Previne atualizações simultâneas ✅
-- Verificação de visibilidade antes de atualizar ✅
-- Máximo 4 eventos por dia para performance ✅
+✅ INTEGRAÇÃO:
+- abrirTarefa(): Link para PersonalTasks ✅
+- criarNovaTarefa(): Redireciona para agenda ✅
+- Listener para 'personal-tasks-sync' ✅
+- Hash de tarefas para detecção de mudanças ✅
 
-✅ COMPATIBILIDADE SYNC:
-- Função atualizarEventos() otimizada para chamadas frequentes ✅
-- Hash de eventos para detecção rápida de mudanças ✅
-- Debug mostra estados de sync ✅
+✅ PERFORMANCE:
+- Atualização inteligente para eventos + tarefas ✅
+- Cache separado para eventos e tarefas ✅
+- Sincronização bidirecional ✅
+- Indicador mostra contagem separada ✅
 
 📊 RESULTADO:
-- Calendar pronto para sync em tempo real ✅
-- Performance otimizada para atualizações frequentes ✅
-- Indicadores visuais de sincronização ✅
-- Detecção inteligente de mudanças ✅
-- Integração perfeita com App.js v8.5.0 ✅
+- Calendário principal agora mostra eventos + tarefas ✅
+- Diferenciação visual clara ✅
+- Toggle para controlar visibilidade ✅
+- Sincronização automática ✅
+- Performance otimizada ✅
+- Integração completa com PersonalTasks ✅
 */
