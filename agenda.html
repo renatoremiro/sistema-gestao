@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Agenda - Sistema BIAPO v8.9.0</title>
+    <title>Minha Agenda - Sistema BIAPO v8.10.0</title>
     
     <!-- ✅ CSS DO SISTEMA -->
     <link rel="stylesheet" href="assets/css/main.css">
@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <!-- 🔥 SISTEMA UNIFICADO COMPLETO v8.9.0 -->
+    <!-- 🔥 SISTEMA UNIFICADO COMPLETO v8.10.0 -->
     <script src="assets/js/config/firebase.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
     <script src="assets/js/utils/validation.js"></script>
@@ -56,7 +56,7 @@
             padding: 20px;
         }
 
-        /* 🔴 HEADER DA PÁGINA v8.9.0 */
+        /* 🔴 HEADER DA PÁGINA FASE 4 v8.10.0 */
         .page-header {
             background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
             color: white;
@@ -67,6 +67,29 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 10px 30px rgba(197, 48, 48, 0.3);
+            position: relative;
+        }
+
+        /* 🔥 NOVO: Badge Fase 4 */
+        .fase4-badge {
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .header-left {
@@ -144,7 +167,7 @@
             transform: translateY(-1px);
         }
 
-        /* 🎛️ CONTROLES PRINCIPAIS BIDIRECIONAL v8.9.0 */
+        /* 🎛️ CONTROLES PRINCIPAIS FASE 4 v8.10.0 */
         .main-controls {
             background: white;
             padding: 24px 32px;
@@ -199,11 +222,6 @@
             border-radius: 50%;
             background: #10b981;
             animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
         .filters-section {
@@ -285,7 +303,7 @@
             color: white;
         }
 
-        /* 🔥 SEÇÃO EVENTOS DE EQUIPE v8.9.0 */
+        /* 🔥 SEÇÃO EVENTOS DE EQUIPE FASE 4 */
         .team-events-section {
             background: white;
             border-radius: 12px;
@@ -317,6 +335,7 @@
             border-left: 4px solid #06b6d4;
             background: #f0f9ff;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .team-event-item:hover {
@@ -343,7 +362,7 @@
             color: #0369a1;
         }
 
-        /* 📅 GRID SEMANAL PRINCIPAL BIDIRECIONAL */
+        /* 📅 GRID SEMANAL PRINCIPAL FASE 4 COM HORÁRIOS */
         .agenda-views {
             background: white;
             border-radius: 12px;
@@ -390,7 +409,7 @@
             background: white;
         }
 
-        /* 📋 CABEÇALHO DOS DIAS */
+        /* 📋 CABEÇALHO DOS DIAS FASE 4 */
         .time-column {
             background: #f8fafc;
             border-right: 2px solid #e2e8f0;
@@ -432,7 +451,7 @@
             margin-top: 4px;
         }
 
-        /* 📋 COLUNA DE HORÁRIOS */
+        /* 📋 COLUNA DE HORÁRIOS FASE 4 */
         .time-slots {
             background: #f8fafc;
             border-right: 2px solid #e2e8f0;
@@ -452,7 +471,7 @@
             color: var(--biapo-gray-lighter);
         }
 
-        /* 📝 COLUNAS DOS DIAS */
+        /* 📝 COLUNAS DOS DIAS FASE 4 */
         .day-column {
             border-right: 1px solid #e2e8f0;
             display: flex;
@@ -479,7 +498,7 @@
             background-color: rgba(197, 48, 48, 0.05);
         }
 
-        /* 📋 ITENS NO GRID BIDIRECIONAL v8.9.0 */
+        /* 📋 ITENS NO GRID FASE 4 COM HORÁRIOS */
         .item-grid {
             background: white;
             border-radius: 6px;
@@ -497,7 +516,7 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
-        /* 🔥 TIPOS DE ITENS COM CORES ESPECÍFICAS */
+        /* 🔥 TIPOS DE ITENS COM CORES ESPECÍFICAS FASE 4 */
         .item-grid.evento-equipe {
             border-left: 4px solid #3b82f6;
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
@@ -527,6 +546,24 @@
             border-left: 4px solid #ef4444;
             background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
             animation: pulse 2s infinite;
+        }
+
+        /* 🔥 NOVO: Indicador de horário no item */
+        .item-time-range {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--biapo-gray);
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-duration {
+            background: rgba(0,0,0,0.1);
+            padding: 1px 4px;
+            border-radius: 8px;
+            font-size: 8px;
         }
 
         .item-time {
@@ -619,7 +656,7 @@
             border-radius: 50%;
         }
 
-        /* 📊 ESTATÍSTICAS BIDIRECIONAIS */
+        /* 📊 ESTATÍSTICAS FASE 4 */
         .stats-bar {
             background: #f8fafc;
             padding: 20px 32px;
@@ -656,7 +693,7 @@
             display: none;
         }
 
-        /* 🔴 MODAL SISTEMA */
+        /* 🔴 MODAL SISTEMA FASE 4 */
         .modal {
             display: none;
             position: fixed;
@@ -742,7 +779,7 @@
             gap: 12px;
         }
 
-        /* 📝 FORMULÁRIOS */
+        /* 📝 FORMULÁRIOS FASE 4 COM HORÁRIOS */
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -798,6 +835,25 @@
         .form-checkbox input[type="checkbox"] {
             width: auto;
             margin: 0;
+        }
+
+        /* 🔥 NOVO: Seção de horários destacada */
+        .horarios-section {
+            background: #f0f9ff;
+            border: 2px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .horarios-section h4 {
+            color: #1e40af;
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* 🏷️ TAGS PARTICIPANTES */
@@ -896,6 +952,26 @@
             background: #f1f5f9;
         }
 
+        /* 🔥 NOVO: Indicador de deep link */
+        .deep-link-indicator {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            z-index: 5000;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
         /* 🎨 LOADING */
         .loading-overlay {
             position: absolute;
@@ -962,6 +1038,11 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .horarios-section {
+                padding: 16px;
+                margin: 16px 0;
+            }
         }
 
         /* 🎯 ESTADOS ESPECIAIS */
@@ -998,7 +1079,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 🔥 INDICADORES SISTEMA BIDIRECIONAL */
+        /* 🔥 INDICADORES SISTEMA FASE 4 */
         .sync-badge {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
@@ -1027,6 +1108,26 @@
             background: rgba(59, 130, 246, 0.2);
             transform: translateY(-1px);
         }
+
+        .fase4-feature {
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            background: rgba(16, 185, 129, 0.05);
+            position: relative;
+        }
+
+        .fase4-feature::before {
+            content: "🔥 FASE 4";
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -1035,16 +1136,22 @@
         <span id="notificationText"></span>
     </div>
 
+    <!-- 🔥 NOVO: Indicador de Deep Link -->
+    <div id="deepLinkIndicator" class="deep-link-indicator">
+        <span id="deepLinkText">🔗 Abrindo item via deep link...</span>
+    </div>
+
     <div class="page-container">
-        <!-- 🔴 HEADER DA PÁGINA v8.9.0 -->
+        <!-- 🔴 HEADER DA PÁGINA FASE 4 v8.10.0 -->
         <div class="page-header">
+            <div class="fase4-badge">🔥 FASE 4 v8.10.0</div>
             <div class="header-left">
                 <img src="assets/img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-biapo">
                 <div>
                     <h1 class="header-title">📅 Minha Agenda Pessoal</h1>
                     <p class="header-subtitle">Sistema de Gestão BIAPO - Obra 292</p>
                     <div style="margin-top: 8px;">
-                        <span class="sync-badge">🔄 v8.9.0 SINCRONIZAÇÃO BIDIRECIONAL</span>
+                        <span class="sync-badge">🔄 v8.10.0 FASE 4: HORÁRIOS + DEEP LINKS</span>
                     </div>
                 </div>
             </div>
@@ -1054,11 +1161,14 @@
                     <div class="user-email" id="userEmail">Verificando usuário...</div>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-header" onclick="sincronizarBidirecional()">
-                        🔄 Sync Bidirecional
+                    <button class="btn-header" onclick="sincronizarFase4()">
+                        🔄 Sync Fase 4
                     </button>
                     <button class="btn-header" onclick="abrirCalendarioPrincipal()">
                         📅 Ver Calendário
+                    </button>
+                    <button class="btn-header" onclick="copiarDeepLinkPagina()">
+                        🔗 Copiar Link
                     </button>
                     <button class="btn-header" onclick="voltarParaSistema()">
                         🏠 Voltar ao Sistema
@@ -1067,21 +1177,21 @@
             </div>
         </div>
 
-        <!-- 🎛️ CONTROLES PRINCIPAIS BIDIRECIONAL -->
+        <!-- 🎛️ CONTROLES PRINCIPAIS FASE 4 -->
         <div class="main-controls">
             <div class="view-tabs">
                 <button class="view-tab active" onclick="alternarVisualizacao('grid')" data-view="grid">
                     🗓️ Grid Semanal
                 </button>
-                <button class="view-tab" onclick="alternarVisualizacao('mixed')" data-view="mixed">
-                    🔄 Visão Mista
+                <button class="view-tab" onclick="alternarVisualizacao('timeline')" data-view="timeline">
+                    🕐 Timeline Horários
                 </button>
             </div>
 
             <div class="sync-status">
                 <div class="sync-indicator"></div>
                 <span style="font-size: 12px; font-weight: 600; color: #065f46;">
-                    Sync Bidirecional Ativo
+                    Sync Fase 4 Ativo
                 </span>
             </div>
 
@@ -1118,31 +1228,43 @@
                         <option value="publico">🌍 Público</option>
                     </select>
                 </div>
+
+                <!-- 🔥 NOVO: Filtro por horário -->
+                <div class="filter-group">
+                    <label class="filter-label">Horário</label>
+                    <select class="filter-select" id="filtroHorario" onchange="aplicarFiltros()">
+                        <option value="todos">🕐 Todos os horários</option>
+                        <option value="manha">🌅 Manhã (6h-12h)</option>
+                        <option value="tarde">☀️ Tarde (12h-18h)</option>
+                        <option value="noite">🌙 Noite (18h-24h)</option>
+                        <option value="sem_horario">⏰ Sem horário</option>
+                    </select>
+                </div>
             </div>
 
             <div class="actions-section">
-                <button class="btn btn-secondary" onclick="exportarAgenda()">
+                <button class="btn btn-secondary" onclick="exportarAgendaFase4()">
                     📄 Exportar PDF
                 </button>
-                <button class="btn btn-info" onclick="mostrarRelatorios()">
+                <button class="btn btn-info" onclick="mostrarRelatoriosHorarios()">
                     📊 Relatórios
                 </button>
-                <button class="btn btn-success" onclick="mostrarModalNovaTarefa()">
+                <button class="btn btn-success" onclick="mostrarModalNovaTarefaFase4()">
                     ➕ Nova Tarefa
                 </button>
-                <button class="btn btn-primary" onclick="sincronizarBidirecional()">
+                <button class="btn btn-primary" onclick="sincronizarFase4()">
                     🔄 Sync Completo
                 </button>
             </div>
         </div>
 
-        <!-- 🔥 SEÇÃO EVENTOS DE EQUIPE RELEVANTES v8.9.0 -->
+        <!-- 🔥 SEÇÃO EVENTOS DE EQUIPE RELEVANTES FASE 4 -->
         <div class="team-events-section" id="teamEventsSection">
             <div class="team-events-header">
                 <div>
                     <h3>📅 Eventos de Equipe Relevantes</h3>
                     <p style="font-size: 12px; opacity: 0.9; margin: 4px 0 0 0;">
-                        Eventos onde você participa ou é responsável
+                        Eventos onde você participa ou é responsável (com horários)
                     </p>
                 </div>
                 <div style="display: flex; gap: 8px;">
@@ -1165,7 +1287,7 @@
             </div>
         </div>
 
-        <!-- 📅 GRID SEMANAL PRINCIPAL BIDIRECIONAL -->
+        <!-- 📅 GRID SEMANAL PRINCIPAL FASE 4 COM HORÁRIOS -->
         <div class="agenda-views">
             <!-- 🗓️ GRID SEMANAL -->
             <div class="weekly-grid-view active" id="gridView">
@@ -1180,20 +1302,24 @@
                     <!-- GRID SERÁ RENDERIZADO DINAMICAMENTE -->
                     <div class="empty-state">
                         <div class="empty-icon">📋</div>
-                        <div class="empty-title">Sua agenda bidirecional está pronta</div>
+                        <div class="empty-title">Sua agenda Fase 4 está pronta</div>
                         <div class="empty-description">
-                            Comece criando sua primeira tarefa ou evento para ver a sincronização bidirecional em ação.
+                            Comece criando sua primeira tarefa com horários para ver a Fase 4 em ação.
                             <br><br>
-                            <strong>🔄 Sistema BIDIRECIONAL v8.9.0:</strong> Tarefas e eventos sincronizam automaticamente entre agenda e calendário!
+                            <strong>🔥 FASE 4 v8.10.0:</strong> 
+                            • Tarefas com horário de início e fim<br>
+                            • Deep links para navegação direta<br>
+                            • Interface unificada e navegação fluida<br>
+                            • Sincronização aprimorada com feedback visual
                         </div>
-                        <button class="btn btn-primary" onclick="mostrarModalNovaTarefa()">
+                        <button class="btn btn-primary" onclick="mostrarModalNovaTarefaFase4()">
                             ➕ Criar Primeira Tarefa
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 📊 BARRA DE ESTATÍSTICAS BIDIRECIONAL -->
+            <!-- 📊 BARRA DE ESTATÍSTICAS FASE 4 -->
             <div class="stats-bar">
                 <div class="stat-item">
                     <div class="stat-number" id="totalTasks">0</div>
@@ -1219,21 +1345,26 @@
                     <div class="stat-number" id="calendarLinked">0</div>
                     <div class="stat-label">No Calendário</div>
                 </div>
+                <!-- 🔥 NOVO: Estatística de horários -->
+                <div class="stat-item">
+                    <div class="stat-number" id="tasksWithTime">0</div>
+                    <div class="stat-label">Com Horários</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 🔥 MODAIS DO SISTEMA DE TAREFAS BIDIRECIONAL -->
+    <!-- 🔥 MODAIS DO SISTEMA DE TAREFAS FASE 4 -->
     
-    <!-- ➕ MODAL NOVA TAREFA BIDIRECIONAL -->
-    <div id="modalNovaTarefa" class="modal">
+    <!-- ➕ MODAL NOVA TAREFA FASE 4 COM HORÁRIOS -->
+    <div id="modalNovaTarefaFase4" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>➕ Nova Tarefa Bidirecional</h3>
-                <button class="modal-close" onclick="fecharModal('modalNovaTarefa')">&times;</button>
+                <h3>➕ Nova Tarefa Fase 4 - Com Horários</h3>
+                <button class="modal-close" onclick="fecharModal('modalNovaTarefaFase4')">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="formNovaTarefa">
+                <form id="formNovaTarefaFase4">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="tarefaTitulo">📝 Título da Tarefa *</label>
@@ -1262,27 +1393,68 @@
                             <input type="date" id="tarefaDataInicio" name="dataInicio">
                         </div>
                         <div class="form-group">
-                            <label for="tarefaHorario">🕐 Horário</label>
-                            <input type="time" id="tarefaHorario" name="horario">
+                            <label for="tarefaDataFim">📅 Data de Fim</label>
+                            <input type="date" id="tarefaDataFim" name="dataFim">
+                        </div>
+                    </div>
+
+                    <!-- 🔥 NOVA: SEÇÃO DE HORÁRIOS FASE 4 -->
+                    <div class="horarios-section fase4-feature">
+                        <h4>🕐 Horários da Tarefa (Fase 4)</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tarefaHorarioInicio">🕐 Horário de Início</label>
+                                <input type="time" id="tarefaHorarioInicio" name="horarioInicio">
+                            </div>
+                            <div class="form-group">
+                                <label for="tarefaHorarioFim">🕐 Horário de Fim</label>
+                                <input type="time" id="tarefaHorarioFim" name="horarioFim">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tarefaDuracaoEstimada">⏱️ Duração Estimada (minutos)</label>
+                                <input type="number" id="tarefaDuracaoEstimada" name="duracaoEstimada" min="15" step="15" placeholder="Ex: 60">
+                            </div>
+                            <div class="form-group">
+                                <label for="tarefaPrioridade">🎯 Prioridade</label>
+                                <select id="tarefaPrioridade" name="prioridade">
+                                    <option value="baixa">🟢 Baixa</option>
+                                    <option value="media" selected>🟡 Média</option>
+                                    <option value="alta">🟠 Alta</option>
+                                    <option value="critica">🔴 Crítica</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="horarioFlexivel" name="horarioFlexivel" checked>
+                                <label for="horarioFlexivel">🔄 Horário flexível (pode ser ajustado)</label>
+                            </div>
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="lembretesAtivos" name="lembretesAtivos">
+                                <label for="lembretesAtivos">🔔 Ativar lembretes baseados no horário</label>
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="tarefaPrioridade">🎯 Prioridade</label>
-                            <select id="tarefaPrioridade" name="prioridade">
-                                <option value="baixa">🟢 Baixa</option>
-                                <option value="media" selected>🟡 Média</option>
-                                <option value="alta">🟠 Alta</option>
-                                <option value="critica">🔴 Crítica</option>
-                            </select>
-                        </div>
                         <div class="form-group">
                             <label for="tarefaEscopo">🌐 Escopo</label>
                             <select id="tarefaEscopo" name="escopo">
                                 <option value="pessoal">👤 Pessoal</option>
                                 <option value="equipe">👥 Equipe</option>
                                 <option value="publico">🌍 Público</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tarefaStatus">📊 Status</label>
+                            <select id="tarefaStatus" name="status">
+                                <option value="pendente">⏳ Pendente</option>
+                                <option value="andamento">🔥 Em andamento</option>
+                                <option value="concluida">✅ Concluída</option>
                             </select>
                         </div>
                     </div>
@@ -1306,9 +1478,9 @@
                         </button>
                     </div>
 
-                    <!-- 🔥 CONTROLES BIDIRECIONAL v8.9.0 -->
-                    <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-top: 16px;">
-                        <h4 style="margin: 0 0 12px 0; color: var(--biapo-gray); font-size: 14px;">🔄 Sincronização Bidirecional</h4>
+                    <!-- 🔥 CONTROLES FASE 4 -->
+                    <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; margin-top: 16px; border: 2px solid #bbf7d0;">
+                        <h4 style="margin: 0 0 12px 0; color: #065f46; font-size: 14px;">🔥 Configurações Fase 4</h4>
                         
                         <div class="form-checkbox">
                             <input type="checkbox" id="aparecerNoCalendario" name="aparecerNoCalendario">
@@ -1321,33 +1493,38 @@
                         </div>
                         
                         <div class="form-checkbox">
-                            <input type="checkbox" id="sincronizarStatus" name="sincronizarStatus">
+                            <input type="checkbox" id="sincronizarStatus" name="sincronizarStatus" checked>
                             <label for="sincronizarStatus">🔄 Sincronizar mudanças de status automaticamente</label>
+                        </div>
+
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="gerarDeepLink" name="gerarDeepLink" checked>
+                            <label for="gerarDeepLink">🔗 Gerar deep link para acesso direto</label>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalNovaTarefa')">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalNovaTarefaFase4')">
                     ❌ Cancelar
                 </button>
-                <button type="button" class="btn btn-primary" onclick="salvarNovaTarefaBidirecional()">
-                    💾 Criar e Sincronizar
+                <button type="button" class="btn btn-primary" onclick="salvarNovaTarefaFase4()">
+                    💾 Criar Tarefa Fase 4
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // 🎯 CLASSE PRINCIPAL DA AGENDA BIDIRECIONAL v8.9.0
-        class AgendaBidirecional {
+        // 🎯 CLASSE PRINCIPAL DA AGENDA FASE 4 v8.10.0
+        class AgendaFase4 {
             constructor() {
                 this.visualizacaoAtiva = 'grid';
                 this.semanaAtual = new Date();
                 this.usuarioAtual = null;
                 this.tarefas = [];
                 this.eventos = [];
-                this.eventosEquipe = []; // 🔥 NOVO: Eventos relevantes da equipe
+                this.eventosEquipe = [];
                 this.participantesTemp = [];
                 this.subtarefasTemp = [];
                 this.tarefaEditando = null;
@@ -1355,63 +1532,74 @@
                     tipo: 'todos',
                     status: 'todos',
                     prioridade: 'todos',
-                    escopo: 'todos' // 🔥 NOVO: Filtro por escopo
+                    escopo: 'todos',
+                    horario: 'todos' // 🔥 NOVO: Filtro por horário
                 };
                 
-                // 🔥 CONFIGURAÇÕES BIDIRECIONAL
-                this.configBidirecional = {
+                // 🔥 CONFIGURAÇÕES FASE 4
+                this.configFase4 = {
                     syncAutomatico: true,
                     mostrarEventosEquipe: true,
                     notificarMudancas: true,
-                    atualizarCalendario: true
+                    atualizarCalendario: true,
+                    // 🔥 NOVO: Configurações Fase 4
+                    suporteHorarios: true,
+                    deepLinksAtivo: true,
+                    navegacaoFluida: true,
+                    feedbackVisual: true
                 };
                 
                 this.init();
             }
 
-            // 🚀 INICIALIZAÇÃO BIDIRECIONAL v8.9.0
+            // 🚀 INICIALIZAÇÃO FASE 4 v8.10.0
             async init() {
-                console.log('📅 Inicializando Agenda BIDIRECIONAL v8.9.0...');
+                console.log('📅 Inicializando Agenda FASE 4 v8.10.0...');
                 
                 try {
-                    // ✅ AGUARDAR APP.JS UNIFICADO ESTAR PRONTO
-                    await this.aguardarAppUnificado();
+                    // ✅ AGUARDAR APP.JS FASE 4 ESTAR PRONTO
+                    await this.aguardarAppFase4();
+                    
+                    // 🔥 PROCESSAR DEEP LINKS
+                    this.processarDeepLinksIniciais();
                     
                     // ✅ VERIFICAR USUÁRIO VIA APP.JS
                     this.verificarUsuario();
                     
-                    // ✅ CARREGAR DADOS BIDIRECIONAIS
-                    await this.carregarDadosBidirecionais();
+                    // ✅ CARREGAR DADOS FASE 4
+                    await this.carregarDadosFase4();
                     
-                    // ✅ CONFIGURAR LISTENERS BIDIRECIONAL
-                    this.configurarEventListenersBidirecional();
+                    // ✅ CONFIGURAR LISTENERS FASE 4
+                    this.configurarEventListenersFase4();
                     
                     // ✅ RENDERIZAR INTERFACE
-                    this.renderizarGridBidirecional();
+                    this.renderizarGridFase4();
                     this.renderizarEventosEquipe();
                     this.atualizarSemanaDisplay();
-                    this.atualizarEstatisticasBidirecional();
+                    this.atualizarEstatisticasFase4();
                     
-                    console.log('✅ Agenda BIDIRECIONAL carregada com sucesso!');
+                    console.log('✅ Agenda FASE 4 carregada com sucesso!');
                     console.log(`📊 ${this.tarefas.length} tarefas + ${this.eventosEquipe.length} eventos relevantes`);
+                    console.log('🔥 Novidades Fase 4: Horários + Deep links + Interface unificada');
                     
                 } catch (error) {
-                    console.error('❌ Erro na inicialização bidirecional:', error);
+                    console.error('❌ Erro na inicialização Fase 4:', error);
                     this.inicializarModoFallback();
                 }
             }
 
-            // 🔥 AGUARDAR APP.JS UNIFICADO v8.7.0+
-            async aguardarAppUnificado() {
+            // 🔥 AGUARDAR APP.JS FASE 4
+            async aguardarAppFase4() {
                 let tentativas = 0;
-                const maxTentativas = 50; // 5 segundos
+                const maxTentativas = 50;
                 
                 while (tentativas < maxTentativas) {
                     if (typeof App !== 'undefined' && 
                         App.estadoSistema && 
                         App.estadoSistema.inicializado &&
-                        App.config.estruturaUnificada) {
-                        console.log('✅ App.js v8.7.0+ ESTRUTURA UNIFICADA pronto!');
+                        App.config?.suporteHorarios &&
+                        App.config?.deepLinksAtivo) {
+                        console.log('✅ App.js v8.8.0 FASE 4 pronto!');
                         return true;
                     }
                     
@@ -1419,11 +1607,108 @@
                     tentativas++;
                 }
                 
-                console.warn('⚠️ App.js unificado não carregou completamente, continuando...');
+                console.warn('⚠️ App.js Fase 4 não carregou completamente, continuando...');
                 return false;
             }
 
-            // 👤 VERIFICAR USUÁRIO VIA APP.JS (mantido)
+            // 🔥 PROCESSAR DEEP LINKS INICIAIS
+            processarDeepLinksIniciais() {
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const itemId = urlParams.get('item');
+                    const itemTipo = urlParams.get('tipo');
+                    const acao = urlParams.get('acao');
+                    
+                    if (itemId && itemTipo) {
+                        console.log(`🔗 Deep link detectado na agenda: ${itemTipo} ${itemId} (${acao})`);
+                        
+                        // Mostrar indicador de deep link
+                        this.mostrarIndicadorDeepLink(itemTipo, itemId, acao);
+                        
+                        // Processar após carregamento completo
+                        this.deepLinkPendente = { itemId, itemTipo, acao };
+                        
+                        setTimeout(() => {
+                            this.processarDeepLinkPendente();
+                        }, 3000);
+                    }
+                    
+                } catch (error) {
+                    console.warn('⚠️ Erro ao processar deep links iniciais:', error);
+                }
+            }
+
+            // 🔥 MOSTRAR INDICADOR DE DEEP LINK
+            mostrarIndicadorDeepLink(tipo, id, acao) {
+                try {
+                    const indicator = document.getElementById('deepLinkIndicator');
+                    const text = document.getElementById('deepLinkText');
+                    
+                    if (indicator && text) {
+                        text.textContent = `🔗 Abrindo ${tipo} ${id} (${acao})...`;
+                        indicator.style.display = 'block';
+                        
+                        setTimeout(() => {
+                            indicator.style.display = 'none';
+                        }, 5000);
+                    }
+                    
+                } catch (error) {
+                    // Silencioso
+                }
+            }
+
+            // 🔥 PROCESSAR DEEP LINK PENDENTE
+            processarDeepLinkPendente() {
+                try {
+                    if (!this.deepLinkPendente) return;
+                    
+                    const { itemId, itemTipo, acao } = this.deepLinkPendente;
+                    
+                    if (itemTipo === 'tarefa') {
+                        // Buscar tarefa
+                        const tarefa = this.tarefas.find(t => t.id == itemId);
+                        if (tarefa) {
+                            console.log(`📋 Tarefa encontrada via deep link: ${tarefa.titulo}`);
+                            
+                            if (acao === 'editar') {
+                                this.editarTarefaFase4(itemId);
+                            } else {
+                                // Destacar tarefa no grid
+                                this.destacarTarefaNoGrid(itemId);
+                            }
+                        } else {
+                            console.warn(`⚠️ Tarefa ${itemId} não encontrada`);
+                        }
+                    }
+                    
+                    this.deepLinkPendente = null;
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao processar deep link pendente:', error);
+                }
+            }
+
+            // 🔥 DESTACAR TAREFA NO GRID
+            destacarTarefaNoGrid(tarefaId) {
+                try {
+                    setTimeout(() => {
+                        const elementos = document.querySelectorAll(`[data-item-id="${tarefaId}"]`);
+                        elementos.forEach(el => {
+                            el.style.border = '3px solid #10b981';
+                            el.style.animation = 'pulse 2s infinite';
+                            
+                            // Scroll para o elemento
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        });
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.warn('⚠️ Erro ao destacar tarefa:', error);
+                }
+            }
+
+            // 👤 VERIFICAR USUÁRIO (mantido)
             verificarUsuario() {
                 try {
                     if (typeof App !== 'undefined' && App.usuarioAtual) {
@@ -1441,7 +1726,7 @@
                     document.getElementById('userName').textContent = this.usuarioAtual.nome;
                     document.getElementById('userEmail').textContent = this.usuarioAtual.email;
 
-                    console.log(`👤 Usuário Agenda Bidirecional: ${this.usuarioAtual.nome}`);
+                    console.log(`👤 Usuário Agenda Fase 4: ${this.usuarioAtual.nome}`);
 
                 } catch (error) {
                     console.error('❌ Erro ao verificar usuário:', error);
@@ -1455,20 +1740,20 @@
                 return parteLocal.charAt(0).toUpperCase() + parteLocal.slice(1);
             }
 
-            // 📊 CARREGAR DADOS BIDIRECIONAIS v8.9.0
-            async carregarDadosBidirecionais() {
+            // 📊 CARREGAR DADOS FASE 4 v8.10.0
+            async carregarDadosFase4() {
                 try {
                     if (typeof App === 'undefined' || !App.obterItensParaUsuario) {
-                        console.warn('⚠️ App.js unificado não disponível - usando modo fallback');
+                        console.warn('⚠️ App.js Fase 4 não disponível - usando modo fallback');
                         this.tarefas = [];
                         this.eventos = [];
                         this.eventosEquipe = [];
                         return;
                     }
 
-                    console.log('📥 Carregando dados bidirecionais via App.js v8.7.0...');
+                    console.log('📥 Carregando dados Fase 4 via App.js v8.8.0...');
                     
-                    // ✅ CARREGAR ITENS DO USUÁRIO (tarefas + eventos)
+                    // ✅ CARREGAR ITENS DO USUÁRIO
                     const { eventos, tarefas } = App.obterItensParaUsuario(this.usuarioAtual.email);
                     
                     // 🔥 SEPARAR TAREFAS PESSOAIS E EVENTOS DE EQUIPE
@@ -1484,18 +1769,18 @@
                          item.responsavel === this.usuarioAtual.email)
                     );
                     
-                    console.log(`✅ Dados bidirecionais carregados: ${this.tarefas.length} tarefas + ${this.eventosEquipe.length} eventos`);
+                    console.log(`✅ Dados Fase 4 carregados: ${this.tarefas.length} tarefas + ${this.eventosEquipe.length} eventos`);
 
                 } catch (error) {
-                    console.error('❌ Erro ao carregar dados bidirecionais:', error);
+                    console.error('❌ Erro ao carregar dados Fase 4:', error);
                     this.tarefas = [];
                     this.eventos = [];
                     this.eventosEquipe = [];
                 }
             }
 
-            // 🎛️ CONFIGURAR EVENT LISTENERS BIDIRECIONAL v8.9.0
-            configurarEventListenersBidirecional() {
+            // 🎛️ CONFIGURAR EVENT LISTENERS FASE 4 v8.10.0
+            configurarEventListenersFase4() {
                 // Filtros tradicionais
                 document.getElementById('filtroTipo').addEventListener('change', () => {
                     this.filtros.tipo = document.getElementById('filtroTipo').value;
@@ -1507,9 +1792,14 @@
                     this.aplicarFiltros();
                 });
 
-                // 🔥 NOVO: Filtro por escopo
                 document.getElementById('filtroEscopo').addEventListener('change', () => {
                     this.filtros.escopo = document.getElementById('filtroEscopo').value;
+                    this.aplicarFiltros();
+                });
+
+                // 🔥 NOVO: Filtro por horário
+                document.getElementById('filtroHorario').addEventListener('change', () => {
+                    this.filtros.horario = document.getElementById('filtroHorario').value;
                     this.aplicarFiltros();
                 });
 
@@ -1524,17 +1814,48 @@
                     });
                 }
 
-                // 🔥 SYNC EM TEMPO REAL VIA APP.JS BIDIRECIONAL
+                // 🔥 SYNC EM TEMPO REAL VIA APP.JS FASE 4
                 window.addEventListener('dados-sincronizados', (e) => {
-                    console.log('🔄 App.js sincronizou - atualizando agenda bidirecional...', e.detail);
-                    this.carregarDadosBidirecionais();
-                    this.renderizarGridBidirecional();
+                    console.log('🔄 App.js Fase 4 sincronizou - atualizando agenda...', e.detail);
+                    this.carregarDadosFase4();
+                    this.renderizarGridFase4();
                     this.renderizarEventosEquipe();
-                    this.atualizarEstatisticasBidirecional();
+                    this.atualizarEstatisticasFase4();
+                });
+
+                // 🔥 LISTENER PARA DEEP LINKS GLOBAIS
+                window.addEventListener('agenda-deep-link', (e) => {
+                    console.log('🔗 Deep link recebido na agenda:', e.detail);
+                    const { itemId, itemTipo, acao } = e.detail;
+                    if (itemTipo === 'tarefa') {
+                        this.processarDeepLinkTarefa(itemId, acao);
+                    }
                 });
             }
 
-            // 🔥 RENDERIZAR EVENTOS DE EQUIPE RELEVANTES v8.9.0
+            // 🔥 PROCESSAR DEEP LINK DE TAREFA
+            processarDeepLinkTarefa(tarefaId, acao = 'visualizar') {
+                try {
+                    console.log(`🔗 Processando deep link de tarefa: ${tarefaId} (${acao})`);
+                    
+                    const tarefa = this.tarefas.find(t => t.id == tarefaId);
+                    if (!tarefa) {
+                        console.warn(`⚠️ Tarefa ${tarefaId} não encontrada para deep link`);
+                        return;
+                    }
+                    
+                    if (acao === 'editar') {
+                        this.editarTarefaFase4(tarefaId);
+                    } else {
+                        this.destacarTarefaNoGrid(tarefaId);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao processar deep link de tarefa:', error);
+                }
+            }
+
+            // 🔥 RENDERIZAR EVENTOS DE EQUIPE (atualizado para Fase 4)
             renderizarEventosEquipe() {
                 const container = document.getElementById('teamEventsContent');
                 const counter = document.getElementById('teamEventsCount');
@@ -1556,7 +1877,6 @@
                     return;
                 }
 
-                // Filtrar eventos próximos (próximos 30 dias)
                 const hoje = new Date();
                 const em30Dias = new Date();
                 em30Dias.setDate(hoje.getDate() + 30);
@@ -1564,12 +1884,16 @@
                 const eventosProximos = this.eventosEquipe.filter(evento => {
                     const dataEvento = new Date(evento.data);
                     return dataEvento >= hoje && dataEvento <= em30Dias;
-                }).slice(0, 5); // Máximo 5 eventos
+                }).slice(0, 5);
 
                 container.innerHTML = eventosProximos.map(evento => {
                     const dataEvento = new Date(evento.data);
                     const isHoje = dataEvento.toDateString() === hoje.toDateString();
                     const diasRestantes = Math.ceil((dataEvento - hoje) / (1000 * 60 * 60 * 24));
+                    
+                    // 🔥 NOVO: Mostrar horários dos eventos
+                    const horarioInfo = evento.horarioInicio ? 
+                        `🕐 ${evento.horarioInicio}${evento.horarioFim ? ' - ' + evento.horarioFim : ''}` : '';
                     
                     return `
                         <div class="team-event-item" onclick="abrirEventoEquipe('${evento.id}')">
@@ -1578,7 +1902,7 @@
                                 <div class="team-event-title">${evento.titulo}</div>
                                 <div class="team-event-meta">
                                     📅 ${dataEvento.toLocaleDateString('pt-BR')} 
-                                    ${evento.horarioInicio ? '🕐 ' + evento.horarioInicio : ''}
+                                    ${horarioInfo}
                                     ${isHoje ? '🔥 HOJE' : diasRestantes === 1 ? '⚡ AMANHÃ' : `📍 ${diasRestantes} dias`}
                                     ${evento.local ? '📍 ' + evento.local : ''}
                                 </div>
@@ -1591,25 +1915,26 @@
                 }).join('');
             }
 
-            // 🗓️ RENDERIZAR GRID BIDIRECIONAL
-            renderizarGridBidirecional() {
+            // 🗓️ RENDERIZAR GRID FASE 4
+            renderizarGridFase4() {
                 const grid = document.getElementById('weeklyGrid');
-                const tarefasFiltradas = this.filtrarTarefas();
+                const tarefasFiltradas = this.filtrarTarefasFase4();
 
                 if (tarefasFiltradas.length === 0 && this.eventosEquipe.length === 0) {
                     grid.innerHTML = `
                         <div class="empty-state">
                             <div class="empty-icon">📋</div>
-                            <div class="empty-title">Sua agenda bidirecional está pronta</div>
+                            <div class="empty-title">Sua agenda Fase 4 está pronta</div>
                             <div class="empty-description">
-                                Comece criando sua primeira tarefa para ver a sincronização bidirecional em ação.
+                                Comece criando sua primeira tarefa com horários para ver a Fase 4 em ação.
                                 <br><br>
-                                <strong>🔄 Sistema BIDIRECIONAL v8.9.0:</strong> 
-                                • Tarefas sincronizam com o calendário principal<br>
-                                • Eventos de equipe aparecem automaticamente<br>
-                                • Mudanças refletem em tempo real em ambos os sistemas
+                                <strong>🔥 FASE 4 v8.10.0:</strong> 
+                                • Tarefas com horário de início e fim<br>
+                                • Deep links para navegação direta<br>
+                                • Interface unificada e navegação fluida<br>
+                                • Sincronização aprimorada com feedback visual
                             </div>
-                            <button class="btn btn-primary" onclick="mostrarModalNovaTarefa()">
+                            <button class="btn btn-primary" onclick="mostrarModalNovaTarefaFase4()">
                                 ➕ Criar Primeira Tarefa
                             </button>
                         </div>
@@ -1617,10 +1942,11 @@
                     return;
                 }
 
-                this.renderizarGridCompletoMisto(grid, tarefasFiltradas, this.eventosEquipe);
+                this.renderizarGridCompletoFase4(grid, tarefasFiltradas, this.eventosEquipe);
             }
 
-            renderizarGridCompletoMisto(grid, tarefas, eventos) {
+            // 🔥 RENDERIZAR GRID COMPLETO FASE 4
+            renderizarGridCompletoFase4(grid, tarefas, eventos) {
                 const hoje = new Date();
                 const inicioSemana = new Date(this.semanaAtual);
                 inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
@@ -1632,7 +1958,7 @@
                     </div>
 
                     <!-- Cabeçalhos dos dias -->
-                    ${this.gerarCabecalhosDias(inicioSemana, hoje, tarefas, eventos)}
+                    ${this.gerarCabecalhosDiasFase4(inicioSemana, hoje, tarefas, eventos)}
 
                     <!-- Slots de horário -->
                     <div class="time-slots">
@@ -1643,13 +1969,14 @@
                     </div>
 
                     <!-- Colunas dos dias -->
-                    ${this.gerarColunasDiasMisto(inicioSemana, tarefas, eventos)}
+                    ${this.gerarColunasDiasFase4(inicioSemana, tarefas, eventos)}
                 `;
 
                 this.adicionarLinhaTempo(grid);
             }
 
-            gerarCabecalhosDias(inicioSemana, hoje, tarefas, eventos) {
+            // 🔥 GERAR CABEÇALHOS DOS DIAS FASE 4
+            gerarCabecalhosDiasFase4(inicioSemana, hoje, tarefas, eventos) {
                 const diasSemana = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
                 let html = '';
 
@@ -1658,13 +1985,18 @@
                     dia.setDate(inicioSemana.getDate() + i);
                     
                     const ehHoje = dia.toDateString() === hoje.toDateString();
-                    const itensTotal = this.obterItensDoDiaMisto(dia, tarefas, eventos).length;
+                    const itensTotal = this.obterItensDoDiaFase4(dia, tarefas, eventos).length;
+                    
+                    // 🔥 NOVO: Contar itens com horário
+                    const itensComHorario = this.obterItensDoDiaFase4(dia, tarefas, eventos).filter(item => 
+                        item.horarioInicio || item.horario
+                    ).length;
 
                     html += `
                         <div class="day-header ${ehHoje ? 'today' : ''}">
                             <div class="day-name">${diasSemana[i]}</div>
                             <div class="day-date">${dia.getDate()}</div>
-                            <div class="day-tasks-count">${itensTotal} itens</div>
+                            <div class="day-tasks-count">${itensTotal} itens${itensComHorario > 0 ? ` | 🕐 ${itensComHorario}` : ''}</div>
                         </div>
                     `;
                 }
@@ -1672,26 +2004,27 @@
                 return html;
             }
 
-            gerarColunasDiasMisto(inicioSemana, tarefas, eventos) {
+            // 🔥 GERAR COLUNAS DOS DIAS FASE 4
+            gerarColunasDiasFase4(inicioSemana, tarefas, eventos) {
                 let html = '';
 
                 for (let i = 0; i < 7; i++) {
                     const dia = new Date(inicioSemana);
                     dia.setDate(inicioSemana.getDate() + i);
-                    const itensDia = this.obterItensDoDiaMisto(dia, tarefas, eventos);
+                    const itensDia = this.obterItensDoDiaFase4(dia, tarefas, eventos);
 
                     html += `
                         <div class="day-column">
                             ${Array.from({length: 10}, (_, h) => {
                                 const hora = 8 + h;
                                 const itensHora = itensDia.filter(item => {
-                                    const horarioItem = parseInt(item.horario?.split(':')[0] || '0');
+                                    const horarioItem = parseInt((item.horarioInicio || item.horario || '0').split(':')[0]);
                                     return horarioItem === hora;
                                 });
 
                                 return `
-                                    <div class="hour-slot" onclick="criarTarefaRapida('${dia.toISOString().split('T')[0]}', '${String(hora).padStart(2, '0')}:00')">
-                                        ${itensHora.map(item => this.renderizarItemGridBidirecional(item)).join('')}
+                                    <div class="hour-slot" onclick="criarTarefaRapidaFase4('${dia.toISOString().split('T')[0]}', '${String(hora).padStart(2, '0')}:00')">
+                                        ${itensHora.map(item => this.renderizarItemGridFase4(item)).join('')}
                                     </div>
                                 `;
                             }).join('')}
@@ -1702,19 +2035,18 @@
                 return html;
             }
 
-            obterItensDoDiaMisto(dia, tarefas = null, eventos = null) {
+            // 🔥 OBTER ITENS DO DIA FASE 4
+            obterItensDoDiaFase4(dia, tarefas = null, eventos = null) {
                 const tarefasParaFiltrar = tarefas || this.tarefas;
                 const eventosParaFiltrar = eventos || this.eventosEquipe;
                 const dataStr = dia.toISOString().split('T')[0];
                 
                 let itens = [];
 
-                // Tarefas pessoais
                 itens = itens.concat(tarefasParaFiltrar.filter(tarefa => 
                     tarefa.dataInicio === dataStr
                 ));
 
-                // Eventos da equipe
                 itens = itens.concat(eventosParaFiltrar.filter(evento => 
                     evento.data === dataStr || evento.dataInicio === dataStr
                 ));
@@ -1722,7 +2054,8 @@
                 return itens;
             }
 
-            renderizarItemGridBidirecional(item) {
+            // 🔥 RENDERIZAR ITEM GRID FASE 4
+            renderizarItemGridFase4(item) {
                 const tipoItem = item._tipoItem || (item.hasOwnProperty('participantes') && !item.hasOwnProperty('responsavel') ? 'evento' : 'tarefa');
                 const escopo = item.escopo || 'pessoal';
                 const classeCSS = `${tipoItem}-${escopo}`;
@@ -1730,7 +2063,6 @@
                 const prioridade = item.prioridade || 'media';
                 const status = item.status || 'agendado';
                 
-                // Ícones específicos
                 const icones = {
                     'evento-equipe': '📅',
                     'evento-publico': '🌍',
@@ -1740,22 +2072,50 @@
                 };
                 const icone = icones[classeCSS] || '📌';
 
+                // 🔥 NOVO: Renderizar horários na Fase 4
+                const horarioInicio = item.horarioInicio || item.horario || '';
+                const horarioFim = item.horarioFim || '';
+                const duracaoEstimada = item.duracaoEstimada;
+                
+                let horarioDisplay = '';
+                if (horarioInicio && horarioFim) {
+                    horarioDisplay = `${horarioInicio} - ${horarioFim}`;
+                } else if (horarioInicio) {
+                    horarioDisplay = horarioInicio;
+                    if (duracaoEstimada) {
+                        horarioDisplay += ` (${duracaoEstimada}min)`;
+                    }
+                }
+
                 return `
-                    <div class="item-grid ${classeCSS} fade-in" onclick="${tipoItem === 'evento' ? `abrirEventoEquipe('${item.id}')` : `editarTarefaBidirecional('${item.id}')`}">
-                        <div class="item-time">${item.horario || item.horarioInicio || ''}</div>
+                    <div class="item-grid ${classeCSS} fade-in" 
+                         data-item-id="${item.id}"
+                         onclick="${tipoItem === 'evento' ? `abrirEventoEquipe('${item.id}')` : `editarTarefaFase4('${item.id}')`}">
+                        
+                        ${horarioDisplay ? `
+                            <div class="item-time-range">
+                                <span>🕐 ${horarioDisplay}</span>
+                                ${duracaoEstimada && !horarioFim ? `<span class="item-duration">${duracaoEstimada}min</span>` : ''}
+                            </div>
+                        ` : ''}
+                        
                         <div class="item-title">${icone} ${item.titulo}</div>
                         ${item.descricao ? `<div class="item-description">${item.descricao}</div>` : ''}
+                        
                         <div class="item-meta">
                             <div class="item-badge ${tipoItem}">${tipoItem === 'evento' ? 'Evento' : 'Tarefa'}</div>
                             <div class="item-actions">
                                 ${item.aparecerNoCalendario ? '<span class="calendar-link-badge" title="Aparece no calendário">📅</span>' : ''}
-                                <span class="item-action-btn" title="Escopo: ${escopo}">🔗</span>
+                                ${item.horarioFlexivel === false ? '<span title="Horário fixo">🔒</span>' : ''}
+                                ${item.lembretesAtivos ? '<span title="Lembretes ativos">🔔</span>' : ''}
+                                <span class="item-action-btn" title="Escopo: ${escopo}" onclick="event.stopPropagation(); copiarDeepLinkItem('${item.id}', '${tipoItem}')">🔗</span>
                             </div>
                         </div>
                     </div>
                 `;
             }
 
+            // 🔄 ADICIONAR LINHA DO TEMPO (mantido)
             adicionarLinhaTempo(grid) {
                 const agora = new Date();
                 const hora = agora.getHours();
@@ -1788,23 +2148,48 @@
                 document.getElementById('currentWeekDisplay').textContent = display;
             }
 
-            // 🔍 FILTRAR TAREFAS (atualizado com escopo)
-            filtrarTarefas() {
+            // 🔍 FILTRAR TAREFAS FASE 4 (atualizado com filtro de horário)
+            filtrarTarefasFase4() {
                 return this.tarefas.filter(tarefa => {
                     if (this.filtros.tipo !== 'todos' && tarefa.tipo !== this.filtros.tipo) return false;
                     if (this.filtros.status !== 'todos' && tarefa.status !== this.filtros.status) return false;
                     if (this.filtros.escopo !== 'todos' && tarefa.escopo !== this.filtros.escopo) return false;
+                    
+                    // 🔥 NOVO: Filtro por horário
+                    if (this.filtros.horario !== 'todos') {
+                        const horarioInicio = tarefa.horarioInicio || tarefa.horario;
+                        
+                        if (this.filtros.horario === 'sem_horario') {
+                            if (horarioInicio) return false;
+                        } else if (this.filtros.horario === 'manha') {
+                            if (!horarioInicio) return false;
+                            const hora = parseInt(horarioInicio.split(':')[0]);
+                            if (hora < 6 || hora >= 12) return false;
+                        } else if (this.filtros.horario === 'tarde') {
+                            if (!horarioInicio) return false;
+                            const hora = parseInt(horarioInicio.split(':')[0]);
+                            if (hora < 12 || hora >= 18) return false;
+                        } else if (this.filtros.horario === 'noite') {
+                            if (!horarioInicio) return false;
+                            const hora = parseInt(horarioInicio.split(':')[0]);
+                            if (hora < 18 || hora >= 24) return false;
+                        }
+                    }
+                    
                     return true;
                 });
             }
 
-            // 📊 ATUALIZAR ESTATÍSTICAS BIDIRECIONAL v8.9.0
-            atualizarEstatisticasBidirecional() {
-                const tarefasFiltradas = this.filtrarTarefas();
+            // 📊 ATUALIZAR ESTATÍSTICAS FASE 4 v8.10.0
+            atualizarEstatisticasFase4() {
+                const tarefasFiltradas = this.filtrarTarefasFase4();
                 const pendentes = tarefasFiltradas.filter(t => t.status === 'pendente').length;
                 const andamento = tarefasFiltradas.filter(t => t.status === 'andamento').length;
                 const concluidas = tarefasFiltradas.filter(t => t.status === 'concluida').length;
                 const noCalendario = tarefasFiltradas.filter(t => t.aparecerNoCalendario === true).length;
+                
+                // 🔥 NOVO: Estatística de tarefas com horários
+                const comHorarios = tarefasFiltradas.filter(t => t.horarioInicio || t.horario).length;
 
                 document.getElementById('totalTasks').textContent = tarefasFiltradas.length;
                 document.getElementById('teamEvents').textContent = this.eventosEquipe.length;
@@ -1812,83 +2197,266 @@
                 document.getElementById('inProgressTasks').textContent = andamento;
                 document.getElementById('completedTasksTotal').textContent = concluidas;
                 document.getElementById('calendarLinked').textContent = noCalendario;
+                document.getElementById('tasksWithTime').textContent = comHorarios;
             }
 
             // 🔄 APLICAR FILTROS
             aplicarFiltros() {
-                this.renderizarGridBidirecional();
-                this.atualizarEstatisticasBidirecional();
+                this.renderizarGridFase4();
+                this.atualizarEstatisticasFase4();
             }
 
             // 📅 NAVEGAR SEMANA (mantido)
             navegarSemana(direcao) {
                 this.semanaAtual.setDate(this.semanaAtual.getDate() + (direcao * 7));
                 this.atualizarSemanaDisplay();
-                this.renderizarGridBidirecional();
+                this.renderizarGridFase4();
             }
 
             irParaHoje() {
                 this.semanaAtual = new Date();
                 this.atualizarSemanaDisplay();
-                this.renderizarGridBidirecional();
+                this.renderizarGridFase4();
             }
 
-            // 🔥 SALVAR NOVA TAREFA BIDIRECIONAL v8.9.0
-            async salvarNovaTarefaBidirecional() {
+            // 🔥 SALVAR NOVA TAREFA FASE 4 v8.10.0
+            async salvarNovaTarefaFase4() {
                 try {
-                    const form = document.getElementById('formNovaTarefa');
+                    const form = document.getElementById('formNovaTarefaFase4');
                     const formData = new FormData(form);
                     
+                    // 🔥 NOVO: Coletar dados de horários
                     const dadosTarefa = {
                         titulo: formData.get('titulo'),
                         descricao: formData.get('descricao'),
                         tipo: formData.get('tipo'),
                         prioridade: formData.get('prioridade'),
-                        escopo: formData.get('escopo'), // 🔥 NOVO: Escopo explícito
+                        escopo: formData.get('escopo'),
+                        status: formData.get('status'),
                         dataInicio: formData.get('dataInicio') || new Date().toISOString().split('T')[0],
-                        horario: formData.get('horario'),
+                        dataFim: formData.get('dataFim'),
+                        
+                        // 🔥 HORÁRIOS FASE 4
+                        horarioInicio: formData.get('horarioInicio'),
+                        horarioFim: formData.get('horarioFim'),
+                        duracaoEstimada: formData.get('duracaoEstimada') ? parseInt(formData.get('duracaoEstimada')) : null,
+                        horarioFlexivel: document.getElementById('horarioFlexivel').checked,
+                        lembretesAtivos: document.getElementById('lembretesAtivos').checked,
+                        
                         participantes: [...this.participantesTemp],
                         subtarefas: [...this.subtarefasTemp],
                         
-                        // 🔥 CONFIGURAÇÕES BIDIRECIONAL
+                        // Configurações Fase 4
                         aparecerNoCalendario: document.getElementById('aparecerNoCalendario').checked,
                         notificarEquipe: document.getElementById('notificarEquipe').checked,
                         sincronizarStatus: document.getElementById('sincronizarStatus').checked
                     };
 
-                    // ✅ USAR APP.JS UNIFICADO
+                    // ✅ USAR APP.JS FASE 4
                     if (typeof App !== 'undefined' && App.criarTarefa) {
-                        await App.criarTarefa(dadosTarefa);
-                        this.notificar('✅ Tarefa criada e sincronizada bidirecionalmente!', 'success');
+                        const novaTarefa = await App.criarTarefa(dadosTarefa);
                         
-                        // 🔥 NOTIFICAR CALENDÁRIO PRINCIPAL SE MARCADO
+                        // 🔥 GERAR E MOSTRAR DEEP LINK
+                        if (document.getElementById('gerarDeepLink').checked) {
+                            const deepLink = App._gerarDeepLink ? App._gerarDeepLink('tarefa', novaTarefa.id, 'editar') : '';
+                            this.mostrarSucessoComDeepLink(novaTarefa.titulo, deepLink);
+                        } else {
+                            this.notificar('✅ Tarefa criada com sucesso!', 'success');
+                        }
+                        
+                        // Notificar calendário se marcado
                         if (dadosTarefa.aparecerNoCalendario) {
-                            this.notificarCalendarioPrincipal('nova-tarefa', dadosTarefa);
+                            this.notificarCalendarioPrincipal('nova-tarefa', novaTarefa);
                         }
                         
                     } else {
-                        throw new Error('App.js não disponível');
+                        throw new Error('App.js Fase 4 não disponível');
                     }
 
-                    this.fecharModal('modalNovaTarefa');
+                    this.fecharModal('modalNovaTarefaFase4');
                     this.limparFormulario();
                     
                     // Recarregar dados
-                    await this.carregarDadosBidirecionais();
-                    this.renderizarGridBidirecional();
+                    await this.carregarDadosFase4();
+                    this.renderizarGridFase4();
                     this.renderizarEventosEquipe();
-                    this.atualizarEstatisticasBidirecional();
+                    this.atualizarEstatisticasFase4();
 
                 } catch (error) {
-                    console.error('❌ Erro ao salvar tarefa bidirecional:', error);
+                    console.error('❌ Erro ao salvar tarefa Fase 4:', error);
                     this.notificar('❌ Erro ao salvar tarefa: ' + error.message, 'error');
                 }
             }
 
-            // 🔥 NOTIFICAR CALENDÁRIO PRINCIPAL (bidirecional)
+            // 🔥 MOSTRAR SUCESSO COM DEEP LINK
+            mostrarSucessoComDeepLink(titulo, deepLink) {
+                try {
+                    let mensagem = `✅ Tarefa "${titulo}" criada com sucesso!`;
+                    
+                    if (deepLink) {
+                        mensagem += `\n\n🔗 Deep link gerado para acesso direto.`;
+                        
+                        setTimeout(() => {
+                            const copiar = confirm(`${mensagem}\n\nDeseja copiar o deep link para a área de transferência?`);
+                            if (copiar && navigator.clipboard) {
+                                navigator.clipboard.writeText(deepLink).then(() => {
+                                    this.notificar('🔗 Deep link copiado!', 'info');
+                                });
+                            }
+                        }, 1000);
+                    }
+                    
+                    this.notificar(mensagem, 'success');
+                    
+                } catch (error) {
+                    this.notificar('✅ Tarefa criada com sucesso!', 'success');
+                }
+            }
+
+            // 🔥 EDITAR TAREFA FASE 4
+            editarTarefaFase4(tarefaId) {
+                try {
+                    console.log(`✏️ Editando tarefa Fase 4 ID: ${tarefaId}`);
+                    
+                    const tarefa = this.tarefas.find(t => t.id == tarefaId);
+                    if (!tarefa) {
+                        console.warn(`⚠️ Tarefa ${tarefaId} não encontrada`);
+                        return;
+                    }
+                    
+                    // Carregar dados da tarefa no modal
+                    this.carregarTarefaNoModal(tarefa);
+                    this.tarefaEditando = tarefaId;
+                    
+                    // Abrir modal
+                    this.abrirModal('modalNovaTarefaFase4');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao editar tarefa Fase 4:', error);
+                    this.notificar('❌ Erro ao abrir tarefa para edição', 'error');
+                }
+            }
+
+            // 🔥 CARREGAR TAREFA NO MODAL
+            carregarTarefaNoModal(tarefa) {
+                try {
+                    // Campos básicos
+                    document.getElementById('tarefaTitulo').value = tarefa.titulo || '';
+                    document.getElementById('tarefaDescricao').value = tarefa.descricao || '';
+                    document.getElementById('tarefaTipo').value = tarefa.tipo || 'pessoal';
+                    document.getElementById('tarefaPrioridade').value = tarefa.prioridade || 'media';
+                    document.getElementById('tarefaEscopo').value = tarefa.escopo || 'pessoal';
+                    document.getElementById('tarefaStatus').value = tarefa.status || 'pendente';
+                    
+                    // Datas
+                    document.getElementById('tarefaDataInicio').value = tarefa.dataInicio || '';
+                    document.getElementById('tarefaDataFim').value = tarefa.dataFim || '';
+                    
+                    // 🔥 HORÁRIOS FASE 4
+                    document.getElementById('tarefaHorarioInicio').value = tarefa.horarioInicio || tarefa.horario || '';
+                    document.getElementById('tarefaHorarioFim').value = tarefa.horarioFim || '';
+                    document.getElementById('tarefaDuracaoEstimada').value = tarefa.duracaoEstimada || '';
+                    
+                    // Configurações de horário
+                    document.getElementById('horarioFlexivel').checked = tarefa.horarioFlexivel !== false;
+                    document.getElementById('lembretesAtivos').checked = tarefa.lembretesAtivos === true;
+                    
+                    // Configurações gerais
+                    document.getElementById('aparecerNoCalendario').checked = tarefa.aparecerNoCalendario === true;
+                    document.getElementById('notificarEquipe').checked = tarefa.notificarEquipe === true;
+                    document.getElementById('sincronizarStatus').checked = tarefa.sincronizarStatus !== false;
+                    document.getElementById('gerarDeepLink').checked = true;
+                    
+                    // Participantes e subtarefas
+                    this.participantesTemp = [...(tarefa.participantes || [])];
+                    this.subtarefasTemp = [...(tarefa.subtarefas || [])];
+                    this.renderizarParticipantes();
+                    this.renderizarSubtarefas();
+                    
+                    // Alterar título do modal
+                    const modalTitle = document.querySelector('#modalNovaTarefaFase4 .modal-header h3');
+                    if (modalTitle) {
+                        modalTitle.textContent = '✏️ Editar Tarefa Fase 4 - Com Horários';
+                    }
+                    
+                    // Alterar botão
+                    const saveBtn = document.querySelector('#modalNovaTarefaFase4 .btn-primary');
+                    if (saveBtn) {
+                        saveBtn.textContent = '💾 Atualizar Tarefa';
+                        saveBtn.onclick = () => this.atualizarTarefaFase4();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar tarefa no modal:', error);
+                }
+            }
+
+            // 🔥 ATUALIZAR TAREFA FASE 4
+            async atualizarTarefaFase4() {
+                try {
+                    if (!this.tarefaEditando) {
+                        throw new Error('Nenhuma tarefa sendo editada');
+                    }
+                    
+                    const form = document.getElementById('formNovaTarefaFase4');
+                    const formData = new FormData(form);
+                    
+                    const dadosAtualizacao = {
+                        titulo: formData.get('titulo'),
+                        descricao: formData.get('descricao'),
+                        tipo: formData.get('tipo'),
+                        prioridade: formData.get('prioridade'),
+                        escopo: formData.get('escopo'),
+                        status: formData.get('status'),
+                        dataInicio: formData.get('dataInicio'),
+                        dataFim: formData.get('dataFim'),
+                        
+                        // Horários Fase 4
+                        horarioInicio: formData.get('horarioInicio'),
+                        horarioFim: formData.get('horarioFim'),
+                        duracaoEstimada: formData.get('duracaoEstimada') ? parseInt(formData.get('duracaoEstimada')) : null,
+                        horarioFlexivel: document.getElementById('horarioFlexivel').checked,
+                        lembretesAtivos: document.getElementById('lembretesAtivos').checked,
+                        
+                        participantes: [...this.participantesTemp],
+                        subtarefas: [...this.subtarefasTemp],
+                        
+                        aparecerNoCalendario: document.getElementById('aparecerNoCalendario').checked,
+                        ultimaAtualizacao: new Date().toISOString()
+                    };
+                    
+                    // Atualizar localmente
+                    const index = this.tarefas.findIndex(t => t.id == this.tarefaEditando);
+                    if (index !== -1) {
+                        this.tarefas[index] = { ...this.tarefas[index], ...dadosAtualizacao };
+                    }
+                    
+                    // Salvar via App.js se disponível
+                    if (typeof App !== 'undefined' && App._salvarDadosUnificados) {
+                        await App._salvarDadosUnificados();
+                    }
+                    
+                    this.notificar('✅ Tarefa atualizada com sucesso!', 'success');
+                    
+                    this.fecharModal('modalNovaTarefaFase4');
+                    this.limparFormulario();
+                    this.tarefaEditando = null;
+                    
+                    // Recarregar dados
+                    await this.carregarDadosFase4();
+                    this.renderizarGridFase4();
+                    this.atualizarEstatisticasFase4();
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao atualizar tarefa Fase 4:', error);
+                    this.notificar('❌ Erro ao atualizar tarefa: ' + error.message, 'error');
+                }
+            }
+
+            // ========== FUNÇÕES AUXILIARES MANTIDAS ==========
+            
             notificarCalendarioPrincipal(acao, dados) {
                 try {
-                    // Emitir evento global para calendário principal
                     window.dispatchEvent(new CustomEvent('agenda-bidirecional-update', {
                         detail: { acao, dados, timestamp: Date.now() }
                     }));
@@ -1897,9 +2465,8 @@
                 } catch (error) {
                     console.warn('⚠️ Erro ao notificar calendário principal:', error);
                 }
-            }
+            },
 
-            // 👥 GERENCIAR PARTICIPANTES (mantido)
             adicionarParticipante() {
                 const input = document.getElementById('participanteInput');
                 const nome = input.value.trim();
@@ -1909,12 +2476,12 @@
                     this.renderizarParticipantes();
                     input.value = '';
                 }
-            }
+            },
 
             removerParticipante(nome) {
                 this.participantesTemp = this.participantesTemp.filter(p => p !== nome);
                 this.renderizarParticipantes();
-            }
+            },
 
             renderizarParticipantes() {
                 const container = document.getElementById('participantesContainer');
@@ -1927,15 +2494,14 @@
                     tag.className = 'participante-tag';
                     tag.innerHTML = `
                         ${nome}
-                        <span class="remove" onclick="agendaBidirecional.removerParticipante('${nome}')">&times;</span>
+                        <span class="remove" onclick="agendaFase4.removerParticipante('${nome}')">&times;</span>
                     `;
                     container.appendChild(tag);
                 });
                 
                 container.appendChild(input);
-            }
+            },
 
-            // 📋 GERENCIAR SUBTAREFAS (mantido)
             adicionarSubtarefa() {
                 const titulo = prompt('📝 Título da subtarefa:');
                 if (titulo && titulo.trim()) {
@@ -1946,7 +2512,7 @@
                     });
                     this.renderizarSubtarefas();
                 }
-            }
+            },
 
             toggleSubtarefa(id) {
                 const subtarefa = this.subtarefasTemp.find(s => s.id === id);
@@ -1954,12 +2520,12 @@
                     subtarefa.concluida = !subtarefa.concluida;
                     this.renderizarSubtarefas();
                 }
-            }
+            },
 
             removerSubtarefa(id) {
                 this.subtarefasTemp = this.subtarefasTemp.filter(s => s.id !== id);
                 this.renderizarSubtarefas();
-            }
+            },
 
             renderizarSubtarefas() {
                 const container = document.getElementById('subtarefasList');
@@ -1976,32 +2542,43 @@
                 container.innerHTML = this.subtarefasTemp.map(subtarefa => `
                     <div class="subtarefa-item">
                         <input type="checkbox" class="subtarefa-checkbox" ${subtarefa.concluida ? 'checked' : ''} 
-                               onchange="agendaBidirecional.toggleSubtarefa(${subtarefa.id})">
+                               onchange="agendaFase4.toggleSubtarefa(${subtarefa.id})">
                         <span class="subtarefa-texto ${subtarefa.concluida ? 'concluida' : ''}">${subtarefa.titulo}</span>
                         <div class="subtarefa-actions">
-                            <button class="btn-icon" onclick="agendaBidirecional.removerSubtarefa(${subtarefa.id})" title="Remover">
+                            <button class="btn-icon" onclick="agendaFase4.removerSubtarefa(${subtarefa.id})" title="Remover">
                                 🗑️
                             </button>
                         </div>
                     </div>
                 `).join('');
-            }
+            },
 
             limparFormulario() {
-                document.getElementById('formNovaTarefa').reset();
+                document.getElementById('formNovaTarefaFase4').reset();
                 this.participantesTemp = [];
                 this.subtarefasTemp = [];
                 this.renderizarParticipantes();
                 this.renderizarSubtarefas();
-            }
+                this.tarefaEditando = null;
+                
+                // Restaurar título e botão do modal
+                const modalTitle = document.querySelector('#modalNovaTarefaFase4 .modal-header h3');
+                if (modalTitle) {
+                    modalTitle.textContent = '➕ Nova Tarefa Fase 4 - Com Horários';
+                }
+                
+                const saveBtn = document.querySelector('#modalNovaTarefaFase4 .btn-primary');
+                if (saveBtn) {
+                    saveBtn.textContent = '💾 Criar Tarefa Fase 4';
+                    saveBtn.onclick = () => this.salvarNovaTarefaFase4();
+                }
+            },
 
-            // 🔔 NOTIFICAÇÃO
             notificar(mensagem, tipo = 'info') {
                 if (typeof Notifications !== 'undefined') {
                     Notifications[tipo](mensagem);
                 } else {
                     console.log(`${tipo.toUpperCase()}: ${mensagem}`);
-                    // Fallback simples
                     const notification = document.getElementById('notification');
                     const text = document.getElementById('notificationText');
                     if (notification && text) {
@@ -2012,9 +2589,8 @@
                         }, 3000);
                     }
                 }
-            }
+            },
 
-            // 🔧 UTILITÁRIOS
             fecharModal(modalId) {
                 const modal = document.getElementById(modalId);
                 if (modal) {
@@ -2023,7 +2599,7 @@
                         modal.style.display = 'none';
                     }, 300);
                 }
-            }
+            },
 
             abrirModal(modalId) {
                 const modal = document.getElementById(modalId);
@@ -2033,203 +2609,7 @@
                         modal.classList.add('show');
                     }, 10);
                 }
-            }
+            },
 
             inicializarModoFallback() {
-                console.log('🔄 Inicializando modo fallback bidirecional...');
-                this.usuarioAtual = { nome: 'Usuário Demo', email: 'demo@biapo.com.br' };
-                this.tarefas = [];
-                this.eventos = [];
-                this.eventosEquipe = [];
-                
-                document.getElementById('userName').textContent = this.usuarioAtual.nome;
-                document.getElementById('userEmail').textContent = this.usuarioAtual.email;
-                
-                this.renderizarGridBidirecional();
-                this.renderizarEventosEquipe();
-                this.atualizarSemanaDisplay();
-                this.atualizarEstatisticasBidirecional();
-            }
-        }
-
-        // 🚀 INSTÂNCIA GLOBAL
-        let agendaBidirecional;
-
-        // 📋 FUNÇÕES GLOBAIS DA INTERFACE BIDIRECIONAL v8.9.0
-        function alternarVisualizacao(tipo) {
-            agendaBidirecional.visualizacaoAtiva = tipo;
-            
-            document.querySelectorAll('.view-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelector(`[data-view="${tipo}"]`).classList.add('active');
-
-            if (tipo === 'mixed') {
-                // Visão mista já é o padrão na v8.9.0
-                agendaBidirecional.renderizarGridBidirecional();
-            } else if (tipo === 'grid') {
-                agendaBidirecional.renderizarGridBidirecional();
-            }
-        }
-
-        function aplicarFiltros() {
-            agendaBidirecional.aplicarFiltros();
-        }
-
-        function navegarSemana(direcao) {
-            agendaBidirecional.navegarSemana(direcao);
-        }
-
-        function irParaHoje() {
-            agendaBidirecional.irParaHoje();
-        }
-
-        function mostrarModalNovaTarefa() {
-            agendaBidirecional.limparFormulario();
-            agendaBidirecional.abrirModal('modalNovaTarefa');
-            
-            // Definir data padrão como hoje
-            document.getElementById('tarefaDataInicio').value = new Date().toISOString().split('T')[0];
-        }
-
-        function editarTarefaBidirecional(id) {
-            console.log(`✏️ Editando tarefa bidirecional ID: ${id}`);
-            // TODO: Implementar edição bidirecional
-            alert('🚧 Edição bidirecional será implementada em breve!');
-        }
-
-        function abrirEventoEquipe(id) {
-            console.log(`📅 Abrindo evento de equipe ID: ${id}`);
-            
-            // Tentar abrir via Events.js se disponível
-            if (typeof Events !== 'undefined' && Events.editarEvento) {
-                Events.editarEvento(id);
-            } else {
-                // Abrir detalhes do evento
-                const evento = agendaBidirecional.eventosEquipe.find(e => e.id == id);
-                if (evento) {
-                    const detalhes = `📅 EVENTO DE EQUIPE
-
-Título: ${evento.titulo}
-Data: ${evento.data}
-${evento.horarioInicio ? 'Horário: ' + evento.horarioInicio : ''}
-${evento.local ? 'Local: ' + evento.local : ''}
-Participantes: ${evento.participantes?.join(', ') || 'N/A'}
-
-${evento.descricao ? 'Descrição: ' + evento.descricao : ''}
-
-💡 Este evento é gerenciado pelo calendário principal da equipe.`;
-                    
-                    alert(detalhes);
-                }
-            }
-        }
-
-        function marcarEventoNaAgenda(eventoId) {
-            console.log(`📋 Marcando evento ${eventoId} na agenda pessoal`);
-            // TODO: Implementar marcação de evento na agenda
-            agendaBidirecional.notificar('📋 Evento marcado na sua agenda pessoal!', 'success');
-        }
-
-        function criarTarefaRapida(data, horario) {
-            console.log(`🚀 Criação rápida bidirecional: ${data} às ${horario}`);
-            mostrarModalNovaTarefa();
-            document.getElementById('tarefaDataInicio').value = data;
-            document.getElementById('tarefaHorario').value = horario;
-        }
-
-        function salvarNovaTarefaBidirecional() {
-            agendaBidirecional.salvarNovaTarefaBidirecional();
-        }
-
-        function adicionarSubtarefa() {
-            agendaBidirecional.adicionarSubtarefa();
-        }
-
-        function fecharModal(modalId) {
-            agendaBidirecional.fecharModal(modalId);
-        }
-
-        // 🔥 FUNÇÕES BIDIRECIONAL ESPECÍFICAS v8.9.0
-        function sincronizarBidirecional() {
-            console.log('🔄 Sincronização bidirecional manual...');
-            
-            if (typeof App !== 'undefined' && App._salvarDadosUnificados) {
-                App._salvarDadosUnificados().then(() => {
-                    agendaBidirecional.carregarDadosBidirecionais();
-                    agendaBidirecional.renderizarGridBidirecional();
-                    agendaBidirecional.renderizarEventosEquipe();
-                    agendaBidirecional.atualizarEstatisticasBidirecional();
-                    agendaBidirecional.notificar('✅ Sincronização bidirecional completa!', 'success');
-                });
-            } else {
-                agendaBidirecional.notificar('⚠️ App.js não disponível para sincronização', 'warning');
-            }
-        }
-
-        function abrirCalendarioPrincipal() {
-            console.log('📅 Abrindo calendário principal...');
-            window.location.href = 'index.html';
-        }
-
-        function exportarAgenda() {
-            agendaBidirecional.notificar('📄 Exportação será implementada em breve!', 'info');
-        }
-
-        function mostrarRelatorios() {
-            agendaBidirecional.notificar('📊 Relatórios serão implementados em breve!', 'info');
-        }
-
-        function voltarParaSistema() {
-            window.location.href = 'index.html';
-        }
-
-        // 🚀 INICIALIZAÇÃO
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('📅 Inicializando Agenda BIDIRECIONAL v8.9.0...');
-            
-            setTimeout(() => {
-                agendaBidirecional = new AgendaBidirecional();
-            }, 1000);
-        });
-
-        // ⏰ ATUALIZAR LINHA DO TEMPO A CADA MINUTO
-        setInterval(() => {
-            if (agendaBidirecional) {
-                agendaBidirecional.renderizarGridBidirecional();
-            }
-        }, 60000);
-
-        // 🔧 EVENTOS DE TECLADO
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal.show').forEach(modal => {
-                    modal.classList.remove('show');
-                    setTimeout(() => modal.style.display = 'none', 300);
-                });
-            }
-        });
-
-        // 🔥 LISTENER PARA CALENDÁRIO PRINCIPAL
-        window.addEventListener('calendar-update', (e) => {
-            console.log('📅 Calendário principal atualizou - sincronizando agenda...', e.detail);
-            if (agendaBidirecional) {
-                agendaBidirecional.carregarDadosBidirecionais();
-                agendaBidirecional.renderizarGridBidirecional();
-                agendaBidirecional.renderizarEventosEquipe();
-            }
-        });
-
-        // 🔥 LOGS BIDIRECIONAL
-        console.log('📅 Agenda BIDIRECIONAL v8.9.0 carregada!');
-        console.log('🔥 FUNCIONALIDADES BIDIRECIONAL:');
-        console.log('  ✅ Sincronização automática agenda ↔ calendário');
-        console.log('  ✅ Eventos de equipe relevantes exibidos');
-        console.log('  ✅ Tarefas podem aparecer no calendário principal');
-        console.log('  ✅ Navegação fluida entre sistemas');
-        console.log('  ✅ Filtros por escopo (pessoal/equipe/público)');
-        console.log('  ✅ Notificação de mudanças em tempo real');
-        console.log('📡 Sistema BIDIRECIONAL funcionando!');
-    </script>
-</body>
-</html>
+                console.log('
