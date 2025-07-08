@@ -24,6 +24,10 @@ const AdminUsersManager = {
         pathBackup: 'auth/equipe'
     },
 
+    _carregarDepartamentos() {
+
+    // ======== FUNÇÕES UTILITÁRIAS v8.5 ========
+
     // ✅ ESTADO
     estado: {
         modalAberto: false,
@@ -898,8 +902,62 @@ const AdminUsersManager = {
         return false;
     },
 
-    // ======== FUNÇÕES UTILITÁRIAS v8.5 ========
-    _carregarDepartamentos() {
+    // 🔄 ATUALIZAR DADOS
+    async _atualizarDados() {
+        try {
+            console.log('🔄 Atualizando dados do AdminUsersManager...');
+            
+            // Verificar Firebase
+            const firebaseOk = this._verificarFirebase();
+            
+            if (firebaseOk) {
+                // Recarregar dados do Firebase
+                const snapshot = await database.ref(this.config.pathPrincipal).once('value');
+                const dadosFirebase = snapshot.val();
+                
+                if (dadosFirebase && typeof Auth !== 'undefined') {
+                    Auth.equipe = dadosFirebase;
+                    console.log('✅ Dados atualizados do Firebase');
+                }
+            }
+            
+            // Atualizar interface se modal estiver aberto
+            if (this.estado.modalAberto) {
+                this._renderizarListaUsuarios();
+                console.log('✅ Interface atualizada');
+            }
+            
+            this._mostrarMensagem('Dados atualizados!', 'success');
+            
+        } catch (error) {
+            console.error('❌ Erro ao atualizar dados:', error);
+            this._mostrarMensagem('Erro ao atualizar dados!', 'error');
+        }
+    },
+    // 🔄 SINCRONIZAR COM FIREBASE
+    _sincronizarComFirebase(dadosFirebase) {
+        if (!dadosFirebase || typeof Auth === 'undefined') return;
+        
+        try {
+            // Verificar se há mudanças
+            const dadosAtuais = JSON.stringify(Auth.equipe);
+            const dadosNovos = JSON.stringify(dadosFirebase);
+            
+            if (dadosAtuais !== dadosNovos) {
+                Auth.equipe = dadosFirebase;
+                
+                // Atualizar interface se estiver na aba de usuários
+                const abaUsuarios = document.getElementById('abaUsuarios');
+                if (abaUsuarios && abaUsuarios.style.background === 'rgb(197, 48, 48)') {
+                    this._renderizarListaUsuarios();
+                }
+                
+                console.log('🔄 Dados sincronizados automaticamente');
+            }
+        } catch (error) {
+            console.warn('⚠️ Erro na sincronização automática:', error);
+        }
+    },
         console.log('🏢 Departamentos v8.5 carregados:', this.departamentos.length);
         this.estado.departamentosCarregados = true;
     },
@@ -1547,32 +1605,141 @@ const AdminUsersManager = {
         }
     },
 
+    // 🗑️ CONFIRMAR EXCLUSÃO COM MODAL
     confirmarExclusao(chaveUsuario) {
         const usuario = Auth.equipe[chaveUsuario];
-        if (!usuario) return;
+        if (!usuario) {
+            this._mostrarMensagem('Usuário não encontrado!', 'error');
+            return;
+        }
         
-        const confirmacao = confirm(`Excluir usuário ${usuario.nome}?\n\nEsta ação não pode ser desfeita.`);
-        if (confirmacao) {
+        // Verificar se não é o único admin
+        const admins = Object.values(Auth.equipe).filter(u => u.admin === true);
+        if (usuario.admin && admins.length === 1) {
+            this._mostrarMensagem('Não é possível excluir o único administrador!', 'error');
+            return;
+        }
+        
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000001;
+        `;
+        
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                border-radius: 16px;
+                padding: 24px;
+                max-width: 400px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            ">
+                <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                <h3 style="margin: 0 0 16px 0; color: #1f2937;">Excluir Usuário</h3>
+                <p style="margin: 0 0 24px 0; color: #6b7280; line-height: 1.5;">
+                    Tem certeza que deseja excluir <strong>${usuario.nome}</strong>?
+                    <br><br>
+                    Esta ação não pode ser desfeita.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="this.closest('div').parentElement.remove()" style="
+                        background: #6b7280;
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">Cancelar</button>
+                    <button onclick="AdminUsersManager._executarExclusao('${chaveUsuario}'); this.closest('div').parentElement.remove();" style="
+                        background: #ef4444;
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">🗑️ Excluir</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Fechar ao clicar fora
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    },
+
+    // 🗑️ EXECUTAR EXCLUSÃO
+    async _executarExclusao(chaveUsuario) {
+        try {
+            const usuario = Auth.equipe[chaveUsuario];
+            const nome = usuario.nome;
+            
             delete Auth.equipe[chaveUsuario];
-            this._salvarUsuariosNoFirebase();
+            
+            await this._salvarUsuariosNoFirebase();
             this._renderizarListaUsuarios();
-            this._mostrarMensagem(`Usuário ${usuario.nome} excluído!`, 'warning');
+            
+            console.log(`🗑️ Usuário excluído: ${nome}`);
+            this._mostrarMensagem(`Usuário ${nome} excluído com sucesso!`, 'warning');
+            
+        } catch (error) {
+            console.error('❌ Erro ao excluir usuário:', error);
+            this._mostrarMensagem('Erro ao excluir usuário!', 'error');
         }
     },
 
-    alternarStatus(chaveUsuario) {
-        if (!Auth.equipe[chaveUsuario]) return;
+    // 🔄 ALTERNAR STATUS (melhorado)
+    async alternarStatus(chaveUsuario) {
+        if (!Auth.equipe[chaveUsuario]) {
+            this._mostrarMensagem('Usuário não encontrado!', 'error');
+            return;
+        }
 
         const usuario = Auth.equipe[chaveUsuario];
         const novoStatus = !usuario.ativo;
         
-        Auth.equipe[chaveUsuario].ativo = novoStatus;
+        // Verificar se não está desativando o único admin ativo
+        if (usuario.admin && usuario.ativo && !novoStatus) {
+            const adminsAtivos = Object.values(Auth.equipe).filter(u => u.admin === true && u.ativo !== false);
+            if (adminsAtivos.length === 1) {
+                this._mostrarMensagem('Não é possível desativar o único administrador ativo!', 'error');
+                return;
+            }
+        }
         
-        console.log(`🔄 Status alterado: ${usuario.nome} → ${novoStatus ? 'ATIVO' : 'INATIVO'}`);
-        this._mostrarMensagem(`Usuário ${novoStatus ? 'ativado' : 'desativado'}!`, 'success');
-        
-        this._salvarUsuariosNoFirebase();
-        this._renderizarListaUsuarios();
+        try {
+            Auth.equipe[chaveUsuario].ativo = novoStatus;
+            Auth.equipe[chaveUsuario].dataAtualizacao = new Date().toISOString();
+            
+            await this._salvarUsuariosNoFirebase();
+            this._renderizarListaUsuarios();
+            
+            const status = novoStatus ? 'ATIVO' : 'INATIVO';
+            const cor = novoStatus ? '🟢' : '🔴';
+            
+            console.log(`🔄 Status alterado: ${usuario.nome} → ${status}`);
+            this._mostrarMensagem(`${cor} Usuário ${usuario.nome} ${novoStatus ? 'ativado' : 'desativado'}!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Erro ao alterar status:', error);
+            this._mostrarMensagem('Erro ao alterar status do usuário!', 'error');
+        }
     },
 
     _renderizarRelatorios() {
@@ -1616,7 +1783,7 @@ const AdminUsersManager = {
                 </div>
 
                 <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
-                    <h4 style="margin: 0 0 16px 0; color: #374151;">⚡ Novidades v8.5</h4>
+                    <h4 style="margin: 0 0 16px 0; color: #374151;">⚡ Funcionalidades v8.5 - CRUD Completo</h4>
                     <ul style="margin: 0; padding-left: 20px; color: #6b7280; font-size: 14px; line-height: 1.6;">
                         <li>✅ 5 Departamentos reais da BIAPO</li>
                         <li>✅ Cargos específicos por departamento</li>
@@ -1624,6 +1791,12 @@ const AdminUsersManager = {
                         <li>✅ Estatísticas por departamento</li>
                         <li>✅ Interface melhorada</li>
                         <li>✅ Validações aprimoradas</li>
+                        <li>🔥 <strong>NOVO:</strong> Formulário completo de criação</li>
+                        <li>🔥 <strong>NOVO:</strong> Formulário completo de edição</li>
+                        <li>🔥 <strong>NOVO:</strong> Validação de email em tempo real</li>
+                        <li>🔥 <strong>NOVO:</strong> Cargos dinâmicos por departamento</li>
+                        <li>🔥 <strong>NOVO:</strong> Confirmação de exclusão com modal</li>
+                        <li>🔥 <strong>NOVO:</strong> Proteção contra exclusão de únicos admins</li>
                     </ul>
                 </div>
             </div>
@@ -1679,9 +1852,25 @@ window.AdminUsersManager_Debug = {
     estatisticas: () => {
         const usuarios = AdminUsersManager._obterListaUsuarios();
         return AdminUsersManager._calcularEstatisticasDepartamentos(usuarios);
+    },
+    testarCRUD: () => {
+        console.log('🧪 Testando funcionalidades CRUD...');
+        console.log('📝 Novo usuário:', AdminUsersManager.abrirFormularioNovo());
+        setTimeout(() => AdminUsersManager._fecharFormulario(), 2000);
+    },
+    testarFormularios: () => {
+        const usuarios = AdminUsersManager._obterListaUsuarios();
+        if (usuarios.length > 0) {
+            console.log('✏️ Editando primeiro usuário...');
+            AdminUsersManager.editarUsuario(usuarios[0]._key);
+        } else {
+            console.log('❌ Nenhum usuário disponível para teste');
+        }
     }
 };
 
-console.log('👥 AdminUsersManager v8.5 - DEPARTAMENTOS REAIS BIAPO carregado!');
-console.log('🏢 5 Departamentos implementados com cargos específicos');
-console.log('📊 Filtros, estatísticas e interface melhorada disponível');
+console.log('👥 AdminUsersManager v8.5 - CRUD COMPLETO carregado!');
+console.log('🏢 5 Departamentos reais + Cargos específicos implementados');
+console.log('📝 Formulários de criação e edição completos');
+console.log('✅ CRUD funcionando: Criar, Editar, Ativar/Desativar, Excluir');
+console.log('🔧 Validações, filtros e interface melhorada disponível');
