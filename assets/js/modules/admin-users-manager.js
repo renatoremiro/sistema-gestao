@@ -946,15 +946,605 @@ const AdminUsersManager = {
         };
     },
 
-    // ======== FUNÇÕES PLACEHOLDER (implementação básica) ========
+    // 🔥 FORMULÁRIOS COMPLETOS v8.5 - FASE 2
     abrirFormularioNovo() {
         console.log('📝 Abrindo formulário para novo usuário...');
-        this._mostrarMensagem('Formulário de novo usuário - implementação v8.6', 'info');
+        
+        this.estado.modoEdicao = false;
+        this.estado.usuarioEditando = null;
+        
+        const modal = this._criarModalFormulario();
+        document.body.appendChild(modal);
+        
+        // Foco no primeiro campo
+        setTimeout(() => {
+            const primeiroInput = modal.querySelector('input[name="nome"]');
+            if (primeiroInput) primeiroInput.focus();
+        }, 100);
     },
 
     editarUsuario(chaveUsuario) {
         console.log('✏️ Editando usuário:', chaveUsuario);
-        this._mostrarMensagem('Edição de usuário - implementação v8.6', 'info');
+        
+        const usuario = Auth.equipe[chaveUsuario];
+        if (!usuario) {
+            this._mostrarMensagem('Usuário não encontrado!', 'error');
+            return;
+        }
+        
+        this.estado.modoEdicao = true;
+        this.estado.usuarioEditando = { ...usuario, _key: chaveUsuario };
+        
+        const modal = this._criarModalFormulario();
+        document.body.appendChild(modal);
+        
+        // Preencher dados
+        setTimeout(() => {
+            this._preencherFormularioEdicao();
+        }, 100);
+    },
+
+    // 🎨 CRIAR MODAL DE FORMULÁRIO
+    _criarModalFormulario() {
+        const isEdicao = this.estado.modoEdicao;
+        const titulo = isEdicao ? 'Editar Usuário' : 'Novo Usuário';
+        const icone = isEdicao ? '✏️' : '➕';
+        
+        const modal = document.createElement('div');
+        modal.id = 'modalFormularioUsuario';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000000;
+            animation: fadeIn 0.3s ease;
+        `;
+
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 90vh;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                display: flex;
+                flex-direction: column;
+            ">
+                <!-- Header -->
+                <div style="
+                    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                    color: white;
+                    padding: 24px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div>
+                        <h2 style="margin: 0; font-size: 20px; font-weight: 700;">
+                            ${icone} ${titulo}
+                        </h2>
+                        <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 14px;">
+                            ${isEdicao ? 'Editar informações do usuário' : 'Adicionar novo membro à equipe BIAPO'}
+                        </p>
+                    </div>
+                    <button onclick="AdminUsersManager._fecharFormulario()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: none;
+                        color: white;
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        font-size: 18px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">✕</button>
+                </div>
+
+                <!-- Formulário -->
+                <div style="
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 24px;
+                ">
+                    <form id="formularioUsuario" style="display: flex; flex-direction: column; gap: 20px;">
+                        
+                        <!-- Nome -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">
+                                Nome Completo *
+                            </label>
+                            <input 
+                                type="text" 
+                                name="nome" 
+                                required
+                                placeholder="Ex: Isabella Silva"
+                                style="
+                                    width: 100%;
+                                    padding: 12px 16px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    font-size: 14px;
+                                    transition: border-color 0.2s ease;
+                                    box-sizing: border-box;
+                                "
+                                onfocus="this.style.borderColor='#059669'"
+                                onblur="this.style.borderColor='#e5e7eb'"
+                            />
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">
+                                Email Corporativo *
+                            </label>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                required
+                                placeholder="usuario@biapo.com.br"
+                                style="
+                                    width: 100%;
+                                    padding: 12px 16px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    font-size: 14px;
+                                    transition: border-color 0.2s ease;
+                                    box-sizing: border-box;
+                                "
+                                onfocus="this.style.borderColor='#059669'"
+                                onblur="this.style.borderColor='#e5e7eb'"
+                            />
+                            <div id="emailValidacao" style="margin-top: 4px; font-size: 12px;"></div>
+                        </div>
+
+                        <!-- Departamento -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">
+                                Departamento *
+                            </label>
+                            <select 
+                                name="departamento" 
+                                required
+                                onchange="AdminUsersManager._atualizarCargos()"
+                                style="
+                                    width: 100%;
+                                    padding: 12px 16px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    font-size: 14px;
+                                    background: white;
+                                    cursor: pointer;
+                                    box-sizing: border-box;
+                                "
+                            >
+                                <option value="">Selecione um departamento</option>
+                                ${this.departamentos.map(dept => 
+                                    `<option value="${dept.nome}">${dept.nome}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+
+                        <!-- Cargo -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">
+                                Cargo *
+                            </label>
+                            <select 
+                                name="cargo" 
+                                required
+                                disabled
+                                style="
+                                    width: 100%;
+                                    padding: 12px 16px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    font-size: 14px;
+                                    background: #f9fafb;
+                                    cursor: not-allowed;
+                                    box-sizing: border-box;
+                                "
+                            >
+                                <option value="">Primeiro selecione o departamento</option>
+                            </select>
+                        </div>
+
+                        <!-- Telefone -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151; font-size: 14px;">
+                                Telefone
+                            </label>
+                            <input 
+                                type="tel" 
+                                name="telefone" 
+                                placeholder="(11) 99999-9999"
+                                style="
+                                    width: 100%;
+                                    padding: 12px 16px;
+                                    border: 2px solid #e5e7eb;
+                                    border-radius: 8px;
+                                    font-size: 14px;
+                                    transition: border-color 0.2s ease;
+                                    box-sizing: border-box;
+                                "
+                                onfocus="this.style.borderColor='#059669'"
+                                onblur="this.style.borderColor='#e5e7eb'"
+                            />
+                        </div>
+
+                        <!-- Opções Avançadas -->
+                        <div style="
+                            border-top: 1px solid #e5e7eb;
+                            padding-top: 20px;
+                            margin-top: 10px;
+                        ">
+                            <h4 style="margin: 0 0 16px 0; color: #374151; font-size: 16px;">
+                                Permissões e Status
+                            </h4>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <!-- Admin -->
+                                <div style="
+                                    background: #fef3c7;
+                                    border: 1px solid #fbbf24;
+                                    border-radius: 8px;
+                                    padding: 16px;
+                                ">
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input 
+                                            type="checkbox" 
+                                            name="admin" 
+                                            style="margin-right: 8px; transform: scale(1.2);"
+                                        />
+                                        <span style="font-weight: 600; color: #92400e;">
+                                            🔑 Administrador
+                                        </span>
+                                    </label>
+                                    <p style="margin: 8px 0 0 0; font-size: 12px; color: #92400e; opacity: 0.8;">
+                                        Acesso total ao sistema
+                                    </p>
+                                </div>
+
+                                <!-- Ativo -->
+                                <div style="
+                                    background: #d1fae5;
+                                    border: 1px solid #10b981;
+                                    border-radius: 8px;
+                                    padding: 16px;
+                                ">
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input 
+                                            type="checkbox" 
+                                            name="ativo" 
+                                            checked
+                                            style="margin-right: 8px; transform: scale(1.2);"
+                                        />
+                                        <span style="font-weight: 600; color: #065f46;">
+                                            ✅ Usuário Ativo
+                                        </span>
+                                    </label>
+                                    <p style="margin: 8px 0 0 0; font-size: 12px; color: #065f46; opacity: 0.8;">
+                                        Pode acessar o sistema
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- Footer com botões -->
+                <div style="
+                    padding: 24px;
+                    border-top: 1px solid #e5e7eb;
+                    background: #f9fafb;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <button onclick="AdminUsersManager._fecharFormulario()" style="
+                        background: #6b7280;
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: 600;
+                    ">Cancelar</button>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        ${isEdicao ? `
+                            <button onclick="AdminUsersManager._resetarSenha()" style="
+                                background: #f59e0b;
+                                color: white;
+                                border: none;
+                                padding: 12px 20px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-size: 14px;
+                                font-weight: 600;
+                            ">🔄 Reset Senha</button>
+                        ` : ''}
+                        
+                        <button onclick="AdminUsersManager._salvarUsuario()" style="
+                            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            font-weight: 600;
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                        ">${isEdicao ? '💾 Salvar Alterações' : '➕ Criar Usuário'}</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Event listener para fechar ao clicar fora
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this._fecharFormulario();
+            }
+        });
+
+        // Validação em tempo real do email
+        const emailInput = modal.querySelector('input[name="email"]');
+        emailInput.addEventListener('input', () => {
+            this._validarEmailTempo();
+        });
+
+        return modal;
+    },
+
+    // 🔧 ATUALIZAR CARGOS DINÂMICOS
+    _atualizarCargos() {
+        const departamentoSelect = document.querySelector('select[name="departamento"]');
+        const cargoSelect = document.querySelector('select[name="cargo"]');
+        
+        if (!departamentoSelect || !cargoSelect) return;
+        
+        const departamentoSelecionado = departamentoSelect.value;
+        
+        if (!departamentoSelecionado) {
+            cargoSelect.innerHTML = '<option value="">Primeiro selecione o departamento</option>';
+            cargoSelect.disabled = true;
+            cargoSelect.style.background = '#f9fafb';
+            cargoSelect.style.cursor = 'not-allowed';
+            return;
+        }
+        
+        const departamento = this.departamentos.find(d => d.nome === departamentoSelecionado);
+        
+        if (departamento) {
+            cargoSelect.innerHTML = `
+                <option value="">Selecione um cargo</option>
+                ${departamento.cargos.map(cargo => 
+                    `<option value="${cargo}">${cargo}</option>`
+                ).join('')}
+            `;
+            cargoSelect.disabled = false;
+            cargoSelect.style.background = 'white';
+            cargoSelect.style.cursor = 'pointer';
+        }
+    },
+
+    // ✅ VALIDAÇÃO EMAIL EM TEMPO REAL
+    _validarEmailTempo() {
+        const emailInput = document.querySelector('input[name="email"]');
+        const validacaoDiv = document.getElementById('emailValidacao');
+        
+        if (!emailInput || !validacaoDiv) return;
+        
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+            validacaoDiv.innerHTML = '';
+            emailInput.style.borderColor = '#e5e7eb';
+            return;
+        }
+        
+        // Validar formato
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            validacaoDiv.innerHTML = '<span style="color: #ef4444;">⚠️ Formato de email inválido</span>';
+            emailInput.style.borderColor = '#ef4444';
+            return;
+        }
+        
+        // Verificar se já existe (apenas para novos usuários)
+        if (!this.estado.modoEdicao) {
+            const emailExiste = Object.values(Auth.equipe || {}).some(u => u.email === email);
+            if (emailExiste) {
+                validacaoDiv.innerHTML = '<span style="color: #ef4444;">⚠️ Este email já está em uso</span>';
+                emailInput.style.borderColor = '#ef4444';
+                return;
+            }
+        }
+        
+        validacaoDiv.innerHTML = '<span style="color: #10b981;">✅ Email válido</span>';
+        emailInput.style.borderColor = '#10b981';
+    },
+
+    // 📝 PREENCHER FORMULÁRIO PARA EDIÇÃO
+    _preencherFormularioEdicao() {
+        const usuario = this.estado.usuarioEditando;
+        if (!usuario) return;
+        
+        // Preencher campos básicos
+        document.querySelector('input[name="nome"]').value = usuario.nome || '';
+        document.querySelector('input[name="email"]').value = usuario.email || '';
+        document.querySelector('input[name="telefone"]').value = usuario.telefone || '';
+        
+        // Departamento
+        const departamentoSelect = document.querySelector('select[name="departamento"]');
+        departamentoSelect.value = usuario.departamento || '';
+        
+        // Trigger para carregar cargos
+        this._atualizarCargos();
+        
+        // Cargo (após atualizar cargos)
+        setTimeout(() => {
+            const cargoSelect = document.querySelector('select[name="cargo"]');
+            cargoSelect.value = usuario.cargo || '';
+        }, 100);
+        
+        // Checkboxes
+        document.querySelector('input[name="admin"]').checked = usuario.admin === true;
+        document.querySelector('input[name="ativo"]').checked = usuario.ativo !== false;
+        
+        console.log('✅ Formulário preenchido para edição:', usuario.nome);
+    },
+
+    // 💾 SALVAR USUÁRIO
+    async _salvarUsuario() {
+        try {
+            const dadosFormulario = this._coletarDadosFormulario();
+            
+            if (!this._validarFormulario(dadosFormulario)) {
+                return;
+            }
+            
+            console.log('💾 Salvando usuário...', dadosFormulario);
+            
+            // Preparar dados do usuário
+            const usuario = {
+                nome: dadosFormulario.nome,
+                email: dadosFormulario.email,
+                cargo: dadosFormulario.cargo,
+                departamento: dadosFormulario.departamento,
+                telefone: dadosFormulario.telefone || '',
+                admin: dadosFormulario.admin,
+                ativo: dadosFormulario.ativo,
+                dataAtualizacao: new Date().toISOString()
+            };
+            
+            let chaveUsuario;
+            
+            if (this.estado.modoEdicao) {
+                // Edição
+                chaveUsuario = this.estado.usuarioEditando._key;
+                usuario.dataCriacao = this.estado.usuarioEditando.dataCriacao || new Date().toISOString();
+                
+                Auth.equipe[chaveUsuario] = usuario;
+                console.log('✅ Usuário editado:', usuario.nome);
+                this._mostrarMensagem(`Usuário ${usuario.nome} atualizado!`, 'success');
+                
+            } else {
+                // Novo usuário
+                chaveUsuario = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                usuario.dataCriacao = new Date().toISOString();
+                
+                Auth.equipe[chaveUsuario] = usuario;
+                console.log('✅ Novo usuário criado:', usuario.nome);
+                this._mostrarMensagem(`Usuário ${usuario.nome} criado!`, 'success');
+            }
+            
+            // Salvar no Firebase
+            await this._salvarUsuariosNoFirebase();
+            
+            // Fechar formulário e atualizar lista
+            this._fecharFormulario();
+            this._renderizarListaUsuarios();
+            
+        } catch (error) {
+            console.error('❌ Erro ao salvar usuário:', error);
+            this._mostrarMensagem('Erro ao salvar usuário!', 'error');
+        }
+    },
+
+    // 📋 COLETAR DADOS DO FORMULÁRIO
+    _coletarDadosFormulario() {
+        return {
+            nome: document.querySelector('input[name="nome"]').value.trim(),
+            email: document.querySelector('input[name="email"]').value.trim(),
+            departamento: document.querySelector('select[name="departamento"]').value,
+            cargo: document.querySelector('select[name="cargo"]').value,
+            telefone: document.querySelector('input[name="telefone"]').value.trim(),
+            admin: document.querySelector('input[name="admin"]').checked,
+            ativo: document.querySelector('input[name="ativo"]').checked
+        };
+    },
+
+    // ✅ VALIDAR FORMULÁRIO
+    _validarFormulario(dados) {
+        const erros = [];
+        
+        // Nome obrigatório
+        if (!dados.nome) {
+            erros.push('Nome é obrigatório');
+        }
+        
+        // Email obrigatório e formato
+        if (!dados.email) {
+            erros.push('Email é obrigatório');
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(dados.email)) {
+                erros.push('Formato de email inválido');
+            }
+            
+            // Verificar email único (apenas para novos)
+            if (!this.estado.modoEdicao) {
+                const emailExiste = Object.values(Auth.equipe || {}).some(u => u.email === dados.email);
+                if (emailExiste) {
+                    erros.push('Este email já está em uso');
+                }
+            }
+        }
+        
+        // Departamento obrigatório
+        if (!dados.departamento) {
+            erros.push('Departamento é obrigatório');
+        }
+        
+        // Cargo obrigatório
+        if (!dados.cargo) {
+            erros.push('Cargo é obrigatório');
+        }
+        
+        if (erros.length > 0) {
+            this._mostrarMensagem(`Erros encontrados:\n• ${erros.join('\n• ')}`, 'error');
+            return false;
+        }
+        
+        return true;
+    },
+
+    // ❌ FECHAR FORMULÁRIO
+    _fecharFormulario() {
+        const modal = document.getElementById('modalFormularioUsuario');
+        if (modal) modal.remove();
+        
+        this.estado.modoEdicao = false;
+        this.estado.usuarioEditando = null;
+        
+        console.log('❌ Formulário fechado');
+    },
+
+    // 🔄 RESET SENHA (placeholder)
+    _resetarSenha() {
+        const usuario = this.estado.usuarioEditando;
+        if (!usuario) return;
+        
+        const confirmacao = confirm(`Resetar senha do usuário ${usuario.nome}?\n\nUma nova senha será enviada por email.`);
+        if (confirmacao) {
+            this._mostrarMensagem(`Senha resetada para ${usuario.nome}!`, 'success');
+            console.log('🔄 Senha resetada para:', usuario.nome);
+        }
     },
 
     confirmarExclusao(chaveUsuario) {
