@@ -1,82 +1,27 @@
 /**
- * 👥 MÓDULO ADMIN - GESTÃO DE USUÁRIOS v8.3
+ * 🏢 EXPANSÃO ADMIN - GESTÃO DE ÁREAS v8.3
  * 
- * 🎯 FUNCIONALIDADES:
- * - ✅ CRUD completo de usuários (Create, Read, Update, Delete)
- * - ✅ Interface moderna e intuitiva
- * - ✅ Validações e segurança
+ * 🎯 ADICIONADO AO AdminUsersManager:
+ * - ✅ CRUD completo de áreas (Create, Read, Update, Delete)  
+ * - ✅ Sistema de abas (Usuários | Áreas)
+ * - ✅ Seleção de coordenador da lista de usuários
+ * - ✅ Seleção de equipe com múltipla escolha
+ * - ✅ Picker de cores para as áreas
  * - ✅ Persistência no Firebase
- * - ✅ Integração perfeita com Auth.js existente
  */
 
-const AdminUsersManager = {
-    // ✅ CONFIGURAÇÃO
-    config: {
-        versao: '8.3.0',
-        permissaoAdmin: true,
-        persistenciaFirebase: true,
-        validacaoEmail: true,
-        backupLocal: true
+// 🔥 EXPANDIR AdminUsersManager EXISTENTE
+Object.assign(AdminUsersManager, {
+    
+    // ✅ ESTADO EXPANDIDO PARA ÁREAS
+    estadoAreas: {
+        abaAtiva: 'usuarios', // 'usuarios' | 'areas'
+        modoEdicaoArea: false,
+        areaEditando: null,
+        areasCarregadas: false
     },
 
-    // ✅ ESTADO
-    estado: {
-        modalAberto: false,
-        modoEdicao: false,
-        usuarioEditando: null,
-        usuariosCarregados: false
-    },
-
-    // 🚀 INICIALIZAR MÓDULO
-    inicializar() {
-        console.log('👥 Inicializando AdminUsersManager v8.3...');
-        
-        // Verificar permissões
-        if (!this._verificarPermissoesAdmin()) {
-            console.warn('⚠️ Usuário sem permissões de administrador');
-            return false;
-        }
-
-        // Sobrescrever função existente no Auth.js
-        if (typeof Auth !== 'undefined') {
-            Auth.mostrarGerenciarUsuarios = () => this.abrirInterfaceGestao();
-        }
-
-        console.log('✅ AdminUsersManager v8.3 inicializado!');
-        return true;
-    },
-
-    // 🔐 VERIFICAR PERMISSÕES ADMIN
-    _verificarPermissoesAdmin() {
-        if (typeof Auth === 'undefined' || !Auth.ehAdmin || !Auth.ehAdmin()) {
-            if (typeof Notifications !== 'undefined') {
-                Notifications.error('❌ Acesso restrito a administradores');
-            } else {
-                alert('❌ Acesso restrito a administradores');
-            }
-            return false;
-        }
-        return true;
-    },
-
-    // 🎨 ABRIR INTERFACE DE GESTÃO PRINCIPAL
-    abrirInterfaceGestao() {
-        if (!this._verificarPermissoesAdmin()) return;
-
-        this.estado.modalAberto = true;
-        this.estado.modoEdicao = false;
-        this.estado.usuarioEditando = null;
-
-        const modal = this._criarModalGestao();
-        document.body.appendChild(modal);
-
-        // Carregar lista de usuários
-        this._renderizarListaUsuarios();
-
-        console.log('👥 Interface de gestão de usuários aberta');
-    },
-
-    // 🎨 CRIAR MODAL PRINCIPAL
+    // 🎨 SOBRESCREVER CRIAÇÃO DO MODAL PARA INCLUIR ABAS
     _criarModalGestao() {
         const modal = document.createElement('div');
         modal.id = 'modalGestaoUsuarios';
@@ -99,7 +44,7 @@ const AdminUsersManager = {
                 background: white;
                 border-radius: 16px;
                 width: 95%;
-                max-width: 1000px;
+                max-width: 1200px;
                 max-height: 90vh;
                 overflow: hidden;
                 box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -117,10 +62,10 @@ const AdminUsersManager = {
                 ">
                     <div>
                         <h2 style="margin: 0; font-size: 24px; font-weight: 700;">
-                            👥 Gestão de Usuários BIAPO
+                            👑 Administração BIAPO
                         </h2>
                         <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 14px;">
-                            Administração da Equipe - v8.3
+                            Gestão Completa - Usuários & Áreas - v8.3
                         </p>
                     </div>
                     <button onclick="AdminUsersManager.fecharModal()" style="
@@ -138,6 +83,51 @@ const AdminUsersManager = {
                     ">✕</button>
                 </div>
 
+                <!-- Abas -->
+                <div style="
+                    display: flex;
+                    background: #f9fafb;
+                    border-bottom: 2px solid #e5e7eb;
+                ">
+                    <button 
+                        id="abaUsuarios"
+                        onclick="AdminUsersManager.trocarAba('usuarios')" 
+                        style="
+                            flex: 1;
+                            padding: 16px 24px;
+                            border: none;
+                            background: ${this.estadoAreas.abaAtiva === 'usuarios' ? 'white' : 'transparent'};
+                            color: ${this.estadoAreas.abaAtiva === 'usuarios' ? '#C53030' : '#6b7280'};
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            border-bottom: 3px solid ${this.estadoAreas.abaAtiva === 'usuarios' ? '#C53030' : 'transparent'};
+                            transition: all 0.3s ease;
+                        "
+                    >
+                        👥 Usuários (${this._contarUsuarios()})
+                    </button>
+                    
+                    <button 
+                        id="abaAreas"
+                        onclick="AdminUsersManager.trocarAba('areas')" 
+                        style="
+                            flex: 1;
+                            padding: 16px 24px;
+                            border: none;
+                            background: ${this.estadoAreas.abaAtiva === 'areas' ? 'white' : 'transparent'};
+                            color: ${this.estadoAreas.abaAtiva === 'areas' ? '#C53030' : '#6b7280'};
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            border-bottom: 3px solid ${this.estadoAreas.abaAtiva === 'areas' ? '#C53030' : 'transparent'};
+                            transition: all 0.3s ease;
+                        "
+                    >
+                        🏢 Áreas (${this._contarAreas()})
+                    </button>
+                </div>
+
                 <!-- Toolbar -->
                 <div style="
                     padding: 20px 24px;
@@ -145,10 +135,10 @@ const AdminUsersManager = {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    background: #f9fafb;
+                    background: white;
                 ">
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <button onclick="AdminUsersManager._renderizarListaUsuarios()" style="
+                        <button onclick="AdminUsersManager._atualizarAbaAtiva()" style="
                             background: #374151;
                             color: white;
                             border: none;
@@ -158,12 +148,12 @@ const AdminUsersManager = {
                             font-size: 14px;
                         ">🔄 Atualizar</button>
                         
-                        <span style="color: #6b7280; font-size: 14px;" id="contadorUsuarios">
-                            Carregando usuários...
+                        <span style="color: #6b7280; font-size: 14px;" id="contadorItens">
+                            Carregando...
                         </span>
                     </div>
                     
-                    <button onclick="AdminUsersManager.abrirFormularioNovo()" style="
+                    <button id="botaoNovo" onclick="AdminUsersManager._abrirFormularioNovo()" style="
                         background: linear-gradient(135deg, #059669 0%, #047857 100%);
                         color: white;
                         border: none;
@@ -176,7 +166,7 @@ const AdminUsersManager = {
                         align-items: center;
                         gap: 6px;
                     ">
-                        ➕ Novo Usuário
+                        ➕ Novo
                     </button>
                 </div>
 
@@ -189,7 +179,7 @@ const AdminUsersManager = {
                     <div id="conteudoGestaoUsuarios">
                         <div style="padding: 40px; text-align: center; color: #6b7280;">
                             <div style="font-size: 40px; margin-bottom: 16px;">⏳</div>
-                            <div>Carregando usuários...</div>
+                            <div>Carregando...</div>
                         </div>
                     </div>
                 </div>
@@ -206,27 +196,94 @@ const AdminUsersManager = {
         return modal;
     },
 
-    // 📋 RENDERIZAR LISTA DE USUÁRIOS
-    _renderizarListaUsuarios() {
+    // 🔄 TROCAR ABA
+    trocarAba(aba) {
+        this.estadoAreas.abaAtiva = aba;
+        
+        // Atualizar visual das abas
+        this._atualizarVisualAbas();
+        
+        // Carregar conteúdo da aba
+        this._atualizarAbaAtiva();
+        
+        console.log(`🔄 Aba trocada para: ${aba}`);
+    },
+
+    // 🎨 ATUALIZAR VISUAL DAS ABAS
+    _atualizarVisualAbas() {
+        const abaUsuarios = document.getElementById('abaUsuarios');
+        const abaAreas = document.getElementById('abaAreas');
+        const botaoNovo = document.getElementById('botaoNovo');
+
+        if (abaUsuarios && abaAreas && botaoNovo) {
+            const isUsuarios = this.estadoAreas.abaAtiva === 'usuarios';
+            
+            // Aba Usuários
+            abaUsuarios.style.background = isUsuarios ? 'white' : 'transparent';
+            abaUsuarios.style.color = isUsuarios ? '#C53030' : '#6b7280';
+            abaUsuarios.style.borderBottom = `3px solid ${isUsuarios ? '#C53030' : 'transparent'}`;
+            
+            // Aba Áreas
+            abaAreas.style.background = !isUsuarios ? 'white' : 'transparent';
+            abaAreas.style.color = !isUsuarios ? '#C53030' : '#6b7280';
+            abaAreas.style.borderBottom = `3px solid ${!isUsuarios ? '#C53030' : 'transparent'}`;
+            
+            // Botão Novo
+            botaoNovo.innerHTML = isUsuarios ? 
+                '➕ Novo Usuário' : 
+                '➕ Nova Área';
+        }
+    },
+
+    // 🔄 ATUALIZAR ABA ATIVA
+    _atualizarAbaAtiva() {
+        if (this.estadoAreas.abaAtiva === 'usuarios') {
+            this._renderizarListaUsuarios();
+        } else {
+            this._renderizarListaAreas();
+        }
+    },
+
+    // 📝 ABRIR FORMULÁRIO NOVO (GENÉRICO)
+    _abrirFormularioNovo() {
+        if (this.estadoAreas.abaAtiva === 'usuarios') {
+            this.abrirFormularioNovo();
+        } else {
+            this.abrirFormularioNovaArea();
+        }
+    },
+
+    // 📊 CONTAR USUÁRIOS
+    _contarUsuarios() {
+        return typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe).length : 0;
+    },
+
+    // 📊 CONTAR ÁREAS
+    _contarAreas() {
+        return this._obterAreas().length;
+    },
+
+    // ==================== GESTÃO DE ÁREAS ====================
+
+    // 📋 RENDERIZAR LISTA DE ÁREAS
+    _renderizarListaAreas() {
         const container = document.getElementById('conteudoGestaoUsuarios');
         if (!container) return;
 
-        // Obter usuários do Auth.js
-        const usuarios = this._obterListaUsuarios();
+        const areas = this._obterAreas();
         
         // Atualizar contador
-        const contador = document.getElementById('contadorUsuarios');
+        const contador = document.getElementById('contadorItens');
         if (contador) {
-            contador.textContent = `${usuarios.length} usuários cadastrados`;
+            contador.textContent = `${areas.length} áreas cadastradas`;
         }
 
-        // Gerar HTML da lista
         container.innerHTML = `
             <div style="padding: 0;">
                 <!-- Header da tabela -->
                 <div style="
                     display: grid;
-                    grid-template-columns: 1fr 2fr 1.5fr 1.5fr 80px 100px;
+                    grid-template-columns: 2fr 1.5fr 1.5fr 100px 120px;
                     gap: 16px;
                     padding: 16px 24px;
                     background: #f9fafb;
@@ -236,167 +293,203 @@ const AdminUsersManager = {
                     color: #6b7280;
                     text-transform: uppercase;
                 ">
-                    <div>Status</div>
-                    <div>Nome / Email</div>
-                    <div>Cargo</div>
-                    <div>Departamento</div>
-                    <div>Admin</div>
+                    <div>Área / Coordenador</div>
+                    <div>Equipe</div>
+                    <div>Atividades</div>
+                    <div>Cor</div>
                     <div>Ações</div>
                 </div>
 
-                <!-- Lista de usuários -->
+                <!-- Lista de áreas -->
                 <div style="max-height: 400px; overflow-y: auto;">
-                    ${usuarios.map(usuario => this._renderizarItemUsuario(usuario)).join('')}
+                    ${areas.map(area => this._renderizarItemArea(area)).join('')}
                 </div>
+                
+                ${areas.length === 0 ? `
+                    <div style="padding: 60px 24px; text-align: center; color: #6b7280;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">🏢</div>
+                        <div style="font-size: 18px; margin-bottom: 8px;">Nenhuma área cadastrada</div>
+                        <div style="font-size: 14px;">Clique em "Nova Área" para começar</div>
+                    </div>
+                ` : ''}
             </div>
         `;
 
-        console.log(`📋 Lista renderizada: ${usuarios.length} usuários`);
+        console.log(`📋 Lista de áreas renderizada: ${areas.length} áreas`);
     },
 
-    // 👤 RENDERIZAR ITEM DE USUÁRIO
-    _renderizarItemUsuario(usuario) {
-        const isAtivo = usuario.ativo;
-        const isAdmin = usuario.admin;
-        const key = this._obterChaveUsuario(usuario);
+    // 🏢 RENDERIZAR ITEM DE ÁREA
+    _renderizarItemArea(area) {
+        const chave = area._key;
+        const totalEquipe = area.equipe ? area.equipe.length : 0;
+        const totalAtividades = area.atividades ? area.atividades.length : 0;
 
         return `
             <div style="
                 display: grid;
-                grid-template-columns: 1fr 2fr 1.5fr 1.5fr 80px 100px;
+                grid-template-columns: 2fr 1.5fr 1.5fr 100px 120px;
                 gap: 16px;
-                padding: 16px 24px;
+                padding: 20px 24px;
                 border-bottom: 1px solid #f3f4f6;
                 align-items: center;
                 transition: background-color 0.2s ease;
             " onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
                 
-                <!-- Status -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="
-                        width: 12px;
-                        height: 12px;
-                        border-radius: 50%;
-                        background: ${isAtivo ? '#10b981' : '#ef4444'};
-                    "></div>
-                    <span style="
-                        font-size: 12px;
-                        color: ${isAtivo ? '#065f46' : '#7f1d1d'};
-                        font-weight: 500;
-                    ">${isAtivo ? 'Ativo' : 'Inativo'}</span>
+                <!-- Área / Coordenador -->
+                <div>
+                    <div style="font-weight: 700; color: #1f2937; margin-bottom: 4px; font-size: 16px;">
+                        ${area.nome}
+                    </div>
+                    <div style="font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 6px;">
+                        <span>👤</span>
+                        <span>${area.coordenador}</span>
+                    </div>
                 </div>
 
-                <!-- Nome / Email -->
+                <!-- Equipe -->
                 <div>
-                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 2px;">
-                        ${usuario.nome}
+                    <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">
+                        👥 ${totalEquipe} membro${totalEquipe !== 1 ? 's' : ''}
                     </div>
                     <div style="font-size: 12px; color: #6b7280;">
-                        ${usuario.email}
+                        ${area.equipe && area.equipe.length > 0 ? 
+                            area.equipe.slice(0, 2).map(nome => nome.split(' ')[0]).join(', ') + 
+                            (area.equipe.length > 2 ? ` +${area.equipe.length - 2}` : '') :
+                            'Sem membros'
+                        }
                     </div>
                 </div>
 
-                <!-- Cargo -->
-                <div style="color: #374151; font-size: 14px;">
-                    ${usuario.cargo}
+                <!-- Atividades -->
+                <div>
+                    <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">
+                        📋 ${totalAtividades} atividade${totalAtividades !== 1 ? 's' : ''}
+                    </div>
+                    <div style="font-size: 12px; color: #6b7280;">
+                        ${this._obterStatusAtividades(area.atividades)}
+                    </div>
                 </div>
 
-                <!-- Departamento -->
-                <div style="color: #6b7280; font-size: 13px;">
-                    ${usuario.departamento}
-                </div>
-
-                <!-- Admin -->
+                <!-- Cor -->
                 <div style="text-align: center;">
-                    ${isAdmin ? 
-                        '<span style="background: #fbbf24; color: #92400e; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">ADMIN</span>' : 
-                        '<span style="color: #9ca3af; font-size: 12px;">—</span>'
-                    }
+                    <div style="
+                        width: 40px;
+                        height: 40px;
+                        background: ${area.cor || '#6b7280'};
+                        border-radius: 8px;
+                        margin: 0 auto;
+                        border: 2px solid rgba(255,255,255,0.2);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    "></div>
+                    <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">
+                        ${area.cor || '#6b7280'}
+                    </div>
                 </div>
 
                 <!-- Ações -->
                 <div style="display: flex; gap: 6px;">
-                    <button onclick="AdminUsersManager.editarUsuario('${key}')" style="
+                    <button onclick="AdminUsersManager.editarArea('${chave}')" style="
                         background: #3b82f6;
                         color: white;
                         border: none;
-                        width: 28px;
-                        height: 28px;
+                        width: 32px;
+                        height: 32px;
                         border-radius: 6px;
                         cursor: pointer;
-                        font-size: 12px;
+                        font-size: 14px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                    " title="Editar usuário">✏️</button>
+                    " title="Editar área">✏️</button>
                     
-                    <button onclick="AdminUsersManager.confirmarExclusao('${key}')" style="
+                    <button onclick="AdminUsersManager.confirmarExclusaoArea('${chave}')" style="
                         background: #ef4444;
                         color: white;
                         border: none;
-                        width: 28px;
-                        height: 28px;
+                        width: 32px;
+                        height: 32px;
                         border-radius: 6px;
                         cursor: pointer;
-                        font-size: 12px;
+                        font-size: 14px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                    " title="Excluir usuário">🗑️</button>
+                    " title="Excluir área">🗑️</button>
                 </div>
             </div>
         `;
     },
 
-    // 📋 OBTER LISTA DE USUÁRIOS DO AUTH.JS
-    _obterListaUsuarios() {
-        if (typeof Auth === 'undefined' || !Auth.equipe) {
-            console.error('❌ Auth.equipe não disponível');
-            return [];
+    // 📊 OBTER STATUS DAS ATIVIDADES
+    _obterStatusAtividades(atividades) {
+        if (!atividades || atividades.length === 0) {
+            return 'Nenhuma atividade';
         }
 
-        return Object.keys(Auth.equipe).map(key => ({
-            ...Auth.equipe[key],
-            _key: key
-        })).sort((a, b) => {
-            // Ordenar: admin primeiro, depois por nome
-            if (a.admin && !b.admin) return -1;
-            if (!a.admin && b.admin) return 1;
-            return a.nome.localeCompare(b.nome);
-        });
+        const verde = atividades.filter(a => a.status === 'verde' || a.status === 'concluido').length;
+        const amarelo = atividades.filter(a => a.status === 'amarelo' || a.status === 'em andamento').length;
+        const vermelho = atividades.filter(a => a.status === 'vermelho' || a.status === 'atraso').length;
+
+        const partes = [];
+        if (verde > 0) partes.push(`🟢 ${verde}`);
+        if (amarelo > 0) partes.push(`🟡 ${amarelo}`);
+        if (vermelho > 0) partes.push(`🔴 ${vermelho}`);
+
+        return partes.join(' ');
     },
 
-    // 🔑 OBTER CHAVE DO USUÁRIO
-    _obterChaveUsuario(usuario) {
-        return usuario._key || usuario.email.split('@')[0].toLowerCase();
+    // 📋 OBTER ÁREAS
+    _obterAreas() {
+        // Tentar obter de App.dados primeiro
+        if (typeof App !== 'undefined' && App.dados && App.dados.areas) {
+            return Object.keys(App.dados.areas).map(key => ({
+                ...App.dados.areas[key],
+                _key: key
+            }));
+        }
+
+        // Fallback para DataStructure
+        if (typeof DataStructure !== 'undefined' && DataStructure.inicializarDados) {
+            const dados = DataStructure.inicializarDados();
+            return Object.keys(dados.areas).map(key => ({
+                ...dados.areas[key],
+                _key: key
+            }));
+        }
+
+        return [];
     },
 
-    // ➕ ABRIR FORMULÁRIO NOVO USUÁRIO
-    abrirFormularioNovo() {
-        this.estado.modoEdicao = false;
-        this.estado.usuarioEditando = null;
-        this._abrirFormularioUsuario();
+    // ➕ NOVA ÁREA
+    abrirFormularioNovaArea() {
+        this.estadoAreas.modoEdicaoArea = false;
+        this.estadoAreas.areaEditando = null;
+        this._abrirFormularioArea();
     },
 
-    // ✏️ EDITAR USUÁRIO
-    editarUsuario(chaveUsuario) {
-        if (typeof Auth === 'undefined' || !Auth.equipe[chaveUsuario]) {
-            console.error('❌ Usuário não encontrado:', chaveUsuario);
+    // ✏️ EDITAR ÁREA
+    editarArea(chaveArea) {
+        const areas = this._obterAreas();
+        const area = areas.find(a => a._key === chaveArea);
+        
+        if (!area) {
+            console.error('❌ Área não encontrada:', chaveArea);
             return;
         }
 
-        this.estado.modoEdicao = true;
-        this.estado.usuarioEditando = chaveUsuario;
-        this._abrirFormularioUsuario(Auth.equipe[chaveUsuario]);
+        this.estadoAreas.modoEdicaoArea = true;
+        this.estadoAreas.areaEditando = chaveArea;
+        this._abrirFormularioArea(area);
     },
 
-    // 🎨 ABRIR FORMULÁRIO DE USUÁRIO
-    _abrirFormularioUsuario(dadosUsuario = null) {
+    // 🎨 ABRIR FORMULÁRIO DE ÁREA
+    _abrirFormularioArea(dadosArea = null) {
         const container = document.getElementById('conteudoGestaoUsuarios');
         if (!container) return;
 
-        const isEdicao = this.estado.modoEdicao;
-        const titulo = isEdicao ? '✏️ Editar Usuário' : '➕ Novo Usuário';
+        const isEdicao = this.estadoAreas.modoEdicaoArea;
+        const titulo = isEdicao ? '✏️ Editar Área' : '➕ Nova Área';
+        const usuarios = this._obterListaUsuarios();
 
         container.innerHTML = `
             <div style="padding: 24px;">
@@ -410,7 +503,7 @@ const AdminUsersManager = {
                     border-bottom: 2px solid #e5e7eb;
                 ">
                     <h3 style="margin: 0; font-size: 18px; color: #1f2937;">${titulo}</h3>
-                    <button onclick="AdminUsersManager._renderizarListaUsuarios()" style="
+                    <button onclick="AdminUsersManager._renderizarListaAreas()" style="
                         background: #6b7280;
                         color: white;
                         border: none;
@@ -422,9 +515,9 @@ const AdminUsersManager = {
                 </div>
 
                 <!-- Formulário -->
-                <form id="formularioUsuario" style="max-width: 600px;">
+                <form id="formularioArea" style="max-width: 800px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                        <!-- Nome -->
+                        <!-- Nome da Área -->
                         <div>
                             <label style="
                                 display: block;
@@ -432,12 +525,12 @@ const AdminUsersManager = {
                                 font-weight: 600;
                                 color: #374151;
                                 font-size: 14px;
-                            ">👤 Nome Completo *</label>
+                            ">🏢 Nome da Área *</label>
                             <input 
                                 type="text" 
-                                id="inputNome" 
-                                value="${dadosUsuario?.nome || ''}"
-                                placeholder="Ex: João Silva"
+                                id="inputNomeArea" 
+                                value="${dadosArea?.nome || ''}"
+                                placeholder="Ex: Desenvolvimento de Software"
                                 required
                                 style="
                                     width: 100%;
@@ -450,7 +543,7 @@ const AdminUsersManager = {
                             >
                         </div>
 
-                        <!-- Email -->
+                        <!-- Coordenador -->
                         <div>
                             <label style="
                                 display: block;
@@ -458,64 +551,9 @@ const AdminUsersManager = {
                                 font-weight: 600;
                                 color: #374151;
                                 font-size: 14px;
-                            ">📧 Email *</label>
-                            <input 
-                                type="email" 
-                                id="inputEmail" 
-                                value="${dadosUsuario?.email || ''}"
-                                placeholder="usuario@biapo.com.br"
-                                required
-                                ${isEdicao ? 'readonly style="background: #f9fafb;"' : ''}
-                                style="
-                                    width: 100%;
-                                    padding: 12px;
-                                    border: 2px solid #e5e7eb;
-                                    border-radius: 8px;
-                                    font-size: 14px;
-                                    box-sizing: border-box;
-                                "
-                            >
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                        <!-- Cargo -->
-                        <div>
-                            <label style="
-                                display: block;
-                                margin-bottom: 6px;
-                                font-weight: 600;
-                                color: #374151;
-                                font-size: 14px;
-                            ">💼 Cargo *</label>
-                            <input 
-                                type="text" 
-                                id="inputCargo" 
-                                value="${dadosUsuario?.cargo || ''}"
-                                placeholder="Ex: Analista"
-                                required
-                                style="
-                                    width: 100%;
-                                    padding: 12px;
-                                    border: 2px solid #e5e7eb;
-                                    border-radius: 8px;
-                                    font-size: 14px;
-                                    box-sizing: border-box;
-                                "
-                            >
-                        </div>
-
-                        <!-- Departamento -->
-                        <div>
-                            <label style="
-                                display: block;
-                                margin-bottom: 6px;
-                                font-weight: 600;
-                                color: #374151;
-                                font-size: 14px;
-                            ">🏢 Departamento *</label>
+                            ">👤 Coordenador *</label>
                             <select 
-                                id="inputDepartamento" 
+                                id="inputCoordenador" 
                                 required
                                 style="
                                     width: 100%;
@@ -526,91 +564,118 @@ const AdminUsersManager = {
                                     box-sizing: border-box;
                                 "
                             >
-                                <option value="">Selecione...</option>
-                                <option value="Gestão Geral" ${dadosUsuario?.departamento === 'Gestão Geral' ? 'selected' : ''}>Gestão Geral</option>
-                                <option value="Obra e Construção" ${dadosUsuario?.departamento === 'Obra e Construção' ? 'selected' : ''}>Obra e Construção</option>
-                                <option value="Museu Nacional" ${dadosUsuario?.departamento === 'Museu Nacional' ? 'selected' : ''}>Museu Nacional</option>
+                                <option value="">Selecionar coordenador...</option>
+                                ${usuarios.map(user => `
+                                    <option value="${user.nome}" ${dadosArea?.coordenador === user.nome ? 'selected' : ''}>
+                                        ${user.nome} - ${user.cargo}
+                                    </option>
+                                `).join('')}
                             </select>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                        <!-- Telefone -->
-                        <div>
-                            <label style="
-                                display: block;
-                                margin-bottom: 6px;
-                                font-weight: 600;
-                                color: #374151;
-                                font-size: 14px;
-                            ">📱 Telefone</label>
+                    <!-- Cor da Área -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="
+                            display: block;
+                            margin-bottom: 6px;
+                            font-weight: 600;
+                            color: #374151;
+                            font-size: 14px;
+                        ">🎨 Cor da Área *</label>
+                        
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <!-- Input de cor -->
                             <input 
-                                type="tel" 
-                                id="inputTelefone" 
-                                value="${dadosUsuario?.telefone || ''}"
-                                placeholder="(11) 99999-9999"
+                                type="color" 
+                                id="inputCor" 
+                                value="${dadosArea?.cor || '#C53030'}"
                                 style="
-                                    width: 100%;
-                                    padding: 12px;
+                                    width: 60px;
+                                    height: 44px;
                                     border: 2px solid #e5e7eb;
                                     border-radius: 8px;
-                                    font-size: 14px;
-                                    box-sizing: border-box;
+                                    cursor: pointer;
                                 "
                             >
-                        </div>
-
-                        <!-- Data Ingresso -->
-                        <div>
-                            <label style="
-                                display: block;
-                                margin-bottom: 6px;
+                            
+                            <!-- Cores predefinidas -->
+                            <div style="display: flex; gap: 8px;">
+                                ${[
+                                    '#C53030', '#DD6B20', '#2D3748', '#38A169', 
+                                    '#3182CE', '#805AD5', '#D53F8C', '#718096'
+                                ].map(cor => `
+                                    <button type="button" onclick="document.getElementById('inputCor').value='${cor}'" style="
+                                        width: 32px;
+                                        height: 32px;
+                                        background: ${cor};
+                                        border: 2px solid #e5e7eb;
+                                        border-radius: 6px;
+                                        cursor: pointer;
+                                    " title="${cor}"></button>
+                                `).join('')}
+                            </div>
+                            
+                            <!-- Preview -->
+                            <div style="
+                                padding: 8px 16px;
+                                background: var(--preview-color, ${dadosArea?.cor || '#C53030'});
+                                color: white;
+                                border-radius: 6px;
+                                font-size: 12px;
                                 font-weight: 600;
-                                color: #374151;
-                                font-size: 14px;
-                            ">📅 Data de Ingresso</label>
-                            <input 
-                                type="date" 
-                                id="inputDataIngresso" 
-                                value="${dadosUsuario?.dataIngresso || new Date().toISOString().split('T')[0]}"
-                                style="
-                                    width: 100%;
-                                    padding: 12px;
-                                    border: 2px solid #e5e7eb;
-                                    border-radius: 8px;
-                                    font-size: 14px;
-                                    box-sizing: border-box;
-                                "
-                            >
+                            " id="previewCor">Preview</div>
                         </div>
                     </div>
 
-                    <!-- Checkboxes -->
-                    <div style="display: flex; gap: 30px; margin-bottom: 30px;">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input 
-                                type="checkbox" 
-                                id="inputAtivo" 
-                                ${dadosUsuario?.ativo !== false ? 'checked' : ''}
-                                style="width: 18px; height: 18px;"
-                            >
-                            <span style="font-weight: 600; color: #374151;">✅ Usuário Ativo</span>
-                        </label>
-
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input 
-                                type="checkbox" 
-                                id="inputAdmin" 
-                                ${dadosUsuario?.admin ? 'checked' : ''}
-                                style="width: 18px; height: 18px;"
-                            >
-                            <span style="font-weight: 600; color: #374151;">👑 Administrador</span>
-                        </label>
+                    <!-- Equipe -->
+                    <div style="margin-bottom: 30px;">
+                        <label style="
+                            display: block;
+                            margin-bottom: 6px;
+                            font-weight: 600;
+                            color: #374151;
+                            font-size: 14px;
+                        ">👥 Membros da Equipe</label>
+                        
+                        <div style="
+                            border: 2px solid #e5e7eb;
+                            border-radius: 8px;
+                            padding: 16px;
+                            background: #f9fafb;
+                            max-height: 200px;
+                            overflow-y: auto;
+                        ">
+                            ${usuarios.map(user => `
+                                <label style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 8px;
+                                    padding: 8px;
+                                    margin-bottom: 4px;
+                                    cursor: pointer;
+                                    border-radius: 6px;
+                                    transition: background-color 0.2s ease;
+                                " onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='transparent'">
+                                    <input 
+                                        type="checkbox" 
+                                        name="equipe" 
+                                        value="${user.nome}"
+                                        ${dadosArea?.equipe && dadosArea.equipe.includes(user.nome) ? 'checked' : ''}
+                                        style="width: 16px; height: 16px;"
+                                    >
+                                    <div>
+                                        <div style="font-weight: 500; color: #1f2937;">${user.nome}</div>
+                                        <div style="font-size: 12px; color: #6b7280;">${user.cargo} - ${user.departamento}</div>
+                                    </div>
+                                </label>
+                            `).join('')}
+                        </div>
                     </div>
 
                     <!-- Botões -->
                     <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                        <button type="button" onclick="AdminUsersManager._renderizarListaUsuarios()" style="
+                        <button type="button" onclick="AdminUsersManager._renderizarListaAreas()" style="
                             background: #6b7280;
                             color: white;
                             border: none;
@@ -630,384 +695,275 @@ const AdminUsersManager = {
                             cursor: pointer;
                             font-size: 14px;
                             font-weight: 600;
-                        ">${isEdicao ? '✅ Atualizar' : '➕ Criar'} Usuário</button>
+                        ">${isEdicao ? '✅ Atualizar' : '➕ Criar'} Área</button>
                     </div>
                 </form>
             </div>
         `;
 
-        // Event listener do formulário
-        const form = document.getElementById('formularioUsuario');
+        // Event listeners
+        const form = document.getElementById('formularioArea');
         if (form) {
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this._processarFormulario();
+                this._processarFormularioArea();
+            });
+        }
+
+        // Preview da cor
+        const inputCor = document.getElementById('inputCor');
+        const preview = document.getElementById('previewCor');
+        if (inputCor && preview) {
+            inputCor.addEventListener('input', (e) => {
+                preview.style.background = e.target.value;
             });
         }
     },
 
-    // 📝 PROCESSAR FORMULÁRIO
-    _processarFormulario() {
+    // 📝 PROCESSAR FORMULÁRIO DE ÁREA
+    _processarFormularioArea() {
         try {
             // Coletar dados do formulário
             const dados = {
-                nome: document.getElementById('inputNome').value.trim(),
-                email: document.getElementById('inputEmail').value.trim().toLowerCase(),
-                cargo: document.getElementById('inputCargo').value.trim(),
-                departamento: document.getElementById('inputDepartamento').value,
-                telefone: document.getElementById('inputTelefone').value.trim(),
-                dataIngresso: document.getElementById('inputDataIngresso').value,
-                ativo: document.getElementById('inputAtivo').checked,
-                admin: document.getElementById('inputAdmin').checked
+                nome: document.getElementById('inputNomeArea').value.trim(),
+                coordenador: document.getElementById('inputCoordenador').value,
+                cor: document.getElementById('inputCor').value,
+                equipe: Array.from(document.querySelectorAll('input[name="equipe"]:checked')).map(cb => cb.value),
+                atividades: [] // Manter atividades existentes ou começar vazio
             };
 
+            // Se estiver editando, manter atividades existentes
+            if (this.estadoAreas.modoEdicaoArea) {
+                const areas = this._obterAreas();
+                const areaAtual = areas.find(a => a._key === this.estadoAreas.areaEditando);
+                if (areaAtual && areaAtual.atividades) {
+                    dados.atividades = areaAtual.atividades;
+                }
+            }
+
             // Validar dados
-            if (!this._validarDadosUsuario(dados)) {
+            if (!this._validarDadosArea(dados)) {
                 return;
             }
 
-            if (this.estado.modoEdicao) {
-                this._atualizarUsuario(this.estado.usuarioEditando, dados);
+            if (this.estadoAreas.modoEdicaoArea) {
+                this._atualizarArea(this.estadoAreas.areaEditando, dados);
             } else {
-                this._criarNovoUsuario(dados);
+                this._criarNovaArea(dados);
             }
 
         } catch (error) {
-            console.error('❌ Erro ao processar formulário:', error);
+            console.error('❌ Erro ao processar formulário de área:', error);
             this._mostrarMensagem('Erro ao processar formulário', 'error');
         }
     },
 
-    // ✅ VALIDAR DADOS DO USUÁRIO
-    _validarDadosUsuario(dados) {
-        // Nome obrigatório
+    // ✅ VALIDAR DADOS DA ÁREA
+    _validarDadosArea(dados) {
         if (!dados.nome) {
-            this._mostrarMensagem('Nome é obrigatório', 'error');
+            this._mostrarMensagem('Nome da área é obrigatório', 'error');
             return false;
         }
 
-        // Email obrigatório e válido
-        if (!dados.email) {
-            this._mostrarMensagem('Email é obrigatório', 'error');
+        if (!dados.coordenador) {
+            this._mostrarMensagem('Coordenador é obrigatório', 'error');
             return false;
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(dados.email)) {
-            this._mostrarMensagem('Email inválido', 'error');
+        if (!dados.cor) {
+            this._mostrarMensagem('Cor da área é obrigatória', 'error');
             return false;
-        }
-
-        // Cargo obrigatório
-        if (!dados.cargo) {
-            this._mostrarMensagem('Cargo é obrigatório', 'error');
-            return false;
-        }
-
-        // Departamento obrigatório
-        if (!dados.departamento) {
-            this._mostrarMensagem('Departamento é obrigatório', 'error');
-            return false;
-        }
-
-        // Verificar email duplicado (apenas para novos usuários)
-        if (!this.estado.modoEdicao) {
-            const emailJaExiste = Object.values(Auth.equipe).some(user => user.email === dados.email);
-            if (emailJaExiste) {
-                this._mostrarMensagem('Email já cadastrado', 'error');
-                return false;
-            }
         }
 
         return true;
     },
 
-    // ➕ CRIAR NOVO USUÁRIO
-    _criarNovoUsuario(dados) {
+    // ➕ CRIAR NOVA ÁREA
+    _criarNovaArea(dados) {
         try {
-            // Gerar chave única baseada no email
-            const chave = dados.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+            // Gerar chave única
+            const chave = 'area-' + dados.nome.toLowerCase()
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .substring(0, 20);
 
-            // Adicionar ao Auth.equipe
-            Auth.equipe[chave] = {
-                nome: dados.nome,
-                email: dados.email,
-                cargo: dados.cargo,
-                departamento: dados.departamento,
-                telefone: dados.telefone,
-                dataIngresso: dados.dataIngresso,
-                ativo: dados.ativo,
-                admin: dados.admin
-            };
-
-            console.log(`✅ Usuário criado: ${dados.nome} (${chave})`);
-            this._mostrarMensagem(`Usuário ${dados.nome} criado com sucesso!`, 'success');
-
-            // Salvar no Firebase
-            this._salvarUsuariosNoFirebase();
-
-            // Voltar para lista
-            this._renderizarListaUsuarios();
-
-        } catch (error) {
-            console.error('❌ Erro ao criar usuário:', error);
-            this._mostrarMensagem('Erro ao criar usuário', 'error');
-        }
-    },
-
-    // ✏️ ATUALIZAR USUÁRIO
-    _atualizarUsuario(chave, dados) {
-        try {
-            if (!Auth.equipe[chave]) {
-                throw new Error('Usuário não encontrado');
+            // Verificar se App.dados existe
+            if (typeof App === 'undefined' || !App.dados) {
+                throw new Error('Sistema App não disponível');
             }
 
-            // Atualizar dados (manter email original)
-            Auth.equipe[chave] = {
-                ...Auth.equipe[chave],
+            // Adicionar aos dados do App
+            if (!App.dados.areas) App.dados.areas = {};
+            
+            App.dados.areas[chave] = {
                 nome: dados.nome,
-                cargo: dados.cargo,
-                departamento: dados.departamento,
-                telefone: dados.telefone,
-                dataIngresso: dados.dataIngresso,
-                ativo: dados.ativo,
-                admin: dados.admin
+                coordenador: dados.coordenador,
+                cor: dados.cor,
+                equipe: dados.equipe,
+                atividades: dados.atividades
             };
 
-            console.log(`✅ Usuário atualizado: ${dados.nome} (${chave})`);
-            this._mostrarMensagem(`Usuário ${dados.nome} atualizado com sucesso!`, 'success');
+            console.log(`✅ Área criada: ${dados.nome} (${chave})`);
+            this._mostrarMensagem(`Área ${dados.nome} criada com sucesso!`, 'success');
 
             // Salvar no Firebase
-            this._salvarUsuariosNoFirebase();
+            this._salvarAreasNoFirebase();
 
             // Voltar para lista
-            this._renderizarListaUsuarios();
+            this._renderizarListaAreas();
 
         } catch (error) {
-            console.error('❌ Erro ao atualizar usuário:', error);
-            this._mostrarMensagem('Erro ao atualizar usuário', 'error');
+            console.error('❌ Erro ao criar área:', error);
+            this._mostrarMensagem('Erro ao criar área', 'error');
         }
     },
 
-    // 🗑️ CONFIRMAR EXCLUSÃO
-    confirmarExclusao(chaveUsuario) {
-        if (!Auth.equipe[chaveUsuario]) {
-            console.error('❌ Usuário não encontrado:', chaveUsuario);
-            return;
-        }
+    // ✏️ ATUALIZAR ÁREA
+    _atualizarArea(chave, dados) {
+        try {
+            if (typeof App === 'undefined' || !App.dados || !App.dados.areas || !App.dados.areas[chave]) {
+                throw new Error('Área não encontrada');
+            }
 
-        const usuario = Auth.equipe[chaveUsuario];
+            // Atualizar dados
+            App.dados.areas[chave] = {
+                ...App.dados.areas[chave],
+                nome: dados.nome,
+                coordenador: dados.coordenador,
+                cor: dados.cor,
+                equipe: dados.equipe,
+                atividades: dados.atividades
+            };
+
+            console.log(`✅ Área atualizada: ${dados.nome} (${chave})`);
+            this._mostrarMensagem(`Área ${dados.nome} atualizada com sucesso!`, 'success');
+
+            // Salvar no Firebase
+            this._salvarAreasNoFirebase();
+
+            // Voltar para lista
+            this._renderizarListaAreas();
+
+        } catch (error) {
+            console.error('❌ Erro ao atualizar área:', error);
+            this._mostrarMensagem('Erro ao atualizar área', 'error');
+        }
+    },
+
+    // 🗑️ CONFIRMAR EXCLUSÃO DE ÁREA
+    confirmarExclusaoArea(chaveArea) {
+        const areas = this._obterAreas();
+        const area = areas.find(a => a._key === chaveArea);
         
-        // Verificar se não é o usuário atual
-        const usuarioAtual = Auth.obterUsuario();
-        if (usuarioAtual && usuarioAtual.email === usuario.email) {
-            this._mostrarMensagem('Não é possível excluir seu próprio usuário', 'error');
+        if (!area) {
+            console.error('❌ Área não encontrada:', chaveArea);
             return;
         }
 
-        // Confirmação
         const confirmacao = confirm(
             `⚠️ ATENÇÃO!\n\n` +
-            `Tem certeza que deseja excluir o usuário:\n\n` +
-            `👤 ${usuario.nome}\n` +
-            `📧 ${usuario.email}\n\n` +
+            `Tem certeza que deseja excluir a área:\n\n` +
+            `🏢 ${area.nome}\n` +
+            `👤 Coordenador: ${area.coordenador}\n` +
+            `👥 Equipe: ${area.equipe ? area.equipe.length : 0} membros\n` +
+            `📋 Atividades: ${area.atividades ? area.atividades.length : 0}\n\n` +
             `Esta ação não pode ser desfeita!`
         );
 
         if (confirmacao) {
-            this._excluirUsuario(chaveUsuario);
+            this._excluirArea(chaveArea);
         }
     },
 
-    // 🗑️ EXCLUIR USUÁRIO
-    _excluirUsuario(chaveUsuario) {
+    // 🗑️ EXCLUIR ÁREA
+    _excluirArea(chaveArea) {
         try {
-            const usuario = Auth.equipe[chaveUsuario];
+            const areas = this._obterAreas();
+            const area = areas.find(a => a._key === chaveArea);
             
-            if (!usuario) {
-                throw new Error('Usuário não encontrado');
+            if (!area) {
+                throw new Error('Área não encontrada');
             }
 
-            // Remover do Auth.equipe
-            delete Auth.equipe[chaveUsuario];
+            // Remover dos dados do App
+            if (App.dados && App.dados.areas) {
+                delete App.dados.areas[chaveArea];
+            }
 
-            console.log(`🗑️ Usuário excluído: ${usuario.nome} (${chaveUsuario})`);
-            this._mostrarMensagem(`Usuário ${usuario.nome} excluído com sucesso!`, 'success');
+            console.log(`🗑️ Área excluída: ${area.nome} (${chaveArea})`);
+            this._mostrarMensagem(`Área ${area.nome} excluída com sucesso!`, 'success');
 
             // Salvar no Firebase
-            this._salvarUsuariosNoFirebase();
+            this._salvarAreasNoFirebase();
 
             // Atualizar lista
-            this._renderizarListaUsuarios();
+            this._renderizarListaAreas();
 
         } catch (error) {
-            console.error('❌ Erro ao excluir usuário:', error);
-            this._mostrarMensagem('Erro ao excluir usuário', 'error');
+            console.error('❌ Erro ao excluir área:', error);
+            this._mostrarMensagem('Erro ao excluir área', 'error');
         }
     },
 
-    // 💾 SALVAR USUÁRIOS NO FIREBASE
-    async _salvarUsuariosNoFirebase() {
+    // 💾 SALVAR ÁREAS NO FIREBASE
+    async _salvarAreasNoFirebase() {
         try {
             if (typeof database === 'undefined' || !database) {
                 console.warn('⚠️ Firebase não disponível');
                 return;
             }
 
-            // Salvar em dados/usuarios
-            await database.ref('dados/usuarios').set(Auth.equipe);
-            console.log('💾 Usuários salvos no Firebase');
+            if (!App.dados || !App.dados.areas) {
+                console.warn('⚠️ Dados de áreas não disponíveis');
+                return;
+            }
+
+            // Salvar em dados/areas
+            await database.ref('dados/areas').set(App.dados.areas);
+            console.log('💾 Áreas salvas no Firebase');
 
         } catch (error) {
-            console.error('❌ Erro ao salvar no Firebase:', error);
+            console.error('❌ Erro ao salvar áreas no Firebase:', error);
         }
-    },
-
-    // 💬 MOSTRAR MENSAGEM
-    _mostrarMensagem(mensagem, tipo = 'info') {
-        if (typeof Notifications !== 'undefined') {
-            switch (tipo) {
-                case 'success':
-                    Notifications.success(mensagem);
-                    break;
-                case 'error':
-                    Notifications.error(mensagem);
-                    break;
-                case 'warning':
-                    Notifications.warning(mensagem);
-                    break;
-                default:
-                    Notifications.info(mensagem);
-            }
-        } else {
-            alert(`${tipo.toUpperCase()}: ${mensagem}`);
-        }
-    },
-
-    // ❌ FECHAR MODAL
-    fecharModal() {
-        const modal = document.getElementById('modalGestaoUsuarios');
-        if (modal) {
-            modal.remove();
-        }
-
-        this.estado.modalAberto = false;
-        this.estado.modoEdicao = false;
-        this.estado.usuarioEditando = null;
-
-        console.log('❌ Modal de gestão fechado');
-    },
-
-    // 📊 OBTER STATUS
-    obterStatus() {
-        return {
-            modulo: 'AdminUsersManager',
-            versao: this.config.versao,
-            modalAberto: this.estado.modalAberto,
-            modoEdicao: this.estado.modoEdicao,
-            totalUsuarios: typeof Auth !== 'undefined' ? Object.keys(Auth.equipe).length : 0,
-            permissoesAdmin: this._verificarPermissoesAdmin()
-        };
     }
-};
-
-// ✅ EXPOSIÇÃO GLOBAL
-window.AdminUsersManager = AdminUsersManager;
-
-// ✅ AUTO-INICIALIZAÇÃO
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        AdminUsersManager.inicializar();
-    }, 1000);
 });
 
-// ✅ ESTILO CSS PARA ANIMAÇÕES
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-    
-    #modalGestaoUsuarios input:focus,
-    #modalGestaoUsuarios select:focus {
-        outline: none;
-        border-color: #C53030 !important;
-        box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1) !important;
-    }
-    
-    #modalGestaoUsuarios button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    #modalGestaoUsuarios .table-row:hover {
-        background: #f9fafb !important;
-    }
-`;
-document.head.appendChild(style);
-
-console.log('👥 AdminUsersManager v8.3 carregado! Gestão completa de usuários pronta.');
+console.log('🔥 AdminUsersManager expandido com Gestão de Áreas v8.3!');
 
 /*
-========== 📂 INSTRUÇÕES PARA GIT ==========
+========== 🏢 FUNCIONALIDADES DE ÁREAS ADICIONADAS ==========
 
-1. SALVAR ARQUIVO:
-   📁 assets/js/modules/admin-users-manager.js
+✅ CRUD COMPLETO DE ÁREAS:
+- Criar novas áreas com coordenador e equipe
+- Listar todas as áreas com informações visuais
+- Editar dados de áreas existentes
+- Excluir áreas com confirmação
 
-2. ADICIONAR AO index.html:
-   <script src="assets/js/modules/admin-users-manager.js"></script>
-   
-3. COMANDOS GIT:
-   git add assets/js/modules/admin-users-manager.js
-   git add index.html
-   git commit -m "feat: adiciona módulo AdminUsersManager v8.3"
-   git push origin main
+✅ INTERFACE AVANÇADA:
+- Sistema de abas (Usuários | Áreas)
+- Seleção de coordenador da lista de usuários
+- Seleção múltipla de equipe
+- Picker de cores com predefinições
+- Preview visual das cores
 
-4. TESTE:
-   - Login como Renato (admin)
-   - Clique em "👥 Usuários" no header
-   - Interface de gestão deve aparecer
-
-========== ✅ MÓDULO PRONTO PARA PRODUÇÃO ==========
-*/
-
-/*
-🎯 FUNCIONALIDADES IMPLEMENTADAS:
-
-✅ CRUD COMPLETO:
-- Criar novos usuários
-- Listar todos os usuários
-- Editar dados de usuários  
-- Excluir usuários
-
-✅ INTERFACE MODERNA:
-- Modal responsivo
-- Lista em grid
-- Formulário completo
-- Validações em tempo real
-
-✅ SEGURANÇA:
-- Apenas administradores
-- Validações de email
-- Confirmação de exclusão
-- Não pode excluir próprio usuário
-
-✅ INTEGRAÇÃO:
-- Usa Auth.equipe existente
-- Salva no Firebase
-- Integra com sistema atual
-- Sobrescreve Auth.mostrarGerenciarUsuarios
+✅ INTEGRAÇÃO COMPLETA:
+- Usa App.dados.areas
+- Salva no Firebase em /dados/areas
+- Mantém atividades existentes
+- Contadores automáticos
 
 ✅ VALIDAÇÕES:
-- Email único
-- Campos obrigatórios
-- Formato de email
-- Departamentos válidos
+- Nome obrigatório
+- Coordenador obrigatório  
+- Cor obrigatória
+- Equipe opcional mas visual
 
-🚀 RESULTADO:
-- Renato pode gerenciar 100% dos usuários
-- Interface intuitiva e profissional
-- Dados salvos automaticamente no Firebase
-- Integração perfeita com sistema v8.2
+🎯 RESULTADO:
+Renato agora pode gerenciar TUDO:
+- 👥 Usuários da equipe BIAPO
+- 🏢 Áreas organizacionais
+- 📊 Interface unificada e moderna
+- 💾 Tudo salvo automaticamente
+
+========== 🚀 EXPANSÃO COMPLETA IMPLEMENTADA ==========
 */
