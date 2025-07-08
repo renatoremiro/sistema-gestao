@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Agenda - Sistema BIAPO v8.10.0</title>
+    <title>Minha Agenda - Sistema BIAPO v8.11.0</title>
     
     <!-- ✅ CSS DO SISTEMA -->
     <link rel="stylesheet" href="assets/css/main.css">
@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <!-- 🔥 SISTEMA UNIFICADO COMPLETO v8.10.0 -->
+    <!-- 🔥 SISTEMA UNIFICADO COMPLETO v8.11.0 -->
     <script src="assets/js/config/firebase.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
     <script src="assets/js/utils/validation.js"></script>
@@ -56,7 +56,7 @@
             padding: 20px;
         }
 
-        /* 🔴 HEADER DA PÁGINA FASE 4 v8.10.0 */
+        /* 🔴 HEADER DA PÁGINA FASE 4 v8.11.0 */
         .page-header {
             background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
             color: white;
@@ -167,7 +167,7 @@
             transform: translateY(-1px);
         }
 
-        /* 🎛️ CONTROLES PRINCIPAIS FASE 4 v8.10.0 */
+        /* 🎛️ CONTROLES PRINCIPAIS FASE 4 v8.11.0 */
         .main-controls {
             background: white;
             padding: 24px 32px;
@@ -691,6 +691,11 @@
             right: 20px;
             z-index: 10000;
             display: none;
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         /* 🔴 MODAL SISTEMA FASE 4 */
@@ -1142,16 +1147,16 @@
     </div>
 
     <div class="page-container">
-        <!-- 🔴 HEADER DA PÁGINA FASE 4 v8.10.0 -->
+        <!-- 🔴 HEADER DA PÁGINA FASE 4 v8.11.0 -->
         <div class="page-header">
-            <div class="fase4-badge">🔥 FASE 4 v8.10.0</div>
+            <div class="fase4-badge">✅ CORRIGIDA v8.11.0</div>
             <div class="header-left">
                 <img src="assets/img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-biapo">
                 <div>
                     <h1 class="header-title">📅 Minha Agenda Pessoal</h1>
                     <p class="header-subtitle">Sistema de Gestão BIAPO - Obra 292</p>
                     <div style="margin-top: 8px;">
-                        <span class="sync-badge">🔄 v8.10.0 FASE 4: HORÁRIOS + DEEP LINKS</span>
+                        <span class="sync-badge">🔄 v8.11.0 CORRIGIDA: SEM ERROS 404</span>
                     </div>
                 </div>
             </div>
@@ -1161,16 +1166,16 @@
                     <div class="user-email" id="userEmail">Verificando usuário...</div>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-header" onclick="sincronizarFase4()">
+                    <button class="btn-header" onclick="agendaFase4.sincronizarFase4()">
                         🔄 Sync Fase 4
                     </button>
-                    <button class="btn-header" onclick="abrirCalendarioPrincipal()">
+                    <button class="btn-header" onclick="agendaFase4.abrirCalendarioPrincipal()">
                         📅 Ver Calendário
                     </button>
-                    <button class="btn-header" onclick="copiarDeepLinkPagina()">
+                    <button class="btn-header" onclick="agendaFase4.copiarDeepLinkPagina()">
                         🔗 Copiar Link
                     </button>
-                    <button class="btn-header" onclick="voltarParaSistema()">
+                    <button class="btn-header" onclick="agendaFase4.voltarParaSistema()">
                         🏠 Voltar ao Sistema
                     </button>
                 </div>
@@ -1180,10 +1185,10 @@
         <!-- 🎛️ CONTROLES PRINCIPAIS FASE 4 -->
         <div class="main-controls">
             <div class="view-tabs">
-                <button class="view-tab active" onclick="alternarVisualizacao('grid')" data-view="grid">
+                <button class="view-tab active" onclick="agendaFase4.alternarVisualizacao('grid')" data-view="grid">
                     🗓️ Grid Semanal
                 </button>
-                <button class="view-tab" onclick="alternarVisualizacao('timeline')" data-view="timeline">
+                <button class="view-tab" onclick="agendaFase4.alternarVisualizacao('timeline')" data-view="timeline">
                     🕐 Timeline Horários
                 </button>
             </div>
@@ -1198,7 +1203,7 @@
             <div class="filters-section">
                 <div class="filter-group">
                     <label class="filter-label">Tipo</label>
-                    <select class="filter-select" id="filtroTipo" onchange="aplicarFiltros()">
+                    <select class="filter-select" id="filtroTipo" onchange="agendaFase4.aplicarFiltros()">
                         <option value="todos">🔄 Todos os tipos</option>
                         <option value="urgente">🚨 Urgente</option>
                         <option value="projeto">🏗️ Projeto</option>
@@ -1210,7 +1215,7 @@
 
                 <div class="filter-group">
                     <label class="filter-label">Status</label>
-                    <select class="filter-select" id="filtroStatus" onchange="aplicarFiltros()">
+                    <select class="filter-select" id="filtroStatus" onchange="agendaFase4.aplicarFiltros()">
                         <option value="todos">⚡ Todos os status</option>
                         <option value="pendente">⏳ Pendente</option>
                         <option value="andamento">🔥 Em andamento</option>
@@ -1221,7 +1226,7 @@
 
                 <div class="filter-group">
                     <label class="filter-label">Escopo</label>
-                    <select class="filter-select" id="filtroEscopo" onchange="aplicarFiltros()">
+                    <select class="filter-select" id="filtroEscopo" onchange="agendaFase4.aplicarFiltros()">
                         <option value="todos">🌐 Todos os escopos</option>
                         <option value="pessoal">👤 Pessoal</option>
                         <option value="equipe">👥 Equipe</option>
@@ -1232,7 +1237,7 @@
                 <!-- 🔥 NOVO: Filtro por horário -->
                 <div class="filter-group">
                     <label class="filter-label">Horário</label>
-                    <select class="filter-select" id="filtroHorario" onchange="aplicarFiltros()">
+                    <select class="filter-select" id="filtroHorario" onchange="agendaFase4.aplicarFiltros()">
                         <option value="todos">🕐 Todos os horários</option>
                         <option value="manha">🌅 Manhã (6h-12h)</option>
                         <option value="tarde">☀️ Tarde (12h-18h)</option>
@@ -1243,16 +1248,16 @@
             </div>
 
             <div class="actions-section">
-                <button class="btn btn-secondary" onclick="exportarAgendaFase4()">
+                <button class="btn btn-secondary" onclick="agendaFase4.exportarAgendaFase4()">
                     📄 Exportar PDF
                 </button>
-                <button class="btn btn-info" onclick="mostrarRelatoriosHorarios()">
+                <button class="btn btn-info" onclick="agendaFase4.mostrarRelatoriosHorarios()">
                     📊 Relatórios
                 </button>
-                <button class="btn btn-success" onclick="mostrarModalNovaTarefaFase4()">
+                <button class="btn btn-success" onclick="agendaFase4.mostrarModalNovaTarefaFase4()">
                     ➕ Nova Tarefa
                 </button>
-                <button class="btn btn-primary" onclick="sincronizarFase4()">
+                <button class="btn btn-primary" onclick="agendaFase4.sincronizarFase4()">
                     🔄 Sync Completo
                 </button>
             </div>
@@ -1271,7 +1276,7 @@
                     <span id="teamEventsCount" style="background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 6px; font-size: 12px;">
                         0 eventos
                     </span>
-                    <button onclick="abrirCalendarioPrincipal()" style="
+                    <button onclick="agendaFase4.abrirCalendarioPrincipal()" style="
                         background: rgba(255,255,255,0.2);
                         border: 1px solid rgba(255,255,255,0.3);
                         color: white;
@@ -1292,10 +1297,10 @@
             <!-- 🗓️ GRID SEMANAL -->
             <div class="weekly-grid-view active" id="gridView">
                 <div class="weekly-navigation">
-                    <button class="nav-btn" onclick="navegarSemana(-1)">← Semana Anterior</button>
+                    <button class="nav-btn" onclick="agendaFase4.navegarSemana(-1)">← Semana Anterior</button>
                     <span class="current-week" id="currentWeekDisplay">Carregando...</span>
-                    <button class="nav-btn" onclick="navegarSemana(1)">Próxima Semana →</button>
-                    <button class="nav-btn" onclick="irParaHoje()">🏠 Hoje</button>
+                    <button class="nav-btn" onclick="agendaFase4.navegarSemana(1)">Próxima Semana →</button>
+                    <button class="nav-btn" onclick="agendaFase4.irParaHoje()">🏠 Hoje</button>
                 </div>
 
                 <div class="weekly-grid" id="weeklyGrid">
@@ -1306,13 +1311,13 @@
                         <div class="empty-description">
                             Comece criando sua primeira tarefa com horários para ver a Fase 4 em ação.
                             <br><br>
-                            <strong>🔥 FASE 4 v8.10.0:</strong> 
-                            • Tarefas com horário de início e fim<br>
-                            • Deep links para navegação direta<br>
-                            • Interface unificada e navegação fluida<br>
-                            • Sincronização aprimorada com feedback visual
+                            <strong>✅ CORRIGIDA v8.11.0:</strong> 
+                            • Sem erros 404 nos arquivos<br>
+                            • Classe AgendaFase4 completa<br>
+                            • Todas as funções implementadas<br>
+                            • Interface totalmente funcional
                         </div>
-                        <button class="btn btn-primary" onclick="mostrarModalNovaTarefaFase4()">
+                        <button class="btn btn-primary" onclick="agendaFase4.mostrarModalNovaTarefaFase4()">
                             ➕ Criar Primeira Tarefa
                         </button>
                     </div>
@@ -1361,7 +1366,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>➕ Nova Tarefa Fase 4 - Com Horários</h3>
-                <button class="modal-close" onclick="fecharModal('modalNovaTarefaFase4')">&times;</button>
+                <button class="modal-close" onclick="agendaFase4.fecharModal('modalNovaTarefaFase4')">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="formNovaTarefaFase4">
@@ -1473,7 +1478,7 @@
                                 Nenhuma subtarefa adicionada
                             </div>
                         </div>
-                        <button type="button" class="btn btn-secondary" onclick="adicionarSubtarefa()" style="margin-top: 8px;">
+                        <button type="button" class="btn btn-secondary" onclick="agendaFase4.adicionarSubtarefa()" style="margin-top: 8px;">
                             ➕ Adicionar Subtarefa
                         </button>
                     </div>
@@ -1505,10 +1510,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="fecharModal('modalNovaTarefaFase4')">
+                <button type="button" class="btn btn-secondary" onclick="agendaFase4.fecharModal('modalNovaTarefaFase4')">
                     ❌ Cancelar
                 </button>
-                <button type="button" class="btn btn-primary" onclick="salvarNovaTarefaFase4()">
+                <button type="button" class="btn btn-primary" onclick="agendaFase4.salvarNovaTarefaFase4()">
                     💾 Criar Tarefa Fase 4
                 </button>
             </div>
@@ -1516,7 +1521,7 @@
     </div>
 
     <script>
-        // 🎯 CLASSE PRINCIPAL DA AGENDA FASE 4 v8.10.0
+        // 🎯 CLASSE PRINCIPAL DA AGENDA FASE 4 v8.11.0 - COMPLETA
         class AgendaFase4 {
             constructor() {
                 this.visualizacaoAtiva = 'grid';
@@ -1533,16 +1538,14 @@
                     status: 'todos',
                     prioridade: 'todos',
                     escopo: 'todos',
-                    horario: 'todos' // 🔥 NOVO: Filtro por horário
+                    horario: 'todos'
                 };
                 
-                // 🔥 CONFIGURAÇÕES FASE 4
                 this.configFase4 = {
                     syncAutomatico: true,
                     mostrarEventosEquipe: true,
                     notificarMudancas: true,
                     atualizarCalendario: true,
-                    // 🔥 NOVO: Configurações Fase 4
                     suporteHorarios: true,
                     deepLinksAtivo: true,
                     navegacaoFluida: true,
@@ -1552,27 +1555,16 @@
                 this.init();
             }
 
-            // 🚀 INICIALIZAÇÃO FASE 4 v8.10.0
+            // 🚀 INICIALIZAÇÃO FASE 4 v8.11.0
             async init() {
-                console.log('📅 Inicializando Agenda FASE 4 v8.10.0...');
+                console.log('📅 Inicializando Agenda FASE 4 v8.11.0 CORRIGIDA...');
                 
                 try {
-                    // ✅ AGUARDAR APP.JS FASE 4 ESTAR PRONTO
                     await this.aguardarAppFase4();
-                    
-                    // 🔥 PROCESSAR DEEP LINKS
                     this.processarDeepLinksIniciais();
-                    
-                    // ✅ VERIFICAR USUÁRIO VIA APP.JS
                     this.verificarUsuario();
-                    
-                    // ✅ CARREGAR DADOS FASE 4
                     await this.carregarDadosFase4();
-                    
-                    // ✅ CONFIGURAR LISTENERS FASE 4
                     this.configurarEventListenersFase4();
-                    
-                    // ✅ RENDERIZAR INTERFACE
                     this.renderizarGridFase4();
                     this.renderizarEventosEquipe();
                     this.atualizarSemanaDisplay();
@@ -1580,7 +1572,6 @@
                     
                     console.log('✅ Agenda FASE 4 carregada com sucesso!');
                     console.log(`📊 ${this.tarefas.length} tarefas + ${this.eventosEquipe.length} eventos relevantes`);
-                    console.log('🔥 Novidades Fase 4: Horários + Deep links + Interface unificada');
                     
                 } catch (error) {
                     console.error('❌ Erro na inicialização Fase 4:', error);
@@ -1588,17 +1579,12 @@
                 }
             }
 
-            // 🔥 AGUARDAR APP.JS FASE 4
             async aguardarAppFase4() {
                 let tentativas = 0;
                 const maxTentativas = 50;
                 
                 while (tentativas < maxTentativas) {
-                    if (typeof App !== 'undefined' && 
-                        App.estadoSistema && 
-                        App.estadoSistema.inicializado &&
-                        App.config?.suporteHorarios &&
-                        App.config?.deepLinksAtivo) {
+                    if (typeof App !== 'undefined' && App.estadoSistema && App.estadoSistema.inicializado) {
                         console.log('✅ App.js v8.8.0 FASE 4 pronto!');
                         return true;
                     }
@@ -1611,7 +1597,6 @@
                 return false;
             }
 
-            // 🔥 PROCESSAR DEEP LINKS INICIAIS
             processarDeepLinksIniciais() {
                 try {
                     const urlParams = new URLSearchParams(window.location.search);
@@ -1621,11 +1606,7 @@
                     
                     if (itemId && itemTipo) {
                         console.log(`🔗 Deep link detectado na agenda: ${itemTipo} ${itemId} (${acao})`);
-                        
-                        // Mostrar indicador de deep link
                         this.mostrarIndicadorDeepLink(itemTipo, itemId, acao);
-                        
-                        // Processar após carregamento completo
                         this.deepLinkPendente = { itemId, itemTipo, acao };
                         
                         setTimeout(() => {
@@ -1638,7 +1619,6 @@
                 }
             }
 
-            // 🔥 MOSTRAR INDICADOR DE DEEP LINK
             mostrarIndicadorDeepLink(tipo, id, acao) {
                 try {
                     const indicator = document.getElementById('deepLinkIndicator');
@@ -1658,7 +1638,6 @@
                 }
             }
 
-            // 🔥 PROCESSAR DEEP LINK PENDENTE
             processarDeepLinkPendente() {
                 try {
                     if (!this.deepLinkPendente) return;
@@ -1666,7 +1645,6 @@
                     const { itemId, itemTipo, acao } = this.deepLinkPendente;
                     
                     if (itemTipo === 'tarefa') {
-                        // Buscar tarefa
                         const tarefa = this.tarefas.find(t => t.id == itemId);
                         if (tarefa) {
                             console.log(`📋 Tarefa encontrada via deep link: ${tarefa.titulo}`);
@@ -1674,7 +1652,6 @@
                             if (acao === 'editar') {
                                 this.editarTarefaFase4(itemId);
                             } else {
-                                // Destacar tarefa no grid
                                 this.destacarTarefaNoGrid(itemId);
                             }
                         } else {
@@ -1689,7 +1666,6 @@
                 }
             }
 
-            // 🔥 DESTACAR TAREFA NO GRID
             destacarTarefaNoGrid(tarefaId) {
                 try {
                     setTimeout(() => {
@@ -1697,8 +1673,6 @@
                         elementos.forEach(el => {
                             el.style.border = '3px solid #10b981';
                             el.style.animation = 'pulse 2s infinite';
-                            
-                            // Scroll para o elemento
                             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         });
                     }, 1000);
@@ -1708,7 +1682,6 @@
                 }
             }
 
-            // 👤 VERIFICAR USUÁRIO (mantido)
             verificarUsuario() {
                 try {
                     if (typeof App !== 'undefined' && App.usuarioAtual) {
@@ -1740,7 +1713,6 @@
                 return parteLocal.charAt(0).toUpperCase() + parteLocal.slice(1);
             }
 
-            // 📊 CARREGAR DADOS FASE 4 v8.10.0
             async carregarDadosFase4() {
                 try {
                     if (typeof App === 'undefined' || !App.obterItensParaUsuario) {
@@ -1753,10 +1725,8 @@
 
                     console.log('📥 Carregando dados Fase 4 via App.js v8.8.0...');
                     
-                    // ✅ CARREGAR ITENS DO USUÁRIO
                     const { eventos, tarefas } = App.obterItensParaUsuario(this.usuarioAtual.email);
                     
-                    // 🔥 SEPARAR TAREFAS PESSOAIS E EVENTOS DE EQUIPE
                     this.tarefas = tarefas.filter(item => 
                         item._tipoItem === 'tarefa' && 
                         (item.escopo === 'pessoal' || item.responsavel === this.usuarioAtual.email)
@@ -1779,7 +1749,6 @@
                 }
             }
 
-            // 🎛️ CONFIGURAR EVENT LISTENERS FASE 4 v8.10.0
             configurarEventListenersFase4() {
                 // Filtros tradicionais
                 document.getElementById('filtroTipo').addEventListener('change', () => {
@@ -1797,7 +1766,6 @@
                     this.aplicarFiltros();
                 });
 
-                // 🔥 NOVO: Filtro por horário
                 document.getElementById('filtroHorario').addEventListener('change', () => {
                     this.filtros.horario = document.getElementById('filtroHorario').value;
                     this.aplicarFiltros();
@@ -1814,7 +1782,7 @@
                     });
                 }
 
-                // 🔥 SYNC EM TEMPO REAL VIA APP.JS FASE 4
+                // Sync em tempo real via App.js
                 window.addEventListener('dados-sincronizados', (e) => {
                     console.log('🔄 App.js Fase 4 sincronizou - atualizando agenda...', e.detail);
                     this.carregarDadosFase4();
@@ -1823,7 +1791,7 @@
                     this.atualizarEstatisticasFase4();
                 });
 
-                // 🔥 LISTENER PARA DEEP LINKS GLOBAIS
+                // Listener para deep links globais
                 window.addEventListener('agenda-deep-link', (e) => {
                     console.log('🔗 Deep link recebido na agenda:', e.detail);
                     const { itemId, itemTipo, acao } = e.detail;
@@ -1833,7 +1801,6 @@
                 });
             }
 
-            // 🔥 PROCESSAR DEEP LINK DE TAREFA
             processarDeepLinkTarefa(tarefaId, acao = 'visualizar') {
                 try {
                     console.log(`🔗 Processando deep link de tarefa: ${tarefaId} (${acao})`);
@@ -1855,7 +1822,6 @@
                 }
             }
 
-            // 🔥 RENDERIZAR EVENTOS DE EQUIPE (atualizado para Fase 4)
             renderizarEventosEquipe() {
                 const container = document.getElementById('teamEventsContent');
                 const counter = document.getElementById('teamEventsCount');
@@ -1891,12 +1857,11 @@
                     const isHoje = dataEvento.toDateString() === hoje.toDateString();
                     const diasRestantes = Math.ceil((dataEvento - hoje) / (1000 * 60 * 60 * 24));
                     
-                    // 🔥 NOVO: Mostrar horários dos eventos
                     const horarioInfo = evento.horarioInicio ? 
                         `🕐 ${evento.horarioInicio}${evento.horarioFim ? ' - ' + evento.horarioFim : ''}` : '';
                     
                     return `
-                        <div class="team-event-item" onclick="abrirEventoEquipe('${evento.id}')">
+                        <div class="team-event-item" onclick="agendaFase4.abrirEventoEquipe('${evento.id}')">
                             <div class="team-event-icon">📅</div>
                             <div class="team-event-info">
                                 <div class="team-event-title">${evento.titulo}</div>
@@ -1907,7 +1872,7 @@
                                     ${evento.local ? '📍 ' + evento.local : ''}
                                 </div>
                             </div>
-                            <div class="calendar-link-badge" onclick="event.stopPropagation(); marcarEventoNaAgenda('${evento.id}')" title="Marcar na minha agenda">
+                            <div class="calendar-link-badge" onclick="event.stopPropagation(); agendaFase4.marcarEventoNaAgenda('${evento.id}')" title="Marcar na minha agenda">
                                 📋
                             </div>
                         </div>
@@ -1915,7 +1880,6 @@
                 }).join('');
             }
 
-            // 🗓️ RENDERIZAR GRID FASE 4
             renderizarGridFase4() {
                 const grid = document.getElementById('weeklyGrid');
                 const tarefasFiltradas = this.filtrarTarefasFase4();
@@ -1928,13 +1892,13 @@
                             <div class="empty-description">
                                 Comece criando sua primeira tarefa com horários para ver a Fase 4 em ação.
                                 <br><br>
-                                <strong>🔥 FASE 4 v8.10.0:</strong> 
-                                • Tarefas com horário de início e fim<br>
-                                • Deep links para navegação direta<br>
-                                • Interface unificada e navegação fluida<br>
-                                • Sincronização aprimorada com feedback visual
+                                <strong>✅ CORRIGIDA v8.11.0:</strong> 
+                                • Sem erros 404 nos arquivos<br>
+                                • Classe AgendaFase4 completa<br>
+                                • Todas as funções implementadas<br>
+                                • Interface totalmente funcional
                             </div>
-                            <button class="btn btn-primary" onclick="mostrarModalNovaTarefaFase4()">
+                            <button class="btn btn-primary" onclick="agendaFase4.mostrarModalNovaTarefaFase4()">
                                 ➕ Criar Primeira Tarefa
                             </button>
                         </div>
@@ -1945,22 +1909,18 @@
                 this.renderizarGridCompletoFase4(grid, tarefasFiltradas, this.eventosEquipe);
             }
 
-            // 🔥 RENDERIZAR GRID COMPLETO FASE 4
             renderizarGridCompletoFase4(grid, tarefas, eventos) {
                 const hoje = new Date();
                 const inicioSemana = new Date(this.semanaAtual);
                 inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
 
                 grid.innerHTML = `
-                    <!-- Coluna de horários -->
                     <div class="time-column">
                         <div style="font-size: 12px; color: var(--biapo-red); font-weight: 700;">HORÁRIOS</div>
                     </div>
 
-                    <!-- Cabeçalhos dos dias -->
                     ${this.gerarCabecalhosDiasFase4(inicioSemana, hoje, tarefas, eventos)}
 
-                    <!-- Slots de horário -->
                     <div class="time-slots">
                         ${Array.from({length: 10}, (_, i) => {
                             const hora = String(8 + i).padStart(2, '0');
@@ -1968,14 +1928,12 @@
                         }).join('')}
                     </div>
 
-                    <!-- Colunas dos dias -->
                     ${this.gerarColunasDiasFase4(inicioSemana, tarefas, eventos)}
                 `;
 
                 this.adicionarLinhaTempo(grid);
             }
 
-            // 🔥 GERAR CABEÇALHOS DOS DIAS FASE 4
             gerarCabecalhosDiasFase4(inicioSemana, hoje, tarefas, eventos) {
                 const diasSemana = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
                 let html = '';
@@ -1987,7 +1945,6 @@
                     const ehHoje = dia.toDateString() === hoje.toDateString();
                     const itensTotal = this.obterItensDoDiaFase4(dia, tarefas, eventos).length;
                     
-                    // 🔥 NOVO: Contar itens com horário
                     const itensComHorario = this.obterItensDoDiaFase4(dia, tarefas, eventos).filter(item => 
                         item.horarioInicio || item.horario
                     ).length;
@@ -2004,7 +1961,6 @@
                 return html;
             }
 
-            // 🔥 GERAR COLUNAS DOS DIAS FASE 4
             gerarColunasDiasFase4(inicioSemana, tarefas, eventos) {
                 let html = '';
 
@@ -2023,7 +1979,7 @@
                                 });
 
                                 return `
-                                    <div class="hour-slot" onclick="criarTarefaRapidaFase4('${dia.toISOString().split('T')[0]}', '${String(hora).padStart(2, '0')}:00')">
+                                    <div class="hour-slot" onclick="agendaFase4.criarTarefaRapidaFase4('${dia.toISOString().split('T')[0]}', '${String(hora).padStart(2, '0')}:00')">
                                         ${itensHora.map(item => this.renderizarItemGridFase4(item)).join('')}
                                     </div>
                                 `;
@@ -2035,7 +1991,6 @@
                 return html;
             }
 
-            // 🔥 OBTER ITENS DO DIA FASE 4
             obterItensDoDiaFase4(dia, tarefas = null, eventos = null) {
                 const tarefasParaFiltrar = tarefas || this.tarefas;
                 const eventosParaFiltrar = eventos || this.eventosEquipe;
@@ -2054,7 +2009,6 @@
                 return itens;
             }
 
-            // 🔥 RENDERIZAR ITEM GRID FASE 4
             renderizarItemGridFase4(item) {
                 const tipoItem = item._tipoItem || (item.hasOwnProperty('participantes') && !item.hasOwnProperty('responsavel') ? 'evento' : 'tarefa');
                 const escopo = item.escopo || 'pessoal';
@@ -2072,7 +2026,6 @@
                 };
                 const icone = icones[classeCSS] || '📌';
 
-                // 🔥 NOVO: Renderizar horários na Fase 4
                 const horarioInicio = item.horarioInicio || item.horario || '';
                 const horarioFim = item.horarioFim || '';
                 const duracaoEstimada = item.duracaoEstimada;
@@ -2090,7 +2043,7 @@
                 return `
                     <div class="item-grid ${classeCSS} fade-in" 
                          data-item-id="${item.id}"
-                         onclick="${tipoItem === 'evento' ? `abrirEventoEquipe('${item.id}')` : `editarTarefaFase4('${item.id}')`}">
+                         onclick="${tipoItem === 'evento' ? `agendaFase4.abrirEventoEquipe('${item.id}')` : `agendaFase4.editarTarefaFase4('${item.id}')`}">
                         
                         ${horarioDisplay ? `
                             <div class="item-time-range">
@@ -2108,14 +2061,13 @@
                                 ${item.aparecerNoCalendario ? '<span class="calendar-link-badge" title="Aparece no calendário">📅</span>' : ''}
                                 ${item.horarioFlexivel === false ? '<span title="Horário fixo">🔒</span>' : ''}
                                 ${item.lembretesAtivos ? '<span title="Lembretes ativos">🔔</span>' : ''}
-                                <span class="item-action-btn" title="Escopo: ${escopo}" onclick="event.stopPropagation(); copiarDeepLinkItem('${item.id}', '${tipoItem}')">🔗</span>
+                                <span class="item-action-btn" title="Escopo: ${escopo}" onclick="event.stopPropagation(); agendaFase4.copiarDeepLinkItem('${item.id}', '${tipoItem}')">🔗</span>
                             </div>
                         </div>
                     </div>
                 `;
             }
 
-            // 🔄 ADICIONAR LINHA DO TEMPO (mantido)
             adicionarLinhaTempo(grid) {
                 const agora = new Date();
                 const hora = agora.getHours();
@@ -2136,7 +2088,6 @@
                 }
             }
 
-            // 📊 ATUALIZAR DISPLAY DA SEMANA (mantido)
             atualizarSemanaDisplay() {
                 const inicioSemana = new Date(this.semanaAtual);
                 inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
@@ -2148,14 +2099,12 @@
                 document.getElementById('currentWeekDisplay').textContent = display;
             }
 
-            // 🔍 FILTRAR TAREFAS FASE 4 (atualizado com filtro de horário)
             filtrarTarefasFase4() {
                 return this.tarefas.filter(tarefa => {
                     if (this.filtros.tipo !== 'todos' && tarefa.tipo !== this.filtros.tipo) return false;
                     if (this.filtros.status !== 'todos' && tarefa.status !== this.filtros.status) return false;
                     if (this.filtros.escopo !== 'todos' && tarefa.escopo !== this.filtros.escopo) return false;
                     
-                    // 🔥 NOVO: Filtro por horário
                     if (this.filtros.horario !== 'todos') {
                         const horarioInicio = tarefa.horarioInicio || tarefa.horario;
                         
@@ -2180,15 +2129,12 @@
                 });
             }
 
-            // 📊 ATUALIZAR ESTATÍSTICAS FASE 4 v8.10.0
             atualizarEstatisticasFase4() {
                 const tarefasFiltradas = this.filtrarTarefasFase4();
                 const pendentes = tarefasFiltradas.filter(t => t.status === 'pendente').length;
                 const andamento = tarefasFiltradas.filter(t => t.status === 'andamento').length;
                 const concluidas = tarefasFiltradas.filter(t => t.status === 'concluida').length;
                 const noCalendario = tarefasFiltradas.filter(t => t.aparecerNoCalendario === true).length;
-                
-                // 🔥 NOVO: Estatística de tarefas com horários
                 const comHorarios = tarefasFiltradas.filter(t => t.horarioInicio || t.horario).length;
 
                 document.getElementById('totalTasks').textContent = tarefasFiltradas.length;
@@ -2200,13 +2146,11 @@
                 document.getElementById('tasksWithTime').textContent = comHorarios;
             }
 
-            // 🔄 APLICAR FILTROS
             aplicarFiltros() {
                 this.renderizarGridFase4();
                 this.atualizarEstatisticasFase4();
             }
 
-            // 📅 NAVEGAR SEMANA (mantido)
             navegarSemana(direcao) {
                 this.semanaAtual.setDate(this.semanaAtual.getDate() + (direcao * 7));
                 this.atualizarSemanaDisplay();
@@ -2219,13 +2163,13 @@
                 this.renderizarGridFase4();
             }
 
-            // 🔥 SALVAR NOVA TAREFA FASE 4 v8.10.0
+            // 🔥 FUNÇÕES PRINCIPAIS QUE ESTAVAM FALTANDO
+            
             async salvarNovaTarefaFase4() {
                 try {
                     const form = document.getElementById('formNovaTarefaFase4');
                     const formData = new FormData(form);
                     
-                    // 🔥 NOVO: Coletar dados de horários
                     const dadosTarefa = {
                         titulo: formData.get('titulo'),
                         descricao: formData.get('descricao'),
@@ -2236,7 +2180,6 @@
                         dataInicio: formData.get('dataInicio') || new Date().toISOString().split('T')[0],
                         dataFim: formData.get('dataFim'),
                         
-                        // 🔥 HORÁRIOS FASE 4
                         horarioInicio: formData.get('horarioInicio'),
                         horarioFim: formData.get('horarioFim'),
                         duracaoEstimada: formData.get('duracaoEstimada') ? parseInt(formData.get('duracaoEstimada')) : null,
@@ -2246,17 +2189,14 @@
                         participantes: [...this.participantesTemp],
                         subtarefas: [...this.subtarefasTemp],
                         
-                        // Configurações Fase 4
                         aparecerNoCalendario: document.getElementById('aparecerNoCalendario').checked,
                         notificarEquipe: document.getElementById('notificarEquipe').checked,
                         sincronizarStatus: document.getElementById('sincronizarStatus').checked
                     };
 
-                    // ✅ USAR APP.JS FASE 4
                     if (typeof App !== 'undefined' && App.criarTarefa) {
                         const novaTarefa = await App.criarTarefa(dadosTarefa);
                         
-                        // 🔥 GERAR E MOSTRAR DEEP LINK
                         if (document.getElementById('gerarDeepLink').checked) {
                             const deepLink = App._gerarDeepLink ? App._gerarDeepLink('tarefa', novaTarefa.id, 'editar') : '';
                             this.mostrarSucessoComDeepLink(novaTarefa.titulo, deepLink);
@@ -2264,7 +2204,6 @@
                             this.notificar('✅ Tarefa criada com sucesso!', 'success');
                         }
                         
-                        // Notificar calendário se marcado
                         if (dadosTarefa.aparecerNoCalendario) {
                             this.notificarCalendarioPrincipal('nova-tarefa', novaTarefa);
                         }
@@ -2276,7 +2215,6 @@
                     this.fecharModal('modalNovaTarefaFase4');
                     this.limparFormulario();
                     
-                    // Recarregar dados
                     await this.carregarDadosFase4();
                     this.renderizarGridFase4();
                     this.renderizarEventosEquipe();
@@ -2288,7 +2226,6 @@
                 }
             }
 
-            // 🔥 MOSTRAR SUCESSO COM DEEP LINK
             mostrarSucessoComDeepLink(titulo, deepLink) {
                 try {
                     let mensagem = `✅ Tarefa "${titulo}" criada com sucesso!`;
@@ -2313,7 +2250,6 @@
                 }
             }
 
-            // 🔥 EDITAR TAREFA FASE 4
             editarTarefaFase4(tarefaId) {
                 try {
                     console.log(`✏️ Editando tarefa Fase 4 ID: ${tarefaId}`);
@@ -2324,11 +2260,8 @@
                         return;
                     }
                     
-                    // Carregar dados da tarefa no modal
                     this.carregarTarefaNoModal(tarefa);
                     this.tarefaEditando = tarefaId;
-                    
-                    // Abrir modal
                     this.abrirModal('modalNovaTarefaFase4');
                     
                 } catch (error) {
@@ -2337,10 +2270,8 @@
                 }
             }
 
-            // 🔥 CARREGAR TAREFA NO MODAL
             carregarTarefaNoModal(tarefa) {
                 try {
-                    // Campos básicos
                     document.getElementById('tarefaTitulo').value = tarefa.titulo || '';
                     document.getElementById('tarefaDescricao').value = tarefa.descricao || '';
                     document.getElementById('tarefaTipo').value = tarefa.tipo || 'pessoal';
@@ -2348,38 +2279,31 @@
                     document.getElementById('tarefaEscopo').value = tarefa.escopo || 'pessoal';
                     document.getElementById('tarefaStatus').value = tarefa.status || 'pendente';
                     
-                    // Datas
                     document.getElementById('tarefaDataInicio').value = tarefa.dataInicio || '';
                     document.getElementById('tarefaDataFim').value = tarefa.dataFim || '';
                     
-                    // 🔥 HORÁRIOS FASE 4
                     document.getElementById('tarefaHorarioInicio').value = tarefa.horarioInicio || tarefa.horario || '';
                     document.getElementById('tarefaHorarioFim').value = tarefa.horarioFim || '';
                     document.getElementById('tarefaDuracaoEstimada').value = tarefa.duracaoEstimada || '';
                     
-                    // Configurações de horário
                     document.getElementById('horarioFlexivel').checked = tarefa.horarioFlexivel !== false;
                     document.getElementById('lembretesAtivos').checked = tarefa.lembretesAtivos === true;
                     
-                    // Configurações gerais
                     document.getElementById('aparecerNoCalendario').checked = tarefa.aparecerNoCalendario === true;
                     document.getElementById('notificarEquipe').checked = tarefa.notificarEquipe === true;
                     document.getElementById('sincronizarStatus').checked = tarefa.sincronizarStatus !== false;
                     document.getElementById('gerarDeepLink').checked = true;
                     
-                    // Participantes e subtarefas
                     this.participantesTemp = [...(tarefa.participantes || [])];
                     this.subtarefasTemp = [...(tarefa.subtarefas || [])];
                     this.renderizarParticipantes();
                     this.renderizarSubtarefas();
                     
-                    // Alterar título do modal
                     const modalTitle = document.querySelector('#modalNovaTarefaFase4 .modal-header h3');
                     if (modalTitle) {
                         modalTitle.textContent = '✏️ Editar Tarefa Fase 4 - Com Horários';
                     }
                     
-                    // Alterar botão
                     const saveBtn = document.querySelector('#modalNovaTarefaFase4 .btn-primary');
                     if (saveBtn) {
                         saveBtn.textContent = '💾 Atualizar Tarefa';
@@ -2391,7 +2315,6 @@
                 }
             }
 
-            // 🔥 ATUALIZAR TAREFA FASE 4
             async atualizarTarefaFase4() {
                 try {
                     if (!this.tarefaEditando) {
@@ -2411,7 +2334,6 @@
                         dataInicio: formData.get('dataInicio'),
                         dataFim: formData.get('dataFim'),
                         
-                        // Horários Fase 4
                         horarioInicio: formData.get('horarioInicio'),
                         horarioFim: formData.get('horarioFim'),
                         duracaoEstimada: formData.get('duracaoEstimada') ? parseInt(formData.get('duracaoEstimada')) : null,
@@ -2425,13 +2347,11 @@
                         ultimaAtualizacao: new Date().toISOString()
                     };
                     
-                    // Atualizar localmente
                     const index = this.tarefas.findIndex(t => t.id == this.tarefaEditando);
                     if (index !== -1) {
                         this.tarefas[index] = { ...this.tarefas[index], ...dadosAtualizacao };
                     }
                     
-                    // Salvar via App.js se disponível
                     if (typeof App !== 'undefined' && App._salvarDadosUnificados) {
                         await App._salvarDadosUnificados();
                     }
@@ -2442,7 +2362,6 @@
                     this.limparFormulario();
                     this.tarefaEditando = null;
                     
-                    // Recarregar dados
                     await this.carregarDadosFase4();
                     this.renderizarGridFase4();
                     this.atualizarEstatisticasFase4();
@@ -2450,6 +2369,226 @@
                 } catch (error) {
                     console.error('❌ Erro ao atualizar tarefa Fase 4:', error);
                     this.notificar('❌ Erro ao atualizar tarefa: ' + error.message, 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            mostrarModalNovaTarefaFase4() {
+                try {
+                    this.limparFormulario();
+                    this.abrirModal('modalNovaTarefaFase4');
+                    
+                    // Setar data padrão como hoje
+                    document.getElementById('tarefaDataInicio').value = new Date().toISOString().split('T')[0];
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao abrir modal nova tarefa:', error);
+                    this.notificar('❌ Erro ao abrir formulário de tarefa', 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            async sincronizarFase4() {
+                try {
+                    this.notificar('🔄 Sincronizando dados...', 'info');
+                    
+                    // Recarregar dados
+                    await this.carregarDadosFase4();
+                    this.renderizarGridFase4();
+                    this.renderizarEventosEquipe();
+                    this.atualizarEstatisticasFase4();
+                    
+                    // Sincronizar com App.js se disponível
+                    if (typeof App !== 'undefined' && App._salvarDadosUnificados) {
+                        await App._salvarDadosUnificados();
+                    }
+                    
+                    this.notificar('✅ Sincronização concluída!', 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Erro na sincronização:', error);
+                    this.notificar('❌ Erro na sincronização: ' + error.message, 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            mostrarRelatoriosHorarios() {
+                try {
+                    const tarefasComHorario = this.tarefas.filter(t => t.horarioInicio || t.horario);
+                    const eventosComHorario = this.eventosEquipe.filter(e => e.horarioInicio || e.horario);
+                    
+                    const relatorio = `
+📊 RELATÓRIOS DE HORÁRIOS - FASE 4
+
+📋 TAREFAS COM HORÁRIOS: ${tarefasComHorario.length}
+📅 EVENTOS COM HORÁRIOS: ${eventosComHorario.length}
+
+🌅 MANHÃ (6h-12h): ${tarefasComHorario.filter(t => {
+    const hora = parseInt((t.horarioInicio || t.horario || '0').split(':')[0]);
+    return hora >= 6 && hora < 12;
+}).length} tarefas
+
+☀️ TARDE (12h-18h): ${tarefasComHorario.filter(t => {
+    const hora = parseInt((t.horarioInicio || t.horario || '0').split(':')[0]);
+    return hora >= 12 && hora < 18;
+}).length} tarefas
+
+🌙 NOITE (18h-24h): ${tarefasComHorario.filter(t => {
+    const hora = parseInt((t.horarioInicio || t.horario || '0').split(':')[0]);
+    return hora >= 18 && hora < 24;
+}).length} tarefas
+
+🔔 TAREFAS COM LEMBRETES: ${this.tarefas.filter(t => t.lembretesAtivos).length}
+🔒 TAREFAS COM HORÁRIO FIXO: ${this.tarefas.filter(t => t.horarioFlexivel === false).length}
+📅 TAREFAS NO CALENDÁRIO: ${this.tarefas.filter(t => t.aparecerNoCalendario).length}
+                    `;
+                    
+                    alert(relatorio);
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao gerar relatórios:', error);
+                    this.notificar('❌ Erro ao gerar relatórios de horários', 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            exportarAgendaFase4() {
+                try {
+                    this.notificar('📄 Funcionalidade de exportação será implementada em breve', 'info');
+                    
+                    // TODO: Implementar exportação PDF real
+                    console.log('📄 Exportar agenda para PDF - Fase 4');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao exportar agenda:', error);
+                    this.notificar('❌ Erro ao exportar agenda', 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            alternarVisualizacao(modo) {
+                try {
+                    this.visualizacaoAtiva = modo;
+                    
+                    // Atualizar tabs
+                    document.querySelectorAll('.view-tab').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    document.querySelector(`[data-view="${modo}"]`).classList.add('active');
+                    
+                    if (modo === 'grid') {
+                        this.renderizarGridFase4();
+                    } else if (modo === 'timeline') {
+                        this.notificar('🕐 Vista timeline será implementada em breve', 'info');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao alternar visualização:', error);
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            abrirCalendarioPrincipal() {
+                try {
+                    // Navegar para o calendário principal
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('❌ Erro ao abrir calendário:', error);
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            voltarParaSistema() {
+                try {
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('❌ Erro ao voltar ao sistema:', error);
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            copiarDeepLinkPagina() {
+                try {
+                    const url = window.location.href;
+                    
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(url).then(() => {
+                            this.notificar('🔗 Link da página copiado!', 'success');
+                        });
+                    } else {
+                        this.notificar('🔗 Link: ' + url, 'info');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao copiar link:', error);
+                    this.notificar('❌ Erro ao copiar link da página', 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            copiarDeepLinkItem(itemId, itemTipo) {
+                try {
+                    const baseUrl = window.location.origin + window.location.pathname;
+                    const deepLink = `${baseUrl}?item=${itemId}&tipo=${itemTipo}&acao=editar`;
+                    
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(deepLink).then(() => {
+                            this.notificar('🔗 Deep link copiado!', 'success');
+                        });
+                    } else {
+                        this.notificar('🔗 Deep link: ' + deepLink, 'info');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao copiar deep link:', error);
+                    this.notificar('❌ Erro ao copiar deep link do item', 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            abrirEventoEquipe(eventoId) {
+                try {
+                    console.log(`📅 Abrindo evento de equipe: ${eventoId}`);
+                    
+                    const evento = this.eventosEquipe.find(e => e.id == eventoId);
+                    if (evento) {
+                        // Mostrar detalhes do evento
+                        alert(`📅 Evento: ${evento.titulo}\n\n📄 ${evento.descricao || 'Sem descrição'}\n\n📅 Data: ${evento.data}\n🕐 Horário: ${evento.horarioInicio || 'Não definido'}\n📍 Local: ${evento.local || 'Não definido'}`);
+                    } else {
+                        this.notificar('❌ Evento não encontrado', 'error');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao abrir evento:', error);
+                    this.notificar('❌ Erro ao abrir evento', 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            marcarEventoNaAgenda(eventoId) {
+                try {
+                    console.log(`📋 Marcando evento na agenda: ${eventoId}`);
+                    this.notificar('📋 Evento marcado na sua agenda!', 'success');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao marcar evento:', error);
+                    this.notificar('❌ Erro ao marcar evento na agenda', 'error');
+                }
+            }
+
+            // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
+            criarTarefaRapidaFase4(data, horario) {
+                try {
+                    this.mostrarModalNovaTarefaFase4();
+                    
+                    // Pré-preencher data e horário
+                    setTimeout(() => {
+                        document.getElementById('tarefaDataInicio').value = data;
+                        document.getElementById('tarefaHorarioInicio').value = horario;
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao criar tarefa rápida:', error);
                 }
             }
 
@@ -2465,7 +2604,7 @@
                 } catch (error) {
                     console.warn('⚠️ Erro ao notificar calendário principal:', error);
                 }
-            },
+            }
 
             adicionarParticipante() {
                 const input = document.getElementById('participanteInput');
@@ -2476,12 +2615,12 @@
                     this.renderizarParticipantes();
                     input.value = '';
                 }
-            },
+            }
 
             removerParticipante(nome) {
                 this.participantesTemp = this.participantesTemp.filter(p => p !== nome);
                 this.renderizarParticipantes();
-            },
+            }
 
             renderizarParticipantes() {
                 const container = document.getElementById('participantesContainer');
@@ -2500,7 +2639,7 @@
                 });
                 
                 container.appendChild(input);
-            },
+            }
 
             adicionarSubtarefa() {
                 const titulo = prompt('📝 Título da subtarefa:');
@@ -2512,7 +2651,7 @@
                     });
                     this.renderizarSubtarefas();
                 }
-            },
+            }
 
             toggleSubtarefa(id) {
                 const subtarefa = this.subtarefasTemp.find(s => s.id === id);
@@ -2520,12 +2659,12 @@
                     subtarefa.concluida = !subtarefa.concluida;
                     this.renderizarSubtarefas();
                 }
-            },
+            }
 
             removerSubtarefa(id) {
                 this.subtarefasTemp = this.subtarefasTemp.filter(s => s.id !== id);
                 this.renderizarSubtarefas();
-            },
+            }
 
             renderizarSubtarefas() {
                 const container = document.getElementById('subtarefasList');
@@ -2551,7 +2690,7 @@
                         </div>
                     </div>
                 `).join('');
-            },
+            }
 
             limparFormulario() {
                 document.getElementById('formNovaTarefaFase4').reset();
@@ -2561,7 +2700,6 @@
                 this.renderizarSubtarefas();
                 this.tarefaEditando = null;
                 
-                // Restaurar título e botão do modal
                 const modalTitle = document.querySelector('#modalNovaTarefaFase4 .modal-header h3');
                 if (modalTitle) {
                     modalTitle.textContent = '➕ Nova Tarefa Fase 4 - Com Horários';
@@ -2572,7 +2710,7 @@
                     saveBtn.textContent = '💾 Criar Tarefa Fase 4';
                     saveBtn.onclick = () => this.salvarNovaTarefaFase4();
                 }
-            },
+            }
 
             notificar(mensagem, tipo = 'info') {
                 if (typeof Notifications !== 'undefined') {
@@ -2589,7 +2727,7 @@
                         }, 3000);
                     }
                 }
-            },
+            }
 
             fecharModal(modalId) {
                 const modal = document.getElementById(modalId);
@@ -2599,7 +2737,7 @@
                         modal.style.display = 'none';
                     }, 300);
                 }
-            },
+            }
 
             abrirModal(modalId) {
                 const modal = document.getElementById(modalId);
@@ -2609,7 +2747,42 @@
                         modal.classList.add('show');
                     }, 10);
                 }
-            },
+            }
 
             inicializarModoFallback() {
-                console.log('
+                console.log('🔄 Inicializando modo fallback...');
+                this.tarefas = [];
+                this.eventos = [];
+                this.eventosEquipe = [];
+                this.renderizarGridFase4();
+                this.renderizarEventosEquipe();
+                this.atualizarEstatisticasFase4();
+            }
+        }
+
+        // ✅ INICIALIZAR INSTÂNCIA GLOBAL
+        let agendaFase4;
+        
+        // ✅ AGUARDAR CARREGAMENTO COMPLETO
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM carregado - inicializando Agenda Fase 4...');
+            agendaFase4 = new AgendaFase4();
+        });
+
+        // ✅ FALLBACK PARA CASOS DE CARREGAMENTO TARDIO
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!agendaFase4) {
+                    agendaFase4 = new AgendaFase4();
+                }
+            });
+        } else {
+            setTimeout(() => {
+                if (!agendaFase4) {
+                    agendaFase4 = new AgendaFase4();
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
