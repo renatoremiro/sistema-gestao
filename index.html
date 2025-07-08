@@ -633,11 +633,21 @@
         console.log('📋 Comandos: verificarSistema() | verificacaoRapida()');
 // 🔧 FUNÇÕES GLOBAIS ADICIONAIS
 window.abrirMinhaAgendaDinamica = function() {
-    if (typeof PersonalAgenda !== 'undefined' && PersonalAgenda.abrirMinhaAgenda) {
-        PersonalAgenda.abrirMinhaAgenda();
-    } else {
-        console.warn('⚠️ PersonalAgenda não disponível - tentando fallback');
-        alert('📋 Função de agenda em desenvolvimento. Use o calendário principal.');
+    try {
+        console.log('📅 Abrindo Minha Agenda...');
+        
+        // ✅ VERIFICAR PERSONALTASKS (nome correto)
+        if (typeof PersonalTasks !== 'undefined' && PersonalTasks.state?.inicializado) {
+            console.log('✅ PersonalTasks disponível - redirecionando para agenda');
+            window.location.href = 'agenda.html';
+        } else {
+            console.warn('⚠️ PersonalTasks não inicializado - redirecionando mesmo assim');
+            window.location.href = 'agenda.html';
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao abrir agenda:', error);
+        window.location.href = 'agenda.html'; // Fallback
     }
 };
 
