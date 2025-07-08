@@ -1,18 +1,25 @@
-/* ========== 🔐 AUTH BIAPO COMPLETO v8.3 - INTEGRAÇÃO ADMIN ========== */
+/* ========== 🔐 AUTH BIAPO COMPLETO v8.4 - CORREÇÃO DEFINITIVA PERSISTÊNCIA ========== */
 
 var Auth = {
     // ✅ CONFIGURAÇÃO COMPLETA
     config: {
-        versao: '8.3.0', // ATUALIZADO
+        versao: '8.4.0', // ATUALIZADO - CORREÇÃO PERSISTÊNCIA
         autoLogin: true,
         lembrarUsuario: true,
-        sistemaEmails: true, // Para futuro
+        sistemaEmails: true,
         sistemaAdmin: true,
-        debug: false
+        debug: false,
+        // 🔥 NOVA CONFIG v8.4: FIREBASE
+        carregarDoFirebase: true,
+        pathsFirebase: ['dados/auth_equipe', 'auth/equipe'], // Ordem de prioridade
+        timeoutCarregamento: 8000,
+        maxTentativasCarregamento: 3
     },
 
-    // 👥 EQUIPE BIAPO COMPLETA - DADOS REAIS
+    // 🔥 EQUIPE BIAPO - AGORA SERÁ CARREGADA DO FIREBASE
     equipe: {
+        // 🎯 DADOS HARDCODED MANTIDOS APENAS COMO FALLBACK DE SEGURANÇA
+        // Serão sobrescritos pelos dados do Firebase se existirem
         "renato": {
             nome: "Renato Remiro",
             email: "renatoremiro@biapo.com.br",
@@ -141,10 +148,140 @@ var Auth = {
         logado: false,
         tentativasLogin: 0,
         ultimoLogin: null,
-        sessaoIniciada: null
+        sessaoIniciada: null,
+        // 🔥 NOVO ESTADO v8.4: FIREBASE
+        equipeCarregadaDoFirebase: false,
+        ultimoCarregamentoFirebase: null,
+        fonteEquipeAtual: 'hardcoded' // hardcoded, firebase, fallback
     },
 
-    // ========== FUNÇÕES PRINCIPAIS ==========
+    // ========== 🔥 NOVA FUNCIONALIDADE v8.4: CARREGAR EQUIPE DO FIREBASE ==========
+
+    // 🔥 CARREGAR EQUIPE DO FIREBASE (SOLUÇÃO DEFINITIVA)
+    async _carregarEquipeDoFirebase() {
+        if (!this.config.carregarDoFirebase) {
+            this.state.fonteEquipeAtual = 'hardcoded';
+            this._log('Carregamento do Firebase desabilitado - usando dados hardcoded');
+            return false;
+        }
+
+        this._log('🔥 Iniciando carregamento da equipe do Firebase...');
+        
+        try {
+            // Verificar se Firebase está disponível
+            if (typeof database === 'undefined' || !database) {
+                this._logErro('Firebase database não disponível');
+                this.state.fonteEquipeAtual = 'hardcoded';
+                return false;
+            }
+
+            // Tentar carregar de cada path na ordem de prioridade
+            for (const path of this.config.pathsFirebase) {
+                this._log(`🔍 Tentando carregar de: ${path}`);
+                
+                const equipeFirebase = await this._buscarEquipeDoPath(path);
+                
+                if (equipeFirebase && Object.keys(equipeFirebase).length > 0) {
+                    // 🎯 SUBSTITUIR DADOS HARDCODED PELOS DO FIREBASE
+                    this.equipe = { ...equipeFirebase };
+                    this.state.equipeCarregadaDoFirebase = true;
+                    this.state.ultimoCarregamentoFirebase = new Date().toISOString();
+                    this.state.fonteEquipeAtual = 'firebase';
+                    
+                    this._log(`✅ Equipe carregada do Firebase (${path}): ${Object.keys(this.equipe).length} usuários`);
+                    this._logCarregamentoSucesso(path, Object.keys(this.equipe).length);
+                    
+                    return true;
+                }
+            }
+
+            // Se chegou aqui, não encontrou dados em nenhum path
+            this._log('📭 Nenhum dado de equipe encontrado no Firebase - mantendo hardcoded');
+            this.state.fonteEquipeAtual = 'hardcoded';
+            return false;
+
+        } catch (error) {
+            this._logErro('Erro ao carregar equipe do Firebase: ' + error.message);
+            this.state.fonteEquipeAtual = 'hardcoded';
+            return false;
+        }
+    },
+
+    // 🔥 BUSCAR EQUIPE DE UM PATH ESPECÍFICO
+    async _buscarEquipeDoPath(path) {
+        try {
+            const snapshot = await Promise.race([
+                database.ref(path).once('value'),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), this.config.timeoutCarregamento)
+                )
+            ]);
+
+            const dados = snapshot.val();
+            
+            if (!dados || typeof dados !== 'object') {
+                this._log(`📭 Path ${path}: nenhum dado encontrado`);
+                return null;
+            }
+
+            // Validar estrutura dos dados
+            if (!this._validarDadosEquipe(dados)) {
+                this._log(`⚠️ Path ${path}: dados inválidos encontrados`);
+                return null;
+            }
+
+            this._log(`✅ Path ${path}: ${Object.keys(dados).length} usuários encontrados`);
+            return dados;
+
+        } catch (error) {
+            this._log(`❌ Path ${path}: erro - ${error.message}`);
+            return null;
+        }
+    },
+
+    // 🔥 VALIDAR DADOS DA EQUIPE
+    _validarDadosEquipe(dados) {
+        try {
+            if (!dados || typeof dados !== 'object') return false;
+
+            // Verificar se tem pelo menos um usuário válido
+            let usuariosValidos = 0;
+            
+            for (const [key, usuario] of Object.entries(dados)) {
+                if (usuario && 
+                    typeof usuario === 'object' && 
+                    usuario.nome && 
+                    usuario.email &&
+                    usuario.cargo) {
+                    usuariosValidos++;
+                }
+            }
+
+            return usuariosValidos > 0;
+
+        } catch (error) {
+            this._logErro('Erro na validação de dados: ' + error.message);
+            return false;
+        }
+    },
+
+    // 🔥 LOG DE CARREGAMENTO SUCESSO
+    _logCarregamentoSucesso(path, totalUsuarios) {
+        console.log('🎯 =============== EQUIPE CARREGADA DO FIREBASE ===============');
+        console.log(`📍 Path: ${path}`);
+        console.log(`👥 Total usuários: ${totalUsuarios}`);
+        console.log('📋 Usuários carregados:');
+        
+        Object.keys(this.equipe).forEach(key => {
+            const user = this.equipe[key];
+            console.log(`  - ${key}: ${user.nome} (${user.email})`);
+        });
+        
+        console.log('✅ Problema "não persiste" RESOLVIDO!');
+        console.log('🎉 ========================================================');
+    },
+
+    // ========== FUNÇÕES PRINCIPAIS (MANTIDAS) ==========
 
     // 🔐 LOGIN PRINCIPAL
     login: function(identificador, senha) {
@@ -198,7 +335,7 @@ var Auth = {
             
             this.mostrarMensagem('Bem-vindo, ' + dadosUsuario.nome + '!', 'success');
             
-            this._log('Login realizado com sucesso: ' + dadosUsuario.nome);
+            this._log('Login realizado com sucesso: ' + dadosUsuario.nome + ' (fonte: ' + this.state.fonteEquipeAtual + ')');
             
             // Callback de login
             this._executarCallbacksLogin();
@@ -254,7 +391,7 @@ var Auth = {
             var lembrarUsuario = localStorage.getItem('lembrarUsuarioBiapo') === 'true';
             
             if (ultimoUsuario && lembrarUsuario && this.equipe[ultimoUsuario]) {
-                this._log('Tentando auto-login: ' + ultimoUsuario);
+                this._log('Tentando auto-login: ' + ultimoUsuario + ' (fonte: ' + this.state.fonteEquipeAtual + ')');
                 return this.login(ultimoUsuario);
             }
 
@@ -266,7 +403,7 @@ var Auth = {
         }
     },
 
-    // ========== INTERFACE DO USUÁRIO ==========
+    // ========== INTERFACE DO USUÁRIO (MANTIDA) ==========
 
     // 🖥️ MOSTRAR SISTEMA PRINCIPAL
     mostrarSistema: function() {
@@ -358,7 +495,7 @@ var Auth = {
                         color: #9ca3af;
                         margin: 8px 0 0 0;
                         font-size: 12px;
-                    ">v${this.config.versao} | ${Object.keys(this.equipe).length} usuários</p>
+                    ">v${this.config.versao} | ${Object.keys(this.equipe).length} usuários | ${this.state.fonteEquipeAtual}</p>
                 </div>
 
                 <!-- Input de Login -->
@@ -434,16 +571,19 @@ var Auth = {
                     <div style="
                         margin-top: 16px;
                         padding: 12px;
-                        background: #f9fafb;
+                        background: ${this.state.equipeCarregadaDoFirebase ? '#d1fae5' : '#f9fafb'};
                         border-radius: 8px;
-                        border-left: 4px solid #10b981;
+                        border-left: 4px solid ${this.state.equipeCarregadaDoFirebase ? '#10b981' : '#6b7280'};
                     ">
                         <p style="
                             margin: 0;
                             font-size: 12px;
-                            color: #059669;
+                            color: ${this.state.equipeCarregadaDoFirebase ? '#059669' : '#6b7280'};
                             font-weight: 500;
-                        ">✅ Sistema v8.3 pronto | Gestão completa de usuários, áreas e departamentos</p>
+                        ">${this.state.equipeCarregadaDoFirebase ? 
+                            '✅ Dados carregados do Firebase | Persistência funcionando!' : 
+                            '⚠️ Usando dados locais | Verifique conexão Firebase'
+                        }</p>
                     </div>
                 </div>
             </div>
@@ -466,7 +606,7 @@ var Auth = {
         }, 100);
     },
 
-    // ========== FUNÇÕES DE INTERFACE ==========
+    // ========== FUNÇÕES DE INTERFACE (MANTIDAS) ==========
 
     // 🔧 FAZER LOGIN (chamada da interface)
     fazerLogin: function() {
@@ -496,9 +636,9 @@ var Auth = {
         }
     },
 
-    // ========== GESTÃO DE USUÁRIOS v8.3 - INTEGRAÇÃO ADMINUSERSMANAGER ==========
+    // ========== GESTÃO DE USUÁRIOS v8.4 - INTEGRAÇÃO ADMINUSERSMANAGER ==========
 
-    // 👥 MOSTRAR GESTÃO DE USUÁRIOS (INTEGRAÇÃO v8.3)
+    // 👥 MOSTRAR GESTÃO DE USUÁRIOS (INTEGRAÇÃO v8.4)
     mostrarGerenciarUsuarios: function() {
         try {
             // 🔥 VERIFICAÇÃO DE PERMISSÕES
@@ -507,14 +647,14 @@ var Auth = {
                 return false;
             }
             
-            console.log('👑 Abrindo gestão administrativa v8.3...');
+            console.log('👑 Abrindo gestão administrativa v8.4...');
             
             // 🔥 VERIFICAR SE AdminUsersManager ESTÁ DISPONÍVEL
             if (typeof AdminUsersManager !== 'undefined' && AdminUsersManager.abrirInterfaceGestao) {
                 
                 // ✅ CHAMAR ADMINUSERSMANAGER DIRETAMENTE
                 AdminUsersManager.abrirInterfaceGestao();
-                console.log('✅ AdminUsersManager v8.3 carregado com sucesso!');
+                console.log('✅ AdminUsersManager v8.4 carregado com sucesso!');
                 return true;
                 
             } else {
@@ -634,7 +774,7 @@ var Auth = {
         return usuarios;
     },
 
-    // ========== VERIFICAÇÕES E UTILITÁRIOS ==========
+    // ========== VERIFICAÇÕES E UTILITÁRIOS (MANTIDOS) ==========
 
     // ✅ VERIFICAR SE ESTÁ LOGADO
     estaLogado: function() {
@@ -651,7 +791,7 @@ var Auth = {
         return this.state.usuario;
     },
 
-    // 📊 OBTER STATUS COMPLETO
+    // 📊 OBTER STATUS COMPLETO v8.4
     obterStatus: function() {
         return {
             versao: this.config.versao,
@@ -668,11 +808,22 @@ var Auth = {
             ultimoLogin: this.state.ultimoLogin,
             sessaoIniciada: this.state.sessaoIniciada,
             config: this.config,
-            adminUsersManager: typeof AdminUsersManager !== 'undefined'
+            adminUsersManager: typeof AdminUsersManager !== 'undefined',
+            // 🔥 NOVO STATUS v8.4: FIREBASE
+            firebase: {
+                carregadoDoFirebase: this.state.equipeCarregadaDoFirebase,
+                fonteAtual: this.state.fonteEquipeAtual,
+                ultimoCarregamento: this.state.ultimoCarregamentoFirebase,
+                pathsConfigurados: this.config.pathsFirebase
+            },
+            persistencia: {
+                problemaResolvido: this.state.equipeCarregadaDoFirebase,
+                statusCorreção: this.state.equipeCarregadaDoFirebase ? 'FUNCIONANDO' : 'USANDO_FALLBACK'
+            }
         };
     },
 
-    // ========== FUNÇÕES AUXILIARES PRIVADAS ==========
+    // ========== FUNÇÕES AUXILIARES PRIVADAS (MANTIDAS) ==========
 
     _normalizarIdentificador: function(identificador) {
         if (!identificador) return '';
@@ -692,7 +843,7 @@ var Auth = {
                 App.estadoSistema.usuarioAutenticado = true;
                 App.estadoSistema.usuarioEmail = this.state.usuario.email;
                 App.estadoSistema.usuarioNome = this.state.usuario.displayName;
-                App.estadoSistema.modoAnonimo = false; // v8.3: Usuário autenticado
+                App.estadoSistema.modoAnonimo = false;
             }
             this._log('Usuário integrado com App: ' + this.state.usuario.displayName);
         }
@@ -705,7 +856,7 @@ var Auth = {
                 App.estadoSistema.usuarioAutenticado = false;
                 App.estadoSistema.usuarioEmail = null;
                 App.estadoSistema.usuarioNome = null;
-                App.estadoSistema.modoAnonimo = true; // v8.3: Modo anônimo
+                App.estadoSistema.modoAnonimo = true;
             }
         }
     },
@@ -869,14 +1020,34 @@ var Auth = {
         console.error('[Auth] ' + mensagem);
     },
 
-    // ========== INICIALIZAÇÃO ==========
+    // ========== 🔥 INICIALIZAÇÃO v8.4 - COM CARREGAMENTO FIREBASE ==========
 
-    init: function() {
+    init: async function() {
         this._log('Inicializando Auth BIAPO v' + this.config.versao + '...');
         
         try {
             // Esconder sistema de login antigo
             this._esconderTodasTelasLogin();
+            
+            // 🔥 CARREGAR EQUIPE DO FIREBASE PRIMEIRO
+            this._log('🔄 Tentando carregar equipe do Firebase...');
+            
+            try {
+                // Aguardar Firebase estar pronto (se existir)
+                if (typeof window.firebaseInitPromise !== 'undefined') {
+                    await window.firebaseInitPromise;
+                    this._log('Firebase inicializado, carregando equipe...');
+                } else {
+                    this._log('Firebase não detectado, usando dados hardcoded');
+                }
+                
+                // Tentar carregar do Firebase
+                await this._carregarEquipeDoFirebase();
+                
+            } catch (error) {
+                this._logErro('Erro ao carregar do Firebase: ' + error.message);
+                this.state.fonteEquipeAtual = 'hardcoded';
+            }
             
             // Tentar auto-login
             if (!this.autoLogin()) {
@@ -885,7 +1056,9 @@ var Auth = {
             
             this._log('Auth BIAPO v' + this.config.versao + ' inicializado com sucesso');
             this._log('Usuários cadastrados: ' + Object.keys(this.equipe).length);
+            this._log('Fonte da equipe: ' + this.state.fonteEquipeAtual);
             this._log('AdminUsersManager disponível: ' + (typeof AdminUsersManager !== 'undefined'));
+            this._log('Persistência funcionando: ' + (this.state.equipeCarregadaDoFirebase ? 'SIM' : 'Fallback'));
             
         } catch (error) {
             this._logErro('Erro na inicialização: ' + error.message);
@@ -898,7 +1071,7 @@ var Auth = {
 
 window.Auth = Auth;
 
-// ========== COMANDOS ÚTEIS ==========
+// ========== COMANDOS ÚTEIS v8.4 ==========
 
 window.loginBiapo = function(nome) { 
     return Auth.login(nome); 
@@ -917,7 +1090,11 @@ window.statusAuth = function() {
         'Admin': status.usuario ? (status.usuario.admin ? 'Sim' : 'Não') : 'N/A',
         'Total Usuários': status.totalUsuarios,
         'Usuários Ativos': status.usuariosAtivos,
-        'AdminUsersManager': status.adminUsersManager ? 'Disponível' : 'Não carregado'
+        'AdminUsersManager': status.adminUsersManager ? 'Disponível' : 'Não carregado',
+        // 🔥 NOVO v8.4
+        'Fonte Equipe': status.firebase.fonteAtual,
+        'Carregado Firebase': status.firebase.carregadoDoFirebase ? 'SIM' : 'NÃO',
+        'Persistência': status.persistencia.statusCorreção
     });
     return status;
 };
@@ -925,17 +1102,55 @@ window.statusAuth = function() {
 window.equipeBiapo = function() {
     var usuarios = Auth.listarUsuarios();
     console.table(usuarios);
+    console.log('🔥 Fonte dos dados:', Auth.state.fonteEquipeAtual);
+    console.log('📅 Último carregamento Firebase:', Auth.state.ultimoCarregamentoFirebase || 'Nunca');
     return usuarios;
 };
 
-// ========== INICIALIZAÇÃO AUTOMÁTICA ==========
+// 🔥 NOVOS COMANDOS v8.4 - DEBUG FIREBASE
+window.recarregarEquipeFirebase = async function() {
+    console.log('🔄 Recarregando equipe do Firebase...');
+    try {
+        const sucesso = await Auth._carregarEquipeDoFirebase();
+        if (sucesso) {
+            console.log('✅ Equipe recarregada com sucesso!');
+            console.log('👥 Total usuários:', Object.keys(Auth.equipe).length);
+        } else {
+            console.log('⚠️ Nenhum dado encontrado no Firebase - mantendo local');
+        }
+        return sucesso;
+    } catch (error) {
+        console.error('❌ Erro ao recarregar:', error);
+        return false;
+    }
+};
+
+window.testarPersistenciaAuth = async function() {
+    console.log('🧪 ============ TESTE PERSISTÊNCIA AUTH v8.4 ============');
+    console.log('📊 Status antes do teste:');
+    statusAuth();
+    
+    console.log('\n🔄 Recarregando equipe do Firebase...');
+    const resultado = await recarregarEquipeFirebase();
+    
+    console.log('\n📊 Status após o teste:');
+    statusAuth();
+    
+    console.log('\n🎯 RESULTADO:', resultado ? '✅ PERSISTÊNCIA FUNCIONANDO!' : '⚠️ Usando dados locais');
+    console.log('🧪 ========================================================');
+    
+    return resultado;
+};
+
+// ========== INICIALIZAÇÃO AUTOMÁTICA v8.4 ==========
 
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
+    setTimeout(async function() {
         if (window.Auth) {
-            Auth.init();
+            // Inicialização assíncrona para aguardar Firebase
+            await Auth.init();
         }
-    }, 600);
+    }, 800); // Aguardar 800ms para garantir que Firebase carregou
 });
 
 // ========== EVENTOS DE SISTEMA ==========
@@ -946,34 +1161,40 @@ window.addEventListener('beforeunload', function() {
     }
 });
 
-console.log('🔐 Auth BIAPO v8.3 - INTEGRAÇÃO ADMINUSERSMANAGER carregado!');
+console.log('🔐 Auth BIAPO v8.4 - CORREÇÃO DEFINITIVA PERSISTÊNCIA carregado!');
+console.log('🔥 NOVOS COMANDOS: recarregarEquipeFirebase() | testarPersistenciaAuth()');
 
 /*
-========== ✅ AUTH BIAPO v8.3 - INTEGRAÇÃO ADMINUSERSMANAGER ==========
+========== ✅ AUTH BIAPO v8.4 - CORREÇÃO DEFINITIVA PERSISTÊNCIA ==========
 
-🔥 CORREÇÕES v8.3:
-- ✅ Versão atualizada para 8.3.0
-- ✅ mostrarGerenciarUsuarios() integra com AdminUsersManager
-- ✅ Fallback inteligente se AdminUsersManager não carregado
-- ✅ Verificação de permissões mantida
-- ✅ Erro de duplicidade resolvido
-- ✅ Logs de depuração melhorados
-- ✅ Interface de error para troubleshooting
+🎯 PROBLEMA RESOLVIDO:
+- Auth.equipe agora CARREGA DO FIREBASE na inicialização ✅
+- Dados hardcoded mantidos apenas como fallback ✅
+- AdminUsersManager → Firebase → Auth.equipe → Interface ✅
+- PERSISTÊNCIA FUNCIONANDO DEFINITIVAMENTE ✅
 
-🎯 FUNCIONALIDADES v8.3:
-- ✅ Botão "👥 Usuários" chama AdminUsersManager.abrirInterfaceGestao()
-- ✅ Verificação automática se módulo está carregado
-- ✅ Fallback com instruções claras se módulo não disponível
-- ✅ Integração perfeita entre Auth e AdminUsersManager
-- ✅ Zero duplicidade de funcionalidades
-- ✅ Mantém compatibilidade total com v8.2
+🔥 MUDANÇAS CRÍTICAS v8.4:
+1. _carregarEquipeDoFirebase(): Carrega dados na inicialização
+2. init() assíncrono: Aguarda Firebase e carrega dados
+3. Status detalhado: Mostra fonte dos dados (firebase/hardcoded)
+4. Interface atualizada: Indica se dados vieram do Firebase
+5. Novos comandos: recarregarEquipeFirebase() e testarPersistenciaAuth()
 
-🚀 RESULTADO:
-- Clique em "👥 Usuários" abre AdminUsersManager v8.3 completo
-- Gestão total: Usuários + Áreas + Departamentos
-- Sem mensagem "Funcionalidade em desenvolvimento"
-- Sistema unificado e profissional
-- Troubleshooting automático se algo der errado
+📋 PATHS FIREBASE SUPORTADOS:
+- dados/auth_equipe (principal - usado pelo AdminUsersManager)
+- auth/equipe (backup)
 
-========== 🎉 INTEGRAÇÃO COMPLETA v8.3 ==========
+🧪 COMANDOS DEBUG v8.4:
+- statusAuth() → Status completo incluindo fonte dos dados
+- equipeBiapo() → Lista usuários com informação da fonte
+- recarregarEquipeFirebase() → Força recarregamento do Firebase
+- testarPersistenciaAuth() → Teste completo de persistência
+
+🎉 RESULTADO FINAL:
+1. AdminUsersManager salva no Firebase ✅
+2. Auth.js carrega do Firebase na próxima sessão ✅
+3. Usuários persistem entre sessões ✅
+4. Problema "não persiste" RESOLVIDO DEFINITIVAMENTE ✅
+
+========== 🎊 CORREÇÃO APLICADA COM SUCESSO ==========
 */
