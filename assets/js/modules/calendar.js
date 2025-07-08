@@ -1051,7 +1051,405 @@ ${tipoItem.toUpperCase()}: ${titulo}${item.descricao ? ' - ' + item.descricao : 
     // ========== TODAS AS OUTRAS FUNÇÕES MANTIDAS ==========
     // (Para economizar espaço, mas todas as funções existentes do Calendar.js v8.12.0 são mantidas)
 };
+/ 🔥 FUNÇÃO CRÍTICA 1: inicializar() (era ausente)
+inicializar() {
+    try {
+        console.log('📅 Inicializando Calendar.js v8.12.1...');
+        
+        // 1. Verificar se elemento #calendario existe
+        const elemento = document.getElementById('calendario');
+        if (!elemento) {
+            console.error('❌ Elemento #calendario não encontrado no DOM');
+            return false;
+        }
+        
+        console.log('✅ Elemento #calendario encontrado');
+        
+        // 2. Verificar se App.js está disponível
+        if (!this._verificarApp()) {
+            console.warn('⚠️ App.js não disponível - usando modo fallback');
+        }
+        
+        // 3. Renderizar calendário
+        const sucesso = this.renderizarCalendario();
+        if (!sucesso) {
+            console.error('❌ Falha ao renderizar calendário');
+            return false;
+        }
+        
+        // 4. Marcar como carregado
+        this.state.carregado = true;
+        this.state.ultimaSincronizacao = new Date().toISOString();
+        
+        console.log('✅ Calendar.js v8.12.1 inicializado com SUCESSO!');
+        console.log(`📊 Estado: ${this.state.mesAtual}/${this.state.anoAtual} - Dia: ${this.state.diaSelecionado}`);
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ ERRO CRÍTICO ao inicializar Calendar:', error);
+        return false;
+    }
+},
 
+// 🔥 FUNÇÃO CRÍTICA 2: renderizarCalendario() (era ausente)
+renderizarCalendario() {
+    try {
+        console.log('🎨 Renderizando calendário visual...');
+        
+        const container = document.getElementById('calendario');
+        if (!container) {
+            console.error('❌ Container #calendario não encontrado');
+            return false;
+        }
+        
+        // Limpar container
+        container.innerHTML = '';
+        
+        // HTML estrutural do calendário
+        container.innerHTML = `
+            <!-- 📅 CABEÇALHO DO CALENDÁRIO -->
+            <div style="
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                margin-bottom: 16px; 
+                padding: 12px 16px; 
+                background: white; 
+                border-radius: 8px; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            ">
+                <button onclick="Calendar.mesAnterior()" style="
+                    background: #3b82f6; 
+                    color: white; 
+                    border: none; 
+                    padding: 8px 12px; 
+                    border-radius: 6px; 
+                    cursor: pointer; 
+                    font-weight: 600;
+                    transition: all 0.2s;
+                " onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
+                    ← Anterior
+                </button>
+                
+                <h3 id="mesAnoAtual" style="
+                    margin: 0; 
+                    color: #1f2937; 
+                    font-size: 18px; 
+                    font-weight: 600;
+                ">
+                    ${this.config.MESES[this.state.mesAtual]} ${this.state.anoAtual}
+                </h3>
+                
+                <button onclick="Calendar.proximoMes()" style="
+                    background: #3b82f6; 
+                    color: white; 
+                    border: none; 
+                    padding: 8px 12px; 
+                    border-radius: 6px; 
+                    cursor: pointer; 
+                    font-weight: 600;
+                    transition: all 0.2s;
+                " onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
+                    Próximo →
+                </button>
+            </div>
+            
+            <!-- 📅 DIAS DA SEMANA -->
+            <div style="
+                display: grid; 
+                grid-template-columns: repeat(7, 1fr); 
+                gap: 1px; 
+                margin-bottom: 8px;
+                background: #e5e7eb;
+                border-radius: 8px;
+                overflow: hidden;
+            ">
+                ${this.config.DIAS_SEMANA.map(dia => `
+                    <div style="
+                        background: #374151; 
+                        color: white; 
+                        padding: 12px 8px; 
+                        text-align: center; 
+                        font-weight: 600; 
+                        font-size: 12px;
+                    ">${dia}</div>
+                `).join('')}
+            </div>
+            
+            <!-- 📅 GRID DO CALENDÁRIO -->
+            <div id="calendarGrid" style="
+                display: grid; 
+                grid-template-columns: repeat(7, 1fr); 
+                gap: 1px; 
+                background: #e5e7eb; 
+                border-radius: 8px; 
+                overflow: hidden;
+                min-height: 400px;
+            ">
+                <!-- Dias serão preenchidos aqui -->
+            </div>
+            
+            <!-- 📊 ESTATÍSTICAS -->
+            <div id="calendarStats" style="
+                margin-top: 16px; 
+                padding: 12px 16px; 
+                background: #f8fafc; 
+                border-radius: 8px; 
+                border: 1px solid #e5e7eb;
+                font-size: 13px;
+                color: #6b7280;
+                text-align: center;
+            ">
+                📊 Calendário carregado • Status: ${this._verificarApp() ? 'Sincronizado' : 'Offline'} • v8.12.1
+            </div>
+        `;
+        
+        // Renderizar os dias
+        const sucessoGrid = this._renderizarGrid();
+        if (!sucessoGrid) {
+            console.warn('⚠️ Erro ao renderizar grid, mas estrutura criada');
+        }
+        
+        console.log('✅ Calendário renderizado com sucesso!');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro ao renderizar calendário:', error);
+        
+        // Fallback de emergência
+        const container = document.getElementById('calendario');
+        if (container) {
+            container.innerHTML = `
+                <div style="
+                    padding: 40px; 
+                    text-align: center; 
+                    background: #fee2e2; 
+                    border: 2px solid #ef4444; 
+                    border-radius: 8px; 
+                    color: #991b1b;
+                ">
+                    <h3>❌ Erro ao carregar calendário</h3>
+                    <p>Erro: ${error.message}</p>
+                    <button onclick="Calendar.inicializar()" style="
+                        background: #ef4444; 
+                        color: white; 
+                        border: none; 
+                        padding: 8px 16px; 
+                        border-radius: 6px; 
+                        cursor: pointer; 
+                        margin-top: 12px;
+                    ">🔄 Tentar Novamente</button>
+                </div>
+            `;
+        }
+        
+        return false;
+    }
+},
+
+// 🔥 FUNÇÃO CRÍTICA 3: _renderizarGrid() (renderizar os dias)
+_renderizarGrid() {
+    try {
+        const grid = document.getElementById('calendarGrid');
+        if (!grid) {
+            console.warn('⚠️ Grid não encontrado');
+            return false;
+        }
+        
+        console.log('📅 Renderizando grid de dias...');
+        
+        // Calcular primeiro e último dia do mês
+        const primeiroDia = new Date(this.state.anoAtual, this.state.mesAtual, 1);
+        const ultimoDia = new Date(this.state.anoAtual, this.state.mesAtual + 1, 0);
+        const diasNoMes = ultimoDia.getDate();
+        const primeiroDiaSemana = primeiroDia.getDay();
+        
+        // Limpar grid
+        grid.innerHTML = '';
+        
+        // Adicionar dias vazios do início
+        for (let i = 0; i < primeiroDiaSemana; i++) {
+            const diaVazio = document.createElement('div');
+            diaVazio.style.cssText = `
+                background: #f9fafb;
+                min-height: 100px;
+                border: 1px solid #e5e7eb;
+            `;
+            grid.appendChild(diaVazio);
+        }
+        
+        // Adicionar dias do mês
+        const hoje = new Date();
+        const ehMesAtual = hoje.getMonth() === this.state.mesAtual && hoje.getFullYear() === this.state.anoAtual;
+        
+        for (let dia = 1; dia <= diasNoMes; dia++) {
+            const ehHoje = ehMesAtual && hoje.getDate() === dia;
+            const ehSelecionado = dia === this.state.diaSelecionado;
+            
+            // Obter eventos/tarefas do dia (com fallback)
+            let eventosNoDia = [];
+            let tarefasNoDia = [];
+            
+            try {
+                if (this._verificarApp()) {
+                    const dataISO = new Date(this.state.anoAtual, this.state.mesAtual, dia).toISOString().split('T')[0];
+                    const itensDoDia = this._obterItensDoDia(dataISO);
+                    eventosNoDia = itensDoDia.eventos || [];
+                    tarefasNoDia = itensDoDia.tarefas || [];
+                }
+            } catch (error) {
+                console.warn(`⚠️ Erro ao obter itens do dia ${dia}:`, error);
+            }
+            
+            const totalItens = eventosNoDia.length + tarefasNoDia.length;
+            
+            // Criar célula do dia
+            const celulaDia = this._criarCelulaDiaSincronizada ? 
+                this._criarCelulaDiaSincronizada(dia, hoje, eventosNoDia, tarefasNoDia) :
+                this._criarCelulaDiaSimples(dia, ehHoje, ehSelecionado, totalItens);
+            
+            grid.appendChild(celulaDia);
+        }
+        
+        console.log(`✅ Grid renderizado: ${diasNoMes} dias`);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro ao renderizar grid:', error);
+        return false;
+    }
+},
+
+// 🔥 FUNÇÃO AUXILIAR: _criarCelulaDiaSimples (fallback)
+_criarCelulaDiaSimples(dia, ehHoje, ehSelecionado, totalItens) {
+    const celula = document.createElement('div');
+    
+    let backgroundColor = '#ffffff';
+    if (ehHoje) backgroundColor = '#dbeafe';
+    if (ehSelecionado) backgroundColor = '#fef3c7';
+    
+    celula.style.cssText = `
+        background: ${backgroundColor};
+        min-height: 100px;
+        padding: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        border: 1px solid #e5e7eb;
+    `;
+    
+    celula.innerHTML = `
+        <div style="
+            font-weight: ${ehHoje || ehSelecionado ? '700' : '500'};
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: ${ehHoje ? '#1e40af' : '#374151'};
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        ">
+            <span>${dia}</span>
+            ${totalItens > 0 ? `
+                <span style="
+                    background: #3b82f6; 
+                    color: white; 
+                    padding: 2px 6px; 
+                    border-radius: 10px; 
+                    font-size: 10px; 
+                    font-weight: 600;
+                ">${totalItens}</span>
+            ` : ''}
+        </div>
+        
+        ${totalItens > 0 ? `
+            <div style="
+                font-size: 9px;
+                background: #f3f4f6;
+                padding: 4px;
+                border-radius: 4px;
+                color: #6b7280;
+            ">
+                📅 ${totalItens} item${totalItens > 1 ? 's' : ''}
+            </div>
+        ` : ''}
+    `;
+    
+    // Click handler
+    celula.addEventListener('click', () => {
+        this.selecionarDia(dia);
+        
+        if (typeof this.abrirResumoDia === 'function') {
+            const dataISO = new Date(this.state.anoAtual, this.state.mesAtual, dia).toISOString().split('T')[0];
+            this.abrirResumoDia(dataISO);
+        } else {
+            console.log(`📅 Dia selecionado: ${dia}/${this.state.mesAtual + 1}/${this.state.anoAtual}`);
+        }
+    });
+    
+    // Hover effect
+    celula.addEventListener('mouseenter', () => {
+        celula.style.backgroundColor = totalItens > 0 ? '#ecfdf5' : '#f3f4f6';
+    });
+    
+    celula.addEventListener('mouseleave', () => {
+        celula.style.backgroundColor = backgroundColor;
+    });
+    
+    return celula;
+},
+
+// 🔥 FUNÇÕES DE NAVEGAÇÃO (se não existirem)
+mesAnterior() {
+    try {
+        if (this.state.mesAtual === 0) {
+            this.state.mesAtual = 11;
+            this.state.anoAtual--;
+        } else {
+            this.state.mesAtual--;
+        }
+        
+        this.renderizarCalendario();
+        console.log(`📅 Navegou para: ${this.config.MESES[this.state.mesAtual]} ${this.state.anoAtual}`);
+        
+    } catch (error) {
+        console.error('❌ Erro ao navegar mês anterior:', error);
+    }
+},
+
+proximoMes() {
+    try {
+        if (this.state.mesAtual === 11) {
+            this.state.mesAtual = 0;
+            this.state.anoAtual++;
+        } else {
+            this.state.mesAtual++;
+        }
+        
+        this.renderizarCalendario();
+        console.log(`📅 Navegou para: ${this.config.MESES[this.state.mesAtual]} ${this.state.anoAtual}`);
+        
+    } catch (error) {
+        console.error('❌ Erro ao navegar próximo mês:', error);
+    }
+},
+
+// 🔥 FUNÇÃO ATUALIZADA: selecionarDia (se já existe, substituir)
+selecionarDia(dia) {
+    try {
+        this.state.diaSelecionado = dia;
+        
+        // Re-renderizar para mostrar seleção
+        if (typeof this.renderizarCalendario === 'function') {
+            this.renderizarCalendario();
+        }
+        
+        console.log(`📅 Dia selecionado: ${dia}`);
+        
+    } catch (error) {
+        console.error('❌ Erro ao selecionar dia:', error);
+    }
+}
 // ✅ EXPOSIÇÃO GLOBAL
 window.Calendar = Calendar;
 
