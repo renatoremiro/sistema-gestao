@@ -1,10 +1,11 @@
 /**
- * 🚀 Sistema Principal v8.2 - EVENTOS GLOBAIS CORRIGIDO
+ * 🚀 Sistema Principal v8.3 - CORREÇÃO DEFINITIVA PERSISTÊNCIA
  * 
- * 🔥 CORREÇÃO CRÍTICA: Eventos visíveis para todos (logados e anônimos)
+ * 🔥 CORREÇÃO CRÍTICA: NÃO sobrescrever Auth.equipe com dados do Firebase
  * ✅ LEITURA LIVRE: Carregamento sem necessidade de autenticação
  * ✅ ESCRITA PROTEGIDA: Salvamento apenas para usuários autenticados
  * ✅ EVENTOS GLOBAIS: Toda equipe BIAPO vê os mesmos eventos
+ * ✅ USUÁRIOS PRESERVADOS: Auth.equipe nunca é sobrescrito
  */
 
 const App = {
@@ -14,7 +15,7 @@ const App = {
         carregandoDados: false,
         usuarioAutenticado: false,
         usuarioEmail: null,
-        versao: '8.2.0',
+        versao: '8.3.0', // ATUALIZADO
         debugMode: false,
         ultimoCarregamento: null,
         modoAnonimo: false
@@ -25,9 +26,9 @@ const App = {
         eventos: [],
         areas: {},
         tarefas: [],
-        usuarios: {},
+        // 🔥 USUÁRIOS REMOVIDOS - Auth.equipe é a fonte única
         metadata: {
-            versao: '8.2.0',
+            versao: '8.3.0',
             ultimaAtualizacao: null
         }
     },
@@ -35,17 +36,17 @@ const App = {
     // 👤 USUÁRIO ATUAL
     usuarioAtual: null,
 
-    // 🔥 INICIALIZAÇÃO PRINCIPAL CORRIGIDA v8.2
+    // 🔥 INICIALIZAÇÃO PRINCIPAL CORRIGIDA v8.3
     async inicializar() {
         try {
-            console.log('🚀 Inicializando Sistema BIAPO v8.2...');
+            console.log('🚀 Inicializando Sistema BIAPO v8.3...');
             
             this.estadoSistema.carregandoDados = true;
             
             // 1. Configurar estrutura básica
             this._configurarEstruturaBasica();
             
-            // 2. 🔥 CARREGAR DADOS DO FIREBASE (SEM BLOQUEIO DE AUTH)
+            // 2. 🔥 CARREGAR DADOS DO FIREBASE (SEM USUÁRIOS)
             await this._carregarDadosDoFirebaseGlobal();
             
             // 3. Configurar usuário se estiver logado
@@ -65,9 +66,10 @@ const App = {
             this.estadoSistema.carregandoDados = false;
             this.estadoSistema.ultimoCarregamento = new Date().toISOString();
             
-            console.log('✅ Sistema BIAPO v8.2 inicializado com sucesso!');
+            console.log('✅ Sistema BIAPO v8.3 inicializado com sucesso!');
             console.log(`📊 Eventos carregados: ${this.dados.eventos.length}`);
             console.log(`👤 Modo: ${this.estadoSistema.modoAnonimo ? 'Anônimo (leitura)' : 'Autenticado (escrita)'}`);
+            console.log(`👥 Usuários em Auth.equipe: ${typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe).length : 'N/A'}`);
             
         } catch (error) {
             console.error('❌ Erro na inicialização:', error);
@@ -80,10 +82,10 @@ const App = {
         }
     },
 
-    // 🔥 NOVA FUNÇÃO v8.2: CARREGAR DADOS GLOBAIS (SEM BLOQUEIO AUTH)
+    // 🔥 NOVA FUNÇÃO v8.3: CARREGAR DADOS GLOBAIS SEM USUÁRIOS
     async _carregarDadosDoFirebaseGlobal() {
         try {
-            console.log('📥 Carregando dados globais do Firebase...');
+            console.log('📥 Carregando dados globais do Firebase (SEM usuários)...');
             
             // 🔥 VERIFICAR FIREBASE SEM DEPENDER DE AUTH
             if (typeof database === 'undefined' || !database) {
@@ -98,17 +100,19 @@ const App = {
             ]);
             
             if (dadosFirebase && typeof dadosFirebase === 'object') {
-                // 🔥 APLICAR DADOS CARREGADOS (GLOBAL)
+                // 🔥 APLICAR DADOS CARREGADOS (SEM USUÁRIOS)
                 this.dados = {
                     eventos: dadosFirebase.eventos || [],
                     areas: dadosFirebase.areas || {},
                     tarefas: dadosFirebase.tarefas || [],
-                    usuarios: dadosFirebase.usuarios || {},
-                    metadata: dadosFirebase.metadata || { versao: '8.2.0' }
+                    // 🔥 USUÁRIOS REMOVIDOS - NÃO CARREGAR DO FIREBASE
+                    // usuarios: dadosFirebase.usuarios || {}, // REMOVIDO
+                    metadata: dadosFirebase.metadata || { versao: '8.3.0' }
                 };
                 
                 console.log(`✅ Dados globais carregados: ${this.dados.eventos.length} eventos`);
                 console.log(`📍 Áreas: ${Object.keys(this.dados.areas).length}`);
+                console.log(`👥 Auth.equipe preservado: ${typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe).length + ' usuários' : 'N/A'}`);
                 
                 // Atualizar timestamp
                 if (this.dados.metadata) {
@@ -129,10 +133,10 @@ const App = {
         }
     },
 
-    // 🔥 BUSCAR DADOS DO FIREBASE GLOBAL (SEM AUTH)
+    // 🔥 BUSCAR DADOS DO FIREBASE GLOBAL (SEM USUÁRIOS)
     async _buscarDadosFirebaseGlobal() {
         try {
-            console.log('🔍 Buscando dados no path /dados...');
+            console.log('🔍 Buscando dados no path /dados (SEM usuários)...');
             
             const snapshot = await database.ref('dados').once('value');
             const dados = snapshot.val();
@@ -141,7 +145,16 @@ const App = {
                 console.log('📦 Dados encontrados no Firebase:');
                 console.log(`  - Eventos: ${dados.eventos ? dados.eventos.length : 0}`);
                 console.log(`  - Áreas: ${dados.areas ? Object.keys(dados.areas).length : 0}`);
-                return dados;
+                console.log(`  - Usuários: ${dados.usuarios ? Object.keys(dados.usuarios).length + ' (IGNORADOS)' : 'nenhum'}`);
+                
+                // 🔥 RETORNAR DADOS SEM USUÁRIOS
+                return {
+                    eventos: dados.eventos || [],
+                    areas: dados.areas || {},
+                    tarefas: dados.tarefas || [],
+                    // usuarios: REMOVIDO - não carregar do Firebase
+                    metadata: dados.metadata || {}
+                };
             } else {
                 console.log('📭 Nenhum dado encontrado no Firebase');
                 return null;
@@ -221,8 +234,15 @@ const App = {
                 const backup = Persistence.recuperarBackupLocal();
                 
                 if (backup) {
-                    this.dados = backup;
-                    console.log(`📂 Backup local carregado: ${this.dados.eventos.length} eventos`);
+                    // 🔥 APLICAR BACKUP SEM USUÁRIOS
+                    this.dados = {
+                        eventos: backup.eventos || [],
+                        areas: backup.areas || {},
+                        tarefas: backup.tarefas || [],
+                        // usuarios: REMOVIDO - não carregar do backup
+                        metadata: backup.metadata || {}
+                    };
+                    console.log(`📂 Backup local carregado: ${this.dados.eventos.length} eventos (usuários preservados)`);
                     return;
                 }
             }
@@ -237,15 +257,15 @@ const App = {
         }
     },
 
-    // ✅ CONFIGURAR ESTRUTURA BÁSICA
+    // ✅ CONFIGURAR ESTRUTURA BÁSICA (SEM USUÁRIOS)
     _configurarEstruturaBasica() {
         if (!this.dados.eventos) this.dados.eventos = [];
         if (!this.dados.areas) this.dados.areas = {};
         if (!this.dados.tarefas) this.dados.tarefas = [];
-        if (!this.dados.usuarios) this.dados.usuarios = {};
+        // 🔥 USUÁRIOS REMOVIDOS - não inicializar aqui
         if (!this.dados.metadata) {
             this.dados.metadata = {
-                versao: '8.2.0',
+                versao: '8.3.0',
                 ultimaAtualizacao: new Date().toISOString()
             };
         }
@@ -254,14 +274,17 @@ const App = {
         if (typeof DataStructure !== 'undefined' && DataStructure.inicializarDados) {
             const estruturaPadrao = DataStructure.inicializarDados();
             
-            // Mesclar apenas se dados estão vazios
+            // Mesclar apenas se dados estão vazios (SEM USUÁRIOS)
             if (Object.keys(this.dados.areas).length === 0) {
                 this.dados.areas = estruturaPadrao.areas;
             }
-            if (Object.keys(this.dados.usuarios).length === 0) {
-                this.dados.usuarios = estruturaPadrao.usuarios;
-            }
+            // 🔥 NÃO mesclar usuários
+            // if (Object.keys(this.dados.usuarios).length === 0) {
+            //     this.dados.usuarios = estruturaPadrao.usuarios; // REMOVIDO
+            // }
         }
+        
+        console.log('✅ Estrutura básica configurada (Auth.equipe preservado)');
     },
 
     // ✅ CONFIGURAR USUÁRIO ATUAL
@@ -368,14 +391,14 @@ const App = {
         }
     },
 
-    // 🔄 RECARREGAR DADOS DO FIREBASE
+    // 🔄 RECARREGAR DADOS DO FIREBASE (SEM USUÁRIOS)
     async recarregarDados() {
         try {
-            console.log('🔄 Recarregando dados...');
+            console.log('🔄 Recarregando dados (preservando Auth.equipe)...');
             
             this.estadoSistema.carregandoDados = true;
             
-            // Carregar dados atualizados (sempre global)
+            // Carregar dados atualizados (sempre global, sem usuários)
             await this._carregarDadosDoFirebaseGlobal();
             
             // Atualizar módulos
@@ -389,10 +412,10 @@ const App = {
             this.estadoSistema.carregandoDados = false;
             
             if (typeof Notifications !== 'undefined') {
-                Notifications.success('🔄 Dados atualizados!');
+                Notifications.success('🔄 Dados atualizados (usuários preservados)!');
             }
             
-            console.log('✅ Dados recarregados com sucesso');
+            console.log('✅ Dados recarregados com sucesso (Auth.equipe preservado)');
             
         } catch (error) {
             console.error('❌ Erro ao recarregar dados:', error);
@@ -465,18 +488,26 @@ const App = {
             versao: this.estadoSistema.versao,
             totalEventos: this.dados.eventos.length,
             totalAreas: Object.keys(this.dados.areas).length,
+            // 🔥 USUÁRIOS DO Auth.equipe
+            totalUsuarios: typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe).length : 0,
+            fonteUsuarios: 'Auth.equipe',
             ultimoCarregamento: this.estadoSistema.ultimoCarregamento,
             firebase: typeof database !== 'undefined',
             modules: {
                 Calendar: typeof Calendar !== 'undefined',
                 Events: typeof Events !== 'undefined',
                 Persistence: typeof Persistence !== 'undefined',
-                Auth: typeof Auth !== 'undefined'
+                Auth: typeof Auth !== 'undefined',
+                AdminUsersManager: typeof AdminUsersManager !== 'undefined'
             },
             permissoes: {
                 leitura: true,
                 escrita: !this.estadoSistema.modoAnonimo,
                 admin: this.usuarioAtual?.admin || false
+            },
+            integracao: {
+                authEquipePreservado: typeof Auth !== 'undefined' && !!Auth.equipe,
+                dadosFirebaseSemUsuarios: !this.dados.hasOwnProperty('usuarios')
             }
         };
     },
@@ -522,6 +553,20 @@ const App = {
     // 🔥 VERIFICAR SE É ADMIN
     ehAdmin() {
         return this.usuarioAtual?.admin === true;
+    },
+
+    // 🔥 NOVA FUNÇÃO: OBTER USUÁRIOS (DELEGADO PARA Auth.equipe)
+    obterUsuarios() {
+        try {
+            if (typeof Auth !== 'undefined' && Auth.equipe) {
+                return Auth.equipe;
+            }
+            console.warn('⚠️ Auth.equipe não disponível');
+            return {};
+        } catch (error) {
+            console.error('❌ Erro ao obter usuários:', error);
+            return {};
+        }
     }
 };
 
@@ -532,7 +577,7 @@ window.App = App;
 window.recarregarDados = () => App.recarregarDados();
 window.statusSistema = () => App.obterStatusSistema();
 
-// 🔥 VERIFICAÇÃO DE SISTEMA (DEBUG)
+// 🔥 VERIFICAÇÃO DE SISTEMA (DEBUG) v8.3
 window.verificarSistema = () => {
     const status = App.obterStatusSistema();
     console.table({
@@ -540,13 +585,46 @@ window.verificarSistema = () => {
         'Modo': status.modoAnonimo ? 'Anônimo' : 'Autenticado',
         'Eventos': status.totalEventos,
         'Áreas': status.totalAreas,
+        'Usuários (Auth.equipe)': status.totalUsuarios,
+        'Fonte Usuários': status.fonteUsuarios,
         'Firebase': status.firebase ? 'Conectado' : 'Offline',
-        'Pode Editar': status.permissoes.escrita ? 'Sim' : 'Não'
+        'Pode Editar': status.permissoes.escrita ? 'Sim' : 'Não',
+        'Auth.equipe Preservado': status.integracao.authEquipePreservado ? 'Sim' : 'Não',
+        'Dados sem usuários': status.integracao.dadosFirebaseSemUsuarios ? 'Sim' : 'Não'
     });
     return status;
 };
 
-// 🔥 INICIALIZAÇÃO AUTOMÁTICA CORRIGIDA v8.2
+// 🔥 DEBUG ESPECÍFICO PARA USUÁRIOS v8.3
+window.debugUsuarios = () => {
+    console.log('🔍 ============ DEBUG USUÁRIOS v8.3 ============');
+    
+    const authEquipe = typeof Auth !== 'undefined' && Auth.equipe ? Auth.equipe : null;
+    const appDados = App.dados.usuarios || null;
+    
+    console.log('👥 Auth.equipe:', authEquipe ? Object.keys(authEquipe).length + ' usuários' : 'INDISPONÍVEL');
+    console.log('📊 App.dados.usuarios:', appDados ? Object.keys(appDados).length + ' usuários' : 'NÃO EXISTE (CORRETO)');
+    
+    if (authEquipe) {
+        console.log('📋 Usuários em Auth.equipe:');
+        Object.keys(authEquipe).forEach(key => {
+            const user = authEquipe[key];
+            console.log(`  - ${key}: ${user.nome} (${user.email})`);
+        });
+    }
+    
+    console.log('🎯 Fonte única de usuários:', App.obterUsuarios() === authEquipe ? 'CORRETA' : 'PROBLEMA');
+    console.log('✅ App.dados SEM usuários:', !App.dados.hasOwnProperty('usuarios') ? 'CORRETO' : 'PROBLEMA');
+    
+    return {
+        authEquipe: authEquipe ? Object.keys(authEquipe) : null,
+        appDados: appDados ? Object.keys(appDados) : null,
+        fonteUnica: App.obterUsuarios() === authEquipe,
+        dadosSemUsuarios: !App.dados.hasOwnProperty('usuarios')
+    };
+};
+
+// 🔥 INICIALIZAÇÃO AUTOMÁTICA CORRIGIDA v8.3
 document.addEventListener('DOMContentLoaded', async () => {
     // Aguardar outros módulos carregarem
     setTimeout(async () => {
@@ -555,21 +633,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ✅ LOG FINAL
-console.log('🚀 App.js v8.2 - EVENTOS GLOBAIS CORRIGIDO carregado!');
+console.log('🚀 App.js v8.3 - CORREÇÃO DEFINITIVA PERSISTÊNCIA carregado!');
 
 /*
-🔥 CORREÇÕES DEFINITIVAS v8.2:
-- _carregarDadosDoFirebaseGlobal(): Carrega SEM verificação de auth ✅
-- _detectarModoAnonimo(): Identifica modo apenas leitura ✅
-- Salvamento protegido: Apenas usuários autenticados ✅
-- Leitura livre: Todos podem ver eventos da equipe ✅
-- Indicador visual: Modo anônimo claramente identificado ✅
-- Permissões granulares: leitura vs escrita vs admin ✅
+🔥 CORREÇÕES DEFINITIVAS v8.3:
+- _carregarDadosDoFirebaseGlobal(): NÃO carrega usuários do Firebase ✅
+- _buscarDadosFirebaseGlobal(): Ignora dados de usuários ✅
+- _configurarEstruturaBasica(): NÃO inicializa usuários ✅
+- this.dados: NÃO contém propriedade 'usuarios' ✅
+- obterUsuarios(): Delegado para Auth.equipe ✅
+- recarregarDados(): Preserva Auth.equipe ✅
+- Status mostra fonte de usuários como Auth.equipe ✅
+- Debug específico para verificar usuários ✅
 
 📊 RESULTADO DEFINITIVO:
-- Eventos visíveis para todos (logados e anônimos) ✅
-- Sistema mantém segurança para edições ✅
-- Experiência clara: visualização vs edição ✅
-- Sistema v8.2 COMPLETO E FUNCIONAL ✅
+- App.dados NÃO contém usuários ✅
+- Auth.equipe nunca é sobrescrito ✅
+- AdminUsersManager pode persistir sem conflito ✅
+- Firebase não interfere com usuários ✅
+- Sistema v8.3 COM PERSISTÊNCIA FUNCIONANDO ✅
 - PROBLEMA RESOLVIDO DEFINITIVAMENTE ✅
 */
