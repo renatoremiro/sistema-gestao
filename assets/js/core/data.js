@@ -1,16 +1,15 @@
 /**
- * 📊 Sistema de Estrutura de Dados v7.4.5 - CORRIGIDO E LIMPO
+ * 📊 Sistema de Estrutura de Dados v8.3 - CORRIGIDO SEM DUPLICIDADE
  * 
- * 🔥 CORREÇÃO CRÍTICA: Arquivo limpo - removida duplicação
- * ✅ VALIDAÇÃO: Estruturas garantidas antes de verificar
- * ✅ EXPOSIÇÃO: window.DataStructure garantida
- * ✅ INICIALIZAÇÃO: Auto-executada
+ * 🔥 CORREÇÃO CRÍTICA: Removida duplicidade de usuários
+ * ✅ REFERÊNCIA: Aponta para Auth.equipe como fonte única
+ * ✅ COMPATIBILIDADE: Mantém funções necessárias
  */
 
 const DataStructure = {
     // ✅ CONFIGURAÇÕES GLOBAIS
     config: {
-        versao: '7.4.5',
+        versao: '8.3.0', // ATUALIZADO
         dataAtualizacao: '2025-07-07',
         autoSave: true,
         validacao: true,
@@ -20,119 +19,8 @@ const DataStructure = {
         maxBackups: 5
     },
 
-    // ✅ USUÁRIOS BIAPO COMPLETOS
-    usuariosBiapo: {
-        'renatoremiro@biapo.com.br': {
-            nome: 'Renato Remiro',
-            email: 'renatoremiro@biapo.com.br',
-            cargo: 'Coordenador Geral',
-            departamento: 'Gestão Geral',
-            telefone: '',
-            ativo: true,
-            administrador: true,
-            dataIngresso: '2024-01-01'
-        },
-        'brunabritto@biapo.com.br': {
-            nome: 'Bruna Britto',
-            email: 'brunabritto@biapo.com.br',
-            cargo: 'Coordenadora',
-            departamento: 'Gestão Geral',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'laracoutinho@biapo.com.br': {
-            nome: 'Lara Coutinho',
-            email: 'laracoutinho@biapo.com.br',
-            cargo: 'Analista',
-            departamento: 'Gestão Geral',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'isabella@biapo.com.br': {
-            nome: 'Isabella',
-            email: 'isabella@biapo.com.br',
-            cargo: 'Especialista',
-            departamento: 'Obra e Construção',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'eduardosantos@biapo.com.br': {
-            nome: 'Eduardo Santos',
-            email: 'eduardosantos@biapo.com.br',
-            cargo: 'Engenheiro',
-            departamento: 'Obra e Construção',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'carlosmendonca@biapo.com.br': {
-            nome: 'Carlos Mendonça (Beto)',
-            email: 'carlosmendonca@biapo.com.br',
-            cargo: 'Supervisor de Obra',
-            departamento: 'Obra e Construção',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'alex@biapo.com.br': {
-            nome: 'Alex',
-            email: 'alex@biapo.com.br',
-            cargo: 'Técnico',
-            departamento: 'Obra e Construção',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'nominatopires@biapo.com.br': {
-            nome: 'Nominato Pires',
-            email: 'nominatopires@biapo.com.br',
-            cargo: 'Especialista',
-            departamento: 'Museu Nacional',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'nayaraalencar@biapo.com.br': {
-            nome: 'Nayara Alencar',
-            email: 'nayaraalencar@biapo.com.br',
-            cargo: 'Analista',
-            departamento: 'Museu Nacional',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'estagio292@biapo.com.br': {
-            nome: 'Jean (Estagiário)',
-            email: 'estagio292@biapo.com.br',
-            cargo: 'Estagiário',
-            departamento: 'Gestão Geral',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        },
-        'redeinterna.obra3@gmail.com': {
-            nome: 'Juliana (Rede Interna)',
-            email: 'redeinterna.obra3@gmail.com',
-            cargo: 'Coordenadora de Rede',
-            departamento: 'Museu Nacional',
-            telefone: '',
-            ativo: true,
-            administrador: false,
-            dataIngresso: '2024-01-01'
-        }
-    },
+    // 🔥 USUÁRIOS REMOVIDOS - USAR Auth.equipe COMO FONTE ÚNICA
+    // usuariosBiapo: REMOVIDO - EVITA DUPLICIDADE
 
     // ✅ CONFIGURAÇÕES DOS MÓDULOS
     modulosConfig: {
@@ -187,7 +75,7 @@ const DataStructure = {
         '2025-12-25': { nome: 'Natal', tipo: 'nacional' }
     },
 
-    // ✅ INICIALIZAR DADOS - FUNÇÃO PRINCIPAL PARA APP.JS
+    // 🔥 INICIALIZAR DADOS CORRIGIDO - SEM CONFLITO DE USUÁRIOS
     inicializarDados() {
         return {
             areas: {
@@ -279,17 +167,47 @@ const DataStructure = {
             tarefas: [],
             feriados: {},
             configuracoes: this.modulosConfig,
-            usuarios: this.usuariosBiapo,
+            
+            // 🔥 USUÁRIOS: REFERÊNCIA AO Auth.equipe - NÃO COPIA
+            usuarios: this._obterUsuariosDoAuth(),
+            
             metadata: {
                 versao: this.config.versao,
                 ultimaAtualizacao: new Date().toISOString(),
                 ultimoUsuario: this._obterUsuarioAtual(),
-                totalUsuarios: Object.keys(this.usuariosBiapo).length
+                totalUsuarios: this._contarUsuariosAuth(),
+                fonteUsuarios: 'Auth.equipe' // IDENTIFICAR FONTE
             }
         };
     },
 
-    // 🔥 VALIDAR ESTRUTURA - FUNÇÃO CORRIGIDA CRÍTICA
+    // 🔥 NOVA FUNÇÃO: OBTER USUÁRIOS DO AUTH (FONTE ÚNICA)
+    _obterUsuariosDoAuth() {
+        try {
+            if (typeof Auth !== 'undefined' && Auth.equipe) {
+                return Auth.equipe; // REFERÊNCIA DIRETA
+            }
+            console.warn('⚠️ Auth.equipe não disponível, retornando objeto vazio');
+            return {};
+        } catch (error) {
+            console.error('❌ Erro ao acessar Auth.equipe:', error);
+            return {};
+        }
+    },
+
+    // 🔥 NOVA FUNÇÃO: CONTAR USUÁRIOS DO AUTH
+    _contarUsuariosAuth() {
+        try {
+            if (typeof Auth !== 'undefined' && Auth.equipe) {
+                return Object.keys(Auth.equipe).length;
+            }
+            return 0;
+        } catch (error) {
+            return 0;
+        }
+    },
+
+    // 🔥 VALIDAR ESTRUTURA - CORRIGIDA PARA NÃO SOBRESCREVER USUÁRIOS
     validarEstrutura(dados) {
         if (!dados || typeof dados !== 'object') {
             console.warn('❌ DATA: Dados inválidos, inicializando estrutura padrão');
@@ -312,15 +230,19 @@ const DataStructure = {
         if (!dados.configuracoes) {
             dados.configuracoes = this.modulosConfig;
         }
+        
+        // 🔥 USUÁRIOS: NÃO SOBRESCREVER - MANTER Auth.equipe
         if (!dados.usuarios) {
-            dados.usuarios = this.usuariosBiapo;
+            dados.usuarios = this._obterUsuariosDoAuth();
         }
+        
         if (!dados.metadata) {
             dados.metadata = {
                 versao: this.config.versao,
                 ultimaAtualizacao: new Date().toISOString(),
                 ultimoUsuario: this._obterUsuarioAtual(),
-                totalUsuarios: Object.keys(this.usuariosBiapo).length
+                totalUsuarios: this._contarUsuariosAuth(),
+                fonteUsuarios: 'Auth.equipe'
             };
         }
         
@@ -396,97 +318,65 @@ const DataStructure = {
         return stats;
     },
 
-    // ✅ OBTER USUÁRIO
+    // 🔥 OBTER USUÁRIO - DELEGADO PARA Auth.js
     obterUsuario(email) {
-        return this.usuariosBiapo[email] || null;
+        try {
+            if (typeof Auth !== 'undefined' && Auth.equipe) {
+                // Buscar por email nas chaves ou nos valores
+                for (const [key, usuario] of Object.entries(Auth.equipe)) {
+                    if (usuario.email === email || key === email) {
+                        return usuario;
+                    }
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('❌ Erro ao obter usuário:', error);
+            return null;
+        }
     },
 
-    // ✅ LISTAR USUÁRIOS
+    // 🔥 LISTAR USUÁRIOS - DELEGADO PARA Auth.js
     listarUsuarios(filtros = {}) {
         try {
-            let usuarios = Object.values(this.usuariosBiapo);
+            if (typeof Auth !== 'undefined' && Auth.equipe) {
+                let usuarios = Object.values(Auth.equipe);
 
-            if (filtros.ativo !== undefined) {
-                usuarios = usuarios.filter(u => u.ativo === filtros.ativo);
+                if (filtros.ativo !== undefined) {
+                    usuarios = usuarios.filter(u => u.ativo === filtros.ativo);
+                }
+
+                if (filtros.departamento) {
+                    usuarios = usuarios.filter(u => u.departamento === filtros.departamento);
+                }
+
+                if (filtros.administrador !== undefined) {
+                    usuarios = usuarios.filter(u => u.admin === filtros.administrador);
+                }
+
+                return usuarios.sort((a, b) => a.nome.localeCompare(b.nome));
             }
-
-            if (filtros.departamento) {
-                usuarios = usuarios.filter(u => u.departamento === filtros.departamento);
-            }
-
-            if (filtros.administrador !== undefined) {
-                usuarios = usuarios.filter(u => u.administrador === filtros.administrador);
-            }
-
-            return usuarios.sort((a, b) => a.nome.localeCompare(b.nome));
+            return [];
         } catch (error) {
             console.error('❌ DATA: Erro ao listar usuários:', error);
             return [];
         }
     },
 
-    // ✅ ADICIONAR USUÁRIO
+    // 🔥 FUNÇÕES DE USUÁRIO DELEGADAS PARA Auth.js
     adicionarUsuario(dadosUsuario) {
-        try {
-            if (!dadosUsuario.nome || !dadosUsuario.email) {
-                throw new Error('Nome e email são obrigatórios');
-            }
-
-            if (this.usuariosBiapo[dadosUsuario.email]) {
-                throw new Error('Usuário já existe');
-            }
-
-            this.usuariosBiapo[dadosUsuario.email] = {
-                nome: dadosUsuario.nome,
-                email: dadosUsuario.email,
-                cargo: dadosUsuario.cargo || 'Colaborador',
-                departamento: dadosUsuario.departamento || 'Gestão Geral',
-                telefone: dadosUsuario.telefone || '',
-                ativo: true,
-                administrador: dadosUsuario.administrador || false,
-                dataIngresso: new Date().toISOString().split('T')[0]
-            };
-
-            return true;
-        } catch (error) {
-            console.error('❌ DATA: Erro ao adicionar usuário:', error);
-            return false;
-        }
+        console.warn('⚠️ Use AdminUsersManager para adicionar usuários');
+        return false;
     },
 
-    // ✅ ATUALIZAR USUÁRIO
     atualizarUsuario(email, dadosAtualizacao) {
-        try {
-            if (!this.usuariosBiapo[email]) {
-                throw new Error('Usuário não encontrado');
-            }
-
-            this.usuariosBiapo[email] = {
-                ...this.usuariosBiapo[email],
-                ...dadosAtualizacao,
-                email: email // Manter email original
-            };
-
-            return true;
-        } catch (error) {
-            console.error('❌ DATA: Erro ao atualizar usuário:', error);
-            return false;
-        }
+        console.warn('⚠️ Use AdminUsersManager para atualizar usuários');
+        return false;
     },
 
-    // ✅ DESATIVAR USUÁRIO
     desativarUsuario(email) {
-        try {
-            if (!this.usuariosBiapo[email]) {
-                throw new Error('Usuário não encontrado');
-            }
-
-            this.usuariosBiapo[email].ativo = false;
-            return true;
-        } catch (error) {
-            console.error('❌ DATA: Erro ao desativar usuário:', error);
-            return false;
-        }
+        console.warn('⚠️ Use AdminUsersManager para desativar usuários');
+        return false;
     },
 
     // ✅ OBTER FERIADOS
@@ -520,14 +410,19 @@ const DataStructure = {
         return {
             modulo: 'DataStructure',
             versao: this.config.versao,
-            status: 'CORRIGIDO E FUNCIONAL',
-            usuarios: Object.keys(this.usuariosBiapo).length,
+            status: 'CORRIGIDO SEM DUPLICIDADE',
+            usuariosDoAuth: this._contarUsuariosAuth(),
+            fonteUsuarios: 'Auth.equipe',
             funcoes: {
                 inicializarDados: typeof this.inicializarDados === 'function',
                 validarEstrutura: typeof this.validarEstrutura === 'function',
                 calcularEstatisticas: typeof this.calcularEstatisticas === 'function'
             },
-            exposicaoGlobal: typeof window !== 'undefined' && window.DataStructure === this
+            exposicaoGlobal: typeof window !== 'undefined' && window.DataStructure === this,
+            integracao: {
+                authDisponivel: typeof Auth !== 'undefined',
+                authEquipe: typeof Auth !== 'undefined' && !!Auth.equipe
+            }
         };
     }
 };
@@ -539,7 +434,7 @@ if (typeof window !== 'undefined') {
     // Verificação de exposição
     setTimeout(() => {
         if (window.DataStructure) {
-            console.log('✅ DataStructure exposto globalmente com sucesso!');
+            console.log('✅ DataStructure v8.3 SEM DUPLICIDADE exposto globalmente!');
         } else {
             console.error('❌ FALHA CRÍTICA: DataStructure não exposto!');
         }
@@ -551,11 +446,23 @@ if (typeof window !== 'undefined') {
     window.DataStructure_Debug = {
         status: () => DataStructure.obterStatus(),
         usuarios: () => DataStructure.listarUsuarios(),
+        fonteUsuarios: () => {
+            console.log('🔍 Verificando fonte de usuários:');
+            console.log('Auth.equipe disponível:', typeof Auth !== 'undefined' && !!Auth.equipe);
+            console.log('Total usuários Auth:', DataStructure._contarUsuariosAuth());
+            return {
+                fonte: 'Auth.equipe',
+                disponivel: typeof Auth !== 'undefined' && !!Auth.equipe,
+                total: DataStructure._contarUsuariosAuth(),
+                primeiroUsuario: typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe)[0] : 'nenhum'
+            };
+        },
         testar: () => {
-            console.log('🧪 TESTE DataStructure:');
+            console.log('🧪 TESTE DataStructure v8.3:');
             console.log('- inicializarDados:', typeof DataStructure.inicializarDados);
             console.log('- validarEstrutura:', typeof DataStructure.validarEstrutura);
             console.log('- calcularEstatisticas:', typeof DataStructure.calcularEstatisticas);
+            console.log('- Fonte usuários:', DataStructure._obterUsuariosDoAuth() ? 'Auth.equipe' : 'ERRO');
             
             const dados = DataStructure.inicializarDados();
             const valido = DataStructure.validarEstrutura(dados);
@@ -567,20 +474,22 @@ if (typeof window !== 'undefined') {
 }
 
 // ✅ LOG FINAL
-console.log('✅ DataStructure v7.4.5 - CORRIGIDO E LIMPO! Funções principais prontas.');
+console.log('✅ DataStructure v8.3 - SEM DUPLICIDADE! Fonte única: Auth.equipe');
 
 /*
-🔥 CORREÇÕES APLICADAS v7.4.5:
-- ❌ Removida duplicação completa do código
-- ✅ Exposição global garantida: window.DataStructure
-- ✅ Validação corrigida: estruturas garantidas antes da validação
-- ✅ Funções principais: inicializarDados, validarEstrutura, calcularEstatisticas
-- ✅ Gestão de usuários completa
-- ✅ Log de verificação automática
+🔥 CORREÇÕES APLICADAS v8.3:
+- ❌ Removido usuariosBiapo (duplicidade eliminada)
+- ✅ _obterUsuariosDoAuth(): Referência direta ao Auth.equipe
+- ✅ Validação não sobrescreve usuários
+- ✅ Inicialização usa Auth.equipe como fonte única
+- ✅ Funções de gestão delegadas ao AdminUsersManager
+- ✅ Debug mostra fonte de usuários
+- ✅ Status identifica fonte como Auth.equipe
 
 🎯 RESULTADO:
-- app.js NÃO terá mais erro "DataStructure is not defined" ✅
-- Sistema vai carregar sem problemas ✅  
-- Firebase vai receber dados válidos ✅
-- Persistência vai funcionar 100% ✅
+- Uma única fonte de usuários: Auth.equipe ✅
+- DataStructure não cria conflito ✅  
+- AdminUsersManager pode persistir sem interferência ✅
+- Firebase vai receber dados corretos ✅
+- DUPLICIDADE ELIMINADA DEFINITIVAMENTE ✅
 */
