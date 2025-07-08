@@ -1,9 +1,9 @@
-/* ========== 🔐 AUTH BIAPO COMPLETO v8.1 - FUTURO-PROOF ========== */
+/* ========== 🔐 AUTH BIAPO COMPLETO v8.3 - INTEGRAÇÃO ADMIN ========== */
 
 var Auth = {
     // ✅ CONFIGURAÇÃO COMPLETA
     config: {
-        versao: '8.1.0',
+        versao: '8.3.0', // ATUALIZADO
         autoLogin: true,
         lembrarUsuario: true,
         sistemaEmails: true, // Para futuro
@@ -443,7 +443,7 @@ var Auth = {
                             font-size: 12px;
                             color: #059669;
                             font-weight: 500;
-                        ">✅ Sistema pronto para uso | Todos os dados salvos automaticamente</p>
+                        ">✅ Sistema v8.3 pronto | Gestão completa de usuários, áreas e departamentos</p>
                     </div>
                 </div>
             </div>
@@ -496,23 +496,122 @@ var Auth = {
         }
     },
 
-    // ========== GESTÃO DE USUÁRIOS ==========
+    // ========== GESTÃO DE USUÁRIOS v8.3 - INTEGRAÇÃO ADMINUSERSMANAGER ==========
 
-    // 👥 MOSTRAR GESTÃO DE USUÁRIOS
+    // 👥 MOSTRAR GESTÃO DE USUÁRIOS (INTEGRAÇÃO v8.3)
     mostrarGerenciarUsuarios: function() {
-        if (!this.ehAdmin()) {
-            this.mostrarMensagem('Acesso restrito a administradores', 'error');
-            return;
+        try {
+            // 🔥 VERIFICAÇÃO DE PERMISSÕES
+            if (!this.ehAdmin()) {
+                this.mostrarMensagem('❌ Acesso restrito a administradores', 'error');
+                return false;
+            }
+            
+            console.log('👑 Abrindo gestão administrativa v8.3...');
+            
+            // 🔥 VERIFICAR SE AdminUsersManager ESTÁ DISPONÍVEL
+            if (typeof AdminUsersManager !== 'undefined' && AdminUsersManager.abrirInterfaceGestao) {
+                
+                // ✅ CHAMAR ADMINUSERSMANAGER DIRETAMENTE
+                AdminUsersManager.abrirInterfaceGestao();
+                console.log('✅ AdminUsersManager v8.3 carregado com sucesso!');
+                return true;
+                
+            } else {
+                
+                // ❌ FALLBACK: AdminUsersManager não disponível
+                console.warn('⚠️ AdminUsersManager não encontrado - usando fallback');
+                this._mostrarFallbackGestaoUsuarios();
+                return false;
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao abrir gestão de usuários:', error);
+            this.mostrarMensagem('Erro interno na gestão de usuários', 'error');
+            this._mostrarFallbackGestaoUsuarios();
+            return false;
         }
-        
-        console.log('🔧 Abrindo gestão de usuários...');
-        
-        // Interface de gestão (para implementação futura)
-        var modal = this._criarModalGestaoUsuarios();
-        document.body.appendChild(modal);
     },
 
-    // 📋 LISTAR USUÁRIOS
+    // 🚨 FALLBACK: GESTÃO DE USUÁRIOS BÁSICA
+    _mostrarFallbackGestaoUsuarios: function() {
+        var modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+        `;
+        
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                padding: 40px;
+                border-radius: 16px;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            ">
+                <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+                <h3 style="color: #DC2626; margin: 0 0 16px 0;">AdminUsersManager não carregado</h3>
+                <p style="color: #6b7280; margin: 0 0 24px 0; line-height: 1.5;">
+                    O módulo de gestão avançada não está disponível.<br>
+                    Verifique se o arquivo <code>admin-users-manager.js</code> foi carregado corretamente.
+                </p>
+                
+                <div style="background: #FEF2F2; padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: left;">
+                    <h4 style="color: #991B1B; margin: 0 0 8px 0; font-size: 14px;">🔧 Solução:</h4>
+                    <ol style="color: #7F1D1D; margin: 0; padding-left: 20px; font-size: 13px;">
+                        <li>Adicione o script no index.html:<br>
+                            <code>&lt;script src="assets/js/modules/admin-users-manager.js"&gt;&lt;/script&gt;</code>
+                        </li>
+                        <li>Recarregue a página (F5)</li>
+                        <li>Tente novamente</li>
+                    </ol>
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="location.reload()" style="
+                        background: #059669;
+                        color: white;
+                        border: none;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">🔄 Recarregar Página</button>
+                    
+                    <button onclick="this.closest('div').parentElement.remove()" style="
+                        background: #6b7280;
+                        color: white;
+                        border: none;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">❌ Fechar</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Auto-fechar em 10 segundos
+        setTimeout(function() {
+            if (modal.parentElement) {
+                modal.remove();
+            }
+        }, 10000);
+    },
+
+    // 📋 LISTAR USUÁRIOS (MANTIDO PARA COMPATIBILIDADE)
     listarUsuarios: function(filtros) {
         var usuarios = [];
         var self = this;
@@ -533,28 +632,6 @@ var Auth = {
         });
         
         return usuarios;
-    },
-
-    // ➕ ADICIONAR USUÁRIO (para futuro)
-    adicionarUsuario: function(dadosUsuario) {
-        if (!this.ehAdmin()) {
-            return false;
-        }
-        
-        // Implementação futura
-        console.log('Funcionalidade de adicionar usuário em desenvolvimento');
-        return false;
-    },
-
-    // ✏️ EDITAR USUÁRIO (para futuro)
-    editarUsuario: function(id, novosDados) {
-        if (!this.ehAdmin()) {
-            return false;
-        }
-        
-        // Implementação futura
-        console.log('Funcionalidade de editar usuário em desenvolvimento');
-        return false;
     },
 
     // ========== VERIFICAÇÕES E UTILITÁRIOS ==========
@@ -590,7 +667,8 @@ var Auth = {
             tentativasLogin: this.state.tentativasLogin,
             ultimoLogin: this.state.ultimoLogin,
             sessaoIniciada: this.state.sessaoIniciada,
-            config: this.config
+            config: this.config,
+            adminUsersManager: typeof AdminUsersManager !== 'undefined'
         };
     },
 
@@ -614,6 +692,7 @@ var Auth = {
                 App.estadoSistema.usuarioAutenticado = true;
                 App.estadoSistema.usuarioEmail = this.state.usuario.email;
                 App.estadoSistema.usuarioNome = this.state.usuario.displayName;
+                App.estadoSistema.modoAnonimo = false; // v8.3: Usuário autenticado
             }
             this._log('Usuário integrado com App: ' + this.state.usuario.displayName);
         }
@@ -626,6 +705,7 @@ var Auth = {
                 App.estadoSistema.usuarioAutenticado = false;
                 App.estadoSistema.usuarioEmail = null;
                 App.estadoSistema.usuarioNome = null;
+                App.estadoSistema.modoAnonimo = true; // v8.3: Modo anônimo
             }
         }
     },
@@ -723,47 +803,6 @@ var Auth = {
         return unicos.sort();
     },
 
-    _criarModalGestaoUsuarios: function() {
-        var modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 999999;
-        `;
-        
-        modal.innerHTML = `
-            <div style="
-                background: white;
-                padding: 32px;
-                border-radius: 12px;
-                max-width: 600px;
-                width: 90%;
-                max-height: 80vh;
-                overflow-y: auto;
-            ">
-                <h3>👥 Gestão de Usuários BIAPO</h3>
-                <p>Funcionalidade em desenvolvimento para próximas versões.</p>
-                <button onclick="this.closest('.modal, div').remove()" style="
-                    background: #C53030;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                ">Fechar</button>
-            </div>
-        `;
-        
-        return modal;
-    },
-
     _aplicarFiltros: function(usuario, filtros) {
         if (filtros.ativo !== undefined && usuario.ativo !== filtros.ativo) {
             return false;
@@ -846,6 +885,7 @@ var Auth = {
             
             this._log('Auth BIAPO v' + this.config.versao + ' inicializado com sucesso');
             this._log('Usuários cadastrados: ' + Object.keys(this.equipe).length);
+            this._log('AdminUsersManager disponível: ' + (typeof AdminUsersManager !== 'undefined'));
             
         } catch (error) {
             this._logErro('Erro na inicialização: ' + error.message);
@@ -876,7 +916,8 @@ window.statusAuth = function() {
         'Usuário': status.usuario ? status.usuario.nome : 'Nenhum',
         'Admin': status.usuario ? (status.usuario.admin ? 'Sim' : 'Não') : 'N/A',
         'Total Usuários': status.totalUsuarios,
-        'Usuários Ativos': status.usuariosAtivos
+        'Usuários Ativos': status.usuariosAtivos,
+        'AdminUsersManager': status.adminUsersManager ? 'Disponível' : 'Não carregado'
     });
     return status;
 };
@@ -905,49 +946,34 @@ window.addEventListener('beforeunload', function() {
     }
 });
 
-console.log('🔐 Auth BIAPO Completo v8.1 - FUTURO-PROOF carregado!');
+console.log('🔐 Auth BIAPO v8.3 - INTEGRAÇÃO ADMINUSERSMANAGER carregado!');
 
 /*
-========== ✅ AUTH BIAPO COMPLETO v8.1 - FUNCIONALIDADES ==========
+========== ✅ AUTH BIAPO v8.3 - INTEGRAÇÃO ADMINUSERSMANAGER ==========
 
-🎯 FUNCIONALIDADES ATUAIS:
-- ✅ Login por primeiro nome (simples e rápido)
-- ✅ Equipe BIAPO completa com emails reais
-- ✅ Interface visual moderna e responsiva
-- ✅ Auto-login inteligente
-- ✅ Integração perfeita com App v8.0
-- ✅ Sistema de administração (Renato)
-- ✅ Gestão de sessão completa
-- ✅ Callbacks e eventos customizados
-- ✅ Logs e debug configurável
-- ✅ Compatibilidade total com sistema atual
+🔥 CORREÇÕES v8.3:
+- ✅ Versão atualizada para 8.3.0
+- ✅ mostrarGerenciarUsuarios() integra com AdminUsersManager
+- ✅ Fallback inteligente se AdminUsersManager não carregado
+- ✅ Verificação de permissões mantida
+- ✅ Erro de duplicidade resolvido
+- ✅ Logs de depuração melhorados
+- ✅ Interface de error para troubleshooting
 
-👥 DADOS COMPLETOS:
-- 11 usuários da equipe BIAPO
-- Emails reais para cada usuário
-- Cargos e departamentos corretos
-- Sistema de permissões (admin/user)
-- Dados para expansão futura
-
-🔧 FUNCIONALIDADES FUTURAS PREPARADAS:
-- 🔜 Login por email + senha
-- 🔜 Gestão completa de usuários
-- 🔜 Sistema de permissões avançado
-- 🔜 Auditoria de login
-- 🔜 Integração com Firebase Auth
-- 🔜 Reset de senhas
-- 🔜 Múltiplos níveis de acesso
-
-📊 COMANDOS DISPONÍVEIS:
-- loginBiapo('nome')    - Fazer login
-- logoutBiapo()         - Fazer logout
-- statusAuth()          - Ver status completo
-- equipeBiapo()         - Listar toda equipe
+🎯 FUNCIONALIDADES v8.3:
+- ✅ Botão "👥 Usuários" chama AdminUsersManager.abrirInterfaceGestao()
+- ✅ Verificação automática se módulo está carregado
+- ✅ Fallback com instruções claras se módulo não disponível
+- ✅ Integração perfeita entre Auth e AdminUsersManager
+- ✅ Zero duplicidade de funcionalidades
+- ✅ Mantém compatibilidade total com v8.2
 
 🚀 RESULTADO:
-- Sistema completo e pronto para produção ✅
-- Zero retrabalho futuro ✅
-- Dados reais preservados ✅
-- Escalabilidade garantida ✅
-- Manutenibilidade alta ✅
+- Clique em "👥 Usuários" abre AdminUsersManager v8.3 completo
+- Gestão total: Usuários + Áreas + Departamentos
+- Sem mensagem "Funcionalidade em desenvolvimento"
+- Sistema unificado e profissional
+- Troubleshooting automático se algo der errado
+
+========== 🎉 INTEGRAÇÃO COMPLETA v8.3 ==========
 */
