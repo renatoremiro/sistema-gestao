@@ -314,7 +314,7 @@ const Auth = {
         console.log('🏢 Departamentos na equipe:', Array.from(departamentosNaEquipe));
     },
 
-    // 🔐 LOGIN
+    // 🔐 LOGIN (ATUALIZADO)
     login(nomeUsuario) {
         if (!nomeUsuario || typeof nomeUsuario !== 'string') {
             console.error('❌ Nome de usuário inválido');
@@ -355,6 +355,9 @@ const Auth = {
             console.log('👑 Admin:', usuario.admin ? 'SIM' : 'NÃO');
             console.log('🏢 Departamento:', usuario.departamento);
             
+            // Atualizar interface
+            this._atualizarInterface();
+            
             return true;
         } else {
             console.error('❌ Usuário não encontrado:', nomeUsuario);
@@ -362,12 +365,16 @@ const Auth = {
         }
     },
 
-    // 🚪 LOGOUT
+    // 🚪 LOGOUT (ATUALIZADO)
     logout() {
         if (this.state.usuarioLogado) {
             console.log('🚪 Logout:', this.state.usuarioLogado.nome);
             this.state.usuarioLogado = null;
             localStorage.removeItem('biapo_usuario_logado');
+            
+            // Atualizar interface
+            this._atualizarInterface();
+            
             return true;
         }
         return false;
@@ -481,6 +488,9 @@ const Auth = {
                         loginTimestamp: dados.timestamp
                     };
                     console.log('🔄 Login automático:', usuario.nome);
+                    
+                    // Atualizar interface para usuário logado
+                    this._atualizarInterface();
                 } else {
                     localStorage.removeItem('biapo_usuario_logado');
                 }
@@ -492,11 +502,407 @@ const Auth = {
     },
 
     _configurarInterface() {
-        // Interface de login já existe
-        console.log('🎨 Interface Auth.js v8.5 configurada');
+        // Verificar se usuário já está logado
+        if (this.state.usuarioLogado) {
+            console.log('👤 Usuário já logado:', this.state.usuarioLogado.nome);
+            this._atualizarInterface();
+            return;
+        }
+
+        // Verificar se deve mostrar modal de login automaticamente
+        const modalSalvo = localStorage.getItem('biapo_mostrar_login_automatico');
+        if (modalSalvo !== 'false') {
+            // Primeira visita ou usuário quer ver modal - mostrar interface de login
+            this._criarInterfaceLogin();
+        } else {
+            // Usuário já escolheu modo anônimo antes - apenas mostrar botão
+            this._criarBotaoLogin();
+        }
+        
+        console.log('🎨 Interface de login Auth.js v8.5 configurada');
     },
 
-    // 👑 MOSTRAR GERENCIAR USUÁRIOS (COMPATIBILIDADE v8.5)
+    // 🎨 CRIAR INTERFACE DE LOGIN
+    _criarInterfaceLogin() {
+        // Remover modal existente se houver
+        const modalExistente = document.getElementById('modalLoginBiapo');
+        if (modalExistente) {
+            modalExistente.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'modalLoginBiapo';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        `;
+
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                border-radius: 16px;
+                padding: 40px;
+                width: 90%;
+                max-width: 450px;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                position: relative;
+            ">
+                <!-- Logo/Header -->
+                <div style="
+                    background: linear-gradient(135deg, #C53030 0%, #9B2C2C 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 12px;
+                    margin-bottom: 30px;
+                ">
+                    <h1 style="
+                        margin: 0;
+                        font-size: 24px;
+                        font-weight: 700;
+                    ">🏗️ Sistema BIAPO</h1>
+                    <p style="
+                        margin: 8px 0 0 0;
+                        opacity: 0.9;
+                        font-size: 14px;
+                    ">Obra 292 - Museu Nacional</p>
+                </div>
+
+                <!-- Informações -->
+                <div style="
+                    background: #f9fafb;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin-bottom: 30px;
+                    text-align: left;
+                ">
+                    <h3 style="margin: 0 0 12px 0; color: #1f2937; font-size: 16px;">
+                        ✅ Sistema v8.5 Carregado
+                    </h3>
+                    <div style="font-size: 14px; color: #6b7280; line-height: 1.5;">
+                        👥 <strong>${Object.keys(this.equipe).length} usuários</strong> da equipe BIAPO<br>
+                        🏢 <strong>${this.departamentos.length} departamentos</strong> ativos<br>
+                        👑 <strong>${this.obterAdmins().length} administradores</strong><br>
+                        🔥 <strong>Fonte:</strong> ${this.state.fonteEquipeAtual}
+                    </div>
+                </div>
+
+                <!-- Formulário de Login -->
+                <div style="margin-bottom: 30px;">
+                    <h2 style="
+                        margin: 0 0 20px 0;
+                        color: #1f2937;
+                        font-size: 20px;
+                        font-weight: 600;
+                    ">🔐 Faça seu Login</h2>
+                    
+                    <input 
+                        type="text" 
+                        id="inputNomeUsuario"
+                        placeholder="Digite seu primeiro nome (ex: isabella, renato)"
+                        style="
+                            width: 100%;
+                            padding: 16px;
+                            border: 2px solid #e5e7eb;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            margin-bottom: 20px;
+                            box-sizing: border-box;
+                            transition: border-color 0.2s ease;
+                        "
+                        onfocus="this.style.borderColor='#C53030'"
+                        onblur="this.style.borderColor='#e5e7eb'"
+                        onkeypress="if(event.key==='Enter') Auth._tentarLogin()"
+                    />
+                    
+                    <button 
+                        onclick="Auth._tentarLogin()"
+                        style="
+                            width: 100%;
+                            background: linear-gradient(135deg, #C53030 0%, #9B2C2C 100%);
+                            color: white;
+                            border: none;
+                            padding: 16px;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: transform 0.2s ease;
+                        "
+                        onmouseover="this.style.transform='translateY(-1px)'"
+                        onmouseout="this.style.transform='translateY(0)'"
+                    >
+                        🚀 Entrar no Sistema
+                    </button>
+                </div>
+
+                <!-- Acesso Anônimo -->
+                <div style="
+                    border-top: 1px solid #e5e7eb;
+                    padding-top: 20px;
+                    margin-top: 20px;
+                ">
+                    <p style="
+                        margin: 0 0 15px 0;
+                        color: #6b7280;
+                        font-size: 14px;
+                    ">
+                        Ou visualize os eventos sem fazer login:
+                    </p>
+                    <button 
+                        onclick="Auth._acessoAnonimo()"
+                        style="
+                            background: #6b7280;
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            cursor: pointer;
+                        "
+                    >
+                        👁️ Visualizar Eventos (Somente Leitura)
+                    </button>
+                </div>
+
+                <!-- Mensagem de erro -->
+                <div id="mensagemErroLogin" style="
+                    margin-top: 20px;
+                    padding: 12px;
+                    border-radius: 6px;
+                    display: none;
+                    background: #fef2f2;
+                    border: 1px solid #fecaca;
+                    color: #dc2626;
+                    font-size: 14px;
+                "></div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Focar no input
+        setTimeout(() => {
+            const input = document.getElementById('inputNomeUsuario');
+            if (input) input.focus();
+        }, 100);
+    },
+
+    // 🔐 TENTAR LOGIN
+    _tentarLogin() {
+        const input = document.getElementById('inputNomeUsuario');
+        const mensagemErro = document.getElementById('mensagemErroLogin');
+        
+        if (!input || !mensagemErro) return;
+
+        const nomeUsuario = input.value.trim();
+        
+        if (!nomeUsuario) {
+            this._mostrarErroLogin('Por favor, digite seu nome');
+            return;
+        }
+
+        console.log('🔐 Tentativa de login:', nomeUsuario);
+
+        if (this.login(nomeUsuario)) {
+            // Login bem-sucedido
+            this._fecharModalLogin();
+            this._mostrarSucesso();
+            
+            // Recarregar página para aplicar mudanças
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            // Login falhou
+            this._mostrarErroLogin(`Usuário "${nomeUsuario}" não encontrado.\n\nUsuários disponíveis: ${Object.keys(this.equipe).join(', ')}`);
+        }
+    },
+
+    // 👁️ ACESSO ANÔNIMO (ATUALIZADO)
+    _acessoAnonimo() {
+        console.log('👁️ Acesso anônimo selecionado');
+        
+        // Salvar preferência para não mostrar modal automaticamente
+        localStorage.setItem('biapo_mostrar_login_automatico', 'false');
+        
+        this._fecharModalLogin();
+        
+        // Mostrar mensagem sobre modo de visualização
+        this._mostrarModoVisualizacao();
+        
+        // Criar botão de login para acesso posterior
+        this._criarBotaoLogin();
+    },
+
+    // ❌ MOSTRAR ERRO DE LOGIN
+    _mostrarErroLogin(mensagem) {
+        const mensagemErro = document.getElementById('mensagemErroLogin');
+        if (mensagemErro) {
+            mensagemErro.textContent = mensagem;
+            mensagemErro.style.display = 'block';
+        }
+    },
+
+    // ✅ MOSTRAR SUCESSO
+    _mostrarSucesso() {
+        const usuario = this.state.usuarioLogado;
+        
+        // Criar notificação de sucesso
+        const notificacao = document.createElement('div');
+        notificacao.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 350px;
+        `;
+        
+        notificacao.innerHTML = `
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 24px; margin-right: 12px;">✅</span>
+                <div>
+                    <div style="font-weight: 700; font-size: 16px;">Login Realizado!</div>
+                    <div style="opacity: 0.9; font-size: 14px;">Bem-vindo(a) ao Sistema BIAPO</div>
+                </div>
+            </div>
+            <div style="font-size: 14px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
+                👤 <strong>${usuario.nome}</strong><br>
+                🏢 ${usuario.departamento}<br>
+                👑 ${usuario.admin ? 'Administrador' : 'Usuário'}
+            </div>
+        `;
+        
+        document.body.appendChild(notificacao);
+        
+        // Remover após 3 segundos
+        setTimeout(() => {
+            notificacao.remove();
+        }, 3000);
+    },
+
+    // 👁️ MOSTRAR MODO VISUALIZAÇÃO
+    _mostrarModoVisualizacao() {
+        const notificacao = document.createElement('div');
+        notificacao.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 350px;
+        `;
+        
+        notificacao.innerHTML = `
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 24px; margin-right: 12px;">👁️</span>
+                <div>
+                    <div style="font-weight: 700; font-size: 16px;">Modo Visualização</div>
+                    <div style="opacity: 0.9; font-size: 14px;">Você pode ver eventos, mas não editar</div>
+                </div>
+            </div>
+            <div style="font-size: 14px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
+                📅 <strong>Eventos:</strong> Visualização completa<br>
+                ❌ <strong>Edição:</strong> Não disponível<br>
+                🔐 <strong>Login:</strong> Clique no canto superior direito
+            </div>
+        `;
+        
+        document.body.appendChild(notificacao);
+        
+        // Remover após 4 segundos
+        setTimeout(() => {
+            notificacao.remove();
+        }, 4000);
+    },
+
+    // ❌ FECHAR MODAL DE LOGIN
+    _fecharModalLogin() {
+        const modal = document.getElementById('modalLoginBiapo');
+        if (modal) {
+            modal.remove();
+        }
+    },
+
+    // 🎨 CRIAR BOTÃO DE LOGIN (MODO ANÔNIMO)
+    _criarBotaoLogin() {
+        // Remover botão existente
+        const botaoExistente = document.getElementById('botaoLoginBiapo');
+        if (botaoExistente) {
+            botaoExistente.remove();
+        }
+
+        const botao = document.createElement('div');
+        botao.id = 'botaoLoginBiapo';
+        botao.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #C53030 0%, #9B2C2C 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(197, 48, 48, 0.4);
+            z-index: 999998;
+            transition: transform 0.2s ease;
+            user-select: none;
+        `;
+        
+        botao.innerHTML = '🔐 Fazer Login';
+        
+        botao.addEventListener('click', () => {
+            this._criarInterfaceLogin();
+        });
+        
+        botao.addEventListener('mouseover', () => {
+            botao.style.transform = 'translateY(-2px)';
+        });
+        
+        botao.addEventListener('mouseout', () => {
+            botao.style.transform = 'translateY(0)';
+        });
+        
+        document.body.appendChild(botao);
+    },
+
+    // 🔄 ATUALIZAR INTERFACE BASEADA NO LOGIN
+    _atualizarInterface() {
+        if (this.state.usuarioLogado) {
+            // Usuário logado - remover botão de login
+            const botaoLogin = document.getElementById('botaoLoginBiapo');
+            if (botaoLogin) {
+                botaoLogin.remove();
+            }
+        } else {
+            // Usuário não logado - mostrar botão de login
+            this._criarBotaoLogin();
+        }
+    },
     mostrarGerenciarUsuarios() {
         console.log('👑 Abrindo gestão administrativa v8.5...');
         
@@ -521,7 +927,16 @@ window.Auth = Auth;
 
 // ✅ FUNÇÕES GLOBAIS DE CONVENIÊNCIA
 window.loginBiapo = (nome) => Auth.login(nome);
-window.logoutBiapo = () => Auth.logout();
+window.logoutBiapo = () => {
+    const resultado = Auth.logout();
+    if (resultado) {
+        // Mostrar interface de login após logout
+        setTimeout(() => {
+            Auth._criarInterfaceLogin();
+        }, 500);
+    }
+    return resultado;
+};
 window.statusAuth = () => {
     const status = Auth.obterStatus();
     console.log('📊 STATUS AUTH.JS v8.5:');
