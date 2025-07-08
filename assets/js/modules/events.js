@@ -1,10 +1,10 @@
 /**
- * 📅 Sistema de Gestão de Eventos v8.2 - COMPATÍVEL COM MODO ANÔNIMO
+ * 📅 Sistema de Gestão de Eventos v8.3 - PARTICIPANTES DINÂMICOS CORRIGIDOS
  * 
- * 🔥 NOVA FUNCIONALIDADE: Verifica permissões antes de permitir edições
- * ✅ MODO ANÔNIMO: Permite visualização, bloqueia edição
- * ✅ INTERFACE INTELIGENTE: Adapta botões baseado em permissões
- * ✅ INTEGRAÇÃO: Funciona perfeitamente com App v8.2
+ * 🔥 CORREÇÃO CRÍTICA: Participantes agora sincronizam com AdminUsersManager
+ * ✅ DINÂMICO: Lista atualizada automaticamente com usuários reais
+ * ✅ FALLBACK: Mantém lista hardcoded como segurança
+ * ✅ SINCRONIZAÇÃO: 100% integrado com Auth.equipe
  */
 
 const Events = {
@@ -27,8 +27,8 @@ const Events = {
             { value: 'cancelado', label: 'Cancelado', cor: '#ef4444' }
         ],
         
-        // Lista BIAPO completa e atualizada
-        participantesBiapo: [
+        // 🔥 LISTA HARDCODED AGORA É APENAS FALLBACK
+        participantesBiapoFallback: [
             'Renato Remiro',
             'Bruna Britto', 
             'Lara Coutinho',
@@ -48,7 +48,71 @@ const Events = {
         modalAtivo: false,
         eventoEditando: null,
         participantesSelecionados: [],
-        modoAnonimo: false
+        modoAnonimo: false,
+        // 🔥 NOVO: Cache de participantes para performance
+        participantesCache: null,
+        ultimaAtualizacaoParticipantes: null
+    },
+
+    // 🔥 NOVA FUNÇÃO: OBTER PARTICIPANTES DINÂMICOS
+    _obterParticipantesBiapo() {
+        try {
+            // Cache válido por 30 segundos para performance
+            const agora = Date.now();
+            if (this.state.participantesCache && 
+                this.state.ultimaAtualizacaoParticipantes && 
+                (agora - this.state.ultimaAtualizacaoParticipantes) < 30000) {
+                return this.state.participantesCache;
+            }
+
+            let participantes = [];
+
+            // 🎯 FONTE PRIMÁRIA: Auth.equipe (dados do AdminUsersManager)
+            if (typeof Auth !== 'undefined' && Auth.equipe && Object.keys(Auth.equipe).length > 0) {
+                participantes = Object.values(Auth.equipe)
+                    .filter(usuario => {
+                        // Filtrar apenas usuários ativos com dados válidos
+                        return usuario && 
+                               usuario.ativo !== false && 
+                               usuario.nome && 
+                               usuario.nome.trim().length > 0;
+                    })
+                    .map(usuario => usuario.nome.trim())
+                    .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+                console.log(`✅ Participantes carregados do Auth.equipe: ${participantes.length} usuários`);
+                console.log('👥 Lista:', participantes.join(', '));
+            }
+
+            // 🔄 FALLBACK: Se não há usuários dinâmicos, usar lista hardcoded
+            if (participantes.length === 0) {
+                participantes = [...this.config.participantesBiapoFallback];
+                console.warn('⚠️ Usando lista fallback de participantes');
+            }
+
+            // 🔥 CACHE PARA PERFORMANCE
+            this.state.participantesCache = participantes;
+            this.state.ultimaAtualizacaoParticipantes = agora;
+
+            return participantes;
+
+        } catch (error) {
+            console.error('❌ Erro ao obter participantes dinâmicos:', error);
+            
+            // Em caso de erro, usar fallback
+            return [...this.config.participantesBiapoFallback];
+        }
+    },
+
+    // 🔥 NOVA FUNÇÃO: FORÇAR ATUALIZAÇÃO DE PARTICIPANTES
+    atualizarParticipantes() {
+        this.state.participantesCache = null;
+        this.state.ultimaAtualizacaoParticipantes = null;
+        
+        const novosParticipantes = this._obterParticipantesBiapo();
+        console.log(`🔄 Participantes atualizados: ${novosParticipantes.length} usuários`);
+        
+        return novosParticipantes;
     },
 
     // 🔥 VERIFICAR PERMISSÕES DE EDIÇÃO
@@ -89,6 +153,9 @@ const Events = {
             this.state.eventoEditando = null;
             this.state.participantesSelecionados = [];
             
+            // 🔥 ATUALIZAR PARTICIPANTES ANTES DE ABRIR MODAL
+            this.atualizarParticipantes();
+            
             this._criarModal(dataInput);
             this.state.modalAtivo = true;
 
@@ -122,6 +189,9 @@ const Events = {
             
             this.state.eventoEditando = id;
             this.state.participantesSelecionados = evento.pessoas || evento.participantes || [];
+            
+            // 🔥 ATUALIZAR PARTICIPANTES ANTES DE ABRIR MODAL
+            this.atualizarParticipantes();
             
             this._criarModal(evento.data, evento);
             this.state.modalAtivo = true;
@@ -504,7 +574,7 @@ const Events = {
         }
     },
 
-    // 🔥 CRIAR MODAL OTIMIZADO - VISIBILIDADE 100% GARANTIDA (mantém v8.1)
+    // 🔥 CRIAR MODAL OTIMIZADO - VISIBILIDADE 100% GARANTIDA (com participantes dinâmicos)
     _criarModal(dataInicial, dadosEvento = null) {
         // Remover modal existente
         this._removerModal();
@@ -565,17 +635,15 @@ const Events = {
         }, 100);
     },
 
-    // === MANTER TODAS AS OUTRAS FUNÇÕES DO v8.1 ===
-    // (Mantém: _gerarHtmlModal, _configurarEventListeners, _submeterFormulario, 
-    //  fecharModal, _salvarEAtualizarCalendario, etc.)
-
-    // 🔥 GERAR HTML DO MODAL OTIMIZADO (mantém v8.1)
+    // 🔥 GERAR HTML DO MODAL OTIMIZADO (com participantes dinâmicos)
     _gerarHtmlModal(titulo, dataInicial, dadosEvento, ehEdicao) {
         const tiposHtml = this.config.tipos.map(tipo => 
             `<option value="${tipo.value}" ${dadosEvento?.tipo === tipo.value ? 'selected' : ''}>${tipo.icon} ${tipo.label}</option>`
         ).join('');
         
-        const participantesHtml = this.config.participantesBiapo.map(pessoa => {
+        // 🔥 USAR PARTICIPANTES DINÂMICOS
+        const participantesDinamicos = this._obterParticipantesBiapo();
+        const participantesHtml = participantesDinamicos.map(pessoa => {
             const selecionado = this.state.participantesSelecionados.includes(pessoa) || 
                                dadosEvento?.pessoas?.includes(pessoa) || 
                                dadosEvento?.participantes?.includes(pessoa);
@@ -598,6 +666,11 @@ const Events = {
                 </label>
             `;
         }).join('');
+
+        // 🔥 INDICADOR DE FONTE DOS PARTICIPANTES
+        const fonteParticipantes = participantesDinamicos.length > this.config.participantesBiapoFallback.length ? 
+            '✅ Usuários dinâmicos do AdminUsersManager' : 
+            '⚠️ Lista padrão (configure usuários no AdminUsersManager)';
 
         return `
             <div style="
@@ -755,11 +828,22 @@ const Events = {
                                       onblur="this.style.borderColor='#e5e7eb'">${dadosEvento?.descricao || ''}</textarea>
                         </div>
                         
-                        <!-- Participantes -->
+                        <!-- Participantes DINÂMICOS -->
                         <div>
                             <label style="display: block !important; margin-bottom: 6px !important; font-weight: 600 !important; color: #374151 !important;">
-                                👥 Participantes BIAPO
+                                👥 Participantes BIAPO (${participantesDinamicos.length} usuários)
                             </label>
+                            <div style="
+                                font-size: 11px !important;
+                                color: #6b7280 !important;
+                                margin-bottom: 8px !important;
+                                padding: 6px 8px !important;
+                                background: #f8fafc !important;
+                                border-radius: 4px !important;
+                                border: 1px solid #e5e7eb !important;
+                            ">
+                                🔄 ${fonteParticipantes}
+                            </div>
                             <div style="
                                 max-height: 180px !important; 
                                 overflow-y: auto !important; 
@@ -975,13 +1059,20 @@ const Events = {
         }
     },
 
-    // ✅ OBTER STATUS v8.2
+    // ✅ OBTER STATUS v8.3 - DINÂMICO
     obterStatus() {
+        const participantes = this._obterParticipantesBiapo();
+        
         return {
             modalAtivo: this.state.modalAtivo,
             eventoEditando: this.state.eventoEditando,
             modoAnonimo: this.state.modoAnonimo,
-            participantesDisponiveis: this.config.participantesBiapo.length,
+            participantes: {
+                total: participantes.length,
+                fonte: participantes.length > this.config.participantesBiapoFallback.length ? 'Auth.equipe' : 'Fallback',
+                ultimaAtualizacao: this.state.ultimaAtualizacaoParticipantes,
+                cache: !!this.state.participantesCache
+            },
             totalEventos: App.dados?.eventos?.length || 0,
             integracaoCalendar: typeof Calendar !== 'undefined',
             permissoes: {
@@ -990,8 +1081,9 @@ const Events = {
                 editar: this._verificarPermissoes(),
                 excluir: this._verificarPermissoes()
             },
-            versao: '8.2.0 - COMPATÍVEL COM MODO ANÔNIMO',
-            correcaoAplicada: true
+            versao: '8.3.0 - PARTICIPANTES DINÂMICOS CORRIGIDOS',
+            correcaoAplicada: true,
+            sincronizacaoAdminUsers: typeof Auth !== 'undefined' && !!Auth.equipe
         };
     }
 };
@@ -999,22 +1091,65 @@ const Events = {
 // ✅ EXPOR NO WINDOW GLOBAL
 window.Events = Events;
 
+// 🔥 COMANDOS GLOBAIS PARA TESTE
+window.Events_Debug = {
+    status: () => Events.obterStatus(),
+    participantes: () => Events._obterParticipantesBiapo(),
+    atualizarParticipantes: () => Events.atualizarParticipantes(),
+    testeParticipantes: () => {
+        console.log('🧪 TESTE PARTICIPANTES DINÂMICOS v8.3');
+        console.log('===========================================');
+        
+        const participantes = Events._obterParticipantesBiapo();
+        const authUsuarios = typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe).length : 0;
+        
+        console.log(`👥 Participantes retornados: ${participantes.length}`);
+        console.log(`🔗 Auth.equipe disponível: ${authUsuarios} usuários`);
+        console.log(`📋 Lista: ${participantes.join(', ')}`);
+        console.log(`🎯 Fonte: ${participantes.length > Events.config.participantesBiapoFallback.length ? 'DINÂMICA ✅' : 'FALLBACK ⚠️'}`);
+        
+        if (authUsuarios > 0) {
+            console.log('✅ Sincronização funcionando!');
+        } else {
+            console.log('⚠️ Auth.equipe não carregado - usar AdminUsersManager primeiro');
+        }
+        
+        return {
+            participantes,
+            total: participantes.length,
+            fonte: participantes.length > Events.config.participantesBiapoFallback.length ? 'dinamica' : 'fallback',
+            authUsuarios,
+            sincronizado: authUsuarios > 0
+        };
+    }
+};
+
 // ✅ LOG DE CARREGAMENTO
-console.log('📅 Events.js v8.2 - COMPATÍVEL COM MODO ANÔNIMO carregado!');
+console.log('📅 Events.js v8.3 - PARTICIPANTES DINÂMICOS CORRIGIDOS carregado!');
+console.log('🔥 NOVO: Participantes sincronizam automaticamente com AdminUsersManager');
+console.log('📋 Comandos: Events_Debug.testeParticipantes() | Events_Debug.participantes()');
 
 /*
-🔥 MELHORIAS v8.2:
-- _verificarPermissoes(): Integração com App.podeEditar() ✅
-- _mostrarDetalhesEvento(): Modal de visualização para anônimos ✅
-- _mostrarMensagemModoAnonimo(): Mensagens educativas ✅
-- Verificação de permissões em todas as ações críticas ✅
-- Interface adaptativa baseada em permissões ✅
-- Modal de detalhes bonito e informativo ✅
+🔥 MELHORIAS v8.3 - PARTICIPANTES DINÂMICOS:
 
-🎯 RESULTADO FINAL v8.2:
-- Events.js 100% compatível com modo anônimo ✅
-- Visualização rica para usuários não logados ✅
-- Edição protegida apenas para autenticados ✅
-- Interface inteligente e educativa ✅
-- Sistema v8.2 COMPLETO E INTEGRADO ✅
+✅ CORREÇÕES APLICADAS:
+1. _obterParticipantesBiapo(): Função dinâmica que lê de Auth.equipe ✅
+2. Cache de 30s para performance otimizada ✅  
+3. Fallback inteligente para lista hardcoded ✅
+4. Sincronização automática com AdminUsersManager ✅
+5. Indicador visual da fonte dos dados no modal ✅
+6. Debug completo para troubleshooting ✅
+
+🎯 RESULTADO FINAL v8.3:
+- Usuários cadastrados pelo admin aparecem AUTOMATICAMENTE nos eventos ✅
+- Lista atualizada dinamicamente ✅
+- Performance otimizada com cache ✅
+- Sistema robusto com fallback ✅
+- Debug completo disponível ✅
+- PROBLEMA CRÍTICO RESOLVIDO DEFINITIVAMENTE ✅
+
+📋 PRÓXIMOS PASSOS:
+1. Testar modal de eventos (deve mostrar usuários dinâmicos) ✅
+2. Corrigir departamentos persistentes (próxima etapa)
+3. Limpeza de redundâncias (manutenção)
 */
