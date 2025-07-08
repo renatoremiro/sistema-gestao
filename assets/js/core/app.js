@@ -108,8 +108,7 @@ const App = {
             // 6. Renderizar interface
             this._renderizarInterface();
             
-            // 7. 🔥 MOSTRAR INDICADOR DE SYNC
-            this._mostrarIndicadorSync();
+            // 7. Sync ativo (sem indicador visual)
             
             // 8. Finalizar
             this.estadoSistema.inicializado = true;
@@ -221,8 +220,7 @@ const App = {
                         // 🔥 ATUALIZAR CALENDAR EM TEMPO REAL
                         this._atualizarCalendarSync();
                         
-                        // Mostrar indicador de sincronização
-                        this._mostrarIndicadorSyncAtualizado();
+                        // Sync silencioso - sem indicador visual
                         
                         // Atualizar timestamp
                         this.estadoSistema.ultimaSincronizacao = new Date().toISOString();
@@ -342,113 +340,9 @@ const App = {
         console.log('✅ Sync por polling ativado (30s)');
     },
 
-    // 🔥 INDICADOR VISUAL DE SYNC
-    _mostrarIndicadorSync() {
-        try {
-            // Remover indicador anterior
-            const indicadorAnterior = document.getElementById('indicadorSync');
-            if (indicadorAnterior) {
-                indicadorAnterior.remove();
-            }
-            
-            // Criar novo indicador
-            const indicador = document.createElement('div');
-            indicador.id = 'indicadorSync';
-            indicador.style.cssText = `
-                position: fixed;
-                top: 10px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: linear-gradient(135deg, #10b981, #059669);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                transition: all 0.3s ease;
-                border: 1px solid rgba(255,255,255,0.2);
-            `;
-            
-            const statusTexto = this.estadoSistema.syncAtivo === true ? 
-                'Sincronização Ativa' : 
-                this.estadoSistema.syncAtivo === 'polling' ? 
-                'Sync Backup Ativo' : 
-                'Offline';
-            
-            const icone = this.estadoSistema.syncAtivo ? '🔄' : '📡';
-            
-            indicador.innerHTML = `
-                <span style="animation: ${this.estadoSistema.syncAtivo ? 'spin 2s linear infinite' : 'none'};">${icone}</span>
-                <span>${statusTexto}</span>
-                <small style="opacity: 0.8;">v8.5.0</small>
-            `;
-            
-            // Adicionar CSS da animação
-            if (!document.getElementById('syncAnimationCSS')) {
-                const style = document.createElement('style');
-                style.id = 'syncAnimationCSS';
-                style.textContent = `
-                    @keyframes spin {
-                        from { transform: rotate(0deg); }
-                        to { transform: rotate(360deg); }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            document.body.appendChild(indicador);
-            this.estadoSistema.indicadorSync = indicador;
-            
-            // Auto-ocultar após 5 segundos se sync estiver funcionando
-            if (this.estadoSistema.syncAtivo) {
-                setTimeout(() => {
-                    if (indicador && indicador.parentNode) {
-                        indicador.style.opacity = '0.6';
-                        indicador.style.transform = 'translateX(-50%) scale(0.9)';
-                    }
-                }, this.config.indicadorSyncTimeout);
-            }
-            
-        } catch (error) {
-            console.warn('⚠️ Erro ao mostrar indicador sync:', error);
-        }
-    },
-
-    // 🔥 MOSTRAR INDICADOR DE ATUALIZAÇÃO
-    _mostrarIndicadorSyncAtualizado() {
-        try {
-            const indicador = this.estadoSistema.indicadorSync;
-            if (!indicador) return;
-            
-            // Animação de atualização
-            indicador.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-            indicador.innerHTML = `
-                <span style="animation: spin 1s linear infinite;">🔄</span>
-                <span>Dados Atualizados!</span>
-                <small style="opacity: 0.8;">${new Date().toLocaleTimeString()}</small>
-            `;
-            
-            // Voltar ao normal após 2 segundos
-            setTimeout(() => {
-                if (indicador && indicador.parentNode) {
-                    indicador.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                    indicador.innerHTML = `
-                        <span style="animation: spin 2s linear infinite;">🔄</span>
-                        <span>Sincronização Ativa</span>
-                        <small style="opacity: 0.8;">v8.5.0</small>
-                    `;
-                }
-            }, 2000);
-            
-        } catch (error) {
-            console.warn('⚠️ Erro ao atualizar indicador:', error);
-        }
-    },
+    // 🔥 INDICADORES VISUAIS REMOVIDOS (funcionalidade mantida)
+    // _mostrarIndicadorSync() - REMOVIDO
+    // _mostrarIndicadorModoAnonimo() - REMOVIDO
 
     // 🔥 DESATIVAR SYNC (para cleanup)
     _desativarSync() {
@@ -470,11 +364,7 @@ const App = {
             this.estadoSistema.pollingInterval = null;
             this.estadoSistema.syncAtivo = false;
             
-            // Remover indicador
-            if (this.estadoSistema.indicadorSync) {
-                this.estadoSistema.indicadorSync.remove();
-                this.estadoSistema.indicadorSync = null;
-            }
+            // Indicador removido - sync limpo
             
             console.log('🔄 Sync desativado');
             
@@ -488,7 +378,7 @@ const App = {
         console.log('🔄 Reativando sync...');
         this._desativarSync();
         this._ativarSyncTempoReal();
-        this._mostrarIndicadorSync();
+        // Sync reativado silenciosamente
     },
 
     // ========== MANTER TODAS AS OUTRAS FUNÇÕES EXISTENTES ==========
@@ -699,46 +589,11 @@ const App = {
         
         if (this.estadoSistema.modoAnonimo) {
             console.log('👁️ Modo anônimo ativado');
-            this._mostrarIndicadorModoAnonimo();
+            // Indicador removido - funcionalidade mantida
         }
     },
 
-    // 🔥 INDICADOR MODO ANÔNIMO OTIMIZADO
-    _mostrarIndicadorModoAnonimo() {
-        try {
-            if (document.getElementById('indicadorAnonimo')) return;
-            
-            const indicador = document.createElement('div');
-            indicador.id = 'indicadorAnonimo';
-            indicador.style.cssText = `
-                position: fixed;
-                top: 60px;
-                right: 10px;
-                background: linear-gradient(135deg, #374151, #1f2937);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                z-index: 1000;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            `;
-            
-            indicador.innerHTML = `
-                <span>👁️</span>
-                <span>Modo Visualização</span>
-                <small style="opacity: 0.8; margin-left: 4px;">(Apenas Leitura)</small>
-            `;
-            
-            document.body.appendChild(indicador);
-            
-        } catch (error) {
-            // Silencioso - indicador é opcional
-        }
-    },
+    // Funções de indicador visual removidas - interface limpa mantida
 
     // 🔥 BACKUP LOCAL OTIMIZADO
     async _tentarCarregarBackupLocal() {
@@ -974,7 +829,7 @@ const App = {
                 ultimaSincronizacao: this.estadoSistema.ultimaSincronizacao,
                 listenerAtivo: !!this.estadoSistema.listenerAtivo,
                 pollingAtivo: !!this.estadoSistema.pollingInterval,
-                indicadorVisivel: !!this.estadoSistema.indicadorSync
+                interfaceLimpa: true // Indicadores removidos
             },
             // Módulos
             modules: {
@@ -998,10 +853,10 @@ const App = {
                 integracaoCorrigida: true,
                 syncTempoRealFuncionando: this.estadoSistema.syncAtivo !== false
             },
-            // 🔥 FUNCIONALIDADES v8.5.0
+            // 🔥 FUNCIONALIDADES v8.5.0 (Interface Limpa)
             funcionalidades: {
                 syncTempoReal: this.estadoSistema.syncAtivo !== false,
-                indicadorVisual: !!this.estadoSistema.indicadorSync,
+                interfaceLimpa: true,
                 fallbackPolling: !!this.estadoSistema.pollingInterval,
                 comparacaoInteligente: true,
                 atualizacaoAutomatica: true
@@ -1134,9 +989,9 @@ window.debugSync = () => {
     console.log('  ultimaSincronizacao:', sync.ultimaSincronizacao);
     console.log('  firebaseDisponivel:', sync.firebaseDisponivel);
     
-    console.log('\n📊 Indicadores:');
-    console.log('  indicadorSync visível:', !!sync.indicadorSync);
-    console.log('  indicadorAnonimo visível:', !!document.getElementById('indicadorAnonimo'));
+    console.log('\n📊 Interface:');
+    console.log('  interfaceLimpa: true (indicadores removidos)');
+    console.log('  modoAnonimo detectado:', !!document.getElementById('indicadorAnonimo'));
     
     console.log('\n🎯 Dados Atuais:');
     console.log('  eventos:', App.dados.eventos.length);
@@ -1163,6 +1018,7 @@ window.debugSync = () => {
         ultimaSincronizacao: sync.ultimaSincronizacao,
         firebase: sync.firebaseDisponivel,
         eventos: App.dados.eventos.length,
+        interfaceLimpa: true,
         funcionando: sync.syncAtivo !== false
     };
 };
@@ -1200,8 +1056,8 @@ window.addEventListener('beforeunload', () => {
 });
 
 // ✅ LOG FINAL OTIMIZADO v8.5.0
-console.log('🚀 App.js v8.5.0 - FIREBASE REALTIME SYNC IMPLEMENTADO!');
-console.log('🔥 Novidades: Listener tempo real + Indicador visual + Fallback polling + Comparação inteligente');
+console.log('🚀 App.js v8.5.0 - FIREBASE REALTIME SYNC (Interface Limpa)!');
+console.log('🔥 Funcionalidades: Listener tempo real + Fallback polling + Comparação inteligente + Interface limpa');
 console.log('⚡ Comandos: debugSync() | testarSync() | reativarSync() | desativarSync()');
 
 /*
@@ -1213,11 +1069,11 @@ console.log('⚡ Comandos: debugSync() | testarSync() | reativarSync() | desativ
 - _atualizarCalendarSync(): Atualização automática do Calendar ✅
 - Fallback automático para polling se listener falhar ✅
 
-✅ INDICADORES VISUAIS:
-- _mostrarIndicadorSync(): Indicador "🔄 Sincronização Ativa" ✅
-- _mostrarIndicadorSyncAtualizado(): Animação quando dados mudam ✅
-- Posicionamento inteligente (evita conflito com modo anônimo) ✅
-- Auto-fade após 5 segundos ✅
+✅ INTERFACE LIMPA:
+- Indicadores visuais removidos por solicitação ✅
+- Sync funcionando silenciosamente ✅
+- Interface clean sem popups ✅
+- Funcionalidade 100% mantida ✅
 
 ✅ GERENCIAMENTO DE LISTENERS:
 - _desativarSync(): Remove listeners + limpa estados ✅
