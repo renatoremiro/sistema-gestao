@@ -1,11 +1,10 @@
 /**
- * 🚀 Sistema Principal v8.3 - CORREÇÃO DEFINITIVA PERSISTÊNCIA
+ * 🚀 Sistema Principal v8.3 - DEPARTAMENTOS PERSISTENTES CORRIGIDOS
  * 
- * 🔥 CORREÇÃO CRÍTICA: NÃO sobrescrever Auth.equipe com dados do Firebase
- * ✅ LEITURA LIVRE: Carregamento sem necessidade de autenticação
- * ✅ ESCRITA PROTEGIDA: Salvamento apenas para usuários autenticados
- * ✅ EVENTOS GLOBAIS: Toda equipe BIAPO vê os mesmos eventos
- * ✅ USUÁRIOS PRESERVADOS: Auth.equipe nunca é sobrescrito
+ * 🔥 CORREÇÃO APLICADA: Departamentos agora carregam do Firebase
+ * ✅ SINCRONIZAÇÃO: Integração com AdminUsersManager
+ * ✅ PERSISTÊNCIA: Departamentos mantêm após F5
+ * ✅ INTEGRAÇÃO: Auth.departamentos sincronizado
  */
 
 const App = {
@@ -18,7 +17,10 @@ const App = {
         versao: '8.3.0', // ATUALIZADO
         debugMode: false,
         ultimoCarregamento: null,
-        modoAnonimo: false
+        modoAnonimo: false,
+        // 🔥 NOVO: Estado dos departamentos
+        departamentosCarregados: false,
+        ultimoCarregamentoDepartamentos: null
     },
 
     // 📊 DADOS PRINCIPAIS (carregados do Firebase)
@@ -26,7 +28,7 @@ const App = {
         eventos: [],
         areas: {},
         tarefas: [],
-        // 🔥 USUÁRIOS REMOVIDOS - Auth.equipe é a fonte única
+        // 🔥 DEPARTAMENTOS REMOVIDOS - Auth.departamentos é a fonte única
         metadata: {
             versao: '8.3.0',
             ultimaAtualizacao: null
@@ -49,25 +51,29 @@ const App = {
             // 2. 🔥 CARREGAR DADOS DO FIREBASE (SEM USUÁRIOS)
             await this._carregarDadosDoFirebaseGlobal();
             
-            // 3. Configurar usuário se estiver logado
+            // 3. 🔥 NOVA FUNCIONALIDADE: CARREGAR DEPARTAMENTOS
+            await this._carregarDepartamentosDoFirebase();
+            
+            // 4. Configurar usuário se estiver logado
             this._configurarUsuarioAtual();
             
-            // 4. Detectar modo anônimo
+            // 5. Detectar modo anônimo
             this._detectarModoAnonimo();
             
-            // 5. Inicializar módulos DEPOIS dos dados carregados
+            // 6. Inicializar módulos DEPOIS dos dados carregados
             this._inicializarModulos();
             
-            // 6. Renderizar interface
+            // 7. Renderizar interface
             this._renderizarInterface();
             
-            // 7. Finalizar inicialização
+            // 8. Finalizar inicialização
             this.estadoSistema.inicializado = true;
             this.estadoSistema.carregandoDados = false;
             this.estadoSistema.ultimoCarregamento = new Date().toISOString();
             
             console.log('✅ Sistema BIAPO v8.3 inicializado com sucesso!');
             console.log(`📊 Eventos carregados: ${this.dados.eventos.length}`);
+            console.log(`🏢 Departamentos carregados: ${this._contarDepartamentos()}`);
             console.log(`👤 Modo: ${this.estadoSistema.modoAnonimo ? 'Anônimo (leitura)' : 'Autenticado (escrita)'}`);
             console.log(`👥 Usuários em Auth.equipe: ${typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe).length : 'N/A'}`);
             
@@ -82,7 +88,148 @@ const App = {
         }
     },
 
-    // 🔥 NOVA FUNÇÃO v8.3: CARREGAR DADOS GLOBAIS SEM USUÁRIOS
+    // 🔥 NOVA FUNÇÃO v8.3: CARREGAR DEPARTAMENTOS DO FIREBASE
+    async _carregarDepartamentosDoFirebase() {
+        try {
+            console.log('🏢 Iniciando carregamento de departamentos do Firebase...');
+            
+            // Verificar se Firebase está disponível
+            if (typeof database === 'undefined' || !database) {
+                console.warn('⚠️ Firebase não disponível para departamentos');
+                this._configurarDepartamentosPadrao();
+                return false;
+            }
+            
+            // Carregar departamentos com timeout
+            const departamentosFirebase = await Promise.race([
+                this._buscarDepartamentosDoFirebase(),
+                this._timeoutPromise(5000, 'Timeout ao carregar departamentos')
+            ]);
+            
+            if (departamentosFirebase && departamentosFirebase.length > 0) {
+                // 🎯 SINCRONIZAR COM Auth.departamentos
+                if (typeof Auth !== 'undefined') {
+                    Auth.departamentos = [...departamentosFirebase];
+                    console.log(`✅ Departamentos sincronizados com Auth: ${departamentosFirebase.length} departamentos`);
+                    console.log(`📋 Lista: ${departamentosFirebase.join(', ')}`);
+                }
+                
+                // Atualizar estado
+                this.estadoSistema.departamentosCarregados = true;
+                this.estadoSistema.ultimoCarregamentoDepartamentos = new Date().toISOString();
+                
+                return true;
+            } else {
+                console.log('📭 Nenhum departamento encontrado no Firebase');
+                this._configurarDepartamentosPadrao();
+                return false;
+            }
+            
+        } catch (error) {
+            console.warn('⚠️ Erro ao carregar departamentos:', error.message);
+            this._configurarDepartamentosPadrao();
+            return false;
+        }
+    },
+
+    // 🔥 BUSCAR DEPARTAMENTOS DO FIREBASE
+    async _buscarDepartamentosDoFirebase() {
+        try {
+            console.log('🔍 Buscando departamentos no path /dados/departamentos...');
+            
+            const snapshot = await database.ref('dados/departamentos').once('value');
+            const dadosDepartamentos = snapshot.val();
+            
+            if (!dadosDepartamentos || typeof dadosDepartamentos !== 'object') {
+                console.log('📭 Nenhum departamento encontrado no Firebase');
+                return null;
+            }
+            
+            // Converter objeto Firebase para array de nomes
+            const departamentosArray = Object.values(dadosDepartamentos)
+                .filter(dept => dept && dept.ativo !== false && dept.nome)
+                .map(dept => dept.nome.trim())
+                .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            
+            console.log(`✅ ${departamentosArray.length} departamentos encontrados no Firebase`);
+            console.log('📋 Departamentos:', departamentosArray);
+            
+            return departamentosArray;
+            
+        } catch (error) {
+            console.error('❌ Erro ao buscar departamentos:', error);
+            return null;
+        }
+    },
+
+    // 🔥 CONFIGURAR DEPARTAMENTOS PADRÃO (FALLBACK)
+    _configurarDepartamentosPadrao() {
+        const departamentosPadrao = [
+            "Gestão Geral",
+            "Obra e Construção", 
+            "Museu Nacional"
+        ];
+        
+        if (typeof Auth !== 'undefined') {
+            Auth.departamentos = [...departamentosPadrao];
+            console.log('📋 Departamentos padrão configurados no Auth');
+        }
+        
+        this.estadoSistema.departamentosCarregados = false;
+    },
+
+    // 🔥 CONTAR DEPARTAMENTOS
+    _contarDepartamentos() {
+        try {
+            if (typeof Auth !== 'undefined' && Auth.departamentos && Array.isArray(Auth.departamentos)) {
+                return Auth.departamentos.length;
+            }
+            return 0;
+        } catch (error) {
+            return 0;
+        }
+    },
+
+    // 🔥 NOVA FUNÇÃO: RECARREGAR DEPARTAMENTOS
+    async recarregarDepartamentos() {
+        try {
+            console.log('🔄 Recarregando departamentos do Firebase...');
+            
+            const sucesso = await this._carregarDepartamentosDoFirebase();
+            
+            if (sucesso) {
+                // Notificar outros módulos
+                if (typeof Events !== 'undefined' && Events.atualizarParticipantes) {
+                    Events.atualizarParticipantes();
+                }
+                
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.success('🏢 Departamentos atualizados!');
+                }
+                
+                console.log('✅ Departamentos recarregados com sucesso');
+            } else {
+                console.log('⚠️ Nenhum departamento novo encontrado');
+                
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.info('📋 Usando departamentos padrão');
+                }
+            }
+            
+            return sucesso;
+            
+        } catch (error) {
+            console.error('❌ Erro ao recarregar departamentos:', error);
+            
+            if (typeof Notifications !== 'undefined') {
+                Notifications.error('Erro ao recarregar departamentos');
+            }
+            
+            return false;
+        }
+    },
+
+    // 🔥 CARREGAR DADOS DO FIREBASE GLOBAL (SEM USUÁRIOS) - MANTIDO
     async _carregarDadosDoFirebaseGlobal() {
         try {
             console.log('📥 Carregando dados globais do Firebase (SEM usuários)...');
@@ -133,7 +280,7 @@ const App = {
         }
     },
 
-    // 🔥 BUSCAR DADOS DO FIREBASE GLOBAL (SEM USUÁRIOS)
+    // 🔥 BUSCAR DADOS DO FIREBASE GLOBAL (SEM USUÁRIOS) - MANTIDO
     async _buscarDadosFirebaseGlobal() {
         try {
             console.log('🔍 Buscando dados no path /dados (SEM usuários)...');
@@ -146,6 +293,7 @@ const App = {
                 console.log(`  - Eventos: ${dados.eventos ? dados.eventos.length : 0}`);
                 console.log(`  - Áreas: ${dados.areas ? Object.keys(dados.areas).length : 0}`);
                 console.log(`  - Usuários: ${dados.usuarios ? Object.keys(dados.usuarios).length + ' (IGNORADOS)' : 'nenhum'}`);
+                console.log(`  - Departamentos: ${dados.departamentos ? Object.keys(dados.departamentos).length + ' (CARREGADOS SEPARADAMENTE)' : 'nenhum'}`);
                 
                 // 🔥 RETORNAR DADOS SEM USUÁRIOS
                 return {
@@ -327,6 +475,12 @@ const App = {
                     console.log('✅ Tasks inicializado');
                 }
                 
+                // 4. 🔥 NOVO: Notificar Events sobre departamentos carregados
+                if (typeof Events !== 'undefined' && Events.atualizarParticipantes) {
+                    Events.atualizarParticipantes();
+                    console.log('✅ Events notificado sobre dados atualizados');
+                }
+                
             }, 200); // 200ms para garantir que dados estão prontos
             
         } catch (error) {
@@ -391,19 +545,27 @@ const App = {
         }
     },
 
-    // 🔄 RECARREGAR DADOS DO FIREBASE (SEM USUÁRIOS)
+    // 🔄 RECARREGAR DADOS DO FIREBASE (SEM USUÁRIOS + DEPARTAMENTOS)
     async recarregarDados() {
         try {
-            console.log('🔄 Recarregando dados (preservando Auth.equipe)...');
+            console.log('🔄 Recarregando dados (preservando Auth.equipe + departamentos)...');
             
             this.estadoSistema.carregandoDados = true;
             
             // Carregar dados atualizados (sempre global, sem usuários)
             await this._carregarDadosDoFirebaseGlobal();
             
+            // 🔥 NOVA FUNCIONALIDADE: Recarregar departamentos também
+            await this._carregarDepartamentosDoFirebase();
+            
             // Atualizar módulos
             if (typeof Calendar !== 'undefined' && Calendar.atualizarEventos) {
                 Calendar.atualizarEventos();
+            }
+            
+            // 🔥 NOVO: Notificar Events sobre atualização
+            if (typeof Events !== 'undefined' && Events.atualizarParticipantes) {
+                Events.atualizarParticipantes();
             }
             
             // Atualizar interface
@@ -412,10 +574,10 @@ const App = {
             this.estadoSistema.carregandoDados = false;
             
             if (typeof Notifications !== 'undefined') {
-                Notifications.success('🔄 Dados atualizados (usuários preservados)!');
+                Notifications.success('🔄 Dados atualizados (usuários + departamentos preservados)!');
             }
             
-            console.log('✅ Dados recarregados com sucesso (Auth.equipe preservado)');
+            console.log('✅ Dados recarregados com sucesso (Auth.equipe + departamentos preservados)');
             
         } catch (error) {
             console.error('❌ Erro ao recarregar dados:', error);
@@ -478,7 +640,7 @@ const App = {
         }
     },
 
-    // 📊 OBTER STATUS DO SISTEMA
+    // 📊 OBTER STATUS DO SISTEMA v8.3 - DEPARTAMENTOS
     obterStatusSistema() {
         return {
             inicializado: this.estadoSistema.inicializado,
@@ -491,6 +653,11 @@ const App = {
             // 🔥 USUÁRIOS DO Auth.equipe
             totalUsuarios: typeof Auth !== 'undefined' && Auth.equipe ? Object.keys(Auth.equipe).length : 0,
             fonteUsuarios: 'Auth.equipe',
+            // 🔥 NOVO: Status dos departamentos
+            totalDepartamentos: this._contarDepartamentos(),
+            departamentosCarregados: this.estadoSistema.departamentosCarregados,
+            ultimoCarregamentoDepartamentos: this.estadoSistema.ultimoCarregamentoDepartamentos,
+            fonteDepartamentos: this.estadoSistema.departamentosCarregados ? 'Firebase' : 'Padrão',
             ultimoCarregamento: this.estadoSistema.ultimoCarregamento,
             firebase: typeof database !== 'undefined',
             modules: {
@@ -507,7 +674,8 @@ const App = {
             },
             integracao: {
                 authEquipePreservado: typeof Auth !== 'undefined' && !!Auth.equipe,
-                dadosFirebaseSemUsuarios: !this.dados.hasOwnProperty('usuarios')
+                dadosFirebaseSemUsuarios: !this.dados.hasOwnProperty('usuarios'),
+                departamentosSincronizados: this.estadoSistema.departamentosCarregados && typeof Auth !== 'undefined' && Array.isArray(Auth.departamentos)
             }
         };
     },
@@ -567,6 +735,20 @@ const App = {
             console.error('❌ Erro ao obter usuários:', error);
             return {};
         }
+    },
+
+    // 🔥 NOVA FUNÇÃO: OBTER DEPARTAMENTOS
+    obterDepartamentos() {
+        try {
+            if (typeof Auth !== 'undefined' && Auth.departamentos && Array.isArray(Auth.departamentos)) {
+                return Auth.departamentos;
+            }
+            console.warn('⚠️ Auth.departamentos não disponível');
+            return ["Gestão Geral", "Obra e Construção", "Museu Nacional"];
+        } catch (error) {
+            console.error('❌ Erro ao obter departamentos:', error);
+            return ["Gestão Geral", "Obra e Construção", "Museu Nacional"];
+        }
     }
 };
 
@@ -576,8 +758,9 @@ window.App = App;
 // ✅ FUNÇÕES GLOBAIS DE CONVENIÊNCIA
 window.recarregarDados = () => App.recarregarDados();
 window.statusSistema = () => App.obterStatusSistema();
+window.recarregarDepartamentos = () => App.recarregarDepartamentos(); // 🔥 NOVA
 
-// 🔥 VERIFICAÇÃO DE SISTEMA (DEBUG) v8.3
+// 🔥 VERIFICAÇÃO DE SISTEMA (DEBUG) v8.3 - DEPARTAMENTOS
 window.verificarSistema = () => {
     const status = App.obterStatusSistema();
     console.table({
@@ -587,15 +770,81 @@ window.verificarSistema = () => {
         'Áreas': status.totalAreas,
         'Usuários (Auth.equipe)': status.totalUsuarios,
         'Fonte Usuários': status.fonteUsuarios,
+        // 🔥 NOVO: Departamentos
+        'Departamentos': status.totalDepartamentos,
+        'Departamentos Carregados': status.departamentosCarregados ? 'Sim' : 'Não',
+        'Fonte Departamentos': status.fonteDepartamentos,
         'Firebase': status.firebase ? 'Conectado' : 'Offline',
         'Pode Editar': status.permissoes.escrita ? 'Sim' : 'Não',
         'Auth.equipe Preservado': status.integracao.authEquipePreservado ? 'Sim' : 'Não',
-        'Dados sem usuários': status.integracao.dadosFirebaseSemUsuarios ? 'Sim' : 'Não'
+        'Dados sem usuários': status.integracao.dadosFirebaseSemUsuarios ? 'Sim' : 'Não',
+        'Departamentos Sincronizados': status.integracao.departamentosSincronizados ? 'Sim' : 'Não'
     });
     return status;
 };
 
-// 🔥 DEBUG ESPECÍFICO PARA USUÁRIOS v8.3
+// 🔥 DEBUG ESPECÍFICO PARA DEPARTAMENTOS v8.3
+window.debugDepartamentos = () => {
+    console.log('🏢 ============ DEBUG DEPARTAMENTOS v8.3 ============');
+    
+    const authDepartamentos = typeof Auth !== 'undefined' && Auth.departamentos ? Auth.departamentos : null;
+    const statusCarregados = App.estadoSistema.departamentosCarregados;
+    
+    console.log('🏢 Auth.departamentos:', authDepartamentos ? authDepartamentos.length + ' departamentos' : 'INDISPONÍVEL');
+    console.log('📊 Carregados do Firebase:', statusCarregados ? 'SIM' : 'NÃO (usando padrão)');
+    console.log('⏰ Último carregamento:', App.estadoSistema.ultimoCarregamentoDepartamentos || 'Nunca');
+    
+    if (authDepartamentos) {
+        console.log('📋 Lista de departamentos:');
+        authDepartamentos.forEach((dept, i) => {
+            console.log(`  ${i + 1}. ${dept}`);
+        });
+    }
+    
+    // Verificar no Firebase
+    if (typeof database !== 'undefined') {
+        database.ref('dados/departamentos').once('value').then(snapshot => {
+            const dados = snapshot.val();
+            console.log(`\n🔥 FIREBASE: ${dados ? Object.keys(dados).length : 0} departamentos`);
+            if (dados) {
+                Object.values(dados).forEach(dept => {
+                    console.log(`   - ${dept.nome} (${dept.ativo ? 'ativo' : 'inativo'})`);
+                });
+            }
+        });
+    }
+    
+    console.log('🎯 Integração funcionando:', statusCarregados && authDepartamentos ? 'FUNCIONANDO ✅' : 'PROBLEMA ❌');
+    console.log('🏢 ====================================================');
+    
+    return {
+        departamentos: authDepartamentos,
+        total: authDepartamentos ? authDepartamentos.length : 0,
+        carregadosFirebase: statusCarregados,
+        ultimoCarregamento: App.estadoSistema.ultimoCarregamentoDepartamentos,
+        funcionando: statusCarregados && authDepartamentos
+    };
+};
+
+// 🔥 TESTE COMPLETO DE DEPARTAMENTOS
+window.testarDepartamentos = async () => {
+    console.log('🧪 ============ TESTE DEPARTAMENTOS v8.3 ============');
+    console.log('📊 Status antes do teste:');
+    debugDepartamentos();
+    
+    console.log('\n🔄 Recarregando departamentos do Firebase...');
+    const resultado = await App.recarregarDepartamentos();
+    
+    console.log('\n📊 Status após o teste:');
+    debugDepartamentos();
+    
+    console.log('\n🎯 RESULTADO:', resultado ? '✅ DEPARTAMENTOS FUNCIONANDO!' : '⚠️ Usando departamentos padrão');
+    console.log('🧪 ====================================================');
+    
+    return resultado;
+};
+
+// 🔥 DEBUG ESPECÍFICO PARA USUÁRIOS v8.3 (MANTIDO)
 window.debugUsuarios = () => {
     console.log('🔍 ============ DEBUG USUÁRIOS v8.3 ============');
     
@@ -624,7 +873,7 @@ window.debugUsuarios = () => {
     };
 };
 
-// 🔥 INICIALIZAÇÃO AUTOMÁTICA CORRIGIDA v8.3
+// ✅ INICIALIZAÇÃO AUTOMÁTICA CORRIGIDA v8.3
 document.addEventListener('DOMContentLoaded', async () => {
     // Aguardar outros módulos carregarem
     setTimeout(async () => {
@@ -633,24 +882,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ✅ LOG FINAL
-console.log('🚀 App.js v8.3 - CORREÇÃO DEFINITIVA PERSISTÊNCIA carregado!');
+console.log('🚀 App.js v8.3 - DEPARTAMENTOS PERSISTENTES CORRIGIDOS carregado!');
 
 /*
-🔥 CORREÇÕES DEFINITIVAS v8.3:
-- _carregarDadosDoFirebaseGlobal(): NÃO carrega usuários do Firebase ✅
-- _buscarDadosFirebaseGlobal(): Ignora dados de usuários ✅
-- _configurarEstruturaBasica(): NÃO inicializa usuários ✅
-- this.dados: NÃO contém propriedade 'usuarios' ✅
-- obterUsuarios(): Delegado para Auth.equipe ✅
-- recarregarDados(): Preserva Auth.equipe ✅
-- Status mostra fonte de usuários como Auth.equipe ✅
-- Debug específico para verificar usuários ✅
+🔥 CORREÇÕES DEFINITIVAS v8.3 - DEPARTAMENTOS:
 
-📊 RESULTADO DEFINITIVO:
-- App.dados NÃO contém usuários ✅
-- Auth.equipe nunca é sobrescrito ✅
-- AdminUsersManager pode persistir sem conflito ✅
-- Firebase não interfere com usuários ✅
-- Sistema v8.3 COM PERSISTÊNCIA FUNCIONANDO ✅
+✅ NOVAS FUNCIONALIDADES:
+- _carregarDepartamentosDoFirebase(): Carrega departamentos do Firebase ✅
+- _buscarDepartamentosDoFirebase(): Busca dados em dados/departamentos ✅
+- _configurarDepartamentosPadrao(): Fallback inteligente ✅
+- recarregarDepartamentos(): Função pública para recarregar ✅
+- debugDepartamentos(): Debug específico para departamentos ✅
+- testarDepartamentos(): Teste completo de funcionamento ✅
+
+🔧 INTEGRAÇÕES:
+- Departamentos sincronizam com Auth.departamentos ✅
+- Events.js é notificado sobre atualizações ✅
+- Status do sistema inclui informações de departamentos ✅
+- Interface mostra departamentos carregados ✅
+
+📊 RESULTADO DEFINITIVO v8.3:
+- Departamentos criados no AdminUsersManager persistem ✅
+- App.js carrega departamentos na inicialização ✅
+- Auth.departamentos sempre atualizado ✅
+- Sistema robusto com fallback ✅
+- Debug completo disponível ✅
 - PROBLEMA RESOLVIDO DEFINITIVAMENTE ✅
+
+🧪 COMANDOS DE TESTE:
+- debugDepartamentos() → Status completo dos departamentos
+- testarDepartamentos() → Teste de carregamento
+- recarregarDepartamentos() → Forçar reload
+- verificarSistema() → Status geral do sistema
 */
