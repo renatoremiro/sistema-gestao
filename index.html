@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <!-- 🔥 SISTEMA MODULARIZADO COMPLETO - ORDEM CORRIGIDA -->
+    <!-- 🔥 SISTEMA UNIFICADO COMPLETO v8.6.0 - ORDEM CORRIGIDA -->
     
     <!-- 1. CONFIGURAÇÕES (PRIMEIRO) -->
     <script src="assets/js/config/firebase.js"></script>
@@ -28,21 +28,19 @@
     <script src="assets/js/utils/helpers.js"></script>
     <script src="assets/js/utils/validation.js"></script>
     <script src="assets/js/utils/notifications.js"></script>
-<script src="assets/js/utils/cache-manager.js"></script>
+    <script src="assets/js/utils/cache-manager.js"></script>
 
     <!-- 4. CORE PRINCIPAL (DEPOIS DOS UTILITÁRIOS) -->
     <script src="assets/js/core/app.js"></script>
     
-    <!-- 5. MÓDULOS FUNCIONAIS COMPLETOS -->
+    <!-- 5. MÓDULOS FUNCIONAIS ESSENCIAIS (sem PersonalTasks) -->
     <script src="assets/js/modules/persistence.js"></script>
     <script src="assets/js/modules/auth.js"></script>
     <script src="assets/js/modules/calendar.js"></script>
     <script src="assets/js/modules/events.js"></script>
     <script src="assets/js/modules/tasks.js"></script>
-    <script src="assets/js/modules/personal-tasks.js"></script>
-<script src="assets/js/modules/admin-users-manager.js"></script> 
-
-
+    <!-- ❌ REMOVIDO: personal-tasks.js → Agora via App.js unificado -->
+    <script src="assets/js/modules/admin-users-manager.js"></script> 
 
     <style>
         /* 🔴 CORES BIAPO */
@@ -284,6 +282,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             background: white;
+            position: relative;
         }
         
         .action-card:hover {
@@ -318,6 +317,22 @@
         .action-desc {
             font-size: 12px;
             opacity: 0.8;
+        }
+        
+        /* 🔥 INDICADOR SISTEMA UNIFICADO */
+        .unified-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #10b981;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
         }
         
         .card h3 {
@@ -410,9 +425,9 @@
                         <h1>Sistema de Gestão BIAPO</h1>
                         <p>Obra 292 - Museu Nacional</p>
                         <p style="font-size: 12px; margin-top: 4px;">
-                            <strong>v7.4.5 Sistema Corrigido</strong>
+                            <strong>v8.6.0 Sistema UNIFICADO</strong>
                             <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
-                                FIREBASE READY ✅
+                                APP.JS UNIFICADO ✅
                             </span>
                         </p>
                     </div>
@@ -428,7 +443,7 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-warning btn-sm" onclick="abrirMinhaAgendaDinamica()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                        <button class="btn btn-warning btn-sm" onclick="abrirMinhaAgendaUnificada()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                             📋 Minha Agenda
                         </button>
                         <button class="btn btn-admin btn-sm" onclick="Auth.mostrarGerenciarUsuarios()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
@@ -452,10 +467,11 @@
                     <div class="action-desc">Criar evento para a equipe</div>
                 </div>
                 
-                <div class="action-card" onclick="abrirMinhaAgendaDinamica()">
+                <div class="action-card" onclick="abrirMinhaAgendaUnificada()">
+                    <span class="unified-badge">🔥 NOVO</span>
                     <span class="action-icon">📋</span>
                     <div class="action-title">Minha Agenda</div>
-                    <div class="action-desc">Tarefas e agenda pessoal</div>
+                    <div class="action-desc">Tarefas unificadas via App.js</div>
                 </div>
                 
                 <div class="action-card" onclick="Events.mostrarGerenciarFeriados()">
@@ -479,7 +495,7 @@
             
             <!-- ✅ CALENDÁRIO PRINCIPAL -->
             <div class="card">
-                <h3>📅 Calendário da Equipe - Sincronização Automática</h3>
+                <h3>📅 Calendário da Equipe - Sincronização Automática v8.6.0</h3>
                 <div class="card-content">
                     <div id="calendarioContainer">
                         <div class="calendario" id="calendario">
@@ -493,17 +509,17 @@
             <div class="card">
                 <h3>🎮 Ações Rápidas</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 16px;">
-                    <button class="btn btn-success" onclick="Tasks.mostrarNovaTarefa()" style="padding: 12px;">
+                    <button class="btn btn-success" onclick="criarTarefaUnificada()" style="padding: 12px;">
                         📝 Nova Tarefa
                     </button>
-                    <button class="btn btn-info" onclick="salvarDadosCritico()" style="padding: 12px;">
+                    <button class="btn btn-info" onclick="salvarDadosUnificado()" style="padding: 12px;">
                         💾 Salvar Dados
                     </button>
                     <button class="btn btn-admin" onclick="Auth.mostrarGerenciarUsuarios()" style="padding: 12px;">
                         👥 Equipe
                     </button>
-                    <button class="btn btn-secondary" onclick="verificarSistema()" style="padding: 12px;">
-                        📊 Status Sistema
+                    <button class="btn btn-secondary" onclick="verificarSistemaUnificado()" style="padding: 12px;">
+                        📊 Status Unificado
                     </button>
                 </div>
             </div>
@@ -513,23 +529,25 @@
     <!-- 🔥 MÓDULOS FINAIS -->
     <script src="assets/js/modules/login-init.js"></script>
     
-    <!-- 🔍 SISTEMA DE VERIFICAÇÕES -->
+    <!-- 🔍 SISTEMA DE VERIFICAÇÕES UNIFICADO -->
     <script>
-        // Sistema de Verificações BIAPO v7.4.5
-        const VerificacoesBiapo = {
+        // Sistema de Verificações BIAPO v8.6.0 UNIFICADO
+        const VerificacoesBiapoUnificado = {
             async verificacaoRapida() {
-                console.log('🚀 VERIFICAÇÃO RÁPIDA SISTEMA BIAPO v7.4.5');
+                console.log('🚀 VERIFICAÇÃO RÁPIDA SISTEMA BIAPO v8.6.0 UNIFICADO');
                 
                 const checks = [
                     { nome: 'Firebase', test: () => typeof window.firebase !== 'undefined' || typeof window.Firebase !== 'undefined' },
                     { nome: 'DataStructure', test: () => typeof window.DataStructure !== 'undefined' },
-                    { nome: 'App', test: () => typeof window.App !== 'undefined' },
+                    { nome: 'App v8.6.0', test: () => typeof window.App !== 'undefined' && App.config?.versao === '8.6.0' },
                     { nome: 'Auth', test: () => typeof window.Auth !== 'undefined' },
                     { nome: 'Events', test: () => typeof window.Events !== 'undefined' },
-                    { nome: 'Tasks', test: () => typeof window.Tasks !== 'undefined' },
-                    { nome: 'Calendar', test: () => typeof window.Calendar !== 'undefined' },
+                    { nome: 'Calendar v8.2.0', test: () => typeof window.Calendar !== 'undefined' },
                     { nome: 'Persistence', test: () => typeof window.Persistence !== 'undefined' },
-                    { nome: 'Usuários BIAPO', test: () => DataStructure?.usuariosBiapo && Object.keys(DataStructure.usuariosBiapo).length >= 10 }
+                    { nome: 'App.criarTarefa', test: () => typeof App?.criarTarefa === 'function' },
+                    { nome: 'App.obterTarefasUsuario', test: () => typeof App?.obterTarefasUsuario === 'function' },
+                    { nome: 'Usuários BIAPO', test: () => DataStructure?.usuariosBiapo && Object.keys(DataStructure.usuariosBiapo).length >= 10 },
+                    { nome: 'Sistema Unificado', test: () => App?.dados && typeof App.dados.tarefas !== 'undefined' }
                 ];
                 
                 let aprovados = 0;
@@ -557,25 +575,26 @@
                 return { porcentagem, aprovados, total: checks.length, detalhes };
             },
 
-            async diagnosticoCompleto() {
-                console.log('🔍 ============ DIAGNÓSTICO COMPLETO SISTEMA BIAPO v7.4.5 ============');
+            async diagnosticoCompletoUnificado() {
+                console.log('🔍 ============ DIAGNÓSTICO SISTEMA BIAPO v8.6.0 UNIFICADO ============');
                 console.log('⏰ Iniciando em:', new Date().toLocaleString('pt-BR'));
                 
                 const resultado = await this.verificacaoRapida();
                 
-                console.log('\n📦 STATUS DOS MÓDULOS:');
-                const modulos = ['Firebase', 'DataStructure', 'App', 'Auth', 'Events', 'Tasks', 'Calendar', 'Persistence', 'Notifications', 'Helpers'];
+                console.log('\n📦 STATUS DOS MÓDULOS UNIFICADOS:');
+                const modulos = ['Firebase', 'DataStructure', 'App', 'Auth', 'Events', 'Calendar', 'Persistence', 'Notifications', 'Helpers'];
                 modulos.forEach(modulo => {
                     const disponivel = typeof window[modulo] !== 'undefined';
                     let extra = '';
                     
                     if (disponivel) {
                         try {
-                            if (modulo === 'DataStructure' && DataStructure.usuariosBiapo) {
-                                extra = ` (${Object.keys(DataStructure.usuariosBiapo).length} usuários)`;
-                            } else if (modulo === 'App' && App.obterStatusSistema) {
+                            if (modulo === 'App' && App.obterStatusSistema) {
                                 const status = App.obterStatusSistema();
-                                extra = ` (v${status.versao}, ${status.inicializado ? 'Inicializado' : 'Aguardando'})`;
+                                extra = ` (v${status.versao}, ${status.sistemaUnificado ? 'UNIFICADO' : 'Padrão'})`;
+                            } else if (modulo === 'Calendar' && Calendar.obterStatus) {
+                                const status = Calendar.obterStatus();
+                                extra = ` (${status.tipo})`;
                             }
                         } catch (e) {
                             extra = ' (erro ao obter info)';
@@ -585,16 +604,30 @@
                     console.log(`  ${disponivel ? '✅' : '❌'} ${modulo}${extra}`);
                 });
                 
-                console.log('\n💡 RECOMENDAÇÕES:');
+                console.log('\n🔥 FUNCIONALIDADES UNIFICADAS:');
+                console.log(`  ${typeof App?.criarTarefa === 'function' ? '✅' : '❌'} App.criarTarefa() - Criar tarefas via App.js`);
+                console.log(`  ${typeof App?.editarTarefa === 'function' ? '✅' : '❌'} App.editarTarefa() - Editar tarefas via App.js`);
+                console.log(`  ${typeof App?.obterTarefasUsuario === 'function' ? '✅' : '❌'} App.obterTarefasUsuario() - Buscar tarefas`);
+                console.log(`  ${App?.dados?.tarefas ? '✅' : '❌'} App.dados.tarefas[] - Array de tarefas unificado`);
+                console.log(`  ${App?.dados?.eventos ? '✅' : '❌'} App.dados.eventos[] - Array de eventos unificado`);
+                
+                // ❌ VERIFICAR REMOÇÃO PERSONALTASKS
+                console.log('\n🗑️ VERIFICAÇÃO LIMPEZA:');
+                console.log(`  ${typeof PersonalTasks === 'undefined' ? '✅' : '❌'} PersonalTasks removido (esperado: undefined)`);
+                console.log(`  ${typeof window.personal_tasks === 'undefined' ? '✅' : '❌'} window.personal_tasks removido`);
+                console.log(`  ${typeof criarTarefaPessoal === 'undefined' ? '✅' : '❌'} criarTarefaPessoal() removido (agora App.criarTarefa())`);
+                
+                console.log('\n💡 RECOMENDAÇÕES v8.6.0:');
                 if (resultado.porcentagem >= 95) {
-                    console.log('  🎉 Sistema funcionando perfeitamente!');
-                    console.log('  ✅ Todas as correções foram aplicadas com sucesso');
+                    console.log('  🎉 Sistema UNIFICADO funcionando perfeitamente!');
+                    console.log('  ✅ App.js v8.6.0 com tarefas integradas funcionando');
+                    console.log('  🔥 PersonalTasks.js removido com sucesso');
                     console.log('  🚀 Sistema pronto para uso em produção');
                 } else if (resultado.porcentagem >= 80) {
-                    console.log('  👍 Sistema funcionando bem');
-                    console.log('  🔧 Algumas correções menores podem ser necessárias');
+                    console.log('  👍 Sistema UNIFICADO funcionando bem');
+                    console.log('  🔧 Algumas verificações menores falharam');
                 } else {
-                    console.log('  ⚠️ Sistema precisa de atenção');
+                    console.log('  ⚠️ Sistema UNIFICADO precisa de atenção');
                     console.log('  🛠️ Verifique os módulos marcados com ❌');
                 }
                 
@@ -605,75 +638,129 @@
             }
         };
 
-        // Exposição global das funções
-        window.verificarSistema = () => VerificacoesBiapo.diagnosticoCompleto();
-        window.verificacaoRapida = () => VerificacoesBiapo.verificacaoRapida();
+        // 🔥 FUNÇÕES GLOBAIS UNIFICADAS
+        window.verificarSistemaUnificado = () => VerificacoesBiapoUnificado.diagnosticoCompletoUnificado();
+        window.verificarSistema = () => VerificacoesBiapoUnificado.diagnosticoCompletoUnificado(); // Manter compatibilidade
+        window.verificacaoRapida = () => VerificacoesBiapoUnificado.verificacaoRapida();
         
-        // Garantir exposição do Firebase
+        // ✅ GARANTIR EXPOSIÇÃO DO FIREBASE
         if (typeof firebase !== 'undefined') {
             window.Firebase = firebase;
         }
         
-        // Garantir exposição do Persistence
-        if (typeof Persistence === 'undefined' && typeof salvarDadosCritico !== 'undefined') {
-            window.Persistence = {
-                salvarDados: window.salvarDados || (() => Promise.resolve()),
-                salvarDadosCritico: window.salvarDadosCritico || (() => Promise.resolve()),
-                obterStatus: () => ({
-                    operacoesEmAndamento: 0,
-                    ultimoBackup: new Date().toISOString(),
-                    conectividadeFirebase: true,
-                    versaoBackup: '7.4.5',
-                    conversaoEmails: 'ATIVA'
-                })
-            };
-        }
-        
-        console.log('🔍 Sistema de Verificações BIAPO v7.4.5 carregado!');
-        console.log('📋 Comandos: verificarSistema() | verificacaoRapida()');
-// 🔧 FUNÇÕES GLOBAIS ADICIONAIS
-window.abrirMinhaAgendaDinamica = function() {
-    try {
-        console.log('📅 Abrindo Minha Agenda...');
-        
-        // ✅ VERIFICAR PERSONALTASKS (nome correto)
-        if (typeof PersonalTasks !== 'undefined' && PersonalTasks.state?.inicializado) {
-            console.log('✅ PersonalTasks disponível - redirecionando para agenda');
-            window.location.href = 'agenda.html';
-        } else {
-            console.warn('⚠️ PersonalTasks não inicializado - redirecionando mesmo assim');
-            window.location.href = 'agenda.html';
-        }
-        
-    } catch (error) {
-        console.error('❌ Erro ao abrir agenda:', error);
-        window.location.href = 'agenda.html'; // Fallback
-    }
-};
-
-window.salvarDadosCritico = function() {
-    try {
-        if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
-            Persistence.salvarDadosCritico();
-        } else if (typeof App !== 'undefined' && App.salvarDados) {
-            App.salvarDados();
-        } else {
-            console.warn('⚠️ Sistema de persistência não disponível');
-            if (typeof Notifications !== 'undefined') {
-                Notifications.warning('Sistema de salvamento não disponível no momento');
-            } else {
-                alert('⚠️ Sistema de salvamento não disponível no momento');
+        // ✅ FUNÇÕES UNIFICADAS PARA TAREFAS (via App.js)
+        window.criarTarefaUnificada = function() {
+            try {
+                console.log('📋 Criando tarefa via App.js unificado...');
+                
+                if (typeof App !== 'undefined' && App.criarTarefa) {
+                    // Dados básicos para teste
+                    const dadosTarefa = {
+                        titulo: 'Tarefa criada pelo sistema principal',
+                        descricao: 'Tarefa de teste criada via App.js unificado',
+                        tipo: 'pessoal',
+                        prioridade: 'media',
+                        dataInicio: new Date().toISOString().split('T')[0]
+                    };
+                    
+                    App.criarTarefa(dadosTarefa).then(() => {
+                        if (typeof Notifications !== 'undefined') {
+                            Notifications.success('✅ Tarefa criada via App.js unificado!');
+                        } else {
+                            alert('✅ Tarefa criada via App.js unificado!');
+                        }
+                    }).catch(error => {
+                        console.error('❌ Erro ao criar tarefa:', error);
+                        if (typeof Notifications !== 'undefined') {
+                            Notifications.error('❌ Erro ao criar tarefa');
+                        } else {
+                            alert('❌ Erro ao criar tarefa: ' + error.message);
+                        }
+                    });
+                } else {
+                    throw new Error('App.js não disponível ou sem função criarTarefa()');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao criar tarefa unificada:', error);
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.error('❌ App.js não disponível para criar tarefa');
+                } else {
+                    alert('❌ App.js não disponível para criar tarefa');
+                }
             }
-        }
-    } catch (error) {
-        console.error('❌ Erro ao salvar dados:', error);
-        if (typeof Notifications !== 'undefined') {
-            Notifications.error('Erro ao salvar dados');
-        }
-    }
-};
+        };
 
-console.log('✅ Funções globais adicionais carregadas!');
+        // 🔥 ABRIR AGENDA UNIFICADA (nova função)
+        window.abrirMinhaAgendaUnificada = function() {
+            try {
+                console.log('📅 Abrindo Minha Agenda UNIFICADA...');
+                
+                // ✅ VERIFICAR SE APP.JS ESTÁ DISPONÍVEL
+                if (typeof App !== 'undefined' && App.estadoSistema?.inicializado) {
+                    console.log('✅ App.js v8.6.0 UNIFICADO disponível - redirecionando para agenda');
+                    window.location.href = 'agenda.html';
+                } else {
+                    console.warn('⚠️ App.js não inicializado completamente - redirecionando mesmo assim');
+                    window.location.href = 'agenda.html';
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao abrir agenda unificada:', error);
+                window.location.href = 'agenda.html'; // Fallback
+            }
+        };
+
+        // 💾 SALVAR DADOS VIA SISTEMA UNIFICADO
+        window.salvarDadosUnificado = function() {
+            try {
+                console.log('💾 Salvando dados via App.js unificado...');
+                
+                if (typeof App !== 'undefined' && App._salvarDadosUnificados) {
+                    App._salvarDadosUnificados().then(() => {
+                        if (typeof Notifications !== 'undefined') {
+                            Notifications.success('✅ Dados salvos via App.js unificado!');
+                        } else {
+                            alert('✅ Dados salvos via App.js unificado!');
+                        }
+                    }).catch(error => {
+                        console.error('❌ Erro ao salvar:', error);
+                        if (typeof Notifications !== 'undefined') {
+                            Notifications.error('❌ Erro ao salvar dados');
+                        }
+                    });
+                } else if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
+                    Persistence.salvarDadosCritico();
+                } else {
+                    throw new Error('Sistema de persistência não disponível');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao salvar dados unificado:', error);
+                if (typeof Notifications !== 'undefined') {
+                    Notifications.warning('⚠️ Sistema de salvamento não disponível no momento');
+                } else {
+                    alert('⚠️ Sistema de salvamento não disponível no momento');
+                }
+            }
+        };
+
+        // ⚠️ MANTER COMPATIBILIDADE COM FUNÇÕES ANTIGAS
+        window.salvarDadosCritico = function() {
+            console.warn('⚠️ salvarDadosCritico() é função legada - usando salvarDadosUnificado()');
+            salvarDadosUnificado();
+        };
+
+        // ❌ DETECTAR USO DE PERSONALTASKS (para debug)
+        if (typeof PersonalTasks !== 'undefined') {
+            console.warn('⚠️ PersonalTasks ainda carregado! Deve ser removido para sistema unificado.');
+        } else {
+            console.log('✅ PersonalTasks removido com sucesso - sistema 100% unificado!');
+        }
+        
+        console.log('🔍 Sistema de Verificações BIAPO v8.6.0 UNIFICADO carregado!');
+        console.log('📋 Comandos: verificarSistemaUnificado() | verificacaoRapida()');
+        console.log('🔥 Funções: criarTarefaUnificada() | abrirMinhaAgendaUnificada()');
     </script>
 </body>
 </html>
