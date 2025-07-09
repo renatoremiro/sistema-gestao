@@ -595,7 +595,7 @@ const App = {
     // Obter tarefas do usuário
     obterTarefasUsuario(emailUsuario = null) {
         try {
-            const email = emailUsuario || this.usuarioAtual?.email;
+            const email = normalizarEmail(emailUsuario || this.usuarioAtual?.email);
             
             if (!email) {
                 console.log('📋 Retornando todas as tarefas (modo anônimo)');
@@ -604,12 +604,12 @@ const App = {
             
             const tarefas = this.dados.tarefas.filter(tarefa => {
                 // Tarefa do próprio usuário
-                if (tarefa.responsavel === email || tarefa.criadoPor === email) {
+                if (normalizarEmail(tarefa.responsavel) === email || normalizarEmail(tarefa.criadoPor) === email) {
                     return true;
                 }
                 
                 // Usuário é participante
-                if (tarefa.participantes?.includes(email)) {
+                if ((tarefa.participantes || []).map(normalizarEmail).includes(email)) {
                     return true;
                 }
                 
@@ -715,7 +715,7 @@ const App = {
     // Obter itens para usuário (eventos + tarefas)
     obterItensParaUsuario(emailUsuario = null) {
         try {
-            const email = emailUsuario || this.usuarioAtual?.email;
+            const email = normalizarEmail(emailUsuario || this.usuarioAtual?.email);
             
             // Obter eventos (lógica existente)
             const eventos = this._obterEventosParaUsuario(email);
@@ -737,18 +737,19 @@ const App = {
 
     // Obter eventos para usuário
     _obterEventosParaUsuario(email) {
+        email = normalizarEmail(email);
         if (!email) {
             return this.dados.eventos || [];
         }
         
         return (this.dados.eventos || []).filter(evento => {
             // Criador ou responsável
-            if (evento.criadoPor === email || evento.responsavel === email) {
+            if (normalizarEmail(evento.criadoPor) === email || normalizarEmail(evento.responsavel) === email) {
                 return true;
             }
             
             // Participante
-            if (evento.participantes?.includes(email) || evento.pessoas?.includes(email)) {
+            if ((evento.participantes || []).map(normalizarEmail).includes(email) || (evento.pessoas || []).map(normalizarEmail).includes(email)) {
                 return true;
             }
             
@@ -1038,6 +1039,11 @@ const App = {
         };
     }
 };
+
+// Função utilitária para normalizar e-mails
+function normalizarEmail(email) {
+    return (email || '').toLowerCase().trim();
+}
 
 // ✅ EXPOSIÇÃO GLOBAL
 window.App = App;

@@ -754,5 +754,27 @@
         console.log('📋 Comandos: verificarSistemaUnificado() | verificacaoRapida()');
         console.log('🔥 Funções: criarTarefaUnificada() | abrirMinhaAgendaUnificada()');
     </script>
+    <script>
+        // Atualizar nome do usuário no topo do index
+        function atualizarUsuarioIndex() {
+            if (window.Auth && Auth.state && Auth.state.usuario) {
+                var nome = Auth.state.usuario.displayName || Auth.state.usuario.nome || Auth.state.usuario.email || 'Usuário';
+                var usuarioEl = document.getElementById('usuarioLogado');
+                if (usuarioEl) usuarioEl.textContent = '👤 ' + nome;
+            }
+        }
+        // Atualizar ao logar
+        if (window.Auth) {
+            if (typeof Auth._executarCallbacksLogin === 'function') {
+                var originalLogin = Auth._executarCallbacksLogin;
+                Auth._executarCallbacksLogin = function() {
+                    originalLogin.apply(Auth, arguments);
+                    atualizarUsuarioIndex();
+                };
+            }
+        }
+        window.addEventListener('DOMContentLoaded', atualizarUsuarioIndex);
+        window.addEventListener('biapo-login', atualizarUsuarioIndex);
+    </script>
 </body>
 </html>
