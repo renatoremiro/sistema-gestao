@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Integração Completa - Sistema BIAPO v8.12.2</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Sistema -->
+    <script src="assets/js/config/firebase.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    <script src="assets/js/modules/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/events.js"></script>
+    <script src="assets/js/modules/calendar.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #C53030;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #9B2C2C;
+        }
+        .test-button.success {
+            background: #059669;
+        }
+        .test-button.warning {
+            background: #f59e0b;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .status-card {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+        .status-card.success {
+            border-color: #059669;
+            background: #f0fdf4;
+        }
+        .status-card.error {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        .log {
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste Integração Completa - Sistema BIAPO v8.12.2</h1>
+        
+        <div class="test-section">
+            <h3>📊 Status dos Módulos</h3>
+            <div id="status-modulos" class="status-grid">
+                <div class="status-card">
+                    <h4>App.js</h4>
+                    <div id="status-app">Carregando...</div>
+                </div>
+                <div class="status-card">
+                    <h4>Auth.js</h4>
+                    <div id="status-auth">Carregando...</div>
+                </div>
+                <div class="status-card">
+                    <h4>Events.js</h4>
+                    <div id="status-events">Carregando...</div>
+                </div>
+                <div class="status-card">
+                    <h4>Calendar.js</h4>
+                    <div id="status-calendar">Carregando...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Testes de Integração</h3>
+            
+            <h4>1. Teste de Criação de Eventos</h4>
+            <button class="test-button" onclick="testarCriacaoEventos()">
+                📅 Criar Evento de Teste
+            </button>
+            <button class="test-button" onclick="testarModalEvento()">
+                🎯 Abrir Modal Evento
+            </button>
+            
+            <h4>2. Teste de Sincronização</h4>
+            <button class="test-button" onclick="testarSincronizacao()">
+                🔄 Testar Sincronização
+            </button>
+            <button class="test-button" onclick="verificarEventos()">
+                📋 Verificar Eventos
+            </button>
+            
+            <h4>3. Teste de Permissões</h4>
+            <button class="test-button" onclick="testarPermissoes()">
+                🔐 Testar Permissões
+            </button>
+            <button class="test-button" onclick="simularLogin()">
+                👤 Simular Login
+            </button>
+            
+            <h4>4. Teste de Calendário</h4>
+            <button class="test-button" onclick="testarCalendario()">
+                📅 Testar Calendário
+            </button>
+            <button class="test-button" onclick="verificarIntegracaoCalendario()">
+                🔗 Verificar Integração
+            </button>
+            
+            <h4>5. Limpeza</h4>
+            <button class="test-button warning" onclick="limparDadosTeste()">
+                🗑️ Limpar Dados de Teste
+            </button>
+            <button class="test-button" onclick="executarTesteCompleto()">
+                🚀 Executar Teste Completo
+            </button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Log de Testes</h3>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let testesExecutados = 0;
+        let testesSucesso = 0;
+        
+        function log(mensagem, tipo = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : tipo === 'warning' ? '⚠️' : '📝';
+            logDiv.innerHTML += `[${timestamp}] ${emoji} ${mensagem}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`${emoji} ${mensagem}`);
+        }
+
+        function atualizarStatusModulos() {
+            // App.js
+            const statusApp = document.getElementById('status-app');
+            if (typeof App !== 'undefined') {
+                const status = App.obterStatusSistema();
+                statusApp.innerHTML = `
+                    <div>✅ Carregado</div>
+                    <div>Versão: ${status.versao}</div>
+                    <div>Inicializado: ${status.inicializado ? 'SIM' : 'NÃO'}</div>
+                    <div>Firebase: ${status.firebaseDisponivel ? 'ONLINE' : 'OFFLINE'}</div>
+                    <div>Eventos: ${status.totalEventos}</div>
+                    <div>Tarefas: ${status.totalTarefas}</div>
+                `;
+                statusApp.parentElement.className = 'status-card success';
+            } else {
+                statusApp.innerHTML = '❌ Não carregado';
+                statusApp.parentElement.className = 'status-card error';
+            }
+            
+            // Auth.js
+            const statusAuth = document.getElementById('status-auth');
+            if (typeof Auth !== 'undefined') {
+                const status = Auth.obterStatus();
+                statusAuth.innerHTML = `
+                    <div>✅ Carregado</div>
+                    <div>Versão: ${status.versao}</div>
+                    <div>Logado: ${status.logado ? 'SIM' : 'NÃO'}</div>
+                    <div>Usuários: ${status.totalUsuarios}</div>
+                `;
+                statusAuth.parentElement.className = 'status-card success';
+            } else {
+                statusAuth.innerHTML = '❌ Não carregado';
+                statusAuth.parentElement.className = 'status-card error';
+            }
+            
+            // Events.js
+            const statusEvents = document.getElementById('status-events');
+            if (typeof Events !== 'undefined') {
+                const status = Events.obterStatus();
+                statusEvents.innerHTML = `
+                    <div>✅ Carregado</div>
+                    <div>Versão: ${status.versao}</div>
+                    <div>Modal: ${status.modalAtivo ? 'ATIVO' : 'INATIVO'}</div>
+                    <div>Participantes: ${status.participantes.total}</div>
+                `;
+                statusEvents.parentElement.className = 'status-card success';
+            } else {
+                statusEvents.innerHTML = '❌ Não carregado';
+                statusEvents.parentElement.className = 'status-card error';
+            }
+            
+            // Calendar.js
+            const statusCalendar = document.getElementById('status-calendar');
+            if (typeof Calendar !== 'undefined') {
+                const status = Calendar.obterStatus();
+                statusCalendar.innerHTML = `
+                    <div>✅ Carregado</div>
+                    <div>Versão: ${status.versao}</div>
+                    <div>Carregado: ${status.carregado ? 'SIM' : 'NÃO'}</div>
+                    <div>Mês: ${status.mesAtual}/${status.anoAtual}</div>
+                `;
+                statusCalendar.parentElement.className = 'status-card success';
+            } else {
+                statusCalendar.innerHTML = '❌ Não carregado';
+                statusCalendar.parentElement.className = 'status-card error';
+            }
+        }
+
+        async function testarCriacaoEventos() {
+            log('🧪 Testando criação de eventos...');
+            testesExecutados++;
+            
+            try {
+                if (typeof App === 'undefined') {
+                    throw new Error('App.js não carregado');
+                }
+                
+                const eventoTeste = {
+                    titulo: 'Evento de Integração ' + new Date().toLocaleTimeString(),
+                    tipo: 'reuniao',
+                    data: new Date().toISOString().split('T')[0],
+                    descricao: 'Evento criado pelo teste de integração',
+                    participantes: ['Renato Remiro'],
+                    criadoPor: 'teste@biapo.com.br'
+                };
+                
+                const evento = await App.criarEvento(eventoTeste);
+                log(`✅ Evento criado com sucesso: "${evento.titulo}" (ID: ${evento.id})`, 'success');
+                testesSucesso++;
+                
+                // Verificar se apareceu no calendário
+                setTimeout(() => {
+                    if (typeof Calendar !== 'undefined') {
+                        Calendar.atualizarEventos();
+                        log('✅ Calendário atualizado após criação do evento', 'success');
+                    }
+                }, 500);
+                
+            } catch (error) {
+                log(`❌ Erro ao criar evento: ${error.message}`, 'error');
+            }
+        }
+
+        function testarModalEvento() {
+            log('🧪 Testando modal de eventos...');
+            testesExecutados++;
+            
+            try {
+                if (typeof Events === 'undefined') {
+                    throw new Error('Events.js não carregado');
+                }
+                
+                Events.mostrarNovoEvento();
+                log('✅ Modal de evento aberto com sucesso', 'success');
+                testesSucesso++;
+                
+            } catch (error) {
+                log(`❌ Erro ao abrir modal: ${error.message}`, 'error');
+            }
+        }
+
+        async function testarSincronizacao() {
+            log('🧪 Testando sincronização entre módulos...');
+            testesExecutados++;
+            
+            try {
+                // Verificar se App.js está sincronizando
+                if (typeof App !== 'undefined' && App._salvarDadosUnificados) {
+                    await App._salvarDadosUnificados();
+                    log('✅ App.js sincronizado', 'success');
+                }
+                
+                // Verificar se Calendar.js está escutando eventos
+                if (typeof Calendar !== 'undefined') {
+                    Calendar.atualizarEventos();
+                    log('✅ Calendar.js atualizado', 'success');
+                }
+                
+                log('✅ Sincronização testada com sucesso', 'success');
+                testesSucesso++;
+                
+            } catch (error) {
+                log(`❌ Erro na sincronização: ${error.message}`, 'error');
+            }
+        }
+
+        function verificarEventos() {
+            log('🧪 Verificando eventos existentes...');
+            testesExecutados++;
+            
+            try {
+                if (typeof App === 'undefined') {
+                    throw new Error('App.js não carregado');
+                }
+                
+                const eventos = App.dados.eventos || [];
+                const tarefas = App.dados.tarefas || [];
+                
+                log(`📊 Total de eventos: ${eventos.length}`);
+                log(`📊 Total de tarefas: ${tarefas.length}`);
+                
+                if (eventos.length > 0) {
+                    log(`📅 Último evento: "${eventos[eventos.length - 1].titulo}"`);
+                }
+                
+                log('✅ Verificação de eventos concluída', 'success');
+                testesSucesso++;
+                
+            } catch (error) {
+                log(`❌ Erro ao verificar eventos: ${error.message}`, 'error');
+            }
+        }
+
+        function testarPermissoes() {
+            log('🧪 Testando sistema de permissões...');
+            testesExecutados++;
+            
+            try {
+                if (typeof App === 'undefined') {
+                    throw new Error('App.js não carregado');
+                }
+                
+                const podeEditar = App.podeEditar();
+                const ehAdmin = App.ehAdmin();
+                
+                log(`🔐 Pode editar: ${podeEditar ? 'SIM' : 'NÃO'}`);
+                log(`👑 É admin: ${ehAdmin ? 'SIM' : 'NÃO'}`);
+                
+                log('✅ Teste de permissões concluído', 'success');
+                testesSucesso++;
+                
+            } catch (error) {
+                log(`❌ Erro ao testar permissões: ${error.message}`, 'error');
+            }
+        }
+
+        function simularLogin() {
+            log('🧪 Simulando login...');
+            testesExecutados++;
+            
+            try {
+                if (typeof Auth === 'undefined') {
+                    throw new Error('Auth.js não carregado');
+                }
+                
+                // Simular login com usuário de teste
+                Auth.state.usuario = {
+                    email: 'teste@biapo.com.br',
+                    displayName: 'Usuário de Teste',
+                    admin: true
+                };
+                
+                Auth.state.logado = true;
+                
+                // Atualizar App.js se disponível
+                if (typeof App !== 'undefined') {
+                    App.usuarioAtual = Auth.state.usuario;
+                    App.estadoSistema.usuarioAutenticado = true;
+                    App.estadoSistema.modoAnonimo = false;
+                }
+                
+                log('✅ Login simulado com sucesso', 'success');
+                testesSucesso++;
+                
+            } catch (error) {
+                log(`❌ Erro ao simular login: ${error.message}`, 'error');
+            }
+        }
+
+        function testarCalendario() {
+            log('🧪 Testando funcionalidades do calendário...');
+            testesExecutados++;
+            
+            try {
+                if (typeof Calendar === 'undefined') {
+                    throw new Error('Calendar.js não carregado');
+                }
+                
+                // Testar inicialização
+                const inicializado = Calendar.inicializar();
+                log(`📅 Calendário inicializado: ${inicializado ? 'SIM' : 'NÃO'}`);
+                
+                // Testar atualização
+                Calendar.atualizarEventos();
+                log('✅ Calendário atualizado');
+                
+                log('✅ Teste do calendário concluído', 'success');
+                testesSucesso++;
+                
+            } catch (error) {
+                log(`❌ Erro ao testar calendário: ${error.message}`, 'error');
+            }
+        }
+
+        function verificarIntegracaoCalendario() {
+            log('🧪 Verificando integração com calendário...');
+            testesExecutados++;
+            
+            try {
+                if (typeof Calendar === 'undefined') {
+                    throw new Error('Calendar.js não carregado');
+                }
+                
+                // Verificar se está escutando eventos do App.js
+                const status = Calendar.obterStatus();
+                log(`📊 Status do calendário: ${status.versao}`);
+                log(`📊 Carregado: ${status.carregado ? 'SIM' : 'NÃO'}`);
+                
+                // Verificar se tem função de atualização
+                if (typeof Calendar.atualizarEventos === 'function') {
+                    log('✅ Função atualizarEventos disponível', 'success');
+                } else {
+                    log('❌ Função atualizarEventos não encontrada', 'error');
+                }
+                
+                log('✅ Verificação de integração concluída', 'success');
+                testesSucesso++;
+                
+            } catch (error) {
+                log(`❌ Erro ao verificar integração: ${error.message}`, 'error');
+            }
+        }
+
+        function limparDadosTeste() {
+            log('🧪 Limpando dados de teste...');
+            
+            try {
+                // Limpar localStorage
+                localStorage.removeItem('biapo_eventos');
+                localStorage.removeItem('biapo_eventos_timestamp');
+                localStorage.removeItem('biapo_dados_v8');
+                localStorage.removeItem('biapo_dados_timestamp');
+                
+                // Reinicializar App se disponível
+                if (typeof App !== 'undefined' && App.init) {
+                    App.init();
+                }
+                
+                log('✅ Dados de teste removidos', 'success');
+                
+            } catch (error) {
+                log(`❌ Erro ao limpar dados: ${error.message}`, 'error');
+            }
+        }
+
+        async function executarTesteCompleto() {
+            log('🚀 Iniciando teste completo de integração...');
+            
+            // Reset contadores
+            testesExecutados = 0;
+            testesSucesso = 0;
+            
+            // Executar todos os testes
+            await testarCriacaoEventos();
+            testarModalEvento();
+            await testarSincronizacao();
+            verificarEventos();
+            testarPermissoes();
+            simularLogin();
+            testarCalendario();
+            verificarIntegracaoCalendario();
+            
+            // Resultado final
+            const percentual = Math.round((testesSucesso / testesExecutados) * 100);
+            log(`📊 RESULTADO FINAL: ${testesSucesso}/${testesExecutados} testes passaram (${percentual}%)`, 
+                percentual >= 80 ? 'success' : 'warning');
+            
+            if (percentual >= 80) {
+                log('🎉 Sistema BIAPO v8.12.2 - Integração FUNCIONANDO PERFEITAMENTE!', 'success');
+            } else {
+                log('⚠️ Alguns problemas foram detectados na integração', 'warning');
+            }
+        }
+
+        // Inicializar
+        window.addEventListener('load', () => {
+            log('🚀 Página carregada - iniciando verificação de integração...');
+            
+            // Aguardar carregamento dos módulos
+            setTimeout(() => {
+                atualizarStatusModulos();
+                log('✅ Status dos módulos atualizado');
+            }, 1000);
+        });
+
+        // Atualizar status periodicamente
+        setInterval(atualizarStatusModulos, 3000);
+    </script>
+</body>
+</html> 

@@ -140,7 +140,10 @@ const Calendar = {
                 return false;
             }
             
-            // 4. Marcar como carregado
+            // 4. 🔥 NOVO: Configurar escuta de eventos do App.js
+            this._configurarEscutaEventos();
+            
+            // 5. Marcar como carregado
             this.state.carregado = true;
             this.state.ultimaSincronizacao = new Date().toISOString();
             
@@ -152,6 +155,49 @@ const Calendar = {
         } catch (error) {
             console.error('❌ ERRO CRÍTICO ao inicializar Calendar:', error);
             return false;
+        }
+    },
+
+    // 🔥 NOVA FUNÇÃO: Configurar escuta de eventos do App.js
+    _configurarEscutaEventos() {
+        try {
+            console.log('🔔 Configurando escuta de eventos do App.js...');
+            
+            // Escutar eventos de mudanças no App.js
+            document.addEventListener('app-evento-criado', (evento) => {
+                console.log('📅 Evento criado detectado, atualizando calendário...');
+                this.atualizarEventos();
+            });
+            
+            document.addEventListener('app-evento-editado', (evento) => {
+                console.log('📅 Evento editado detectado, atualizando calendário...');
+                this.atualizarEventos();
+            });
+            
+            document.addEventListener('app-evento-excluido', (evento) => {
+                console.log('📅 Evento excluído detectado, atualizando calendário...');
+                this.atualizarEventos();
+            });
+            
+            document.addEventListener('app-tarefa-criada', (evento) => {
+                console.log('📋 Tarefa criada detectada, atualizando calendário...');
+                this.atualizarEventos();
+            });
+            
+            document.addEventListener('app-tarefa-editada', (evento) => {
+                console.log('📋 Tarefa editada detectada, atualizando calendário...');
+                this.atualizarEventos();
+            });
+            
+            document.addEventListener('app-tarefa-excluida', (evento) => {
+                console.log('📋 Tarefa excluída detectada, atualizando calendário...');
+                this.atualizarEventos();
+            });
+            
+            console.log('✅ Escuta de eventos configurada com sucesso');
+            
+        } catch (error) {
+            console.error('❌ Erro ao configurar escuta de eventos:', error);
         }
     },
 

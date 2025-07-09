@@ -510,7 +510,18 @@ const App = {
     // ✅ NOTIFICAR SISTEMA
     _notificarSistema(evento, dados) {
         try {
-            // Disparar evento customizado
+            // Disparar evento customizado específico
+            const eventoCustomizado = new CustomEvent(`app-${evento}`, {
+                detail: { 
+                    tipo: evento, 
+                    dados: dados,
+                    timestamp: Date.now() 
+                }
+            });
+            
+            document.dispatchEvent(eventoCustomizado);
+            
+            // Disparar evento genérico para compatibilidade
             window.dispatchEvent(new CustomEvent('dados-sincronizados', {
                 detail: { 
                     tipo: evento, 
@@ -521,7 +532,7 @@ const App = {
             
             // Log para debug
             if (this.config.debugAtivo) {
-                console.log(`📡 Evento disparado: ${evento}`);
+                console.log(`📡 Evento disparado: app-${evento}`);
             }
             
         } catch (error) {
