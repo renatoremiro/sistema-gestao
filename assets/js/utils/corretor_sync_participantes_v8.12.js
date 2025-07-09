@@ -416,7 +416,63 @@ setTimeout(() => {
        console.warn('⚠️ Sistema ainda não inicializado. Execute manualmente: CorretorSyncParticipantes.aplicarCorrecoes()');
    }
 }, 2000);
+// 🔥 PATCH v8.12.1 - ADICIONAR AO FINAL DO corretor_sync_participantes_v8.12.js
 
+// Adicionar função que estava faltando no App
+if (typeof App !== 'undefined' && !App._obterUsuarioAtual) {
+    App._obterUsuarioAtual = function() {
+        try {
+            // Verificar usuário atual no App
+            if (this.usuarioAtual && this.usuarioAtual.email) {
+                return this.usuarioAtual.email;
+            }
+            
+            // Verificar no Auth
+            if (typeof Auth !== 'undefined' && Auth.obterUsuario) {
+                const usuario = Auth.obterUsuario();
+                if (usuario && usuario.email) {
+                    return usuario.email;
+                }
+            }
+            
+            // Verificar no estado do sistema
+            if (this.estadoSistema && this.estadoSistema.usuarioEmail) {
+                return this.estadoSistema.usuarioEmail;
+            }
+            
+            return 'Sistema';
+        } catch (error) {
+            console.warn('⚠️ Erro ao obter usuário atual:', error);
+            return 'Sistema';
+        }
+    };
+    
+    console.log('✅ PATCH: App._obterUsuarioAtual() adicionada');
+}
+
+// Adicionar também no Calendar se necessário
+if (typeof Calendar !== 'undefined' && !Calendar._obterUsuarioAtual) {
+    Calendar._obterUsuarioAtual = function() {
+        try {
+            if (App && App._obterUsuarioAtual) {
+                return App._obterUsuarioAtual();
+            }
+            
+            if (Auth && Auth.obterUsuario) {
+                const usuario = Auth.obterUsuario();
+                return usuario?.email || 'Sistema';
+            }
+            
+            return 'Sistema';
+        } catch (error) {
+            return 'Sistema';
+        }
+    };
+    
+    console.log('✅ PATCH: Calendar._obterUsuarioAtual() adicionada');
+}
+
+console.log('🔧 PATCH v8.12.1 aplicado - funções _obterUsuarioAtual restauradas');
 // 🎯 COMANDOS DISPONÍVEIS
 window.CorretorSyncParticipantes = CorretorSyncParticipantes;
 window.aplicarCorrecoesSyncParticipantes = () => CorretorSyncParticipantes.aplicarCorrecoes();
