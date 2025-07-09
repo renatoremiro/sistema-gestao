@@ -2,10 +2,6 @@
   "name": "sistema-gestao",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build"
-  },
-  "devDependencies": {
-    "vite": "^7.0.3"
+    "test": "node tests/helpers.test.js && node tests/auth.test.js && node tests/calendar.test.js && node tests/events.test.js && node tests/tasks.test.js && node tests/persistence.test.js && node tests/login-keydown.test.js && node tests/notifications-dependency.test.js"
   }
 }

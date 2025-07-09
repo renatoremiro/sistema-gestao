@@ -10,8 +10,6 @@
  * - 🔧 CORRIGIDO: Erro de sintaxe linha 34
  */
 
-import Auth from './auth.js';
-
 const AdminUsersManager = {
     // ✅ CONFIGURAÇÃO v8.5
     config: {
@@ -1111,9 +1109,7 @@ const AdminUsersManager = {
 };
 
 // ✅ EXPOSIÇÃO GLOBAL
-if (typeof window !== 'undefined') {
-    window.AdminUsersManager = AdminUsersManager;
-}
+window.AdminUsersManager = AdminUsersManager;
 
 // ✅ AUTO-INICIALIZAÇÃO
 function inicializarAdminUsersManagerV85() {
@@ -1157,5 +1153,3 @@ console.log('👥 AdminUsersManager v8.5 CORRIGIDO - ERRO DE SINTAXE RESOLVIDO!'
 console.log('🏢 5 Departamentos reais + Interface administrativa funcionando');
 console.log('🔧 Linha 34 corrigida - JavaScript válido');
 console.log('✅ Pronto para integração com Auth.js v8.4.2');
-
-export default AdminUsersManager;

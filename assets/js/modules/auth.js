@@ -1,8 +1,5 @@
 /* ========== 🔐 AUTH BIAPO v8.4.2 OTIMIZADO - DEPARTAMENTOS REAIS CORRIGIDOS ========== */
 
-import Calendar from './calendar.js';
-import App from '../core/app.js';
-
 var Auth = {
     // ✅ CONFIGURAÇÃO OTIMIZADA
     config: {
@@ -990,9 +987,7 @@ var Auth = {
 
 // ========== EXPOSIÇÃO GLOBAL ==========
 
-if (typeof window !== 'undefined') {
-    window.Auth = Auth;
-}
+window.Auth = Auth;
 
 // ========== COMANDOS ÚTEIS OTIMIZADOS v8.4.2 ==========
 
@@ -1122,8 +1117,6 @@ window.addEventListener('beforeunload', function() {
 
 console.log('🔐 Auth BIAPO v8.4.2 CORRIGIDA - DEPARTAMENTOS REAIS IMPLEMENTADOS!');
 console.log('⚡ Correções: Departamentos reais + Fallback corrigido + Cache otimizado');
-
-export default Auth;
 
 /*
 ========== ✅ AUTH BIAPO v8.4.2 CORRIGIDA - DEPARTAMENTOS REAIS IMPLEMENTADOS ==========

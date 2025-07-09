@@ -9,9 +9,6 @@
  * - ✅ Retry otimizado com backoff linear
  */
 
-import App from '../core/app.js';
-import Auth from './auth.js';
-
 const Persistence = {
     // ✅ CONFIGURAÇÕES OTIMIZADAS
     config: {
@@ -707,9 +704,7 @@ window.salvarDadosCritico = () => Persistence.salvarDadosCritico();
 window.salvarDadosImediato = () => Persistence.salvarDadosCritico();
 
 // ✅ EXPOSIÇÃO GLOBAL
-if (typeof window !== 'undefined') {
-    window.Persistence = Persistence;
-}
+window.Persistence = Persistence;
 
 // 🔥 DEBUG OTIMIZADO v8.2.1
 window.Persistence_Debug = {
@@ -755,8 +750,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 console.log('💾 Persistence.js v8.2.1 OTIMIZADA - LIMPEZA CONSERVADORA MODERADA aplicada!');
 console.log('⚡ Otimizações: Cache modo anônimo + Validação simplificada + Backup otimizado + Timeouts reduzidos');
-
-export default Persistence;
 
 /*
 🔥 OTIMIZAÇÕES APLICADAS v8.2.1:

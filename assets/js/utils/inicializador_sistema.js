@@ -15,24 +15,31 @@ const InicializadorSistema = {
     
     tentativas: 0,
     maxTentativas: 10,
-
+    
     // 🔧 Inicializar sistema
-    async iniciar() {
+    iniciar() {
         console.log('🚀 Inicializador Sistema BIAPO v1.0');
-
+        
+        // Verificar e inicializar módulos
         this.verificarModulos();
-        while (!this.tudoPronto() && this.tentativas < this.maxTentativas) {
-            await new Promise(r => setTimeout(r, 500));
-            this.tentativas++;
+        
+        // Verificar a cada 500ms até tudo estar pronto
+        this.intervalId = setInterval(() => {
             this.verificarModulos();
-        }
-
-        if (this.tudoPronto()) {
-            console.log('✅ Sistema totalmente inicializado!');
-        } else {
-            console.warn('⚠️ Timeout na inicialização - forçando módulos');
-            this.forcarInicializacao();
-        }
+            
+            this.tentativas++;
+            if (this.tentativas >= this.maxTentativas) {
+                console.warn('⚠️ Timeout na inicialização - forçando módulos');
+                this.forcarInicializacao();
+                clearInterval(this.intervalId);
+            }
+            
+            // Se tudo estiver OK, parar
+            if (this.tudoPronto()) {
+                console.log('✅ Sistema totalmente inicializado!');
+                clearInterval(this.intervalId);
+            }
+        }, 500);
     },
     
     // 🔍 Verificar módulos
@@ -154,10 +161,11 @@ const InicializadorSistema = {
 // 🚀 INICIAR AUTOMATICAMENTE
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        InicializadorSistema.iniciar();
+        setTimeout(() => InicializadorSistema.iniciar(), 100);
     });
 } else {
-    InicializadorSistema.iniciar();
+    // DOM já carregado
+    setTimeout(() => InicializadorSistema.iniciar(), 100);
 }
 
 // 🎯 Comandos globais

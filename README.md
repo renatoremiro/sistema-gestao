@@ -1,38 +1,32 @@
 # sistema-gestao
 Sistema de Gestão - Obra 292
 
-## Como executar
+## Estrutura do repositório
 
-Com a modularização, todo o código está concentrado no arquivo
-`index.html` e nos scripts dentro de `assets/`. Agora o projeto utiliza o
-[Vite](https://vitejs.dev/) para servir e gerar a versão final. Para
-iniciar o modo de desenvolvimento execute:
+Versões antigas da interface e módulos obsoletos agora residem na pasta
+`legacy/`. A raiz do projeto contém apenas os arquivos atualmente
+utilizados.
 
-```bash
-npm run dev
-```
+## Testes
 
-Para produzir os arquivos otimizados em `dist/` utilize:
+Execute a suíte completa utilizando o NPM:
 
 ```bash
-npm run build
+npm test
 ```
 
-Se preferir um servidor estático simples, ainda é possível usar o
-`http-server`:
+Se preferir rodar um teste isolado basta chamar o arquivo diretamente com o
+Node.js, por exemplo:
 
 ```bash
-npx http-server -p 8080
+node tests/helpers.test.js
 ```
-
-Em seguida acesse `http://localhost:8080/index.html` pelo navegador.
 
 ## Configuração do Firebase
 
-Antes de iniciar o servidor defina as credenciais do Firebase.
-O sistema busca essas informações em variáveis de ambiente ou em um arquivo
-`assets/js/config/firebaseConfig.json` (que é ignorado pelo Git). As variáveis
-de ambiente reconhecidas são:
+O sistema busca as credenciais do Firebase a partir de variáveis de ambiente
+ou de um arquivo `assets/js/config/firebaseConfig.json` (que é ignorado pelo
+Git). As variáveis de ambiente reconhecidas são:
 
 ```
 FIREBASE_API_KEY

@@ -839,9 +839,7 @@ const App = {
 };
 
 // ✅ EXPOSIÇÃO GLOBAL
-if (typeof window !== 'undefined') {
-    window.App = App;
-}
+window.App = App;
 
 // ✅ INICIALIZAÇÃO AUTOMÁTICA
 document.addEventListener('DOMContentLoaded', () => {
@@ -865,8 +863,6 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 
 console.log('📱 App.js v8.12.1 CORRIGIDO carregado!');
 console.log('🔥 Correções: novaTarefa → tarefa | Firebase offline | Salvamento otimizado');
-
-export default App;
 
 /*
 🔥 APP.JS v8.12.1 CORRIGIDO - CHANGELOG:
