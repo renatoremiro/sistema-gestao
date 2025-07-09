@@ -1,32 +1,25 @@
 # sistema-gestao
 Sistema de Gestão - Obra 292
 
-## Estrutura do repositório
+## Como executar
 
-Versões antigas da interface e módulos obsoletos agora residem na pasta
-`legacy/`. A raiz do projeto contém apenas os arquivos atualmente
-utilizados.
-
-## Testes
-
-Execute a suíte completa utilizando o NPM:
+Com a modularização, todo o código está concentrado no arquivo
+`index.html` e nos scripts dentro de `assets/`. Rode o sistema servindo
+o diretório via um servidor estático. Com o Node.js instalado é possível
+utilizar o `http-server`:
 
 ```bash
-npm test
+npx http-server -p 8080
 ```
 
-Se preferir rodar um teste isolado basta chamar o arquivo diretamente com o
-Node.js, por exemplo:
-
-```bash
-node tests/helpers.test.js
-```
+Em seguida acesse `http://localhost:8080/index.html` pelo navegador.
 
 ## Configuração do Firebase
 
-O sistema busca as credenciais do Firebase a partir de variáveis de ambiente
-ou de um arquivo `assets/js/config/firebaseConfig.json` (que é ignorado pelo
-Git). As variáveis de ambiente reconhecidas são:
+Antes de iniciar o servidor defina as credenciais do Firebase.
+O sistema busca essas informações em variáveis de ambiente ou em um arquivo
+`assets/js/config/firebaseConfig.json` (que é ignorado pelo Git). As variáveis
+de ambiente reconhecidas são:
 
 ```
 FIREBASE_API_KEY
