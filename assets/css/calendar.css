@@ -1,5 +1,32 @@
 /* ========== 📅 SISTEMA DE CALENDÁRIO v6.2 - CSS ESPECÍFICO ========== */
+/* CORREÇÃO FORÇADA DO GRID - ADICIONAR NO INÍCIO DO calendar.css */
+#calendario #calendarGrid {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 1px !important;
+    background: #e5e7eb !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    min-height: 400px !important;
+}
 
+#calendario > div:nth-child(2) {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 1px !important;
+    margin-bottom: 8px !important;
+    background: #e5e7eb !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+#calendarGrid > div {
+    background: white !important;
+    min-height: 100px !important;
+    padding: 8px !important;
+    cursor: pointer !important;
+    border: 1px solid #e5e7eb !important;
+}
 /* ✅ LAYOUT PRINCIPAL DO CALENDÁRIO */
 .calendario {
     display: grid;
