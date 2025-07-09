@@ -1138,12 +1138,128 @@ Para ${acao}, você precisa estar logado no sistema.
     // (Implementações de _submeterFormulario, validações, etc. mantidas)
 
     _submeterFormulario() {
-        // Implementação mantida da versão original
         try {
-            console.log('📝 Submetendo formulário...');
-            // Lógica de submissão mantida
+            console.log('📝 Submetendo formulário de evento...');
+            
+            // Obter dados do formulário
+            const titulo = document.getElementById('eventoTitulo')?.value?.trim();
+            const tipo = document.getElementById('eventoTipo')?.value;
+            const data = document.getElementById('eventoData')?.value;
+            const descricao = document.getElementById('eventoDescricao')?.value?.trim() || '';
+            const local = document.getElementById('eventoLocal')?.value?.trim() || '';
+            const horarioInicio = document.getElementById('eventoHorarioInicio')?.value || null;
+            const horarioFim = document.getElementById('eventoHorarioFim')?.value || null;
+            
+            // Validar campos obrigatórios
+            if (!titulo) {
+                this._mostrarNotificacao('Título do evento é obrigatório', 'error');
+                document.getElementById('eventoTitulo')?.focus();
+                return;
+            }
+            
+            if (!tipo) {
+                this._mostrarNotificacao('Tipo do evento é obrigatório', 'error');
+                document.getElementById('eventoTipo')?.focus();
+                return;
+            }
+            
+            if (!data) {
+                this._mostrarNotificacao('Data do evento é obrigatória', 'error');
+                document.getElementById('eventoData')?.focus();
+                return;
+            }
+            
+            // Obter participantes selecionados
+            const participantesCheckboxes = document.querySelectorAll('input[name="participantes"]:checked');
+            const participantes = Array.from(participantesCheckboxes).map(cb => cb.value);
+            
+            // Criar objeto do evento
+            const dadosEvento = {
+                titulo,
+                tipo,
+                data,
+                descricao,
+                local,
+                horarioInicio,
+                horarioFim,
+                participantes,
+                status: 'agendado',
+                criadoPor: this._obterUsuarioAtual(),
+                dataCriacao: new Date().toISOString(),
+                ultimaAtualizacao: new Date().toISOString()
+            };
+            
+            // Se é edição, adicionar ID
+            if (this.state.modoEdicao && this.state.eventoEditando) {
+                dadosEvento.id = this.state.eventoEditando;
+            }
+            
+            console.log('📅 Dados do evento:', dadosEvento);
+            
+            // Salvar via App.js se disponível
+            if (this._verificarApp() && typeof App.criarEvento === 'function') {
+                if (this.state.modoEdicao) {
+                    // Editar evento existente
+                    App.editarEvento(this.state.eventoEditando, dadosEvento).then(() => {
+                        this._mostrarNotificacao('✅ Evento atualizado com sucesso!', 'success');
+                        this.fecharModal();
+                        this._sincronizarComApp();
+                    }).catch(error => {
+                        console.error('❌ Erro ao editar evento:', error);
+                        this._mostrarNotificacao('Erro ao atualizar evento', 'error');
+                    });
+                } else {
+                    // Criar novo evento
+                    App.criarEvento(dadosEvento).then(() => {
+                        this._mostrarNotificacao('✅ Evento criado com sucesso!', 'success');
+                        this.fecharModal();
+                        this._sincronizarComApp();
+                    }).catch(error => {
+                        console.error('❌ Erro ao criar evento:', error);
+                        this._mostrarNotificacao('Erro ao criar evento', 'error');
+                    });
+                }
+            } else {
+                // Fallback: salvar localmente
+                console.warn('⚠️ App.js não disponível, salvando localmente');
+                this._salvarEventoLocal(dadosEvento);
+                this._mostrarNotificacao('✅ Evento salvo localmente!', 'success');
+                this.fecharModal();
+            }
+            
         } catch (error) {
             console.error('❌ Erro ao submeter formulário:', error);
+            this._mostrarNotificacao('Erro interno ao salvar evento', 'error');
+        }
+    },
+
+    // 🔥 NOVA FUNÇÃO: Salvar evento localmente (fallback)
+    _salvarEventoLocal(dadosEvento) {
+        try {
+            // Obter eventos existentes
+            let eventos = JSON.parse(localStorage.getItem('biapo_eventos') || '[]');
+            
+            if (this.state.modoEdicao) {
+                // Atualizar evento existente
+                const index = eventos.findIndex(e => e.id === this.state.eventoEditando);
+                if (index !== -1) {
+                    eventos[index] = { ...eventos[index], ...dadosEvento };
+                }
+            } else {
+                // Adicionar novo evento
+                dadosEvento.id = 'local_' + Date.now();
+                eventos.push(dadosEvento);
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('biapo_eventos', JSON.stringify(eventos));
+            localStorage.setItem('biapo_eventos_timestamp', new Date().toISOString());
+            
+            console.log('💾 Evento salvo localmente');
+            
+        } catch (error) {
+            console.error('❌ Erro ao salvar localmente:', error);
+            throw error;
         }
     }
 };

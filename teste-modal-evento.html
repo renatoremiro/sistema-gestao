@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Modal Evento - Sistema BIAPO</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Sistema -->
+    <script src="assets/js/config/firebase.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    <script src="assets/js/modules/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/events.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #C53030;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #9B2C2C;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste Modal de Eventos - Sistema BIAPO v8.12.2</h1>
+        
+        <div class="status">
+            <h3>Status do Sistema:</h3>
+            <div id="status">Carregando...</div>
+        </div>
+        
+        <h3>Testes Disponíveis:</h3>
+        
+        <button class="test-button" onclick="testarModalNovoEvento()">
+            📅 Abrir Modal Novo Evento
+        </button>
+        
+        <button class="test-button" onclick="testarCriarEvento()">
+            🧪 Criar Evento de Teste
+        </button>
+        
+        <button class="test-button" onclick="verificarModulos()">
+            🔍 Verificar Módulos
+        </button>
+        
+        <button class="test-button" onclick="limparDados()">
+            🗑️ Limpar Dados de Teste
+        </button>
+        
+        <div class="status">
+            <h3>Log de Testes:</h3>
+            <div id="log" style="font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 4px;"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(mensagem) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${mensagem}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(mensagem);
+        }
+
+        function atualizarStatus() {
+            const statusDiv = document.getElementById('status');
+            let status = '';
+            
+            // Verificar módulos
+            status += `App.js: ${typeof App !== 'undefined' ? '✅' : '❌'}<br>`;
+            status += `Auth.js: ${typeof Auth !== 'undefined' ? '✅' : '❌'}<br>`;
+            status += `Events.js: ${typeof Events !== 'undefined' ? '✅' : '❌'}<br>`;
+            
+            if (typeof App !== 'undefined') {
+                status += `App inicializado: ${App.estadoSistema?.inicializado ? '✅' : '❌'}<br>`;
+                status += `Firebase: ${App.estadoSistema?.firebaseDisponivel ? '✅' : '⚠️ Offline'}<br>`;
+            }
+            
+            if (typeof Events !== 'undefined') {
+                status += `Modal ativo: ${Events.state?.modalAtivo ? '✅' : '❌'}<br>`;
+            }
+            
+            statusDiv.innerHTML = status;
+        }
+
+        function testarModalNovoEvento() {
+            log('🧪 Testando modal de novo evento...');
+            
+            if (typeof Events === 'undefined') {
+                log('❌ Events.js não carregado!');
+                return;
+            }
+            
+            try {
+                Events.mostrarNovoEvento();
+                log('✅ Modal de novo evento aberto');
+                setTimeout(atualizarStatus, 100);
+            } catch (error) {
+                log(`❌ Erro ao abrir modal: ${error.message}`);
+            }
+        }
+
+        function testarCriarEvento() {
+            log('🧪 Testando criação de evento...');
+            
+            if (typeof App === 'undefined') {
+                log('❌ App.js não carregado!');
+                return;
+            }
+            
+            if (typeof App.criarEvento !== 'function') {
+                log('❌ App.criarEvento não disponível!');
+                return;
+            }
+            
+            const eventoTeste = {
+                titulo: 'Evento de Teste ' + new Date().toLocaleTimeString(),
+                tipo: 'reuniao',
+                data: new Date().toISOString().split('T')[0],
+                descricao: 'Evento criado pelo teste automático',
+                participantes: ['Renato Remiro'],
+                criadoPor: 'teste@biapo.com.br'
+            };
+            
+            App.criarEvento(eventoTeste)
+                .then(evento => {
+                    log(`✅ Evento criado com sucesso: "${evento.titulo}" (ID: ${evento.id})`);
+                    atualizarStatus();
+                })
+                .catch(error => {
+                    log(`❌ Erro ao criar evento: ${error.message}`);
+                });
+        }
+
+        function verificarModulos() {
+            log('🔍 Verificando módulos...');
+            
+            // Verificar App.js
+            if (typeof App !== 'undefined') {
+                log('✅ App.js carregado');
+                log(`   Versão: ${App.config?.versao || 'N/A'}`);
+                log(`   Inicializado: ${App.estadoSistema?.inicializado ? 'SIM' : 'NÃO'}`);
+                log(`   Firebase: ${App.estadoSistema?.firebaseDisponivel ? 'ONLINE' : 'OFFLINE'}`);
+                log(`   criarEvento: ${typeof App.criarEvento === 'function' ? '✅' : '❌'}`);
+                log(`   editarEvento: ${typeof App.editarEvento === 'function' ? '✅' : '❌'}`);
+            } else {
+                log('❌ App.js não carregado');
+            }
+            
+            // Verificar Events.js
+            if (typeof Events !== 'undefined') {
+                log('✅ Events.js carregado');
+                log(`   Versão: ${Events.config?.versao || 'N/A'}`);
+                log(`   mostrarNovoEvento: ${typeof Events.mostrarNovoEvento === 'function' ? '✅' : '❌'}`);
+                log(`   _submeterFormulario: ${typeof Events._submeterFormulario === 'function' ? '✅' : '❌'}`);
+            } else {
+                log('❌ Events.js não carregado');
+            }
+            
+            // Verificar Auth.js
+            if (typeof Auth !== 'undefined') {
+                log('✅ Auth.js carregado');
+                log(`   Versão: ${Auth.config?.versao || 'N/A'}`);
+                log(`   listarUsuarios: ${typeof Auth.listarUsuarios === 'function' ? '✅' : '❌'}`);
+            } else {
+                log('❌ Auth.js não carregado');
+            }
+        }
+
+        function limparDados() {
+            log('🗑️ Limpando dados de teste...');
+            
+            // Limpar localStorage
+            localStorage.removeItem('biapo_eventos');
+            localStorage.removeItem('biapo_eventos_timestamp');
+            localStorage.removeItem('biapo_dados_v8');
+            localStorage.removeItem('biapo_dados_timestamp');
+            
+            log('✅ Dados de teste removidos');
+            
+            // Recarregar App se disponível
+            if (typeof App !== 'undefined' && App.init) {
+                App.init();
+                log('🔄 App.js reinicializado');
+            }
+            
+            setTimeout(atualizarStatus, 100);
+        }
+
+        // Inicializar
+        window.addEventListener('load', () => {
+            log('🚀 Página carregada - iniciando testes...');
+            
+            // Aguardar carregamento dos módulos
+            setTimeout(() => {
+                atualizarStatus();
+                verificarModulos();
+            }, 1000);
+        });
+
+        // Atualizar status periodicamente
+        setInterval(atualizarStatus, 2000);
+    </script>
+</body>
+</html> 

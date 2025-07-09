@@ -837,6 +837,114 @@ const App = {
         return this.dados.eventos.find(e => e.id == id) || null;
     },
 
+    // 🔥 NOVA FUNÇÃO: Criar evento
+    async criarEvento(dadosEvento) {
+        try {
+            console.log('📅 Criando novo evento v8.12.1...');
+            
+            // Validar dados mínimos
+            if (!dadosEvento.titulo) {
+                throw new Error('Título do evento é obrigatório');
+            }
+            
+            if (!dadosEvento.data) {
+                throw new Error('Data do evento é obrigatória');
+            }
+            
+            // Criar estrutura do evento
+            const evento = {
+                // ID único
+                id: this._gerarIdUnico('evento'),
+                
+                // Dados fornecidos
+                ...dadosEvento,
+                
+                // Campos obrigatórios
+                _tipoItem: 'evento',
+                titulo: dadosEvento.titulo,
+                data: dadosEvento.data,
+                tipo: dadosEvento.tipo || 'outro',
+                status: dadosEvento.status || 'agendado',
+                
+                // Campos opcionais
+                descricao: dadosEvento.descricao || '',
+                local: dadosEvento.local || '',
+                horarioInicio: dadosEvento.horarioInicio || null,
+                horarioFim: dadosEvento.horarioFim || null,
+                participantes: dadosEvento.participantes || [],
+                
+                // Metadados
+                criadoPor: dadosEvento.criadoPor || this.usuarioAtual?.email || 'Sistema',
+                dataCriacao: dadosEvento.dataCriacao || new Date().toISOString(),
+                ultimaAtualizacao: new Date().toISOString(),
+                _origem: 'app_unificado_v8.12.1',
+                _sincronizado: false
+            };
+            
+            // Adicionar evento ao array
+            if (!this.dados.eventos) {
+                this.dados.eventos = [];
+            }
+            
+            // Remover se já existe (evita duplicatas)
+            this.dados.eventos = this.dados.eventos.filter(e => e.id !== evento.id);
+            
+            // Adicionar o novo evento
+            this.dados.eventos.push(evento);
+            
+            console.log(`✅ Evento criado: "${evento.titulo}" (ID: ${evento.id})`);
+            
+            // Salvar dados
+            await this._salvarDadosUnificados();
+            
+            // Notificar sistema
+            this._notificarSistema('evento-criado', evento);
+            
+            return evento;
+            
+        } catch (error) {
+            console.error('❌ Erro ao criar evento:', error);
+            throw error;
+        }
+    },
+
+    // 🔥 NOVA FUNÇÃO: Editar evento
+    async editarEvento(id, atualizacoes) {
+        try {
+            console.log(`✏️ Editando evento ID: ${id}...`);
+            
+            const evento = this._buscarEvento(id);
+            if (!evento) {
+                throw new Error('Evento não encontrado');
+            }
+            
+            // Verificar permissões
+            const permissoes = this._verificarPermissoesEdicao(evento, 'evento');
+            if (!permissoes.permitido) {
+                throw new Error(permissoes.motivo);
+            }
+            
+            // Aplicar atualizações
+            Object.assign(evento, atualizacoes);
+            evento.ultimaAtualizacao = new Date().toISOString();
+            evento._sincronizado = false;
+            
+            console.log(`✅ Evento atualizado: "${evento.titulo}"`);
+            
+            // Salvar dados
+            await this._salvarDadosUnificados();
+            
+            // Notificar sistema
+            this._notificarSistema('evento-editado', evento);
+            
+            return evento;
+            
+        } catch (error) {
+            console.error('❌ Erro ao editar evento:', error);
+            throw error;
+        }
+    },
+
     // Excluir evento
     async excluirEvento(id) {
         try {
