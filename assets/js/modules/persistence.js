@@ -16,7 +16,7 @@ const Persistence = {
         TIMEOUT_OPERACAO: 8000, // REDUZIDO: 10000 → 8000ms
         INTERVALO_RETRY: 800, // REDUZIDO: 1000 → 800ms base
         BACKUP_LOCAL_KEY: 'sistemaBackup',
-        VERSAO_BACKUP: '8.2.1',
+        VERSAO_BACKUP: '8.12.2',
         CACHE_MODO_ANONIMO: 10000 // 10s de cache para verificações
     },
 
@@ -232,14 +232,14 @@ const Persistence = {
             metadata: {
                 ultimaAtualizacao: new Date().toISOString(),
                 ultimoUsuario: this._obterUsuarioAtual(),
-                versao: '8.2.1',
+                versao: '8.12.2',
                 totalEventos: (dados.eventos || []).length,
                 totalAreas: Object.keys(dados.areas || {}).length,
                 modoSalvamento: 'autenticado_otimizado'
             },
             
             // Versão e checksum simples
-            versao: '8.2.1',
+            versao: '8.12.2',
             checksum: this._calcularChecksumRapido(dados)
         };
 

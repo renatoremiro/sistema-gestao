@@ -619,6 +619,88 @@ const App = {
         }
     },
 
+    // 🔥 NOVO: Marcar tarefa como concluída
+    async marcarTarefaConcluida(id) {
+        try {
+            const tarefa = this.dados.tarefas.find(t => t.id === id);
+            if (!tarefa) {
+                throw new Error('Tarefa não encontrada');
+            }
+            
+            tarefa.status = 'concluida';
+            tarefa.progresso = 100;
+            tarefa.dataConclusao = new Date().toISOString();
+            tarefa.ultimaAtualizacao = new Date().toISOString();
+            
+            await this._salvarDadosUnificados();
+            
+            console.log(`✅ Tarefa "${tarefa.titulo}" marcada como concluída`);
+            this._notificarSistema('tarefa-concluida', tarefa);
+            
+            return tarefa;
+            
+        } catch (error) {
+            console.error('❌ Erro ao marcar tarefa como concluída:', error);
+            throw error;
+        }
+    },
+
+    // 🔥 NOVO: Marcar tarefa em andamento
+    async marcarTarefaEmAndamento(id) {
+        try {
+            const tarefa = this.dados.tarefas.find(t => t.id === id);
+            if (!tarefa) {
+                throw new Error('Tarefa não encontrada');
+            }
+            
+            tarefa.status = 'em_andamento';
+            tarefa.ultimaAtualizacao = new Date().toISOString();
+            
+            await this._salvarDadosUnificados();
+            
+            console.log(`🔄 Tarefa "${tarefa.titulo}" marcada em andamento`);
+            this._notificarSistema('tarefa-em-andamento', tarefa);
+            
+            return tarefa;
+            
+        } catch (error) {
+            console.error('❌ Erro ao marcar tarefa em andamento:', error);
+            throw error;
+        }
+    },
+
+    // 🔥 NOVO: Atualizar progresso da tarefa
+    async atualizarProgressoTarefa(id, progresso) {
+        try {
+            const tarefa = this.dados.tarefas.find(t => t.id === id);
+            if (!tarefa) {
+                throw new Error('Tarefa não encontrada');
+            }
+            
+            tarefa.progresso = Math.max(0, Math.min(100, progresso));
+            tarefa.ultimaAtualizacao = new Date().toISOString();
+            
+            // Atualizar status baseado no progresso
+            if (tarefa.progresso === 100) {
+                tarefa.status = 'concluida';
+                tarefa.dataConclusao = new Date().toISOString();
+            } else if (tarefa.progresso > 0) {
+                tarefa.status = 'em_andamento';
+            }
+            
+            await this._salvarDadosUnificados();
+            
+            console.log(`📊 Progresso da tarefa "${tarefa.titulo}" atualizado para ${tarefa.progresso}%`);
+            this._notificarSistema('tarefa-progresso-atualizado', tarefa);
+            
+            return tarefa;
+            
+        } catch (error) {
+            console.error('❌ Erro ao atualizar progresso:', error);
+            throw error;
+        }
+    },
+
     // Obter itens para usuário (eventos + tarefas)
     obterItensParaUsuario(emailUsuario = null) {
         try {

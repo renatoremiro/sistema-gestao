@@ -12,7 +12,7 @@
 const DataStructure = {
     // ✅ CONFIGURAÇÕES OTIMIZADAS
     config: {
-        versao: '8.3.1', // OTIMIZADA
+        versao: '8.12.2', // ATUALIZADA: Alinhada com sistema unificado
         dataAtualizacao: '2025-07-07',
         autoSave: true,
         validacao: true,
