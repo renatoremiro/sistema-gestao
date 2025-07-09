@@ -507,8 +507,93 @@ window.CorretorSyncParticipantes = CorretorSyncParticipantes;
 window.aplicarCorrecoesSyncParticipantes = () => CorretorSyncParticipantes.aplicarCorrecoes();
 window.testarSyncParticipantes = () => CorretorSyncParticipantes.testarCenarios();
 window.criarTarefaTeste = () => CorretorSyncParticipantes.criarTarefaTeste();
+window.testarSincronizacaoCompleta = testarSincronizacaoCompleta;
 
 console.log('\n📋 COMANDOS DISPONÍVEIS:');
 console.log('  • aplicarCorrecoesSyncParticipantes() - Aplica todas as correções');
 console.log('  • testarSyncParticipantes() - Mostra cenários de teste');
-console.log('  • criarTarefaTeste() - Cria tarefa de exemplo\n');
+console.log('  • criarTarefaTeste() - Cria tarefa de exemplo');
+console.log('  • testarSincronizacaoCompleta() - Teste completo de sincronização\n');
+
+// 🔥 NOVA FUNÇÃO: Teste completo de sincronização
+async function testarSincronizacaoCompleta() {
+    console.log('🧪 TESTANDO SINCRONIZAÇÃO COMPLETA v8.12.2...');
+    
+    try {
+        // 1. Verificar se App.js está disponível
+        if (typeof App === 'undefined') {
+            console.error('❌ App.js não disponível');
+            return false;
+        }
+        
+        // 2. Verificar se Calendar.js está disponível
+        if (typeof Calendar === 'undefined') {
+            console.error('❌ Calendar.js não disponível');
+            return false;
+        }
+        
+        // 3. Criar tarefa pessoal de teste
+        const tarefaTeste = {
+            titulo: '🧪 Tarefa Pessoal Teste v8.12.2',
+            descricao: 'Tarefa criada para testar sincronização com calendário',
+            escopo: 'pessoal',
+            aparecerNoCalendario: true,
+            dataInicio: new Date().toISOString().split('T')[0], // Hoje
+            horarioInicio: '09:00',
+            prioridade: 'alta',
+            status: 'pendente'
+        };
+        
+        console.log('📋 Criando tarefa de teste...');
+        const tarefaCriada = await App.criarTarefa(tarefaTeste);
+        
+        if (!tarefaCriada) {
+            console.error('❌ Falha ao criar tarefa de teste');
+            return false;
+        }
+        
+        console.log('✅ Tarefa criada:', tarefaCriada);
+        
+        // 4. Aguardar um pouco para sincronização
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 5. Forçar atualização do calendário
+        if (typeof Calendar.atualizarEventos === 'function') {
+            console.log('📅 Forçando atualização do calendário...');
+            Calendar.atualizarEventos();
+        }
+        
+        // 6. Verificar se a tarefa aparece no calendário
+        const dataHoje = new Date().toISOString().split('T')[0];
+        const itensDoDia = Calendar._obterItensDoDia(dataHoje);
+        
+        console.log('🔍 Verificando itens do dia:', itensDoDia);
+        
+        const tarefaEncontrada = itensDoDia.tarefas.find(t => t.id === tarefaCriada.id);
+        
+        if (tarefaEncontrada) {
+            console.log('✅ SUCESSO: Tarefa pessoal aparece no calendário!');
+            console.log('📊 Resumo:', {
+                tarefa: tarefaEncontrada.titulo,
+                escopo: tarefaEncontrada.escopo,
+                aparecerNoCalendario: tarefaEncontrada.aparecerNoCalendario,
+                totalTarefas: itensDoDia.tarefas.length,
+                totalEventos: itensDoDia.eventos.length
+            });
+            return true;
+        } else {
+            console.error('❌ FALHA: Tarefa pessoal não aparece no calendário');
+            console.log('🔍 Tarefas no dia:', itensDoDia.tarefas.map(t => ({
+                id: t.id,
+                titulo: t.titulo,
+                escopo: t.escopo,
+                aparecerNoCalendario: t.aparecerNoCalendario
+            })));
+            return false;
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro no teste de sincronização:', error);
+        return false;
+    }
+}

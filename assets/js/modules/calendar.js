@@ -24,7 +24,7 @@ const Calendar = {
         // Controles de exibição unificados
         mostrarEventos: true,
         mostrarTarefasEquipe: true,
-        mostrarTarefasPessoais: false,
+        mostrarTarefasPessoais: true,
         mostrarTarefasPublicas: true,
         
         // Suporte a click handlers
@@ -88,7 +88,7 @@ const Calendar = {
         filtrosAtivos: {
             eventos: true,
             tarefasEquipe: true,
-            tarefasPessoais: false,
+            tarefasPessoais: true,
             tarefasPublicas: true,
             comHorario: 'todos',
             tipoHorario: 'todos'
