@@ -1694,12 +1694,14 @@
                             email: 'demo@biapo.com.br'
                         };
                     }
-
-                    document.getElementById('userName').textContent = this.usuarioAtual.nome;
-                    document.getElementById('userEmail').textContent = this.usuarioAtual.email;
-
+                    // Atualizar todos elementos com classe nome-usuario
+                    document.querySelectorAll('.nome-usuario').forEach(function(el) {
+                        el.textContent = agendaFase4.usuarioAtual.nome;
+                    });
+                    // Atualizar e-mail
+                    var emailEl = document.getElementById('user-email-agenda');
+                    if (emailEl) emailEl.textContent = this.usuarioAtual.email;
                     console.log(`👤 Usuário Agenda Fase 4: ${this.usuarioAtual.nome}`);
-
                 } catch (error) {
                     console.error('❌ Erro ao verificar usuário:', error);
                     this.inicializarModoFallback();
