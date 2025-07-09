@@ -2762,29 +2762,7 @@
             }
         }
 
-        // ✅ INICIALIZAR INSTÂNCIA GLOBAL
-        let agendaFase4;
-        
-        // ✅ AGUARDAR CARREGAMENTO COMPLETO
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 DOM carregado - inicializando Agenda Fase 4...');
-            agendaFase4 = new AgendaFase4();
-        });
-
-        // ✅ FALLBACK PARA CASOS DE CARREGAMENTO TARDIO
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                if (!agendaFase4) {
-                    agendaFase4 = new AgendaFase4();
-                }
-            });
-        } else {
-            setTimeout(() => {
-                if (!agendaFase4) {
-                    agendaFase4 = new AgendaFase4();
-                }
-            }, 100);
-        }
-    </script>
-</body>
+        </script>
+        <script src="src/main.js"></script>
+    </body>
 </html>
