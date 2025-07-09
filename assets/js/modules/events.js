@@ -9,6 +9,10 @@
  * - ✅ Modal de edição completo funcionando
  */
 
+import App from '../core/app.js';
+import Auth from './auth.js';
+import Persistence from './persistence.js';
+
 const Events = {
     // ✅ CONFIGURAÇÕES ATUALIZADAS v8.12.1
     config: {
@@ -1149,7 +1153,9 @@ Para ${acao}, você precisa estar logado no sistema.
 };
 
 // ✅ EXPOSIÇÃO GLOBAL
-window.Events = Events;
+if (typeof window !== 'undefined') {
+    window.Events = Events;
+}
 
 // Funções globais atualizadas
 window.abrirEdicaoEvento = (id) => Events.abrirModalEdicao(id);
@@ -1161,6 +1167,8 @@ console.log('📅 Events.js v8.12.1 CORRIGIDO carregado!');
 console.log('🔥 Correção: this._obterParticipantesBiapo() → _obterParticipantesBiapoLocal()');
 console.log('✅ Verificações de segurança Auth.js e App.js adicionadas');
 console.log('✅ Todas as funcionalidades v8.12.0 mantidas');
+
+export default Events;
 
 /*
 🔥 EVENTS.JS v8.12.1 CORRIGIDO - PROBLEMA RESOLVIDO:

@@ -11,6 +11,8 @@
  * - ✅ TESTADO: Compatibilidade total com App.js v8.12.0
  */
 
+import App from '../core/app.js';
+
 const Calendar = {
     // ✅ CONFIGURAÇÕES CORRIGIDAS v8.12.2
     config: {
@@ -1409,7 +1411,9 @@ ${tipoItem.toUpperCase()}: ${titulo}${item.descricao ? ' - ' + item.descricao : 
 };
 
 // ✅ EXPOSIÇÃO GLOBAL
-window.Calendar = Calendar;
+if (typeof window !== 'undefined') {
+    window.Calendar = Calendar;
+}
 
 // Funções globais atualizadas
 window.abrirResumoDia = (data) => Calendar.abrirResumoDia(data);
@@ -1421,6 +1425,8 @@ console.log('📅 Calendar.js v8.12.2 COMPLETO E CORRIGIDO carregado!');
 console.log('🔥 Correções: Erro regex resolvido + Funções essenciais implementadas');
 console.log('✅ Compatibilidade: App.js v8.12.0 + Events.js v8.12.1');
 console.log('🎯 Resultado: Calendário funcionando completamente');
+
+export default Calendar;
 
 /*
 🔥 CALENDAR.JS v8.12.2 COMPLETO E CORRIGIDO - CHANGELOG:
