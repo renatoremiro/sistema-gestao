@@ -3,7 +3,7 @@
 var Auth = {
     // ✅ CONFIGURAÇÃO OTIMIZADA
     config: {
-        versao: '8.4.2', // CORRIGIDA: Departamentos reais implementados
+        versao: '8.12.2', // ATUALIZADA: Alinhada com sistema unificado
         autoLogin: true,
         lembrarUsuario: true,
         sistemaEmails: true,
@@ -1065,7 +1065,7 @@ window.departamentosAuth = function() {
         lista: Auth.departamentos,
         fonte: Auth.state.fonteDepartamentosAtual,
         firebase: Auth.state.departamentosCarregadosDoFirebase,
-        versao: 'v8.4.2 - Departamentos reais corrigidos'
+        versao: 'v8.12.2 - Sistema unificado alinhado'
     };
 };
 
