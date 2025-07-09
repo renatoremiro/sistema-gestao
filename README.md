@@ -4,9 +4,22 @@ Sistema de Gestão - Obra 292
 ## Como executar
 
 Com a modularização, todo o código está concentrado no arquivo
-`index.html` e nos scripts dentro de `assets/`. Rode o sistema servindo
-o diretório via um servidor estático. Com o Node.js instalado é possível
-utilizar o `http-server`:
+`index.html` e nos scripts dentro de `assets/`. Agora o projeto utiliza o
+[Vite](https://vitejs.dev/) para servir e gerar a versão final. Para
+iniciar o modo de desenvolvimento execute:
+
+```bash
+npm run dev
+```
+
+Para produzir os arquivos otimizados em `dist/` utilize:
+
+```bash
+npm run build
+```
+
+Se preferir um servidor estático simples, ainda é possível usar o
+`http-server`:
 
 ```bash
 npx http-server -p 8080
