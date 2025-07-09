@@ -1,2 +1,5 @@
 # Ignore firebase configuration file
 assets/js/config/firebaseConfig.json
+node_modules/
+dist/
+package-lock.json
