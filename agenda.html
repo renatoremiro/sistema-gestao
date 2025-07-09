@@ -1562,6 +1562,11 @@
                     await this.aguardarAppFase4();
                     this.processarDeepLinksIniciais();
                     this.verificarUsuario();
+                    if (!this.usuarioAtual || !this.usuarioAtual.nome) {
+                        console.warn('⏳ Usuário não disponível, aguardando para inicializar grid...');
+                        setTimeout(() => this.init(), 300);
+                        return;
+                    }
                     await this.carregarDadosFase4();
                     this.configurarEventListenersFase4();
                     this.renderizarGridFase4();
@@ -1694,16 +1699,17 @@
                             email: 'demo@biapo.com.br'
                         };
                     }
-                    // Atualizar todos elementos com classe nome-usuario
-                    document.querySelectorAll('.nome-usuario').forEach(function(el) {
-                        el.textContent = agendaFase4.usuarioAtual.nome;
-                    });
-                    // Atualizar e-mail
+                    // Proteção extra: só atualiza se usuarioAtual e nome existem
+                    if (this.usuarioAtual && this.usuarioAtual.nome) {
+                        document.querySelectorAll('.nome-usuario').forEach(function(el) {
+                            el.textContent = agendaFase4.usuarioAtual.nome;
+                        });
+                    }
                     var emailEl = document.getElementById('user-email-agenda');
-                    if (emailEl) emailEl.textContent = this.usuarioAtual.email;
-                    console.log(`👤 Usuário Agenda Fase 4: ${this.usuarioAtual.nome}`);
+                    if (emailEl && this.usuarioAtual && this.usuarioAtual.email) emailEl.textContent = this.usuarioAtual.email;
+                    console.log('👤 Usuário Agenda Fase 4:', this.usuarioAtual);
                 } catch (error) {
-                    console.error('❌ Erro ao verificar usuário:', error);
+                    console.error('❌ Erro ao verificar usuário:', error, this.usuarioAtual);
                     this.inicializarModoFallback();
                 }
             }
