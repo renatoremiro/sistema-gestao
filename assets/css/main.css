@@ -1069,4 +1069,100 @@ body {
 .flex-col { flex-direction: column; }
 .flex-center { display: flex; justify-content: center; align-items: center; }
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
-.flex-end { display: flex; justify-content: flex-end; align-
+.flex-end { display: flex; justify-content: flex-end; align-items: center; }
+
+/* ADICIONAR AS CLASSES UTILITÁRIAS FINAIS */
+.flex-start { display: flex; justify-content: flex-start; align-items: center; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.flex-grow { flex-grow: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+
+.gap-1 { gap: var(--gap-xs); }
+.gap-2 { gap: var(--gap-sm); }
+.gap-3 { gap: var(--gap-md); }
+.gap-4 { gap: var(--gap-lg); }
+.gap-6 { gap: var(--gap-xl); }
+
+.rounded { border-radius: var(--border-radius); }
+.rounded-sm { border-radius: var(--border-radius-sm); }
+.rounded-lg { border-radius: var(--border-radius-lg); }
+.rounded-full { border-radius: 9999px; }
+
+.shadow { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-none { box-shadow: none; }
+
+.opacity-0 { opacity: 0; }
+.opacity-50 { opacity: 0.5; }
+.opacity-75 { opacity: 0.75; }
+.opacity-100 { opacity: 1; }
+
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+.select-none { user-select: none; }
+.select-text { user-select: text; }
+.select-all { user-select: all; }
+
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.min-w-0 { min-width: 0; }
+.max-w-full { max-width: 100%; }
+
+/* ========== 🎬 ANIMAÇÕES ========== */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ========== 🎯 CLASSES FINAIS ========== */
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+.animate-fadeOut { animation: fadeOut 0.3s ease-in-out; }
+
+/* Garantir que nada quebre */
+* {
+    max-width: 100%;
+}
+
+/* FIM DO ARQUIVO MAIN.CSS v7.4.0 */
