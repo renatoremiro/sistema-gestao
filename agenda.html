@@ -1151,21 +1151,17 @@
     <div class="page-container">
         <!-- 🔴 HEADER DA PÁGINA FASE 4 v8.11.0 -->
         <div class="page-header">
-            <div class="fase4-badge">✅ CORRIGIDA v8.11.0</div>
             <div class="header-left">
                 <img src="assets/img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-biapo">
                 <div>
-                    <h1 class="header-title">📅 Minha Agenda Pessoal</h1>
-                    <p class="header-subtitle">Sistema de Gestão BIAPO - Obra 292</p>
-                    <div style="margin-top: 8px;">
-                        <span class="sync-badge">🔄 v8.11.0 CORRIGIDA: SEM ERROS 404</span>
-                    </div>
+                    <div class="header-title">📅 Minha Agenda <span class="nome-usuario" style="font-size:18px; font-weight:400; margin-left:10px; color:#fff;"></span></div>
+                    <div class="header-subtitle">Pessoal<br>Sistema de Gestão BIAPO - Obra 292</div>
                 </div>
             </div>
             <div class="header-right">
                 <div class="user-info-badge">
-                    <div class="user-name" id="userName">Carregando...</div>
-                    <div class="user-email" id="userEmail">Verificando usuário...</div>
+                    <div class="user-name nome-usuario">Usuário</div>
+                    <div class="user-email" id="user-email-agenda">-</div>
                 </div>
                 <div class="header-actions">
                     <button class="btn-header" onclick="agendaFase4.sincronizarFase4()">
@@ -1182,6 +1178,7 @@
                     </button>
                 </div>
             </div>
+            <div class="fase4-badge">✔️ CORRIGIDA V8.12.2</div>
         </div>
 
         <!-- 🎛️ CONTROLES PRINCIPAIS FASE 4 -->
@@ -2785,6 +2782,32 @@
                 }
             }, 100);
         }
+
+        // Atualizar nome do usuário na agenda
+        function atualizarUsuarioAgenda() {
+            if (window.Auth && Auth.state && Auth.state.usuario) {
+                var nome = Auth.state.usuario.displayName || Auth.state.usuario.nome || Auth.state.usuario.email || 'Usuário';
+                var email = Auth.state.usuario.email || '-';
+                document.querySelectorAll('.nome-usuario').forEach(function(el) {
+                    el.textContent = nome;
+                });
+                var emailEl = document.getElementById('user-email-agenda');
+                if (emailEl) emailEl.textContent = email;
+            }
+        }
+        // Atualizar ao logar
+        if (window.Auth) {
+            if (typeof Auth._executarCallbacksLogin === 'function') {
+                var originalLogin = Auth._executarCallbacksLogin;
+                Auth._executarCallbacksLogin = function() {
+                    originalLogin.apply(Auth, arguments);
+                    atualizarUsuarioAgenda();
+                };
+            }
+        }
+        // Atualizar ao carregar
+        window.addEventListener('DOMContentLoaded', atualizarUsuarioAgenda);
+        window.addEventListener('biapo-login', atualizarUsuarioAgenda);
     </script>
 </body>
 </html>
