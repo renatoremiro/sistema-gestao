@@ -1096,6 +1096,14 @@ App.criarEvento = async function(dados) {
 
 console.log('🔥 Sistema de Eventos Unificado v8.13.0 ativo!');
 
+// 🔧 TIMEOUT DE INICIALIZAÇÃO v8.13.0
+setTimeout(() => {
+    if (typeof BIAPO !== 'undefined') {
+        console.log('🔧 Forçando inicialização BIAPO...');
+        BIAPO.diagnostico();
+    }
+}, 3000);
+
 // ✅ EXPOSIÇÃO GLOBAL
 window.App = App;
 

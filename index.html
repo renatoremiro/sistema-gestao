@@ -373,8 +373,6 @@
             }
         }
     </style>
-    <!-- 🔥 API UNIFICADA v8.13.0 -->
-    <script src="assets/js/core/api-unificada.js"></script>
 </head>
 <body>
     <!-- 🔐 TELA DE LOGIN -->
@@ -780,5 +778,18 @@
         window.addEventListener('biapo-login', atualizarUsuarioIndex);
     </script>
     <script src="assets/js/modules/biapo-v8130.js"></script>
+    
+    <!-- 🔥 API UNIFICADA v8.13.0 - CARREGAMENTO TARDIO -->
+    <script src="assets/js/core/api-unificada.js"></script>
+    <script>
+    // Aguardar carregamento completo
+    setTimeout(() => {
+        if (typeof APIUnificada !== 'undefined') {
+            console.log('🔥 APIUnificada carregada após módulos principais');
+            const status = APIUnificada.obterStatusCompleto();
+            console.log('📊 Status final:', status);
+        }
+    }, 2000);
+    </script>
 </body>
 </html>

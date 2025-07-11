@@ -23,8 +23,36 @@
     <script src="assets/js/core/app.js"></script>
     <script src="assets/js/modules/persistence.js"></script>
     <script src="assets/js/modules/auth.js"></script>
-<script src="assets/js/utils/corretor_sync_participantes_v8.12.js"></script>
+    <script src="assets/js/utils/corretor_sync_participantes_v8.12.js"></script>
 <script src="assets/js/utils/inicializador_sistema.js"></script>
+
+    <!-- 📋 FALLBACK MINHA AGENDA v8.13.0 -->
+    <script>
+    // 📋 FALLBACK MINHA AGENDA v8.13.0
+    if (typeof minhaAgenda === 'undefined') {
+        window.minhaAgenda = {
+            alternarVisualizacao: (tipo) => console.log('Alternando para:', tipo),
+            aplicarFiltros: () => console.log('Aplicando filtros'),
+            navegarSemana: (dir) => console.log('Navegando semana:', dir),
+            irParaHoje: () => console.log('Indo para hoje'),
+            mostrarModalNovaTarefaFase4: () => {
+                if (typeof APIUnificada !== 'undefined') {
+                    APIUnificada.criarTarefa({
+                        titulo: 'Nova tarefa via agenda',
+                        tipo: 'pessoal',
+                        dataInicio: new Date().toISOString().split('T')[0]
+                    });
+                }
+            },
+            fecharModal: (id) => {
+                const modal = document.getElementById(id);
+                if (modal) modal.style.display = 'none';
+            },
+            salvarNovaTarefaFase4: () => console.log('Salvando tarefa')
+        };
+        console.log('📋 minhaAgenda fallback criado');
+    }
+    </script>
 
     <style>
         /* 🔴 CORES BIAPO */
