@@ -1164,16 +1164,16 @@
                     <div class="user-email" id="user-email-agenda">-</div>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-header" onclick="agendaFase4.sincronizarFase4()">
+                    <button class="btn-header" onclick="minhaAgenda.sincronizarFase4()">
                         🔄 Sync Fase 4
                     </button>
-                    <button class="btn-header" onclick="agendaFase4.abrirCalendarioPrincipal()">
+                    <button class="btn-header" onclick="minhaAgenda.abrirCalendarioPrincipal()">
                         📅 Ver Calendário
                     </button>
-                    <button class="btn-header" onclick="agendaFase4.copiarDeepLinkPagina()">
+                    <button class="btn-header" onclick="minhaAgenda.copiarDeepLinkPagina()">
                         🔗 Copiar Link
                     </button>
-                    <button class="btn-header" onclick="agendaFase4.voltarParaSistema()">
+                    <button class="btn-header" onclick="minhaAgenda.voltarParaSistema()">
                         🏠 Voltar ao Sistema
                     </button>
                 </div>
@@ -1184,10 +1184,10 @@
         <!-- 🎛️ CONTROLES PRINCIPAIS FASE 4 -->
         <div class="main-controls">
             <div class="view-tabs">
-                <button class="view-tab active" onclick="agendaFase4.alternarVisualizacao('grid')" data-view="grid">
+                <button class="view-tab active" onclick="minhaAgenda.alternarVisualizacao('grid')" data-view="grid">
                     🗓️ Grid Semanal
                 </button>
-                <button class="view-tab" onclick="agendaFase4.alternarVisualizacao('timeline')" data-view="timeline">
+                <button class="view-tab" onclick="minhaAgenda.alternarVisualizacao('timeline')" data-view="timeline">
                     🕐 Timeline Horários
                 </button>
             </div>
@@ -1202,7 +1202,7 @@
             <div class="filters-section">
                 <div class="filter-group">
                     <label class="filter-label">Tipo</label>
-                    <select class="filter-select" id="filtroTipo" onchange="agendaFase4.aplicarFiltros()">
+                    <select class="filter-select" id="filtroTipo" onchange="minhaAgenda.aplicarFiltros()">
                         <option value="todos">🔄 Todos os tipos</option>
                         <option value="urgente">🚨 Urgente</option>
                         <option value="projeto">🏗️ Projeto</option>
@@ -1214,7 +1214,7 @@
 
                 <div class="filter-group">
                     <label class="filter-label">Status</label>
-                    <select class="filter-select" id="filtroStatus" onchange="agendaFase4.aplicarFiltros()">
+                    <select class="filter-select" id="filtroStatus" onchange="minhaAgenda.aplicarFiltros()">
                         <option value="todos">⚡ Todos os status</option>
                         <option value="pendente">⏳ Pendente</option>
                         <option value="andamento">🔥 Em andamento</option>
@@ -1225,7 +1225,7 @@
 
                 <div class="filter-group">
                     <label class="filter-label">Escopo</label>
-                    <select class="filter-select" id="filtroEscopo" onchange="agendaFase4.aplicarFiltros()">
+                    <select class="filter-select" id="filtroEscopo" onchange="minhaAgenda.aplicarFiltros()">
                         <option value="todos">🌐 Todos os escopos</option>
                         <option value="pessoal">👤 Pessoal</option>
                         <option value="equipe">👥 Equipe</option>
@@ -1236,7 +1236,7 @@
                 <!-- 🔥 NOVO: Filtro por horário -->
                 <div class="filter-group">
                     <label class="filter-label">Horário</label>
-                    <select class="filter-select" id="filtroHorario" onchange="agendaFase4.aplicarFiltros()">
+                    <select class="filter-select" id="filtroHorario" onchange="minhaAgenda.aplicarFiltros()">
                         <option value="todos">🕐 Todos os horários</option>
                         <option value="manha">🌅 Manhã (6h-12h)</option>
                         <option value="tarde">☀️ Tarde (12h-18h)</option>
@@ -1247,16 +1247,16 @@
             </div>
 
             <div class="actions-section">
-                <button class="btn btn-secondary" onclick="agendaFase4.exportarAgendaFase4()">
+                <button class="btn btn-secondary" onclick="minhaAgenda.exportarminhaAgenda()">
                     📄 Exportar PDF
                 </button>
-                <button class="btn btn-info" onclick="agendaFase4.mostrarRelatoriosHorarios()">
+                <button class="btn btn-info" onclick="minhaAgenda.mostrarRelatoriosHorarios()">
                     📊 Relatórios
                 </button>
-                <button class="btn btn-success" onclick="agendaFase4.mostrarModalNovaTarefaFase4()">
+                <button class="btn btn-success" onclick="minhaAgenda.mostrarModalNovaTarefaFase4()">
                     ➕ Nova Tarefa
                 </button>
-                <button class="btn btn-primary" onclick="agendaFase4.sincronizarFase4()">
+                <button class="btn btn-primary" onclick="minhaAgenda.sincronizarFase4()">
                     🔄 Sync Completo
                 </button>
             </div>
@@ -1275,7 +1275,7 @@
                     <span id="teamEventsCount" style="background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 6px; font-size: 12px;">
                         0 eventos
                     </span>
-                    <button onclick="agendaFase4.abrirCalendarioPrincipal()" style="
+                    <button onclick="minhaAgenda.abrirCalendarioPrincipal()" style="
                         background: rgba(255,255,255,0.2);
                         border: 1px solid rgba(255,255,255,0.3);
                         color: white;
@@ -1296,10 +1296,10 @@
             <!-- 🗓️ GRID SEMANAL -->
             <div class="weekly-grid-view active" id="gridView">
                 <div class="weekly-navigation">
-                    <button class="nav-btn" onclick="agendaFase4.navegarSemana(-1)">← Semana Anterior</button>
+                    <button class="nav-btn" onclick="minhaAgenda.navegarSemana(-1)">← Semana Anterior</button>
                     <span class="current-week" id="currentWeekDisplay">Carregando...</span>
-                    <button class="nav-btn" onclick="agendaFase4.navegarSemana(1)">Próxima Semana →</button>
-                    <button class="nav-btn" onclick="agendaFase4.irParaHoje()">🏠 Hoje</button>
+                    <button class="nav-btn" onclick="minhaAgenda.navegarSemana(1)">Próxima Semana →</button>
+                    <button class="nav-btn" onclick="minhaAgenda.irParaHoje()">🏠 Hoje</button>
                 </div>
 
                 <div class="weekly-grid" id="weeklyGrid">
@@ -1312,11 +1312,11 @@
                             <br><br>
                             <strong>✅ CORRIGIDA v8.11.0:</strong> 
                             • Sem erros 404 nos arquivos<br>
-                            • Classe AgendaFase4 completa<br>
+                            • Classe minhaAgenda completa<br>
                             • Todas as funções implementadas<br>
                             • Interface totalmente funcional
                         </div>
-                        <button class="btn btn-primary" onclick="agendaFase4.mostrarModalNovaTarefaFase4()">
+                        <button class="btn btn-primary" onclick="minhaAgenda.mostrarModalNovaTarefaFase4()">
                             ➕ Criar Primeira Tarefa
                         </button>
                     </div>
@@ -1365,7 +1365,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>➕ Nova Tarefa Fase 4 - Com Horários</h3>
-                <button class="modal-close" onclick="agendaFase4.fecharModal('modalNovaTarefaFase4')">&times;</button>
+                <button class="modal-close" onclick="minhaAgenda.fecharModal('modalNovaTarefaFase4')">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="formNovaTarefaFase4">
@@ -1477,7 +1477,7 @@
                                 Nenhuma subtarefa adicionada
                             </div>
                         </div>
-                        <button type="button" class="btn btn-secondary" onclick="agendaFase4.adicionarSubtarefa()" style="margin-top: 8px;">
+                        <button type="button" class="btn btn-secondary" onclick="minhaAgenda.adicionarSubtarefa()" style="margin-top: 8px;">
                             ➕ Adicionar Subtarefa
                         </button>
                     </div>
@@ -1509,10 +1509,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="agendaFase4.fecharModal('modalNovaTarefaFase4')">
+                <button type="button" class="btn btn-secondary" onclick="minhaAgenda.fecharModal('modalNovaTarefaFase4')">
                     ❌ Cancelar
                 </button>
-                <button type="button" class="btn btn-primary" onclick="agendaFase4.salvarNovaTarefaFase4()">
+                <button type="button" class="btn btn-primary" onclick="minhaAgenda.salvarNovaTarefaFase4()">
                     💾 Criar Tarefa Fase 4
                 </button>
             </div>
@@ -1521,7 +1521,7 @@
 
     <script>
         // 🎯 CLASSE PRINCIPAL DA AGENDA FASE 4 v8.11.0 - COMPLETA
-        class AgendaFase4 {
+        class minhaAgenda {
             constructor() {
                 this.visualizacaoAtiva = 'grid';
                 this.semanaAtual = new Date();
@@ -1702,7 +1702,7 @@
                     // Proteção extra: só atualiza se usuarioAtual e nome existem
                     if (this.usuarioAtual && this.usuarioAtual.nome) {
                         document.querySelectorAll('.nome-usuario').forEach(function(el) {
-                            el.textContent = agendaFase4.usuarioAtual.nome;
+                            el.textContent = minhaAgenda.usuarioAtual.nome;
                         });
                     }
                     var emailEl = document.getElementById('user-email-agenda');
@@ -1868,7 +1868,7 @@
                         `🕐 ${evento.horarioInicio}${evento.horarioFim ? ' - ' + evento.horarioFim : ''}` : '';
                     
                     return `
-                        <div class="team-event-item" onclick="agendaFase4.abrirEventoEquipe('${evento.id}')">
+                        <div class="team-event-item" onclick="minhaAgenda.abrirEventoEquipe('${evento.id}')">
                             <div class="team-event-icon">📅</div>
                             <div class="team-event-info">
                                 <div class="team-event-title">${evento.titulo}</div>
@@ -1879,7 +1879,7 @@
                                     ${evento.local ? '📍 ' + evento.local : ''}
                                 </div>
                             </div>
-                            <div class="calendar-link-badge" onclick="event.stopPropagation(); agendaFase4.marcarEventoNaAgenda('${evento.id}')" title="Marcar na minha agenda">
+                            <div class="calendar-link-badge" onclick="event.stopPropagation(); minhaAgenda.marcarEventoNaAgenda('${evento.id}')" title="Marcar na minha agenda">
                                 📋
                             </div>
                         </div>
@@ -1901,11 +1901,11 @@
                                 <br><br>
                                 <strong>✅ CORRIGIDA v8.11.0:</strong> 
                                 • Sem erros 404 nos arquivos<br>
-                                • Classe AgendaFase4 completa<br>
+                                • Classe minhaAgenda completa<br>
                                 • Todas as funções implementadas<br>
                                 • Interface totalmente funcional
                             </div>
-                            <button class="btn btn-primary" onclick="agendaFase4.mostrarModalNovaTarefaFase4()">
+                            <button class="btn btn-primary" onclick="minhaAgenda.mostrarModalNovaTarefaFase4()">
                                 ➕ Criar Primeira Tarefa
                             </button>
                         </div>
@@ -1986,7 +1986,7 @@
                                 });
 
                                 return `
-                                    <div class="hour-slot" onclick="agendaFase4.criarTarefaRapidaFase4('${dia.toISOString().split('T')[0]}', '${String(hora).padStart(2, '0')}:00')">
+                                    <div class="hour-slot" onclick="minhaAgenda.criarTarefaRapidaFase4('${dia.toISOString().split('T')[0]}', '${String(hora).padStart(2, '0')}:00')">
                                         ${itensHora.map(item => this.renderizarItemGridFase4(item)).join('')}
                                     </div>
                                 `;
@@ -2050,7 +2050,7 @@
                 return `
                     <div class="item-grid ${classeCSS} fade-in" 
                          data-item-id="${item.id}"
-                         onclick="${tipoItem === 'evento' ? `agendaFase4.abrirEventoEquipe('${item.id}')` : `agendaFase4.editarTarefaFase4('${item.id}')`}">
+                         onclick="${tipoItem === 'evento' ? `minhaAgenda.abrirEventoEquipe('${item.id}')` : `minhaAgenda.editarTarefaFase4('${item.id}')`}">
                         
                         ${horarioDisplay ? `
                             <div class="item-time-range">
@@ -2068,7 +2068,7 @@
                                 ${item.aparecerNoCalendario ? '<span class="calendar-link-badge" title="Aparece no calendário">📅</span>' : ''}
                                 ${item.horarioFlexivel === false ? '<span title="Horário fixo">🔒</span>' : ''}
                                 ${item.lembretesAtivos ? '<span title="Lembretes ativos">🔔</span>' : ''}
-                                <span class="item-action-btn" title="Escopo: ${escopo}" onclick="event.stopPropagation(); agendaFase4.copiarDeepLinkItem('${item.id}', '${tipoItem}')">🔗</span>
+                                <span class="item-action-btn" title="Escopo: ${escopo}" onclick="event.stopPropagation(); minhaAgenda.copiarDeepLinkItem('${item.id}', '${tipoItem}')">🔗</span>
                             </div>
                         </div>
                     </div>
@@ -2459,7 +2459,7 @@
             }
 
             // 🔥 FUNÇÃO QUE ESTAVA SENDO CHAMADA MAS NÃO EXISTIA
-            exportarAgendaFase4() {
+            exportarminhaAgenda() {
                 try {
                     this.notificar('📄 Funcionalidade de exportação será implementada em breve', 'info');
                     
@@ -2640,7 +2640,7 @@
                     tag.className = 'participante-tag';
                     tag.innerHTML = `
                         ${nome}
-                        <span class="remove" onclick="agendaFase4.removerParticipante('${nome}')">&times;</span>
+                        <span class="remove" onclick="minhaAgenda.removerParticipante('${nome}')">&times;</span>
                     `;
                     container.appendChild(tag);
                 });
@@ -2688,10 +2688,10 @@
                 container.innerHTML = this.subtarefasTemp.map(subtarefa => `
                     <div class="subtarefa-item">
                         <input type="checkbox" class="subtarefa-checkbox" ${subtarefa.concluida ? 'checked' : ''} 
-                               onchange="agendaFase4.toggleSubtarefa(${subtarefa.id})">
+                               onchange="minhaAgenda.toggleSubtarefa(${subtarefa.id})">
                         <span class="subtarefa-texto ${subtarefa.concluida ? 'concluida' : ''}">${subtarefa.titulo}</span>
                         <div class="subtarefa-actions">
-                            <button class="btn-icon" onclick="agendaFase4.removerSubtarefa(${subtarefa.id})" title="Remover">
+                            <button class="btn-icon" onclick="minhaAgenda.removerSubtarefa(${subtarefa.id})" title="Remover">
                                 🗑️
                             </button>
                         </div>
@@ -2768,25 +2768,25 @@
         }
 
         // ✅ INICIALIZAR INSTÂNCIA GLOBAL
-        let agendaFase4;
+        let minhaAgenda;
         
         // ✅ AGUARDAR CARREGAMENTO COMPLETO
         window.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 DOM carregado - inicializando Agenda Fase 4...');
-            agendaFase4 = new AgendaFase4();
+            minhaAgenda = new minhaAgenda();
         });
 
         // ✅ FALLBACK PARA CASOS DE CARREGAMENTO TARDIO
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                if (!agendaFase4) {
-                    agendaFase4 = new AgendaFase4();
+                if (!minhaAgenda) {
+                    minhaAgenda = new minhaAgenda();
                 }
             });
         } else {
             setTimeout(() => {
-                if (!agendaFase4) {
-                    agendaFase4 = new AgendaFase4();
+                if (!minhaAgenda) {
+                    minhaAgenda = new minhaAgenda();
                 }
             }, 100);
         }
