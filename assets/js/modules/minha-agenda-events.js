@@ -59,4 +59,16 @@ const MinhaAgendaEvents = {
             MinhaAgendaStorage.sincronizar();
         }
     }
-}; 
+};
+
+function abrirModalCriarEvento() {
+    // Exibe modal, coleta dados do formulário
+    // Ao confirmar:
+    MinhaAgendaEvents.criarEvento({
+        id: Date.now(),
+        titulo: 'Reunião',
+        data: '2024-07-12',
+        participantes: ['usuario@exemplo.com'],
+        // ...outros campos
+    });
+} 
