@@ -159,7 +159,7 @@ const SistemaUnificadoBiapo = {
             versao: '8.11.0',
             rotas: {
                 'index.html': 'Calendário Principal',
-                'agenda.html': 'Agenda Pessoal Fase 4'
+                'agenda.html': 'Minha Agenda'
             }
         }
     },

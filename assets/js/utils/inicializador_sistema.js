@@ -90,23 +90,23 @@ const InicializadorSistema = {
             }
         }
         
-        // Verificar Agenda (se estiver na página agenda.html)
+        // Verificar Minha Agenda (se estiver na página agenda.html)
         if (window.location.pathname.includes('agenda.html')) {
-            this.verificarAgenda();
+            this.verificarMinhaAgenda();
         }
     },
     
-    // 🔍 Verificar Agenda
-    verificarAgenda() {
-        if (typeof agendaFase4 !== 'undefined') {
-            console.log('✅ Agenda Fase 4 inicializada');
-        } else if (typeof AgendaFase4 !== 'undefined') {
+    // 🔍 Verificar Minha Agenda
+    verificarMinhaAgenda() {
+        if (typeof minhaAgenda !== 'undefined') {
+            console.log('✅ Minha Agenda inicializada');
+        } else if (typeof MinhaAgenda !== 'undefined') {
             // Tentar inicializar se a classe existir mas não a instância
             try {
-                window.agendaFase4 = new AgendaFase4();
-                console.log('✅ Agenda Fase 4 criada e inicializada');
+                window.minhaAgenda = new MinhaAgenda();
+                console.log('✅ Minha Agenda criada e inicializada');
             } catch (error) {
-                console.warn('⚠️ Erro ao criar Agenda:', error);
+                console.warn('⚠️ Erro ao criar Minha Agenda:', error);
             }
         }
     },
@@ -127,14 +127,14 @@ const InicializadorSistema = {
             }
         }
         
-        // Forçar Agenda se necessário
+        // Forçar Minha Agenda se necessário
         if (window.location.pathname.includes('agenda.html')) {
-            if (typeof AgendaFase4 !== 'undefined' && typeof agendaFase4 === 'undefined') {
+            if (typeof MinhaAgenda !== 'undefined' && typeof minhaAgenda === 'undefined') {
                 try {
-                    window.agendaFase4 = new AgendaFase4();
-                    console.log('✅ Agenda forçada a inicializar');
+                    window.minhaAgenda = new MinhaAgenda();
+                    console.log('✅ Minha Agenda forçada a inicializar');
                 } catch (error) {
-                    console.error('❌ Erro ao forçar Agenda:', error);
+                    console.error('❌ Erro ao forçar Minha Agenda:', error);
                 }
             }
         }
