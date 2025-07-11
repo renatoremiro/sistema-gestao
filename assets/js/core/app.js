@@ -1045,6 +1045,57 @@ function normalizarEmail(email) {
     return (email || '').toLowerCase().trim();
 }
 
+// 🔥 SISTEMA DE EVENTOS UNIFICADO v8.13.0
+App.eventos = {
+    listeners: new Map(),
+    
+    // Registrar listener
+    on(evento, callback) {
+        if (!this.listeners.has(evento)) {
+            this.listeners.set(evento, []);
+        }
+        this.listeners.get(evento).push(callback);
+        console.log(`📡 Listener registrado: ${evento}`);
+    },
+    
+    // Disparar evento
+    emit(evento, dados) {
+        if (this.listeners.has(evento)) {
+            this.listeners.get(evento).forEach(callback => {
+                try {
+                    callback(dados);
+                } catch (e) {
+                    console.error(`❌ Erro no listener ${evento}:`, e);
+                }
+            });
+        }
+        
+        // Também disparar como CustomEvent
+        document.dispatchEvent(new CustomEvent(`biapo:${evento}`, {
+            detail: dados
+        }));
+        
+        console.log(`📡 Evento disparado: ${evento}`);
+    }
+};
+
+// Configurar eventos automáticos
+const _criarTarefaOriginal = App.criarTarefa;
+App.criarTarefa = async function(dados) {
+    const resultado = await _criarTarefaOriginal.call(this, dados);
+    this.eventos.emit('tarefa-criada', resultado);
+    return resultado;
+};
+
+const _criarEventoOriginal = App.criarEvento;
+App.criarEvento = async function(dados) {
+    const resultado = await _criarEventoOriginal.call(this, dados);
+    this.eventos.emit('evento-criado', resultado);
+    return resultado;
+};
+
+console.log('🔥 Sistema de Eventos Unificado v8.13.0 ativo!');
+
 // ✅ EXPOSIÇÃO GLOBAL
 window.App = App;
 
