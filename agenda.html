@@ -1148,6 +1148,41 @@
         <span id="deepLinkText">🔗 Abrindo item via deep link...</span>
     </div>
 
+    <form id="formNovaEntrada" style="margin: 24px 0; display: flex; gap: 12px; align-items: flex-end;">
+        <div>
+            <label for="tipoEntrada">Tipo:</label>
+            <select id="tipoEntrada">
+                <option value="evento">Evento</option>
+                <option value="tarefa">Tarefa</option>
+            </select>
+        </div>
+        <div>
+            <label for="tituloEntrada">Título:</label>
+            <input type="text" id="tituloEntrada" required />
+        </div>
+        <div>
+            <label for="dataEntrada">Data:</label>
+            <input type="date" id="dataEntrada" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Criar</button>
+    </form>
+    <script>
+    document.getElementById('formNovaEntrada').onsubmit = function(e) {
+        e.preventDefault();
+        const tipo = document.getElementById('tipoEntrada').value;
+        const titulo = document.getElementById('tituloEntrada').value;
+        const data = document.getElementById('dataEntrada').value;
+        const id = Date.now();
+        if (tipo === 'evento') {
+            MinhaAgendaEvents.criarEvento({ id, titulo, data, participantes: [] });
+            MinhaAgendaUI.mostrarNotificacao('Evento criado com sucesso!', 'success');
+        } else {
+            MinhaAgendaEvents.criarTarefa({ id, titulo, data, participantes: [] });
+            MinhaAgendaUI.mostrarNotificacao('Tarefa criada com sucesso!', 'success');
+        }
+        document.getElementById('formNovaEntrada').reset();
+    };
+    </script>
     <div id="eventosLista"></div>
     <div id="tarefasLista"></div>
 
