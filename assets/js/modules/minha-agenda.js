@@ -1,38 +1,9 @@
-// Classe principal da Minha Agenda extraída de agenda.html
+// Classe principal da Minha Agenda
 class MinhaAgenda {
-    constructor() {
-        this.visualizacaoAtiva = 'grid';
-        this.semanaAtual = new Date();
-        this.usuarioAtual = null;
-        this.tarefas = [];
-        this.eventos = [];
-        this.eventosEquipe = [];
-        this.participantesTemp = [];
-        this.subtarefasTemp = [];
-        this.tarefaEditando = null;
-        this.filtros = {
-            tipo: 'todos',
-            status: 'todos',
-            prioridade: 'todos',
-            escopo: 'todos',
-            horario: 'todos'
-        };
-        this.configFase4 = {
-            syncAutomatico: true,
-            mostrarEventosEquipe: true,
-            notificarMudancas: true,
-            atualizarCalendario: true,
-            suporteHorarios: true,
-            deepLinksAtivo: true,
-            navegacaoFluida: true,
-            feedbackVisual: true
-        };
-        this.errosConsecutivos = 0;
-        this.maxTentativas = 30;
-        this.init();
-    }
-    // ... (todos os métodos da classe AgendaFase4, igual ao agenda.html) ...
+    // ... toda a lógica da agenda ...
 }
 
-// Instanciação global para compatibilidade
-window.minhaAgenda = new MinhaAgenda(); 
+// Inicialização global segura
+if (!window.minhaAgenda) {
+    window.minhaAgenda = new MinhaAgenda();
+} 
