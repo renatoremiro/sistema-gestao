@@ -61,14 +61,16 @@ const MinhaAgendaEvents = {
     }
 };
 
-function abrirModalCriarEvento() {
-    // Exibe modal, coleta dados do formulário
-    // Ao confirmar:
-    MinhaAgendaEvents.criarEvento({
-        id: Date.now(),
-        titulo: 'Reunião',
-        data: '2024-07-12',
-        participantes: ['usuario@exemplo.com'],
-        // ...outros campos
-    });
+function abrirModalEventoOuTarefa(tipo, dados = {}) {
+    // tipo: 'evento' ou 'tarefa'
+    // dados: objeto com dados para edição (opcional)
+    // Preencher campos do modal conforme tipo/contexto
+    // Exemplo:
+    document.getElementById('modalTipo').value = tipo;
+    document.getElementById('modalTitulo').value = dados.titulo || '';
+    document.getElementById('modalData').value = dados.data || '';
+    // ... outros campos
+    // Mostrar/ocultar campos de participantes conforme tipo/contexto
+    // Exibir modal
+    document.getElementById('modalEventoTarefa').style.display = 'block';
 } 
