@@ -1547,6 +1547,79 @@
         </div>
     </div>
 
+    <!-- Modal Unificado para Evento/Tarefa -->
+    <div id="modalEventoTarefa" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); align-items:center; justify-content:center; z-index:9999;">
+      <form id="formEventoTarefa" style="background:white; padding:32px; border-radius:12px; min-width:320px; max-width:90vw; margin:auto; display:flex; flex-direction:column; gap:16px;">
+        <div>
+          <label for="modalTipo">Tipo:</label>
+          <select id="modalTipo">
+            <option value="evento">Evento</option>
+            <option value="tarefa">Tarefa</option>
+          </select>
+        </div>
+        <div>
+          <label for="modalTitulo">Título:</label>
+          <input type="text" id="modalTitulo" required />
+        </div>
+        <div>
+          <label for="modalData">Data:</label>
+          <input type="date" id="modalData" required />
+        </div>
+        <div id="campoParticipantes" style="display:none;">
+          <label for="modalParticipantes">Participantes (Ctrl+Clique para múltiplos):</label>
+          <select id="modalParticipantes" multiple></select>
+        </div>
+        <div style="display:flex; gap:12px; justify-content:flex-end;">
+          <button type="submit" class="btn btn-primary">Salvar</button>
+          <button type="button" class="btn btn-secondary" onclick="fecharModalEventoTarefa()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+    <script>
+    // Função para abrir o modal
+    function abrirModalEventoTarefa(tipo = 'evento', dados = {}) {
+      document.getElementById('modalTipo').value = tipo;
+      document.getElementById('modalTitulo').value = dados.titulo || '';
+      document.getElementById('modalData').value = dados.data || '';
+      // Participantes: só mostra se for evento de equipe
+      if (tipo === 'evento' && window.minhaAgendaState && window.minhaAgendaState.usuarios) {
+        document.getElementById('campoParticipantes').style.display = '';
+        const select = document.getElementById('modalParticipantes');
+        select.innerHTML = window.minhaAgendaState.usuarios.map(u => `<option value="${u.email}">${u.nome} (${u.email})</option>`).join('');
+        // Selecionar participantes já existentes (edição)
+        if (dados.participantes) {
+          Array.from(select.options).forEach(opt => {
+            opt.selected = dados.participantes.includes(opt.value);
+          });
+        }
+      } else {
+        document.getElementById('campoParticipantes').style.display = 'none';
+      }
+      document.getElementById('modalEventoTarefa').style.display = 'flex';
+    }
+    function fecharModalEventoTarefa() {
+      document.getElementById('modalEventoTarefa').style.display = 'none';
+    }
+    document.getElementById('formEventoTarefa').onsubmit = function(e) {
+      e.preventDefault();
+      const tipo = document.getElementById('modalTipo').value;
+      const titulo = document.getElementById('modalTitulo').value;
+      const data = document.getElementById('modalData').value;
+      let participantes = [];
+      if (tipo === 'evento') {
+        participantes = Array.from(document.getElementById('modalParticipantes').selectedOptions).map(opt => opt.value);
+      }
+      const id = Date.now();
+      if (tipo === 'evento') {
+        MinhaAgendaEvents.criarEvento({ id, titulo, data, participantes });
+        MinhaAgendaUI.mostrarNotificacao('Evento criado com sucesso!', 'success');
+      } else {
+        MinhaAgendaEvents.criarTarefa({ id, titulo, data, participantes: [window.minhaAgendaState.usuarioAtual?.email || ''] });
+        MinhaAgendaUI.mostrarNotificacao('Tarefa criada com sucesso!', 'success');
+      }
+      fecharModalEventoTarefa();
+    };
+    </script>
     <script src="assets/js/modules/minha-agenda-ui.js"></script>
     <script src="assets/js/modules/minha-agenda-storage.js"></script>
     <script src="assets/js/modules/minha-agenda-events.js"></script>
