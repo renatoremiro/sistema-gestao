@@ -1,5 +1,5 @@
-// Classe principal da Agenda Pessoal Fase 4 extraída de agenda.html
-class AgendaFase4 {
+// Classe principal da Minha Agenda extraída de agenda.html
+class MinhaAgenda {
     constructor() {
         this.visualizacaoAtiva = 'grid';
         this.semanaAtual = new Date();
@@ -35,4 +35,4 @@ class AgendaFase4 {
 }
 
 // Instanciação global para compatibilidade
-window.agendaFase4 = new AgendaFase4(); 
+window.minhaAgenda = new MinhaAgenda(); 
