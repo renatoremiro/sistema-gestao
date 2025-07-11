@@ -1,17 +1,36 @@
 // Módulo de Interface da Minha Agenda
 const MinhaAgendaUI = {
     renderizarAgenda: function(dados) {
-        // Renderiza a visualização principal da agenda
-        // Exemplo: atualizar grid, timeline, etc.
+        // Exemplo: atualizar lista de eventos
+        const eventosContainer = document.getElementById('eventosLista');
+        if (eventosContainer) {
+            eventosContainer.innerHTML = dados.eventos.map(ev => `
+                <div class="evento-item">
+                    <strong>${ev.titulo}</strong> - ${ev.data}
+                    <span>Participantes: ${(ev.participantes||[]).join(', ')}</span>
+                    <button onclick="MinhaAgendaEvents.excluirEvento(${ev.id})">Excluir</button>
+                </div>
+            `).join('');
+        }
+        // Exemplo: atualizar lista de tarefas
+        const tarefasContainer = document.getElementById('tarefasLista');
+        if (tarefasContainer) {
+            tarefasContainer.innerHTML = dados.tarefas.map(t => `
+                <div class="tarefa-item">
+                    <strong>${t.titulo}</strong> - ${t.data}
+                    <span>Participantes: ${(t.participantes||[]).join(', ')}</span>
+                    <button onclick="MinhaAgendaEvents.excluirTarefa(${t.id})">Excluir</button>
+                </div>
+            `).join('');
+        }
     },
     atualizarEventos: function(eventos) {
-        // Atualiza a lista de eventos na interface
+        this.renderizarAgenda(window.minhaAgendaState);
     },
     atualizarTarefas: function(tarefas) {
-        // Atualiza a lista de tarefas na interface
+        this.renderizarAgenda(window.minhaAgendaState);
     },
     mostrarNotificacao: function(msg, tipo = 'info') {
-        // Exibe uma notificação visual
         if (typeof Notifications !== 'undefined') {
             Notifications[tipo](msg);
         } else {
