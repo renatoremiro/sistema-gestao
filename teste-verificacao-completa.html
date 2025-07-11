@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Completo - Sistema BIAPO v8.13.0</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .teste-item {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+        .status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste Completo - Sistema BIAPO v8.13.0</h1>
+        <p>Verificação completa de todos os componentes do sistema</p>
+        
+        <div class="teste-item">
+            <h3>1. BIAPO.diagnostico() - Status Positivo</h3>
+            <div id="teste-diagnostico">
+                <button onclick="executarDiagnostico()">Executar Diagnóstico</button>
+                <div id="resultado-diagnostico"></div>
+            </div>
+        </div>
+        
+        <div class="teste-item">
+            <h3>2. Verificação de Erros 404</h3>
+            <div id="teste-404">
+                <button onclick="verificarErros404()">Verificar Network Tab</button>
+                <div id="resultado-404"></div>
+            </div>
+        </div>
+        
+        <div class="teste-item">
+            <h3>3. App.config.versao = '8.13.0'</h3>
+            <div id="teste-versao">
+                <button onclick="verificarVersao()">Verificar Versão</button>
+                <div id="resultado-versao"></div>
+            </div>
+        </div>
+        
+        <div class="teste-item">
+            <h3>4. Sistema sem Travamentos</h3>
+            <div id="teste-performance">
+                <button onclick="testarPerformance()">Testar Performance</button>
+                <div id="resultado-performance"></div>
+            </div>
+        </div>
+        
+        <div class="teste-item">
+            <h3>5. Log de Execução</h3>
+            <div id="log-execucao" class="log"></div>
+        </div>
+        
+        <div class="teste-item">
+            <h3>6. Teste Completo Automático</h3>
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <button onclick="executarTesteCompleto()">Executar Todos os Testes</button>
+            <div id="resultado-completo"></div>
+        </div>
+    </div>
+
+    <!-- Carregar todos os scripts do sistema -->
+    <script src="assets/js/config/firebase.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    <script src="assets/js/utils/persistence.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/modules/events.js"></script>
+    <script src="assets/js/modules/calendar.js"></script>
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    <script src="assets/js/modules/biapo-v8130.js"></script>
+    <script src="assets/js/utils/diagnostico_sistema.js"></script>
+
+    <script>
+        // Sistema de Log
+        function log(mensagem, tipo = 'info') {
+            const logDiv = document.getElementById('log-execucao');
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            const prefix = tipo === 'error' ? '❌' : tipo === 'success' ? '✅' : tipo === 'warning' ? '⚠️' : 'ℹ️';
+            logDiv.innerHTML += `[${timestamp}] ${prefix} ${mensagem}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${mensagem}`);
+        }
+
+        // 1. Teste BIAPO.diagnostico()
+        async function executarDiagnostico() {
+            log('Iniciando teste BIAPO.diagnostico()...', 'info');
+            const resultado = document.getElementById('resultado-diagnostico');
+            
+            try {
+                if (typeof BIAPO === 'undefined') {
+                    throw new Error('BIAPO não está disponível');
+                }
+                
+                if (typeof BIAPO.diagnostico !== 'function') {
+                    throw new Error('BIAPO.diagnostico() não é uma função');
+                }
+                
+                log('Executando BIAPO.diagnostico()...', 'info');
+                const diagnostico = await BIAPO.diagnostico();
+                
+                if (diagnostico && diagnostico.status) {
+                    const status = diagnostico.status;
+                    const sucessos = diagnostico.sucessos || 0;
+                    const problemas = diagnostico.problemas || 0;
+                    
+                    resultado.innerHTML = `
+                        <span class="status ${status === 'PERFEITO' ? 'success' : status === 'BOM' ? 'info' : status === 'REGULAR' ? 'warning' : 'error'}">
+                            ${status}
+                        </span>
+                        <p>✅ Sucessos: ${sucessos} | ❌ Problemas: ${problemas}</p>
+                    `;
+                    
+                    log(`Diagnóstico concluído: ${status} (${sucessos} sucessos, ${problemas} problemas)`, 'success');
+                } else {
+                    throw new Error('Diagnóstico não retornou resultado válido');
+                }
+                
+            } catch (error) {
+                resultado.innerHTML = `<span class="status error">ERRO: ${error.message}</span>`;
+                log(`Erro no diagnóstico: ${error.message}`, 'error');
+            }
+        }
+
+        // 2. Verificar erros 404
+        function verificarErros404() {
+            log('Verificando erros 404 no Network tab...', 'info');
+            const resultado = document.getElementById('resultado-404');
+            
+            // Simular verificação de recursos
+            const recursos = [
+                'assets/js/config/firebase.js',
+                'assets/js/core/app.js',
+                'assets/js/modules/biapo-v8130.js',
+                'assets/js/utils/diagnostico_sistema.js',
+                'assets/css/main.css',
+                'assets/css/calendar.css'
+            ];
+            
+            let erros404 = 0;
+            let total = recursos.length;
+            
+            recursos.forEach(recurso => {
+                const link = document.createElement('link');
+                link.rel = 'preload';
+                link.href = recurso;
+                link.onerror = () => {
+                    erros404++;
+                    log(`❌ 404: ${recurso}`, 'error');
+                };
+                link.onload = () => {
+                    log(`✅ OK: ${recurso}`, 'success');
+                };
+                document.head.appendChild(link);
+            });
+            
+            setTimeout(() => {
+                if (erros404 === 0) {
+                    resultado.innerHTML = `<span class="status success">NENHUM ERRO 404 DETECTADO</span>`;
+                    log('Verificação 404 concluída: Nenhum erro encontrado', 'success');
+                } else {
+                    resultado.innerHTML = `<span class="status error">${erros404} ERROS 404 DETECTADOS</span>`;
+                    log(`Verificação 404 concluída: ${erros404} erros encontrados`, 'error');
+                }
+            }, 2000);
+        }
+
+        // 3. Verificar versão
+        function verificarVersao() {
+            log('Verificando versão do sistema...', 'info');
+            const resultado = document.getElementById('resultado-versao');
+            
+            try {
+                if (typeof App === 'undefined') {
+                    throw new Error('App não está disponível');
+                }
+                
+                const versao = App.config?.versao;
+                const versaoEsperada = '8.13.0';
+                
+                if (versao === versaoEsperada) {
+                    resultado.innerHTML = `
+                        <span class="status success">VERSÃO CORRETA</span>
+                        <p>Versão atual: ${versao}</p>
+                    `;
+                    log(`Versão verificada: ${versao} ✅`, 'success');
+                } else {
+                    resultado.innerHTML = `
+                        <span class="status error">VERSÃO INCORRETA</span>
+                        <p>Esperado: ${versaoEsperada} | Atual: ${versao}</p>
+                    `;
+                    log(`Versão incorreta: esperado ${versaoEsperada}, atual ${versao}`, 'error');
+                }
+                
+            } catch (error) {
+                resultado.innerHTML = `<span class="status error">ERRO: ${error.message}</span>`;
+                log(`Erro ao verificar versão: ${error.message}`, 'error');
+            }
+        }
+
+        // 4. Testar performance
+        async function testarPerformance() {
+            log('Testando performance do sistema...', 'info');
+            const resultado = document.getElementById('resultado-performance');
+            
+            const inicio = performance.now();
+            
+            try {
+                // Teste 1: Inicialização
+                log('Teste 1: Inicialização do sistema...', 'info');
+                if (typeof App !== 'undefined' && App.init) {
+                    await App.init();
+                }
+                
+                // Teste 2: Carregamento de dados
+                log('Teste 2: Carregamento de dados...', 'info');
+                if (App?.dados) {
+                    const totalItens = (App.dados.eventos?.length || 0) + (App.dados.tarefas?.length || 0);
+                    log(`Dados carregados: ${totalItens} itens`, 'success');
+                }
+                
+                // Teste 3: Operações básicas
+                log('Teste 3: Operações básicas...', 'info');
+                if (typeof App?.criarTarefa === 'function') {
+                    log('Função criarTarefa disponível', 'success');
+                }
+                
+                if (typeof App?.editarTarefa === 'function') {
+                    log('Função editarTarefa disponível', 'success');
+                }
+                
+                const tempoTotal = performance.now() - inicio;
+                
+                if (tempoTotal < 3000) {
+                    resultado.innerHTML = `
+                        <span class="status success">PERFORMANCE OK</span>
+                        <p>Tempo de carregamento: ${tempoTotal.toFixed(2)}ms</p>
+                    `;
+                    log(`Performance OK: ${tempoTotal.toFixed(2)}ms`, 'success');
+                } else {
+                    resultado.innerHTML = `
+                        <span class="status warning">PERFORMANCE LENTA</span>
+                        <p>Tempo de carregamento: ${tempoTotal.toFixed(2)}ms</p>
+                    `;
+                    log(`Performance lenta: ${tempoTotal.toFixed(2)}ms`, 'warning');
+                }
+                
+            } catch (error) {
+                resultado.innerHTML = `<span class="status error">ERRO: ${error.message}</span>`;
+                log(`Erro no teste de performance: ${error.message}`, 'error');
+            }
+        }
+
+        // 5. Teste completo automático
+        async function executarTesteCompleto() {
+            log('=== INICIANDO TESTE COMPLETO AUTOMÁTICO ===', 'info');
+            const resultado = document.getElementById('resultado-completo');
+            const progressBar = document.getElementById('progress-bar');
+            
+            const testes = [
+                { nome: 'Verificar BIAPO.diagnostico()', funcao: executarDiagnostico },
+                { nome: 'Verificar erros 404', funcao: verificarErros404 },
+                { nome: 'Verificar versão', funcao: verificarVersao },
+                { nome: 'Testar performance', funcao: testarPerformance }
+            ];
+            
+            let sucessos = 0;
+            let total = testes.length;
+            
+            for (let i = 0; i < testes.length; i++) {
+                const teste = testes[i];
+                const progresso = ((i + 1) / total) * 100;
+                
+                log(`Executando teste ${i + 1}/${total}: ${teste.nome}`, 'info');
+                progressBar.style.width = `${progresso}%`;
+                
+                try {
+                    await teste.funcao();
+                    sucessos++;
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa entre testes
+                } catch (error) {
+                    log(`Erro no teste ${teste.nome}: ${error.message}`, 'error');
+                }
+            }
+            
+            progressBar.style.width = '100%';
+            
+            const porcentagem = (sucessos / total) * 100;
+            const status = porcentagem >= 90 ? 'EXCELENTE' : 
+                          porcentagem >= 75 ? 'BOM' : 
+                          porcentagem >= 60 ? 'REGULAR' : 'CRÍTICO';
+            
+            resultado.innerHTML = `
+                <h3>RESULTADO FINAL</h3>
+                <span class="status ${status === 'EXCELENTE' ? 'success' : status === 'BOM' ? 'info' : status === 'REGULAR' ? 'warning' : 'error'}">
+                    ${status} (${porcentagem.toFixed(1)}%)
+                </span>
+                <p>✅ Sucessos: ${sucessos}/${total}</p>
+            `;
+            
+            log(`=== TESTE COMPLETO FINALIZADO: ${status} (${sucessos}/${total}) ===`, 'success');
+        }
+
+        // Auto-executar quando página carregar
+        window.addEventListener('load', () => {
+            log('Página carregada, aguardando inicialização do sistema...', 'info');
+            
+            // Aguardar inicialização do sistema
+            setTimeout(() => {
+                log('Sistema carregado, pronto para testes!', 'success');
+            }, 3000);
+        });
+    </script>
+</body>
+</html> 

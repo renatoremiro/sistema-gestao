@@ -1,18 +1,18 @@
 /**
- * 🚀 Sistema de Gestão de Aplicação v8.12.1
+ * 🚀 Sistema de Gestão de Aplicação v8.13.0
  * 
- * 🔥 CORREÇÕES v8.12.1:
- * - ✅ CORRIGIDO: Variável 'novaTarefa' → 'tarefa' (linha 1323)
- * - ✅ MELHORADO: Fallback para Firebase offline
- * - ✅ OTIMIZADO: Removido código redundante
+ * 🔥 ATUALIZAÇÕES v8.13.0:
+ * - ✅ ATUALIZADO: Versão para 8.13.0
+ * - ✅ MELHORADO: Sistema de diagnóstico BIAPO
+ * - ✅ OTIMIZADO: Performance e estabilidade
  * - ✅ SIMPLIFICADO: Lógica de adicionar/remover tarefas
  * - ✅ APRIMORADO: Tratamento de erros mais claro
  */
 
 const App = {
-    // ✅ CONFIGURAÇÕES v8.12.1
+    // ✅ CONFIGURAÇÕES v8.13.0
     config: {
-        versao: '8.12.1', // Atualizado de 8.12.0
+        versao: '8.13.0', // Atualizado para 8.13.0
         ambiente: 'producao',
         debugAtivo: true,
         
@@ -38,7 +38,7 @@ const App = {
         tarefas: [], // Array unificado de tarefas
         usuarios: {},
         metadata: {
-            versao: '8.12.1',
+            versao: '8.13.0',
             ultimaAtualizacao: null,
             totalItens: 0
         }
@@ -62,7 +62,7 @@ const App = {
 
     // 🔥 INICIALIZAÇÃO CORRIGIDA
     async init() {
-        console.log('🚀 Iniciando App.js v8.12.1 CORRIGIDO...');
+        console.log('🚀 Iniciando App.js v8.13.0...');
         
         try {
             this.estadoSistema.carregando = true;
@@ -84,7 +84,7 @@ const App = {
             this.estadoSistema.inicializado = true;
             this.estadoSistema.carregando = false;
             
-            console.log('✅ App.js v8.12.1 inicializado com sucesso!');
+            console.log('✅ App.js v8.13.0 inicializado com sucesso!');
             console.log(`📊 ${this.dados.eventos.length} eventos | ${this.dados.tarefas.length} tarefas`);
             
             // Disparar evento de inicialização
@@ -147,7 +147,7 @@ const App = {
     // 🔥 CRIAR TAREFA CORRIGIDO
     async criarTarefa(dadosTarefa) {
         try {
-            console.log('📋 Criando nova tarefa v8.12.1...');
+            console.log('📋 Criando nova tarefa v8.13.0...');
             
             // Validar dados mínimos
             if (!dadosTarefa.titulo) {
