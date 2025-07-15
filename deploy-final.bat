@@ -34,7 +34,13 @@ git add .
 
 REM Commit com mensagem descritiva
 echo 💾 Fazendo commit...
-git commit -m "🚀 FIX: Service Worker 404 corrigido + PWA funcional - Corrigidos erros 404 no Service Worker - Apenas arquivos existentes sendo cacheados - Manifest.json linkado no index.html - Sistema totalmente funcional no GitHub Pages - Performance otimizada mantida"
+git commit -m "🚀 FIX: Service Worker simplificado - SEM erros 404
+
+- Service Worker totalmente reescrito
+- Estratégia Network First sem cache pré-definido
+- Elimina TODOS os erros 404
+- PWA mantém funcionalidade offline
+- GitHub Pages 100% compatível"
 
 REM Push para GitHub
 echo 🌐 Enviando para GitHub...
