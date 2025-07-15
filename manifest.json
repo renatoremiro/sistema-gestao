@@ -1,0 +1,25 @@
+{
+  "name": "Sistema de Gestão BIAPO",
+  "short_name": "BIAPO Sistema",
+  "description": "Sistema de Gestão de Eventos e Tarefas - Obra 292 Museu Nacional",
+  "version": "8.12.1-optimized",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#C53030",
+  "theme_color": "#C53030",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏗️%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
