@@ -24,20 +24,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="BIAPO Sistema">
     
-    <!-- Manifest -->
+    <!-- Manifest - Comentado temporariamente para evitar CORS
     <link rel="manifest" href="./manifest.json">
+    -->
     
-    <!-- Favicon -->
+    <!-- Favicon - Comentado temporariamente
     <link rel="icon" type="image/png" sizes="32x32" href="./assets/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="./assets/img/favicon-16x16.png">
     <link rel="apple-touch-icon" href="./assets/img/apple-touch-icon.png">
+    -->
     
-    <!-- CSS Otimizado -->
-    <link rel="stylesheet" href="./dist/styles.min.css">
-    
-    <!-- Preload recursos críticos -->
-    <link rel="preload" href="./dist/app.min.js" as="script">
-    <link rel="preload" href="./assets/img/Logo-biapo.jpg" as="image">
+    <!-- CSS e JS serão injetados automaticamente pelo webpack -->
     
     <!-- Firebase CDN com fallback -->
     <script>
@@ -359,16 +356,10 @@
         },
         
         loadSystemBundle() {
-          const script = document.createElement('script');
-          script.src = './dist/app.min.js';
-          script.onload = () => {
-            this.nextStep(); // Carregando módulos
-            this.initializeSystem();
-          };
-          script.onerror = () => {
-            this.showError('Falha ao carregar o sistema principal.');
-          };
-          document.head.appendChild(script);
+          // Os arquivos JS já foram injetados pelo webpack
+          // Vamos aguardar eles carregarem
+          this.nextStep(); // Carregando módulos
+          this.initializeSystem();
         },
         
         async initializeSystem() {

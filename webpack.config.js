@@ -7,14 +7,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'production',
   entry: {
-    app: './src/app-bundle.js',
-    vendor: ['./src/vendor-bundle.js']
+    app: ['./src/app-bundle.js', './src/main.css'],
+    vendor: './src/vendor-bundle.js'
   },
   output: {
     filename: '[name].[contenthash:8].min.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
-    publicPath: './'
+    publicPath: ''
   },
   optimization: {
     minimize: true,
@@ -103,5 +103,15 @@ module.exports = {
       '@utils': path.resolve(__dirname, 'src/utils'),
       '@modules': path.resolve(__dirname, 'src/modules')
     }
+  },
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    compress: true,
+    port: 8080,
+    open: true,
+    hot: true,
+    historyApiFallback: true
   }
 };

@@ -8,6 +8,7 @@
     "build:dev": "webpack --mode=development",
     "watch": "webpack --mode=development --watch",
     "serve": "webpack serve --mode=development --open",
+    "serve:simple": "npx http-server dist -p 8080 -o",
     "analyze": "webpack-bundle-analyzer dist/app.*.min.js",
     "clean": "rimraf dist",
     "test:performance": "node scripts/performance-test.js",
@@ -32,7 +33,6 @@
     "webpack-dev-server": "^4.15.0"
   },
   "dependencies": {
-    "lodash.debounce": "^4.0.8",
     "idb": "^7.1.1"
   },
   "engines": {

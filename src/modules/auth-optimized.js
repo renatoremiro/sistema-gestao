@@ -1,4 +1,4 @@
-import { debounce } from 'lodash.debounce';
+import { debounce } from '../utils/debounce.js';
 
 export class OptimizedAuth {
   constructor() {

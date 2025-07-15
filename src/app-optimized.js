@@ -1,5 +1,6 @@
-import { debounce } from 'lodash.debounce';
-import { openDB } from 'idb';
+import { debounce } from './utils/debounce.js';
+// import { openDB } from 'idb'; // Comentado temporariamente
+// Usar IndexedDB nativo simplificado
 
 class OptimizedApp {
   constructor() {
@@ -145,6 +146,10 @@ class OptimizedApp {
 
   async _initIndexedDB() {
     try {
+      // Temporariamente desabilitado para simplicidade
+      console.log('IndexedDB: Usando fallback para localStorage');
+      this.estadoSistema.usandoIndexedDB = false;
+      /*
       this.idbPromise = openDB('BiapoSystemDB', 1, {
         upgrade(db) {
           if (!db.objectStoreNames.contains('eventos')) {
@@ -167,8 +172,10 @@ class OptimizedApp {
       });
       
       this.estadoSistema.usandoIndexedDB = true;
+      */
     } catch (error) {
       console.warn('IndexedDB não disponível:', error);
+      this.estadoSistema.usandoIndexedDB = false;
     }
   }
 
@@ -410,6 +417,10 @@ class OptimizedApp {
   }
 
   async _salvarIndexedDB(dados) {
+    // Temporariamente desabilitado
+    console.log('IndexedDB save: usando localStorage como fallback');
+    return;
+    /*
     if (!this.idbPromise) return;
     
     try {
@@ -434,6 +445,7 @@ class OptimizedApp {
     } catch (error) {
       console.warn('Erro ao salvar no IndexedDB:', error);
     }
+    */
   }
 
   _buildIndices() {
