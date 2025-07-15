@@ -574,18 +574,36 @@
 
             verificarUsuario() {
                 try {
-                    // Tentar obter usuário do App.js
-                    if (App.usuarioAtual) {
+                    console.log('👤 Verificando usuário - início');
+                    
+                    // 🔥 1. PRIORIDADE: Auth.js (usuário logado real)
+                    if (typeof Auth !== 'undefined' && Auth.obterUsuario) {
+                        const usuarioAuth = Auth.obterUsuario();
+                        if (usuarioAuth && usuarioAuth.email) {
+                            this.usuarioAtual = {
+                                nome: usuarioAuth.displayName || usuarioAuth.nome || this.extrairNomeDoEmail(usuarioAuth.email),
+                                email: usuarioAuth.email
+                            };
+                            console.log('✅ Usuário do Auth.js:', this.usuarioAtual);
+                        }
+                    }
+                    
+                    // 🔥 2. BACKUP: App.js
+                    if (!this.usuarioAtual && App.usuarioAtual) {
                         this.usuarioAtual = {
                             nome: App.usuarioAtual.displayName || App.usuarioAtual.nome || this.extrairNomeDoEmail(App.usuarioAtual.email),
                             email: App.usuarioAtual.email
                         };
-                    } else {
-                        // Fallback para usuário demo
+                        console.log('✅ Usuário do App.js:', this.usuarioAtual);
+                    }
+                    
+                    // 🔥 3. FALLBACK: Usuário demo
+                    if (!this.usuarioAtual) {
                         this.usuarioAtual = {
                             nome: 'Usuário Demo',
                             email: 'demo@biapo.com.br'
                         };
+                        console.log('⚠️ Usando usuário demo:', this.usuarioAtual);
                     }
                     
                     // Atualizar interface
@@ -596,7 +614,7 @@
                     const emailEl = document.getElementById('user-email-agenda');
                     if (emailEl) emailEl.textContent = this.usuarioAtual.email;
                     
-                    console.log('👤 Usuário verificado:', this.usuarioAtual.nome);
+                    console.log('👤 Usuário final verificado:', this.usuarioAtual);
                     
                 } catch (error) {
                     console.error('❌ Erro ao verificar usuário:', error);
@@ -612,29 +630,48 @@
 
             async carregarDados() {
                 try {
-                    console.log('📥 Carregando dados da agenda...');
+                    console.log('📥 Carregando dados da agenda para:', this.usuarioAtual.email);
                     
                     if (!App.obterItensParaUsuario) {
                         throw new Error('Função obterItensParaUsuario não disponível no App.js');
                     }
                     
+                    // 🔥 CORREÇÃO: Usar email correto do usuário
                     const { eventos, tarefas } = App.obterItensParaUsuario(this.usuarioAtual.email);
                     
-                    // Filtrar tarefas pessoais e que o usuário participa
-                    this.dados.tarefas = tarefas.filter(tarefa => 
-                        tarefa.escopo === 'pessoal' || 
-                        tarefa.responsavel === this.usuarioAtual.email ||
-                        (tarefa.participantes && tarefa.participantes.includes(this.usuarioAtual.nome))
-                    );
+                    console.log('📊 Dados brutos recebidos:', { 
+                        eventos: eventos.length, 
+                        tarefas: tarefas.length,
+                        usuario: this.usuarioAtual.email
+                    });
                     
-                    // Filtrar eventos relevantes
-                    this.dados.eventos = eventos.filter(evento => 
-                        evento.participantes?.includes(this.usuarioAtual.nome) ||
-                        evento.participantes?.includes(this.usuarioAtual.email) ||
-                        evento.responsavel === this.usuarioAtual.email
-                    );
+                    // 🔥 FILTRO AMPLIADO: Incluir tarefas pessoais e que o usuário participa
+                    this.dados.tarefas = tarefas.filter(tarefa => {
+                        const emailMatch = tarefa.responsavel === this.usuarioAtual.email || 
+                                         tarefa.criadoPor === this.usuarioAtual.email;
+                        const nomeMatch = tarefa.participantes?.includes(this.usuarioAtual.nome) ||
+                                        tarefa.participantes?.includes(this.usuarioAtual.email);
+                        const scopeMatch = tarefa.escopo === 'pessoal';
+                        
+                        return emailMatch || nomeMatch || scopeMatch;
+                    });
                     
-                    console.log(`✅ Dados carregados: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
+                    // 🔥 FILTRO AMPLIADO: Incluir todos os eventos relevantes
+                    this.dados.eventos = eventos.filter(evento => {
+                        const emailMatch = evento.responsavel === this.usuarioAtual.email || 
+                                         evento.criadoPor === this.usuarioAtual.email;
+                        const participanteMatch = evento.participantes?.includes(this.usuarioAtual.nome) ||
+                                                 evento.participantes?.includes(this.usuarioAtual.email) ||
+                                                 evento.pessoas?.includes(this.usuarioAtual.nome) ||
+                                                 evento.pessoas?.includes(this.usuarioAtual.email);
+                        const publicoMatch = evento.visibilidade === 'publica' || evento.escopo === 'publico';
+                        
+                        return emailMatch || participanteMatch || publicoMatch;
+                    });
+                    
+                    console.log(`✅ Dados filtrados: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
+                    console.log('📋 Tarefas:', this.dados.tarefas.map(t => ({ titulo: t.titulo, responsavel: t.responsavel, escopo: t.escopo })));
+                    console.log('📅 Eventos:', this.dados.eventos.map(e => ({ titulo: e.titulo, responsavel: e.responsavel, participantes: e.participantes })));
                     
                 } catch (error) {
                     console.error('❌ Erro ao carregar dados:', error);
@@ -874,7 +911,21 @@
                     this.recarregar();
                 });
                 
-                console.log('✅ Listeners configurados');
+                // 🔥 NOVO: Listener para login/logout
+                document.addEventListener('biapo-login', (e) => {
+                    console.log('🔄 Login detectado na agenda, recarregando usuário...', e.detail);
+                    this.verificarUsuario();
+                    this.recarregar();
+                });
+                
+                document.addEventListener('biapo-logout', () => {
+                    console.log('🔄 Logout detectado na agenda');
+                    this.usuarioAtual = null;
+                    this.dados = { tarefas: [], eventos: [] };
+                    this.renderizarAgenda();
+                });
+                
+                console.log('✅ Listeners configurados (incluindo auth)');
             }
 
             async recarregar() {
@@ -882,6 +933,8 @@
                     console.log('🔄 Recarregando agenda...');
                     this.atualizarStatus('🔄 Recarregando...');
                     
+                    // 🔥 CORREÇÃO: Verificar usuário antes de carregar dados
+                    this.verificarUsuario();
                     await this.carregarDados();
                     this.renderizarAgenda();
                     
@@ -892,6 +945,21 @@
                     console.error('❌ Erro ao recarregar agenda:', error);
                     this.atualizarStatus('❌ Erro ao recarregar');
                     this.notificar('❌ Erro ao recarregar agenda', 'error');
+                }
+            }
+            
+            // 🔥 NOVA FUNÇÃO: Forçar sincronização de usuário
+            forcarSincronizacaoUsuario() {
+                try {
+                    console.log('🔧 Forçando sincronização de usuário...');
+                    
+                    this.verificarUsuario();
+                    this.recarregar();
+                    
+                    console.log('✅ Sincronização forçada concluída');
+                    
+                } catch (error) {
+                    console.error('❌ Erro na sincronização forçada:', error);
                 }
             }
 
@@ -960,7 +1028,17 @@
 
         function sincronizarAgenda() {
             if (agendaGlobal) {
-                agendaGlobal.recarregar();
+                // 🔥 CORREÇÃO: Forçar sincronização de usuário também
+                agendaGlobal.forcarSincronizacaoUsuario();
+            } else {
+                console.warn('⚠️ Agenda não inicializada');
+            }
+        }
+        
+        // 🔥 NOVA FUNÇÃO GLOBAL: Forçar sincronização de usuário
+        function forcarSincronizacaoUsuario() {
+            if (agendaGlobal) {
+                agendaGlobal.forcarSincronizacaoUsuario();
             } else {
                 console.warn('⚠️ Agenda não inicializada');
             }
