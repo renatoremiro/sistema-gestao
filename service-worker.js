@@ -2,15 +2,14 @@ const CACHE_NAME = 'biapo-system-v8.12.1-optimized';
 const STATIC_CACHE = 'biapo-static-v8.12.1';
 const DYNAMIC_CACHE = 'biapo-dynamic-v8.12.1';
 
+// ✅ CORRIGIDO: Apenas arquivos que realmente existem
 const STATIC_FILES = [
   '/',
   '/index.html',
-  '/agenda.html',
-  '/dist/app.min.js',
-  '/dist/vendor.min.js',
-  '/dist/styles.min.css',
-  '/assets/img/Logo-biapo.jpg',
-  '/manifest.json'
+  '/manifest.json',
+  '/dist/app.b743e0d3.min.js',
+  '/dist/vendor.364a4aa9.min.js',
+  '/dist/app.0a8075b5.min.css'
 ];
 
 const FIREBASE_URLS = [
@@ -30,9 +29,7 @@ const CACHE_STRATEGIES = {
 const URL_STRATEGIES = {
   '/': CACHE_STRATEGIES.STALE_WHILE_REVALIDATE,
   '/index.html': CACHE_STRATEGIES.STALE_WHILE_REVALIDATE,
-  '/agenda.html': CACHE_STRATEGIES.STALE_WHILE_REVALIDATE,
   '/dist/': CACHE_STRATEGIES.CACHE_FIRST,
-  '/assets/': CACHE_STRATEGIES.CACHE_FIRST,
   'firebase': CACHE_STRATEGIES.NETWORK_FIRST,
   'api': CACHE_STRATEGIES.NETWORK_FIRST
 };
@@ -42,9 +39,23 @@ self.addEventListener('install', event => {
   
   event.waitUntil(
     Promise.all([
+      // ✅ Cache apenas com fallback de erro
       caches.open(STATIC_CACHE).then(cache => {
         console.log('Service Worker: Caching static files');
-        return cache.addAll(STATIC_FILES.map(url => new Request(url, { cache: 'no-cache' })));
+        return Promise.allSettled(
+          STATIC_FILES.map(async url => {
+            try {
+              const response = await fetch(url, { cache: 'no-cache' });
+              if (response.ok) {
+                return cache.put(url, response);
+              } else {
+                console.warn(`Arquivo não encontrado para cache: ${url}`);
+              }
+            } catch (error) {
+              console.warn(`Erro ao cachear: ${url}`, error);
+            }
+          })
+        );
       }),
       self.skipWaiting()
     ])
@@ -141,7 +152,9 @@ async function cacheFirst(request) {
     }
     
     const networkResponse = await fetch(request);
-    await updateCache(request, networkResponse.clone());
+    if (networkResponse.ok) {
+      await updateCache(request, networkResponse.clone());
+    }
     return networkResponse;
     
   } catch (error) {
@@ -153,7 +166,9 @@ async function cacheFirst(request) {
 async function networkFirst(request) {
   try {
     const networkResponse = await fetch(request);
-    await updateCache(request, networkResponse.clone());
+    if (networkResponse.ok) {
+      await updateCache(request, networkResponse.clone());
+    }
     return networkResponse;
     
   } catch (error) {
@@ -167,7 +182,9 @@ async function staleWhileRevalidate(request) {
   const cachedResponse = await caches.match(request);
   
   const networkPromise = fetch(request).then(response => {
-    updateCache(request, response.clone());
+    if (response.ok) {
+      updateCache(request, response.clone());
+    }
     return response;
   }).catch(error => {
     console.warn('Stale While Revalidate network error:', error);
@@ -194,17 +211,24 @@ async function updateCache(request, response) {
     return;
   }
   
-  const cache = await caches.open(DYNAMIC_CACHE);
-  await cache.put(request, response);
-  
-  await cleanupCache(cache);
+  try {
+    const cache = await caches.open(DYNAMIC_CACHE);
+    await cache.put(request, response);
+    await cleanupCache(cache);
+  } catch (error) {
+    console.warn('Erro ao atualizar cache:', error);
+  }
 }
 
 async function cleanupCache(cache) {
-  const keys = await cache.keys();
-  if (keys.length > 100) {
-    const oldestKey = keys[0];
-    await cache.delete(oldestKey);
+  try {
+    const keys = await cache.keys();
+    if (keys.length > 100) {
+      const oldestKey = keys[0];
+      await cache.delete(oldestKey);
+    }
+  } catch (error) {
+    console.warn('Erro ao limpar cache:', error);
   }
 }
 
@@ -334,50 +358,4 @@ async function handleBackgroundSync() {
   }
 }
 
-self.addEventListener('push', event => {
-  if (!event.data) return;
-  
-  const data = event.data.json();
-  
-  const options = {
-    body: data.body || 'Nova notificação do Sistema BIAPO',
-    icon: '/assets/img/Logo-biapo.jpg',
-    badge: '/assets/img/Logo-biapo.jpg',
-    data: data.data || {},
-    actions: [
-      {
-        action: 'open',
-        title: 'Abrir',
-        icon: '/assets/img/Logo-biapo.jpg'
-      },
-      {
-        action: 'close',
-        title: 'Fechar'
-      }
-    ],
-    vibrate: [100, 50, 100],
-    requireInteraction: true
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'Sistema BIAPO', options)
-  );
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  
-  if (event.action === 'open' || !event.action) {
-    event.waitUntil(
-      clients.matchAll({ type: 'window' }).then(windowClients => {
-        if (windowClients.length > 0) {
-          return windowClients[0].focus();
-        } else {
-          return clients.openWindow('/');
-        }
-      })
-    );
-  }
-});
-
-console.log('Service Worker: Loaded v8.12.1-optimized');
+console.log('Service Worker: Loaded v8.12.1-optimized - Fixed 404 errors');
