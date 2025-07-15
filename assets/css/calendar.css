@@ -1,0 +1,284 @@
+/**
+ * 📅 CALENDAR.CSS v6.3 - SISTEMA DE CALENDÁRIO BIAPO
+ * 
+ * 🔥 ATUALIZAÇÃO v6.3:
+ * - ✅ Override de conflitos com main.css
+ * - ✅ Grid 7x7 funcionando
+ * - ✅ Especificidade aumentada com IDs
+ * - ✅ Reset de classes conflitantes
+ */
+
+/* ========== 🔥 OVERRIDE DE CONFLITOS COM MAIN.CSS ========== */
+
+/* Reset completo do container principal */
+body #calendario {
+    all: initial !important;
+    display: block !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Grid principal do calendário - FORÇADO */
+body #calendario #calendarGrid {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 1px !important;
+    background: #e5e7eb !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    min-height: 400px !important;
+}
+
+/* Células individuais dos dias - OVERRIDE COMPLETO */
+body #calendario #calendarGrid > div {
+    all: initial !important;
+    background: white !important;
+    min-height: 100px !important;
+    padding: 8px !important;
+    cursor: pointer !important;
+    border: 1px solid #e5e7eb !important;
+    transition: all 0.2s ease !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 12px !important;
+    color: #374151 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+}
+
+body #calendario #calendarGrid > div:hover {
+    background-color: #f3f4f6 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2) !important;
+    z-index: 10 !important;
+}
+
+/* Cabeçalho de navegação */
+body #calendario > div:first-child {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 16px !important;
+    padding: 12px 16px !important;
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Dias da semana - cabeçalho */
+body #calendario > div:nth-child(2) {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 1px !important;
+    margin-bottom: 8px !important;
+    background: #e5e7eb !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+body #calendario > div:nth-child(2) > div {
+    background: #374151 !important;
+    color: white !important;
+    padding: 12px 8px !important;
+    text-align: center !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+}
+
+/* Remover conflitos com classes antigas do main.css */
+#calendario .calendario-dia,
+#calendario .calendario-cabecalho,
+#calendario .calendario {
+    all: unset !important;
+}
+
+/* ========== 📅 ESTILOS ESPECÍFICOS DO CALENDÁRIO ========== */
+
+/* Número do dia */
+body #calendario .dia-numero {
+    font-weight: bold !important;
+    margin-bottom: 4px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 14px !important;
+}
+
+/* Dia de hoje */
+body #calendario #calendarGrid > div[style*="dbeafe"] {
+    background: #dbeafe !important;
+    border-color: #3b82f6 !important;
+    font-weight: 600 !important;
+}
+
+/* Dia selecionado */
+body #calendario #calendarGrid > div[style*="fef3c7"] {
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+}
+
+/* ========== 📌 EVENTOS E TAREFAS NO CALENDÁRIO ========== */
+
+/* Container de itens */
+body #calendario .item-calendario {
+    background: #3b82f6 !important;
+    color: white !important;
+    padding: 3px 6px !important;
+    border-radius: 4px !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    margin-bottom: 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    transition: all 0.2s ease !important;
+    line-height: 1.2 !important;
+    min-height: 18px !important;
+}
+
+body #calendario .item-calendario:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    z-index: 20 !important;
+}
+
+/* Cores por tipo de evento */
+body #calendario .evento-reuniao { background: #3b82f6 !important; }
+body #calendario .evento-entrega { background: #10b981 !important; }
+body #calendario .evento-prazo { background: #ef4444 !important; }
+body #calendario .evento-marco { background: #8b5cf6 !important; }
+body #calendario .evento-reuniao_equipe { background: #06b6d4 !important; }
+body #calendario .evento-treinamento { background: #f59e0b !important; }
+body #calendario .evento-outro { background: #6b7280 !important; }
+
+/* Cores por tipo de tarefa */
+body #calendario .tarefa-pessoal { background: #f59e0b !important; }
+body #calendario .tarefa-equipe { background: #8b5cf6 !important; }
+body #calendario .tarefa-projeto { background: #8b5cf6 !important; }
+body #calendario .tarefa-publico { background: #10b981 !important; }
+
+/* Badges de contagem */
+body #calendario .badge-count {
+    font-size: 8px !important;
+    background: #3b82f6 !important;
+    color: white !important;
+    padding: 1px 4px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    margin-left: 4px !important;
+}
+
+/* ========== 🎨 BOTÕES E CONTROLES ========== */
+
+/* Botões de navegação */
+body #calendario button {
+    background: #3b82f6 !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    font-size: 14px !important;
+}
+
+body #calendario button:hover {
+    background: #2563eb !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Título do mês/ano */
+body #calendario h3 {
+    margin: 0 !important;
+    color: #1f2937 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+}
+
+/* ========== 📊 ESTATÍSTICAS E RODAPÉ ========== */
+
+body #calendario #calendarStats {
+    margin-top: 16px !important;
+    padding: 12px 16px !important;
+    background: #f8fafc !important;
+    border-radius: 8px !important;
+    border: 1px solid #e5e7eb !important;
+    font-size: 13px !important;
+    color: #6b7280 !important;
+    text-align: center !important;
+}
+
+/* ========== 📱 RESPONSIVIDADE ========== */
+
+@media (max-width: 768px) {
+    body #calendario {
+        padding: 10px !important;
+    }
+    
+    body #calendario #calendarGrid > div {
+        min-height: 80px !important;
+        padding: 4px !important;
+        font-size: 10px !important;
+    }
+    
+    body #calendario .item-calendario {
+        font-size: 8px !important;
+        padding: 2px 4px !important;
+    }
+    
+    body #calendario button {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* ========== 🎬 ANIMAÇÕES ========== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body #calendario #calendarGrid > div {
+    animation: fadeIn 0.3s ease-out !important;
+}
+
+/* ========== 🔧 UTILITÁRIOS ========== */
+
+/* Scrollbar customizada para dias com muitos eventos */
+body #calendario #calendarGrid > div::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+body #calendario #calendarGrid > div::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+}
+
+body #calendario #calendarGrid > div::-webkit-scrollbar-thumb {
+    background: #888 !important;
+    border-radius: 2px !important;
+}
+
+body #calendario #calendarGrid > div::-webkit-scrollbar-thumb:hover {
+    background: #555 !important;
+}
+
+/* Garantir que nada quebre */
+body #calendario * {
+    box-sizing: border-box !important;
+}
+
+/* FIM DO ARQUIVO CALENDAR.CSS v6.3 */
