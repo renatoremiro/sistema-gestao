@@ -1,0 +1,527 @@
+/* Sistema BIAPO - CSS Otimizado v8.12.1 */
+
+/* ========== VARIÁVEIS CSS OTIMIZADAS ========== */
+:root {
+  --biapo-red: #C53030;
+  --biapo-red-light: #E53E3E;
+  --biapo-red-dark: #9B2C2C;
+  --biapo-orange: #DD6B20;
+  --biapo-gray: #2D3748;
+  --biapo-gray-light: #4A5568;
+  --biapo-gray-lighter: #718096;
+  --accent-green: #38A169;
+  --accent-yellow: #D69E2E;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.3);
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* ========== RESET E BASE OTIMIZADA ========== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: var(--biapo-gray);
+  background: #f8fafc;
+}
+
+/* ========== BOTÕES OTIMIZADOS ========== */
+.btn-primary, .action-btn.primary {
+  background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
+  border: 1px solid var(--biapo-red);
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.btn-primary:hover, .action-btn.primary:hover {
+  background: linear-gradient(135deg, var(--biapo-red-dark) 0%, var(--biapo-red) 100%);
+  border-color: var(--biapo-red-dark);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========== SISTEMA DE LOGIN OTIMIZADO ========== */
+#loginScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.login-container {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-logo {
+  height: 80px;
+  width: auto;
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-md);
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--biapo-gray);
+  margin-bottom: var(--spacing-sm);
+}
+
+.login-subtitle {
+  color: var(--biapo-gray-lighter);
+  margin-bottom: var(--spacing-xl);
+  font-size: 14px;
+}
+
+/* ========== FORMULÁRIOS OTIMIZADOS ========== */
+.form-group {
+  margin-bottom: var(--spacing-lg);
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  color: var(--biapo-gray);
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--biapo-red);
+  box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+}
+
+/* ========== HEADER OTIMIZADO ========== */
+.header {
+  background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
+  color: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.logo-biapo {
+  height: 50px;
+  width: auto;
+  background: white;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-md);
+}
+
+.header h1 {
+  color: white;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.header p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 4px 0 0 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.user-info-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+/* ========== AÇÕES PRINCIPAIS OTIMIZADAS ========== */
+.main-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-lg);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.action-card {
+  padding: var(--spacing-lg);
+  border: 2px solid #e5e7eb;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.5s;
+}
+
+.action-card:hover::before {
+  left: 100%;
+}
+
+.action-card:hover {
+  border-color: var(--biapo-red);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.action-card.primary {
+  background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
+  color: white;
+  border-color: var(--biapo-red);
+}
+
+.action-card.primary:hover {
+  background: linear-gradient(135deg, var(--biapo-red-dark) 0%, var(--biapo-red) 100%);
+  border-color: var(--biapo-red-dark);
+}
+
+.action-icon {
+  font-size: 32px;
+  margin-bottom: var(--spacing-sm);
+  display: block;
+}
+
+.action-title {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.action-desc {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* ========== CARD SYSTEM OTIMIZADO ========== */
+.card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+  transition: box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card h3 {
+  background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%);
+  color: white;
+  margin: 0;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-content {
+  padding: var(--spacing-lg);
+}
+
+/* ========== NOTIFICAÇÕES OTIMIZADAS ========== */
+.notification {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  background: white;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  border-left: 4px solid var(--biapo-red);
+  transform: translateX(100%);
+  transition: transform var(--transition-medium);
+}
+
+.notification.show {
+  transform: translateX(0);
+}
+
+.notification.success {
+  border-left-color: var(--accent-green);
+}
+
+.notification.error {
+  border-left-color: #ef4444;
+}
+
+.notification.warning {
+  border-left-color: var(--accent-yellow);
+}
+
+/* ========== MODAL OTIMIZADO ========== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--radius-lg);
+  max-width: 650px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== LOADING STATES ========== */
+.loading {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ========== UTILIDADES ========== */
+.hidden { display: none !important; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ========== RESPONSIVIDADE OTIMIZADA ========== */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+  }
+  
+  .header-left {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .main-actions {
+    grid-template-columns: 1fr;
+    padding: var(--spacing-md);
+  }
+  
+  .login-container {
+    margin: var(--spacing-lg);
+    padding: var(--spacing-lg);
+  }
+  
+  .modal-content {
+    width: 95vw;
+    margin: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 20px;
+  }
+  
+  .action-card {
+    padding: var(--spacing-md);
+  }
+  
+  .action-icon {
+    font-size: 24px;
+  }
+}
+
+/* ========== PERFORMANCE OPTIMIZATIONS ========== */
+.calendar, .eventos-lista {
+  contain: layout;
+  will-change: transform;
+}
+
+.action-card, .card {
+  contain: layout style;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --biapo-gray: #f7fafc;
+    --biapo-gray-light: #e2e8f0;
+    --biapo-gray-lighter: #cbd5e0;
+  }
+  
+  body {
+    background: #1a202c;
+    color: var(--biapo-gray);
+  }
+  
+  .card {
+    background: #2d3748;
+  }
+}
+
+/* Import outros CSS files */
+@import url('./components.css');
+@import url('./calendar.css');
+
+/* Print styles */
+@media print {
+  .header-right, .main-actions, .notification {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+}

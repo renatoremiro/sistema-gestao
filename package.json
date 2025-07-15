@@ -1,7 +1,48 @@
 {
-  "name": "sistema-gestao",
-  "version": "1.0.0",
+  "name": "sistema-gestao-biapo-optimized",
+  "version": "8.12.1-optimized",
+  "description": "Sistema de Gestão BIAPO - Versão Otimizada Production-Ready",
+  "main": "dist/app.min.js",
   "scripts": {
-    "test": "node tests/helpers.test.js && node tests/auth.test.js && node tests/calendar.test.js && node tests/events.test.js && node tests/tasks.test.js && node tests/persistence.test.js && node tests/login-keydown.test.js && node tests/notifications-dependency.test.js"
-  }
+    "build": "webpack --mode=production",
+    "build:dev": "webpack --mode=development",
+    "watch": "webpack --mode=development --watch",
+    "serve": "webpack serve --mode=development --open",
+    "analyze": "webpack-bundle-analyzer dist/app.*.min.js",
+    "clean": "rimraf dist",
+    "test:performance": "node scripts/performance-test.js",
+    "deploy:build": "npm run clean && npm run build && npm run test:performance",
+    "deploy:final": "node scripts/final-deploy.js",
+    "deploy": "npm run deploy:build && npm run deploy:final"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "@babel/plugin-proposal-class-properties": "^7.18.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "css-minimizer-webpack-plugin": "^5.0.0",
+    "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.7.0",
+    "rimraf": "^5.0.0",
+    "terser-webpack-plugin": "^5.3.0",
+    "webpack": "^5.88.0",
+    "webpack-bundle-analyzer": "^4.9.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.0"
+  },
+  "dependencies": {
+    "lodash.debounce": "^4.0.8",
+    "idb": "^7.1.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }
