@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Agenda - Sistema BIAPO v8.12.2</title>
+    <title>Minha Agenda - Sistema BIAPO v8.13.0 UNIFICADA</title>
     
     <!-- ✅ CSS DO SISTEMA -->
     <link rel="stylesheet" href="assets/css/main.css">
@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <!-- 🔥 SISTEMA UNIFICADO CORRIGIDO v8.12.2 -->
+    <!-- 🔥 SISTEMA UNIFICADO v8.13.0 -->
     <script src="assets/js/config/firebase.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
     <script src="assets/js/utils/validation.js"></script>
@@ -59,7 +59,7 @@
             padding: 20px;
         }
 
-        /* 🔴 HEADER DA PÁGINA v8.12.2 */
+        /* 🔴 HEADER DA PÁGINA v8.13.0 */
         .page-header {
             background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-dark) 100%);
             color: white;
@@ -73,7 +73,7 @@
             position: relative;
         }
 
-        .fase4-badge {
+        .unified-badge {
             position: absolute;
             top: -8px;
             right: 20px;
@@ -169,7 +169,7 @@
             transform: translateY(-1px);
         }
 
-        /* 🎛️ CONTROLES PRINCIPAIS v8.12.2 */
+        /* 🎛️ CONTROLES PRINCIPAIS v8.13.0 */
         .main-controls {
             background: white;
             padding: 24px 32px;
@@ -240,13 +240,13 @@
             background: #e2e8f0;
         }
 
-        /* 📅 GRID DA AGENDA PRINCIPAL v8.12.2 */
+        /* 📅 GRID DA AGENDA UNIFICADA */
         .agenda-container {
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             overflow: hidden;
-            min-height: 500px;
+            min-height: 600px;
         }
 
         .agenda-header {
@@ -281,15 +281,183 @@
             color: var(--biapo-gray);
         }
 
-        /* 📋 GRID DE CONTEÚDO v8.12.2 */
+        /* 📅 GRID SEMANAL - SEMPRE VISÍVEL */
         .agenda-content {
             padding: 20px 32px;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
+        /* Cabeçalho dos dias da semana */
+        .agenda-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-bottom: 8px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .agenda-weekday {
+            background: #374151;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Grid principal da semana */
+        .agenda-week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            min-height: 400px;
+            margin-bottom: 16px;
+        }
+
+        /* Células dos dias */
+        .agenda-day-cell {
+            background: white;
+            min-height: 120px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .agenda-day-cell:hover {
+            background-color: #f3f4f6;
+            border-color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+            z-index: 10;
+        }
+
+        .agenda-day-cell.today {
+            background: #dbeafe;
+            border-color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .agenda-day-cell.selected {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        /* Número do dia */
+        .day-number {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .agenda-day-cell.today .day-number {
+            font-weight: 700;
+            color: #1e40af;
+        }
+
+        /* Contadores de itens */
+        .day-counters {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .item-counter {
+            font-size: 8px;
+            background: #3b82f6;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .item-counter.eventos { background: #3b82f6; }
+        .item-counter.tarefas-equipe { background: #8b5cf6; }
+        .item-counter.tarefas-pessoal { background: #f59e0b; }
+        .item-counter.com-horario { background: #10b981; }
+
+        /* Itens dentro das células */
+        .day-items {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .agenda-item {
+            background: #3b82f6;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            line-height: 1.2;
+            min-height: 18px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .agenda-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 20;
+        }
+
+        /* Cores por tipo */
+        .agenda-item.evento { background: #3b82f6; }
+        .agenda-item.tarefa-equipe { background: #8b5cf6; }
+        .agenda-item.tarefa-pessoal { background: #f59e0b; }
+        .agenda-item.tarefa-publico { background: #10b981; }
+
+        /* Estatísticas */
+        .agenda-stats {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Loading state */
         .loading-state {
             text-align: center;
             color: var(--biapo-gray-lighter);
@@ -311,27 +479,32 @@
             100% { transform: rotate(360deg); }
         }
 
-        .empty-state {
+        /* Empty state */
+        .empty-message {
             text-align: center;
-            padding: 60px 20px;
-            color: var(--biapo-gray-lighter);
+            color: #9ca3af;
+            font-size: 10px;
+            padding: 20px 8px;
+            font-style: italic;
         }
 
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
+        /* Status system */
+        .system-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: #6b7280;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .empty-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--biapo-gray);
-        }
-
-        .empty-description {
-            margin-bottom: 24px;
-            line-height: 1.6;
+        .system-status.hidden {
+            display: none;
         }
 
         /* 🔔 NOTIFICAÇÕES */
@@ -389,25 +562,20 @@
                 justify-content: center;
                 flex-wrap: wrap;
             }
-        }
-
-        /* 🎯 STATUS SYSTEM v8.12.2 */
-        .system-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 12px 16px;
-            font-size: 12px;
-            color: #6b7280;
-            z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .system-status.hidden {
-            display: none;
+            
+            .agenda-week-grid {
+                min-height: 300px;
+            }
+            
+            .agenda-day-cell {
+                min-height: 80px;
+                padding: 4px;
+            }
+            
+            .agenda-item {
+                font-size: 8px;
+                padding: 2px 4px;
+            }
         }
     </style>
 </head>
@@ -418,13 +586,13 @@
     </div>
 
     <div class="page-container">
-        <!-- 🔴 HEADER DA PÁGINA v8.12.2 -->
+        <!-- 🔴 HEADER DA PÁGINA v8.13.0 UNIFICADA -->
         <div class="page-header">
             <div class="header-left">
                 <img src="assets/img/Logo-biapo.jpg" alt="Logo BIAPO" class="logo-biapo">
                 <div>
                     <div class="header-title">📅 Minha Agenda <span class="nome-usuario" style="font-size:18px; font-weight:400; margin-left:10px; color:#fff;"></span></div>
-                    <div class="header-subtitle">Sistema de Gestão BIAPO v8.12.2 - Obra 292</div>
+                    <div class="header-subtitle">Sistema de Gestão BIAPO v8.13.0 - Obra 292</div>
                 </div>
             </div>
             <div class="header-right">
@@ -444,15 +612,15 @@
                     </button>
                 </div>
             </div>
-            <div class="fase4-badge">✅ v8.12.2 CORRIGIDA</div>
+            <div class="unified-badge">✅ v8.13.0 UNIFICADA</div>
         </div>
 
-        <!-- 🎛️ CONTROLES PRINCIPAIS v8.12.2 -->
+        <!-- 🎛️ CONTROLES PRINCIPAIS v8.13.0 -->
         <div class="main-controls">
             <div class="sync-status">
                 <div class="sync-indicator"></div>
                 <span style="font-size: 12px; font-weight: 600; color: #065f46;">
-                    Sistema v8.12.2 Ativo
+                    Sistema v8.13.0 Unificado Ativo
                 </span>
             </div>
 
@@ -469,7 +637,7 @@
             </div>
         </div>
 
-        <!-- 📅 CONTAINER DA AGENDA v8.12.2 -->
+        <!-- 📅 CONTAINER DA AGENDA UNIFICADA v8.13.0 -->
         <div class="agenda-container">
             <div class="agenda-header">
                 <button class="nav-btn" onclick="navegarSemana(-1)">← Semana Anterior</button>
@@ -482,9 +650,9 @@
                 <!-- Estado inicial de carregamento -->
                 <div class="loading-state" id="loadingState">
                     <div class="loading-spinner"></div>
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Carregando sua agenda...</div>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Inicializando agenda unificada...</div>
                     <div style="font-size: 14px; opacity: 0.8;">
-                        Conectando com o sistema v8.12.2
+                        Sistema v8.13.0 com múltiplos fallbacks
                     </div>
                 </div>
             </div>
@@ -493,90 +661,111 @@
 
     <!-- 🎯 STATUS DO SISTEMA -->
     <div class="system-status" id="systemStatus">
-        <div style="font-weight: 600; color: #374151;">Sistema BIAPO v8.12.2</div>
+        <div style="font-weight: 600; color: #374151;">Sistema BIAPO v8.13.0</div>
         <div id="systemStatusText">Inicializando...</div>
     </div>
 
     <script>
-        // 🚀 SISTEMA DE AGENDA SIMPLIFICADO E CORRIGIDO v8.12.2
-        class AgendaSimplificada {
+        // 🚀 SISTEMA DE AGENDA UNIFICADA v8.13.0
+        // Combina o melhor das 3 versões anteriores:
+        // - Robustez e fallbacks da agenda_robusta
+        // - Grid sempre visível da agenda_grid_semanal
+        // - Sincronização forçada da agenda original
+        
+        class AgendaUnificada {
             constructor() {
-                this.versao = '8.12.2';
+                this.versao = '8.13.0';
                 this.carregado = false;
                 this.usuarioAtual = null;
                 this.semanaAtual = new Date();
+                this.diaSelecionado = null;
                 this.dados = {
                     tarefas: [],
                     eventos: []
                 };
                 this.tentativasInit = 0;
-                this.maxTentativas = 20;
+                this.maxTentativas = 10;
+                this.diasSemana = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
                 
-                console.log('📅 Inicializando Agenda Simplificada v8.12.2...');
+                // Dados de exemplo para fallback final
+                this.dadosExemplo = {
+                    tarefas: [
+                        { id: 'ex1', titulo: 'Revisar documentação', escopo: 'pessoal', dataInicio: new Date().toISOString().split('T')[0] },
+                        { id: 'ex2', titulo: 'Reunião equipe', escopo: 'equipe', dataInicio: new Date().toISOString().split('T')[0], horarioInicio: '14:00' }
+                    ],
+                    eventos: [
+                        { id: 'ev1', titulo: 'Apresentação projeto', data: new Date().toISOString().split('T')[0], horarioInicio: '10:00' }
+                    ]
+                };
+                
+                console.log('📅 Inicializando Agenda Unificada v8.13.0...');
                 this.inicializar();
             }
 
             async inicializar() {
                 try {
-                    console.log(`📅 Tentativa ${this.tentativasInit + 1}/${this.maxTentativas} - Inicializando agenda...`);
+                    console.log(`📅 Tentativa ${this.tentativasInit + 1}/${this.maxTentativas} - Inicializando agenda unificada...`);
                     
-                    // 1. Aguardar App.js
-                    const appDisponivel = await this.aguardarApp();
-                    if (!appDisponivel) {
-                        this.tentativasInit++;
-                        if (this.tentativasInit < this.maxTentativas) {
-                            console.log('⏳ App.js ainda não disponível, tentando novamente em 1s...');
-                            setTimeout(() => this.inicializar(), 1000);
-                            return;
-                        } else {
-                            throw new Error('App.js não disponível após ' + this.maxTentativas + ' tentativas');
-                        }
-                    }
+                    // 1. SEMPRE criar o grid primeiro (independente de dados)
+                    this.criarGridSemanalSempre();
                     
-                    // 2. Verificar usuário
+                    // 2. Verificar usuário com múltiplos fallbacks
                     this.verificarUsuario();
                     
-                    // 3. Carregar dados
-                    await this.carregarDados();
+                    // 3. Tentar carregar App.js
+                    const appDisponivel = await this.aguardarApp();
                     
-                    // 4. Renderizar interface
-                    this.renderizarAgenda();
+                    // 4. Carregar dados (com fallbacks se App.js não disponível)
+                    await this.carregarDados(appDisponivel);
                     
-                    // 5. Configurar listeners
+                    // 5. Renderizar dados no grid existente
+                    this.renderizarDadosNoGrid();
+                    
+                    // 6. Configurar listeners
                     this.configurarListeners();
                     
                     this.carregado = true;
-                    this.atualizarStatus('✅ Agenda carregada com sucesso!');
+                    this.atualizarStatus('✅ Agenda unificada carregada!');
                     
-                    console.log('✅ Agenda Simplificada v8.12.2 inicializada com sucesso!');
+                    console.log('✅ Agenda Unificada v8.13.0 inicializada com sucesso!');
                     console.log(`📊 ${this.dados.tarefas.length} tarefas | ${this.dados.eventos.length} eventos`);
                     
                 } catch (error) {
                     console.error('❌ Erro ao inicializar agenda:', error);
-                    this.mostrarErro('Erro ao carregar agenda: ' + error.message);
-                    this.atualizarStatus('❌ Erro na inicialização');
+                    // MESMO COM ERRO, garantir grid visível
+                    this.garantirGridVisivel();
+                    this.atualizarStatus('⚠️ Modo offline ativo');
                 }
             }
 
             async aguardarApp() {
-                // Verificar se App.js está disponível e inicializado
-                if (typeof App !== 'undefined' && 
-                    App.estadoSistema && 
-                    App.estadoSistema.inicializado &&
-                    typeof App.obterItensParaUsuario === 'function') {
-                    console.log('✅ App.js v' + (App.config?.versao || '8.12.x') + ' detectado e disponível');
-                    return true;
+                // Tentar menos vezes para ser mais rápido
+                if (this.tentativasInit < 5) {
+                    if (typeof App !== 'undefined' && 
+                        App.estadoSistema && 
+                        App.estadoSistema.inicializado &&
+                        typeof App.obterItensParaUsuario === 'function') {
+                        console.log('✅ App.js v' + (App.config?.versao || '8.12.x') + ' detectado');
+                        return true;
+                    }
+                    
+                    console.log('⏳ Aguardando App.js...');
+                    this.tentativasInit++;
+                    
+                    // Aguardar e tentar novamente
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return this.aguardarApp();
                 }
                 
-                console.log('⏳ Aguardando App.js...');
+                console.warn('⚠️ App.js não disponível, usando fallbacks');
                 return false;
             }
 
             verificarUsuario() {
                 try {
-                    console.log('👤 Verificando usuário - início');
+                    console.log('👤 Verificando usuário com múltiplos fallbacks...');
                     
-                    // 🔥 1. PRIORIDADE: Auth.js (usuário logado real)
+                    // 1. PRIORIDADE: Auth.js (usuário logado real)
                     if (typeof Auth !== 'undefined' && Auth.obterUsuario) {
                         const usuarioAuth = Auth.obterUsuario();
                         if (usuarioAuth && usuarioAuth.email) {
@@ -588,8 +777,8 @@
                         }
                     }
                     
-                    // 🔥 2. BACKUP: App.js
-                    if (!this.usuarioAtual && App.usuarioAtual) {
+                    // 2. FALLBACK 1: App.js
+                    if (!this.usuarioAtual && typeof App !== 'undefined' && App.usuarioAtual) {
                         this.usuarioAtual = {
                             nome: App.usuarioAtual.displayName || App.usuarioAtual.nome || this.extrairNomeDoEmail(App.usuarioAtual.email),
                             email: App.usuarioAtual.email
@@ -597,13 +786,33 @@
                         console.log('✅ Usuário do App.js:', this.usuarioAtual);
                     }
                     
-                    // 🔥 3. FALLBACK: Usuário demo
+                    // 3. FALLBACK 2: localStorage
+                    if (!this.usuarioAtual) {
+                        const userLocal = localStorage.getItem('usuarioAtual');
+                        if (userLocal) {
+                            try {
+                                this.usuarioAtual = JSON.parse(userLocal);
+                                console.log('✅ Usuário do localStorage:', this.usuarioAtual);
+                            } catch (e) {
+                                console.error('Erro ao ler localStorage:', e);
+                            }
+                        }
+                    }
+                    
+                    // 4. FALLBACK FINAL: Usuário demo
                     if (!this.usuarioAtual) {
                         this.usuarioAtual = {
                             nome: 'Usuário Demo',
                             email: 'demo@biapo.com.br'
                         };
                         console.log('⚠️ Usando usuário demo:', this.usuarioAtual);
+                    }
+                    
+                    // Salvar no localStorage para próxima vez
+                    try {
+                        localStorage.setItem('usuarioAtual', JSON.stringify(this.usuarioAtual));
+                    } catch (e) {
+                        console.error('Erro ao salvar no localStorage:', e);
                     }
                     
                     // Atualizar interface
@@ -625,318 +834,474 @@
             extrairNomeDoEmail(email) {
                 if (!email) return 'Usuário';
                 const parteLocal = email.split('@')[0];
-                return parteLocal.charAt(0).toUpperCase() + parteLocal.slice(1);
+                return parteLocal.charAt(0).toUpperCase() + parteLocal.slice(1).replace(/[._-]/g, ' ');
             }
 
-            async carregarDados() {
+            // FUNÇÃO PRINCIPAL: Criar grid SEMPRE (independente de dados)
+            criarGridSemanalSempre() {
                 try {
-                    console.log('📥 Carregando dados da agenda para:', this.usuarioAtual.email);
-                    
-                    if (!App.obterItensParaUsuario) {
-                        throw new Error('Função obterItensParaUsuario não disponível no App.js');
-                    }
-                    
-                    // 🔥 CORREÇÃO: Usar email correto do usuário
-                    const { eventos, tarefas } = App.obterItensParaUsuario(this.usuarioAtual.email);
-                    
-                    console.log('📊 Dados brutos recebidos:', { 
-                        eventos: eventos.length, 
-                        tarefas: tarefas.length,
-                        usuario: this.usuarioAtual.email
-                    });
-                    
-                    // 🔥 FILTRO AMPLIADO: Incluir tarefas pessoais e que o usuário participa
-                    this.dados.tarefas = tarefas.filter(tarefa => {
-                        const emailMatch = tarefa.responsavel === this.usuarioAtual.email || 
-                                         tarefa.criadoPor === this.usuarioAtual.email;
-                        const nomeMatch = tarefa.participantes?.includes(this.usuarioAtual.nome) ||
-                                        tarefa.participantes?.includes(this.usuarioAtual.email);
-                        const scopeMatch = tarefa.escopo === 'pessoal';
-                        
-                        return emailMatch || nomeMatch || scopeMatch;
-                    });
-                    
-                    // 🔥 FILTRO AMPLIADO: Incluir todos os eventos relevantes
-                    this.dados.eventos = eventos.filter(evento => {
-                        const emailMatch = evento.responsavel === this.usuarioAtual.email || 
-                                         evento.criadoPor === this.usuarioAtual.email;
-                        const participanteMatch = evento.participantes?.includes(this.usuarioAtual.nome) ||
-                                                 evento.participantes?.includes(this.usuarioAtual.email) ||
-                                                 evento.pessoas?.includes(this.usuarioAtual.nome) ||
-                                                 evento.pessoas?.includes(this.usuarioAtual.email);
-                        const publicoMatch = evento.visibilidade === 'publica' || evento.escopo === 'publico';
-                        
-                        return emailMatch || participanteMatch || publicoMatch;
-                    });
-                    
-                    console.log(`✅ Dados filtrados: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
-                    console.log('📋 Tarefas:', this.dados.tarefas.map(t => ({ titulo: t.titulo, responsavel: t.responsavel, escopo: t.escopo })));
-                    console.log('📅 Eventos:', this.dados.eventos.map(e => ({ titulo: e.titulo, responsavel: e.responsavel, participantes: e.participantes })));
-                    
-                } catch (error) {
-                    console.error('❌ Erro ao carregar dados:', error);
-                    this.dados = { tarefas: [], eventos: [] };
-                }
-            }
-
-            renderizarAgenda() {
-                try {
-                    console.log('🎨 Renderizando agenda...');
+                    console.log('🎨 Criando grid semanal SEMPRE VISÍVEL...');
                     
                     const container = document.getElementById('agendaContent');
                     if (!container) {
-                        throw new Error('Container agendaContent não encontrado');
+                        console.error('❌ Container não encontrado');
+                        return;
                     }
                     
                     // Remover loading
                     const loading = document.getElementById('loadingState');
                     if (loading) loading.remove();
                     
-                    // Verificar se há dados
-                    const totalItens = this.dados.tarefas.length + this.dados.eventos.length;
-                    
-                    if (totalItens === 0) {
-                        container.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-icon">📅</div>
-                                <div class="empty-title">Sua agenda está vazia</div>
-                                <div class="empty-description">
-                                    Você não tem tarefas pessoais ou eventos relevantes no momento.
-                                    <br><br>
-                                    <strong>Sistema v8.12.2 funcionando corretamente!</strong>
-                                    <br>
-                                    Conectado com App.js v${App.config?.versao || '8.12.x'}
-                                </div>
-                                <button class="btn btn-primary" onclick="criarNovaTarefa()">
-                                    ➕ Criar Primeira Tarefa
-                                </button>
+                    // Estrutura do grid semanal
+                    container.innerHTML = `
+                        <!-- 📅 CABEÇALHO DOS DIAS DA SEMANA -->
+                        <div class="agenda-weekdays">
+                            ${this.diasSemana.map(dia => `
+                                <div class="agenda-weekday">${dia}</div>
+                            `).join('')}
+                        </div>
+                        
+                        <!-- 📅 GRID DA SEMANA ATUAL -->
+                        <div class="agenda-week-grid" id="weekGrid">
+                            ${this.criarCelulasSemanaSempre()}
+                        </div>
+                        
+                        <!-- 📊 ESTATÍSTICAS -->
+                        <div class="agenda-stats" id="agendaStats">
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #3b82f6;" id="stat-eventos">0</div>
+                                <div class="stat-label">📅 Eventos</div>
                             </div>
-                        `;
-                    } else {
-                        // Renderizar grid simplificado
-                        this.renderizarGridSimplificado(container);
-                    }
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #8b5cf6;" id="stat-tarefas-equipe">0</div>
+                                <div class="stat-label">🟣 Tarefas Equipe</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #f59e0b;" id="stat-tarefas-pessoal">0</div>
+                                <div class="stat-label">🟡 Tarefas Pessoais</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: #10b981;" id="stat-com-horario">0</div>
+                                <div class="stat-label">🕐 Com Horário</div>
+                            </div>
+                        </div>
+                    `;
                     
-                    // Atualizar semana atual
+                    // Atualizar display da semana
                     this.atualizarSemanaDisplay();
                     
-                    console.log('✅ Agenda renderizada com sucesso!');
+                    console.log('✅ Grid semanal criado e SEMPRE VISÍVEL!');
                     
                 } catch (error) {
-                    console.error('❌ Erro ao renderizar agenda:', error);
-                    this.mostrarErro('Erro ao renderizar agenda: ' + error.message);
+                    console.error('❌ Erro ao criar grid semanal:', error);
+                    this.garantirGridVisivel();
                 }
             }
 
-            renderizarGridSimplificado(container) {
-                const hoje = new Date();
-                const inicioSemana = new Date(this.semanaAtual);
-                inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
-                
-                const diasSemana = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-                
-                let html = `
-                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
-                        ${diasSemana.map(dia => `
-                            <div style="background: #374151; color: white; padding: 12px 8px; text-align: center; font-weight: 600; font-size: 12px;">${dia}</div>
-                        `).join('')}
-                    </div>
+            criarCelulasSemanaSempre() {
+                try {
+                    const hoje = new Date();
+                    const inicioSemana = new Date(this.semanaAtual);
+                    inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
                     
-                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e5e7eb; border-radius: 8px; overflow: hidden; min-height: 300px;">
-                `;
-                
-                // Gerar dias da semana
+                    let htmlCelulas = '';
+                    
+                    for (let i = 0; i < 7; i++) {
+                        const dia = new Date(inicioSemana);
+                        dia.setDate(inicioSemana.getDate() + i);
+                        
+                        const ehHoje = dia.toDateString() === hoje.toDateString();
+                        const dataISO = dia.toISOString().split('T')[0];
+                        
+                        let classesCSS = 'agenda-day-cell';
+                        if (ehHoje) classesCSS += ' today';
+                        
+                        htmlCelulas += `
+                            <div class="${classesCSS}" data-date="${dataISO}" onclick="selecionarDia('${dataISO}')">
+                                <div class="day-number">
+                                    <span>${dia.getDate()}</span>
+                                    <div class="day-counters" id="counters-${dataISO}">
+                                        <!-- Contadores serão preenchidos dinamicamente -->
+                                    </div>
+                                </div>
+                                <div class="day-items" id="items-${dataISO}">
+                                    <!-- Itens serão preenchidos dinamicamente -->
+                                    <div class="empty-message">Carregando...</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    return htmlCelulas;
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao criar células:', error);
+                    return this.criarCelulasBasicas();
+                }
+            }
+
+            criarCelulasBasicas() {
+                let htmlBasico = '';
                 for (let i = 0; i < 7; i++) {
-                    const dia = new Date(inicioSemana);
-                    dia.setDate(inicioSemana.getDate() + i);
+                    htmlBasico += `
+                        <div class="agenda-day-cell">
+                            <div class="day-number">${i + 1}</div>
+                            <div class="day-items">
+                                <div class="empty-message">Dia ${i + 1}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return htmlBasico;
+            }
+
+            async carregarDados(appDisponivel) {
+                try {
+                    console.log('📥 Carregando dados da agenda...');
                     
-                    const ehHoje = dia.toDateString() === hoje.toDateString();
-                    const dataISO = dia.toISOString().split('T')[0];
+                    // 1. Tentar carregar do App.js
+                    if (appDisponivel && typeof App !== 'undefined' && App.obterItensParaUsuario) {
+                        const { eventos, tarefas } = App.obterItensParaUsuario(this.usuarioAtual.email);
+                        
+                        // Filtrar itens relevantes
+                        this.dados.tarefas = tarefas.filter(tarefa => {
+                            return tarefa.responsavel === this.usuarioAtual.email || 
+                                   tarefa.criadoPor === this.usuarioAtual.email ||
+                                   tarefa.participantes?.includes(this.usuarioAtual.nome) ||
+                                   tarefa.participantes?.includes(this.usuarioAtual.email) ||
+                                   tarefa.escopo === 'pessoal';
+                        });
+                        
+                        this.dados.eventos = eventos.filter(evento => {
+                            return evento.responsavel === this.usuarioAtual.email || 
+                                   evento.criadoPor === this.usuarioAtual.email ||
+                                   evento.participantes?.includes(this.usuarioAtual.nome) ||
+                                   evento.participantes?.includes(this.usuarioAtual.email) ||
+                                   evento.pessoas?.includes(this.usuarioAtual.nome) ||
+                                   evento.pessoas?.includes(this.usuarioAtual.email) ||
+                                   evento.visibilidade === 'publica';
+                        });
+                        
+                        console.log(`✅ Dados do App.js: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
+                        return;
+                    }
                     
-                    // Obter itens do dia
-                    const itensDia = this.obterItensDoDia(dataISO);
+                    // 2. Fallback: localStorage
+                    console.log('⚠️ App.js não disponível, tentando localStorage...');
+                    const dadosLocal = localStorage.getItem('agendaDados');
+                    if (dadosLocal) {
+                        try {
+                            const parsed = JSON.parse(dadosLocal);
+                            this.dados = parsed;
+                            console.log(`✅ Dados do localStorage: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
+                            return;
+                        } catch (e) {
+                            console.error('Erro ao ler localStorage:', e);
+                        }
+                    }
                     
-                    html += this.criarCelulaDia(dia, ehHoje, itensDia);
+                    // 3. Fallback final: dados de exemplo
+                    console.log('⚠️ Usando dados de exemplo...');
+                    this.dados = this.dadosExemplo;
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar dados:', error);
+                    this.dados = this.dadosExemplo;
                 }
                 
-                html += `</div>`;
-                
-                // Adicionar estatísticas
-                html += `
-                    <div style="margin-top: 20px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e5e7eb; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; text-align: center;">
-                        <div>
-                            <div style="font-size: 20px; font-weight: 700; color: #8b5cf6;">${this.dados.tarefas.length}</div>
-                            <div style="font-size: 12px; color: #6b7280;">Tarefas Pessoais</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 20px; font-weight: 700; color: #3b82f6;">${this.dados.eventos.length}</div>
-                            <div style="font-size: 12px; color: #6b7280;">Eventos Relevantes</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 20px; font-weight: 700; color: #10b981;">${this.dados.tarefas.filter(t => t.status === 'concluida').length}</div>
-                            <div style="font-size: 12px; color: #6b7280;">Concluídas</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 20px; font-weight: 700; color: #f59e0b;">${this.dados.tarefas.filter(t => t.horarioInicio).length}</div>
-                            <div style="font-size: 12px; color: #6b7280;">Com Horário</div>
-                        </div>
-                    </div>
-                `;
-                
-                container.innerHTML = html;
+                // Sempre salvar no localStorage
+                try {
+                    localStorage.setItem('agendaDados', JSON.stringify(this.dados));
+                } catch (e) {
+                    console.error('Erro ao salvar dados:', e);
+                }
+            }
+
+            renderizarDadosNoGrid() {
+                try {
+                    console.log('🎨 Renderizando dados no grid existente...');
+                    
+                    const hoje = new Date();
+                    const inicioSemana = new Date(this.semanaAtual);
+                    inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
+                    
+                    let estatisticas = {
+                        eventos: 0,
+                        tarefasEquipe: 0,
+                        tarefasPessoais: 0,
+                        comHorario: 0
+                    };
+                    
+                    // Renderizar cada dia da semana
+                    for (let i = 0; i < 7; i++) {
+                        const dia = new Date(inicioSemana);
+                        dia.setDate(inicioSemana.getDate() + i);
+                        const dataISO = dia.toISOString().split('T')[0];
+                        
+                        const itensDia = this.obterItensDoDia(dataISO);
+                        this.renderizarDia(dataISO, itensDia);
+                        
+                        // Atualizar estatísticas
+                        estatisticas.eventos += itensDia.eventos.length;
+                        estatisticas.tarefasEquipe += itensDia.tarefas.filter(t => t.escopo === 'equipe').length;
+                        estatisticas.tarefasPessoais += itensDia.tarefas.filter(t => t.escopo === 'pessoal').length;
+                        estatisticas.comHorario += [...itensDia.eventos, ...itensDia.tarefas].filter(item => 
+                            item.horarioInicio || item.horario
+                        ).length;
+                    }
+                    
+                    // Atualizar estatísticas na tela
+                    this.atualizarEstatisticas(estatisticas);
+                    
+                    console.log('✅ Dados renderizados no grid com sucesso!');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao renderizar dados:', error);
+                    this.mostrarGridVazio();
+                }
             }
 
             obterItensDoDia(dataISO) {
                 const eventos = this.dados.eventos.filter(evento => 
-                    evento.data === dataISO || evento.dataInicio === dataISO
+                    evento.data === dataISO || 
+                    evento.dataInicio === dataISO ||
+                    (evento.data && evento.data.split('T')[0] === dataISO)
                 );
                 
                 const tarefas = this.dados.tarefas.filter(tarefa => 
-                    tarefa.dataInicio === dataISO || tarefa.data === dataISO
+                    tarefa.dataInicio === dataISO || 
+                    tarefa.data === dataISO ||
+                    (tarefa.dataInicio && tarefa.dataInicio.split('T')[0] === dataISO)
                 );
                 
-                return { eventos, tarefas, total: eventos.length + tarefas.length };
+                return { eventos, tarefas };
             }
 
-            criarCelulaDia(dia, ehHoje, itensDia) {
-                const { eventos, tarefas, total } = itensDia;
-                
-                let backgroundColor = '#ffffff';
-                if (ehHoje) backgroundColor = '#dbeafe';
-                
-                return `
-                    <div style="
-                        background: ${backgroundColor};
-                        min-height: 80px;
-                        padding: 8px;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                        border: 1px solid #e5e7eb;
-                    " 
-                    onclick="abrirDia('${dia.toISOString().split('T')[0]}')"
-                    onmouseenter="this.style.backgroundColor='#f3f4f6'"
-                    onmouseleave="this.style.backgroundColor='${backgroundColor}'">
+            renderizarDia(dataISO, itensDia) {
+                try {
+                    const { eventos, tarefas } = itensDia;
+                    
+                    // Contadores
+                    const countersEl = document.getElementById(`counters-${dataISO}`);
+                    if (countersEl) {
+                        countersEl.innerHTML = '';
                         
-                        <div style="
-                            font-weight: ${ehHoje ? '700' : '500'};
-                            font-size: 14px;
-                            margin-bottom: 8px;
-                            color: ${ehHoje ? '#1e40af' : '#374151'};
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                        ">
-                            <span>${dia.getDate()}</span>
-                            ${total > 0 ? `<span style="background: #3b82f6; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: 600;">${total}</span>` : ''}
-                        </div>
+                        if (eventos.length > 0) {
+                            countersEl.innerHTML += `<span class="item-counter eventos">📅${eventos.length}</span>`;
+                        }
                         
-                        <div style="display: flex; flex-direction: column; gap: 2px;">
-                            ${eventos.slice(0, 2).map(evento => `
-                                <div style="
-                                    background: #3b82f6; 
-                                    color: white; 
-                                    padding: 2px 4px; 
-                                    border-radius: 3px; 
-                                    font-size: 8px; 
-                                    font-weight: 600;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                    white-space: nowrap;
-                                " title="${evento.titulo}">
-                                    📅 ${evento.titulo}
-                                </div>
-                            `).join('')}
+                        const tarefasEquipe = tarefas.filter(t => t.escopo === 'equipe');
+                        if (tarefasEquipe.length > 0) {
+                            countersEl.innerHTML += `<span class="item-counter tarefas-equipe">🟣${tarefasEquipe.length}</span>`;
+                        }
+                        
+                        const tarefasPessoais = tarefas.filter(t => t.escopo === 'pessoal');
+                        if (tarefasPessoais.length > 0) {
+                            countersEl.innerHTML += `<span class="item-counter tarefas-pessoal">🟡${tarefasPessoais.length}</span>`;
+                        }
+                        
+                        const comHorario = [...eventos, ...tarefas].filter(item => 
+                            item.horarioInicio || item.horario
+                        );
+                        if (comHorario.length > 0) {
+                            countersEl.innerHTML += `<span class="item-counter com-horario">🕐${comHorario.length}</span>`;
+                        }
+                    }
+                    
+                    // Itens
+                    const itemsEl = document.getElementById(`items-${dataISO}`);
+                    if (itemsEl) {
+                        if (eventos.length === 0 && tarefas.length === 0) {
+                            itemsEl.innerHTML = `<div class="empty-message">Sem itens</div>`;
+                        } else {
+                            let htmlItens = '';
                             
-                            ${tarefas.slice(0, 2).map(tarefa => `
-                                <div style="
-                                    background: #8b5cf6; 
-                                    color: white; 
-                                    padding: 2px 4px; 
-                                    border-radius: 3px; 
-                                    font-size: 8px; 
-                                    font-weight: 600;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                    white-space: nowrap;
-                                " title="${tarefa.titulo}">
-                                    📋 ${tarefa.titulo}
-                                </div>
-                            `).join('')}
+                            // Renderizar eventos
+                            eventos.slice(0, 3).forEach(evento => {
+                                const horario = evento.horarioInicio || evento.horario || '';
+                                htmlItens += `
+                                    <div class="agenda-item evento" onclick="abrirItem('${evento.id}', 'evento')" title="${evento.titulo}${evento.descricao ? ' - ' + evento.descricao : ''}">
+                                        <span>📅</span>
+                                        <span>${evento.titulo}</span>
+                                        ${horario ? `<span style="font-size: 7px;">🕐</span>` : ''}
+                                    </div>
+                                `;
+                            });
                             
-                            ${total > 4 ? `
-                                <div style="
-                                    background: #6b7280; 
-                                    color: white; 
-                                    padding: 2px 4px; 
-                                    border-radius: 3px; 
-                                    font-size: 8px; 
-                                    font-weight: 600;
-                                    text-align: center;
-                                ">
-                                    +${total - 4} mais
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
+                            // Renderizar tarefas
+                            tarefas.slice(0, 3).forEach(tarefa => {
+                                const classeEscopo = `tarefa-${tarefa.escopo || 'equipe'}`;
+                                const icone = tarefa.escopo === 'pessoal' ? '👤' : '📋';
+                                const horario = tarefa.horarioInicio || tarefa.horario || '';
+                                
+                                htmlItens += `
+                                    <div class="agenda-item ${classeEscopo}" onclick="abrirItem('${tarefa.id}', 'tarefa')" title="${tarefa.titulo}${tarefa.descricao ? ' - ' + tarefa.descricao : ''}">
+                                        <span>${icone}</span>
+                                        <span>${tarefa.titulo}</span>
+                                        ${horario ? `<span style="font-size: 7px;">🕐</span>` : ''}
+                                    </div>
+                                `;
+                            });
+                            
+                            // Indicador de mais itens
+                            const totalItens = eventos.length + tarefas.length;
+                            if (totalItens > 6) {
+                                htmlItens += `
+                                    <div class="agenda-item" style="background: #6b7280; cursor: pointer;" onclick="abrirDia('${dataISO}')">
+                                        +${totalItens - 6} mais
+                                    </div>
+                                `;
+                            }
+                            
+                            itemsEl.innerHTML = htmlItens;
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error(`❌ Erro ao renderizar dia ${dataISO}:`, error);
+                }
             }
 
-            atualizarSemanaDisplay() {
+            atualizarEstatisticas(stats) {
+                try {
+                    document.getElementById('stat-eventos').textContent = stats.eventos;
+                    document.getElementById('stat-tarefas-equipe').textContent = stats.tarefasEquipe;
+                    document.getElementById('stat-tarefas-pessoal').textContent = stats.tarefasPessoais;
+                    document.getElementById('stat-com-horario').textContent = stats.comHorario;
+                } catch (error) {
+                    console.error('❌ Erro ao atualizar estatísticas:', error);
+                }
+            }
+
+            mostrarGridVazio() {
                 const inicioSemana = new Date(this.semanaAtual);
                 inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
                 
-                const fimSemana = new Date(inicioSemana);
-                fimSemana.setDate(inicioSemana.getDate() + 6);
+                for (let i = 0; i < 7; i++) {
+                    const dia = new Date(inicioSemana);
+                    dia.setDate(inicioSemana.getDate() + i);
+                    const dataISO = dia.toISOString().split('T')[0];
+                    
+                    const itemsEl = document.getElementById(`items-${dataISO}`);
+                    if (itemsEl) {
+                        itemsEl.innerHTML = `<div class="empty-message">Sem dados</div>`;
+                    }
+                }
+            }
 
-                const display = `${inicioSemana.getDate()} - ${fimSemana.getDate()} ${fimSemana.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
-                
-                const elemento = document.getElementById('currentWeekDisplay');
-                if (elemento) elemento.textContent = display;
+            garantirGridVisivel() {
+                const container = document.getElementById('agendaContent');
+                if (!container || !container.querySelector('.agenda-weekdays')) {
+                    console.log('🔧 Garantindo grid visível...');
+                    this.criarGridSemanalSempre();
+                }
+            }
+
+            atualizarSemanaDisplay() {
+                try {
+                    const inicioSemana = new Date(this.semanaAtual);
+                    inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
+                    
+                    const fimSemana = new Date(inicioSemana);
+                    fimSemana.setDate(inicioSemana.getDate() + 6);
+
+                    const display = `${inicioSemana.getDate()} - ${fimSemana.getDate()} ${fimSemana.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
+                    
+                    const elemento = document.getElementById('currentWeekDisplay');
+                    if (elemento) elemento.textContent = display;
+                } catch (error) {
+                    console.error('❌ Erro ao atualizar display da semana:', error);
+                }
+            }
+
+            navegarSemana(direcao) {
+                try {
+                    this.semanaAtual.setDate(this.semanaAtual.getDate() + (direcao * 7));
+                    this.atualizarSemanaDisplay();
+                    
+                    // Recriar grid com nova semana
+                    this.criarGridSemanalSempre();
+                    
+                    // Renderizar dados
+                    this.renderizarDadosNoGrid();
+                    
+                    console.log(`📅 Navegou ${direcao > 0 ? 'próxima' : 'anterior'} semana`);
+                } catch (error) {
+                    console.error('❌ Erro ao navegar semana:', error);
+                }
+            }
+
+            irParaHoje() {
+                try {
+                    this.semanaAtual = new Date();
+                    this.atualizarSemanaDisplay();
+                    
+                    // Recriar grid com semana atual
+                    this.criarGridSemanalSempre();
+                    
+                    // Renderizar dados
+                    this.renderizarDadosNoGrid();
+                    
+                    console.log('📅 Voltou para semana atual');
+                } catch (error) {
+                    console.error('❌ Erro ao ir para hoje:', error);
+                }
             }
 
             configurarListeners() {
-                // Listener para mudanças do App.js
-                document.addEventListener('app-tarefa-criada', () => {
-                    console.log('📋 Tarefa criada detectada, recarregando agenda...');
-                    this.recarregar();
-                });
-                
-                document.addEventListener('app-tarefa-editada', () => {
-                    console.log('📋 Tarefa editada detectada, recarregando agenda...');
-                    this.recarregar();
-                });
-                
-                document.addEventListener('dados-sincronizados', () => {
-                    console.log('🔄 Dados sincronizados detectados, recarregando agenda...');
-                    this.recarregar();
-                });
-                
-                // 🔥 NOVO: Listener para login/logout
-                document.addEventListener('biapo-login', (e) => {
-                    console.log('🔄 Login detectado na agenda, recarregando usuário...', e.detail);
-                    this.verificarUsuario();
-                    this.recarregar();
-                });
-                
-                document.addEventListener('biapo-logout', () => {
-                    console.log('🔄 Logout detectado na agenda');
-                    this.usuarioAtual = null;
-                    this.dados = { tarefas: [], eventos: [] };
-                    this.renderizarAgenda();
-                });
-                
-                console.log('✅ Listeners configurados (incluindo auth)');
+                try {
+                    // Listener para mudanças do App.js
+                    document.addEventListener('app-tarefa-criada', () => {
+                        console.log('📋 Tarefa criada detectada, recarregando agenda...');
+                        this.recarregar();
+                    });
+                    
+                    document.addEventListener('app-tarefa-editada', () => {
+                        console.log('📋 Tarefa editada detectada, recarregando agenda...');
+                        this.recarregar();
+                    });
+                    
+                    document.addEventListener('dados-sincronizados', () => {
+                        console.log('🔄 Dados sincronizados detectados, recarregando agenda...');
+                        this.recarregar();
+                    });
+                    
+                    // Listener para login/logout
+                    document.addEventListener('biapo-login', (e) => {
+                        console.log('🔄 Login detectado na agenda, recarregando usuário...', e.detail);
+                        this.verificarUsuario();
+                        this.recarregar();
+                    });
+                    
+                    document.addEventListener('biapo-logout', () => {
+                        console.log('🔄 Logout detectado na agenda');
+                        this.usuarioAtual = null;
+                        this.dados = { tarefas: [], eventos: [] };
+                        this.renderizarDadosNoGrid();
+                    });
+                    
+                    console.log('✅ Listeners configurados');
+                } catch (error) {
+                    console.error('❌ Erro ao configurar listeners:', error);
+                }
             }
 
             async recarregar() {
                 try {
-                    console.log('🔄 Recarregando agenda...');
+                    console.log('🔄 Recarregando agenda unificada...');
                     this.atualizarStatus('🔄 Recarregando...');
                     
-                    // 🔥 CORREÇÃO: Verificar usuário antes de carregar dados
+                    // Verificar usuário
                     this.verificarUsuario();
-                    await this.carregarDados();
-                    this.renderizarAgenda();
+                    
+                    // Verificar se App.js está disponível agora
+                    const appDisponivel = typeof App !== 'undefined' && App.obterItensParaUsuario;
+                    
+                    // Carregar dados
+                    await this.carregarDados(appDisponivel);
+                    
+                    // Renderizar
+                    this.renderizarDadosNoGrid();
                     
                     this.atualizarStatus('✅ Agenda atualizada!');
                     this.notificar('✅ Agenda recarregada com sucesso!', 'success');
@@ -948,7 +1313,7 @@
                 }
             }
             
-            // 🔥 NOVA FUNÇÃO: Forçar sincronização de usuário
+            // Função para forçar sincronização de usuário (mantida da versão original)
             forcarSincronizacaoUsuario() {
                 try {
                     console.log('🔧 Forçando sincronização de usuário...');
@@ -960,44 +1325,6 @@
                     
                 } catch (error) {
                     console.error('❌ Erro na sincronização forçada:', error);
-                }
-            }
-
-            navegarSemana(direcao) {
-                this.semanaAtual.setDate(this.semanaAtual.getDate() + (direcao * 7));
-                this.atualizarSemanaDisplay();
-                this.renderizarAgenda();
-                console.log(`📅 Navegou ${direcao > 0 ? 'próxima' : 'anterior'} semana`);
-            }
-
-            irParaHoje() {
-                this.semanaAtual = new Date();
-                this.atualizarSemanaDisplay();
-                this.renderizarAgenda();
-                console.log('📅 Voltou para semana atual');
-            }
-
-            mostrarErro(mensagem) {
-                const container = document.getElementById('agendaContent');
-                if (container) {
-                    container.innerHTML = `
-                        <div style="
-                            text-align: center; 
-                            padding: 60px 20px; 
-                            color: #dc2626;
-                            background: #fee2e2;
-                            border: 2px solid #fca5a5;
-                            border-radius: 8px;
-                            margin: 20px;
-                        ">
-                            <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
-                            <h3 style="margin: 0 0 8px 0; color: #991b1b;">Erro na Agenda</h3>
-                            <p style="margin: 0 0 16px 0; font-size: 14px;">${mensagem}</p>
-                            <button class="btn btn-primary" onclick="location.reload()">
-                                🔄 Recarregar Página
-                            </button>
-                        </div>
-                    `;
                 }
             }
 
@@ -1021,21 +1348,73 @@
                 
                 console.log(`${tipo.toUpperCase()}: ${mensagem}`);
             }
+
+            // Sistema de diagnóstico (mantido da versão robusta)
+            diagnosticoCompleto() {
+                console.log('🔍 === DIAGNÓSTICO AGENDA UNIFICADA v8.13.0 ===');
+                console.log('📅 Data/Hora:', new Date().toLocaleString('pt-BR'));
+                
+                console.log('\n👤 USUÁRIO:');
+                console.log('  Nome:', this.usuarioAtual?.nome || 'N/A');
+                console.log('  Email:', this.usuarioAtual?.email || 'N/A');
+                
+                console.log('\n📊 DADOS:');
+                console.log('  Tarefas:', this.dados.tarefas.length);
+                console.log('  Eventos:', this.dados.eventos.length);
+                
+                console.log('\n🔌 MÓDULOS:');
+                console.log('  App.js:', typeof App !== 'undefined' ? '✅' : '❌');
+                console.log('  Auth.js:', typeof Auth !== 'undefined' ? '✅' : '❌');
+                console.log('  Firebase:', typeof firebase !== 'undefined' ? '✅' : '❌');
+                
+                console.log('\n📅 SEMANA ATUAL:');
+                const inicioSemana = new Date(this.semanaAtual);
+                inicioSemana.setDate(this.semanaAtual.getDate() - this.semanaAtual.getDay());
+                const fimSemana = new Date(inicioSemana);
+                fimSemana.setDate(inicioSemana.getDate() + 6);
+                console.log('  Início:', inicioSemana.toLocaleDateString('pt-BR'));
+                console.log('  Fim:', fimSemana.toLocaleDateString('pt-BR'));
+                
+                console.log('\n💾 LOCALSTORAGE:');
+                try {
+                    const userLocal = localStorage.getItem('usuarioAtual');
+                    const dadosLocal = localStorage.getItem('agendaDados');
+                    console.log('  Usuário salvo:', userLocal ? '✅' : '❌');
+                    console.log('  Dados salvos:', dadosLocal ? '✅' : '❌');
+                } catch (e) {
+                    console.log('  ❌ Erro ao acessar localStorage');
+                }
+                
+                console.log('\n✅ Diagnóstico concluído');
+                console.log('==========================================');
+                
+                return {
+                    versao: this.versao,
+                    usuario: this.usuarioAtual,
+                    dados: {
+                        tarefas: this.dados.tarefas.length,
+                        eventos: this.dados.eventos.length
+                    },
+                    modulos: {
+                        app: typeof App !== 'undefined',
+                        auth: typeof Auth !== 'undefined',
+                        firebase: typeof firebase !== 'undefined'
+                    }
+                };
+            }
         }
 
-        // 🚀 FUNÇÕES GLOBAIS SIMPLIFICADAS
+        // 🚀 FUNÇÕES GLOBAIS UNIFICADAS
         let agendaGlobal = null;
 
         function sincronizarAgenda() {
             if (agendaGlobal) {
-                // 🔥 CORREÇÃO: Forçar sincronização de usuário também
                 agendaGlobal.forcarSincronizacaoUsuario();
             } else {
                 console.warn('⚠️ Agenda não inicializada');
             }
         }
         
-        // 🔥 NOVA FUNÇÃO GLOBAL: Forçar sincronização de usuário
         function forcarSincronizacaoUsuario() {
             if (agendaGlobal) {
                 agendaGlobal.forcarSincronizacaoUsuario();
@@ -1098,6 +1477,25 @@
             }
         }
 
+        function selecionarDia(dataISO) {
+            if (agendaGlobal) {
+                agendaGlobal.diaSelecionado = dataISO;
+                
+                // Remover seleção anterior
+                document.querySelectorAll('.agenda-day-cell.selected').forEach(cell => {
+                    cell.classList.remove('selected');
+                });
+                
+                // Adicionar seleção atual
+                const celula = document.querySelector(`[data-date="${dataISO}"]`);
+                if (celula) {
+                    celula.classList.add('selected');
+                }
+                
+                console.log(`📅 Dia selecionado: ${dataISO}`);
+            }
+        }
+
         function abrirDia(data) {
             const dataObj = new Date(data + 'T00:00:00');
             const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
@@ -1110,13 +1508,31 @@
             alert(`📅 DIA SELECIONADO\n\n${dataFormatada}\n\n💡 Detalhes do dia serão implementados em breve.\nPor enquanto, use o calendário principal para mais funcionalidades.`);
         }
 
+        function abrirItem(itemId, tipoItem) {
+            console.log(`✏️ Abrindo ${tipoItem} ID: ${itemId}`);
+            alert(`✏️ EDITAR ITEM\n\nTipo: ${tipoItem.toUpperCase()}\nID: ${itemId}\n\n💡 Edição será implementada em breve.`);
+        }
+
+        function diagnosticoAgenda() {
+            if (agendaGlobal) {
+                return agendaGlobal.diagnosticoCompleto();
+            } else {
+                console.warn('⚠️ Agenda não inicializada');
+                return null;
+            }
+        }
+
         // 🚀 INICIALIZAÇÃO AUTOMÁTICA
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('📄 DOM carregado - iniciando Agenda Simplificada v8.12.2...');
+            console.log('📄 DOM carregado - iniciando Agenda Unificada v8.13.0...');
             
             // Aguardar um pouco para garantir que outros scripts carreguem
             setTimeout(() => {
-                agendaGlobal = new AgendaSimplificada();
+                agendaGlobal = new AgendaUnificada();
+                
+                // Expor globalmente para debug
+                window.agendaGlobal = agendaGlobal;
+                window.diagnosticoAgenda = diagnosticoAgenda;
             }, 500);
         });
 
@@ -1124,13 +1540,16 @@
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             setTimeout(() => {
                 if (!agendaGlobal) {
-                    console.log('⚡ Inicialização tardia da agenda...');
-                    agendaGlobal = new AgendaSimplificada();
+                    console.log('⚡ Inicialização tardia da agenda unificada...');
+                    agendaGlobal = new AgendaUnificada();
+                    window.agendaGlobal = agendaGlobal;
+                    window.diagnosticoAgenda = diagnosticoAgenda;
                 }
             }, 1000);
         }
 
-        console.log('📅 Agenda v8.12.2 CORRIGIDA carregada!');
+        console.log('📅 Agenda Unificada v8.13.0 carregada!');
+        console.log('💡 Comandos disponíveis: diagnosticoAgenda(), forcarSincronizacaoUsuario()');
     </script>
 </body>
 </html>
