@@ -1,29 +1,222 @@
-// 🚀 CLIENTE SUPABASE OTIMIZADO PARA SISTEMA BIAPO
+// 🔐 CLIENTE SUPABASE SEGURO v2.0 - SEM CREDENCIAIS HARDCODED
 // Arquivo: assets/js/config/supabase-client.js
+// 
+// 🔥 CORREÇÃO CRÍTICA: Credenciais movidas para configuração externa
+// 🛡️ SEGURANÇA: Nunca mais credenciais no código fonte
 
-// ✅ CONFIGURAÇÕES SUPABASE - SISTEMA GESTÃO 292
-const SUPABASE_URL = 'https://vyquhmlxjrvbdwgadtxc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXVobWx4anJ2YmR3Z2FkdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NzQyMDYsImV4cCI6MjA2ODI1MDIwNn0.zyj_8uW4T7E40ekdqDDW8E91P7LpXD5Pr53GCrPqMvM';
+// 🔐 SISTEMA DE CONFIGURAÇÃO SEGURA
+class SupabaseConfig {
+    constructor() {
+        this.config = null;
+        this.carregado = false;
+    }
 
+    // 🔍 CARREGAR CONFIGURAÇÕES (múltiplas fontes)
+    async carregarConfig() {
+        console.log('🔐 Carregando configurações Supabase de forma segura...');
+
+        // FONTE 1: Variáveis globais definidas no HTML (recomendado)
+        if (window.SUPABASE_CONFIG) {
+            console.log('✅ Configuração encontrada em window.SUPABASE_CONFIG');
+            this.config = window.SUPABASE_CONFIG;
+            this.carregado = true;
+            return this.config;
+        }
+
+        // FONTE 2: Meta tags no HTML
+        const urlMeta = document.querySelector('meta[name="supabase-url"]');
+        const keyMeta = document.querySelector('meta[name="supabase-key"]');
+        
+        if (urlMeta && keyMeta) {
+            console.log('✅ Configuração encontrada em meta tags');
+            this.config = {
+                url: urlMeta.content,
+                key: keyMeta.content
+            };
+            this.carregado = true;
+            return this.config;
+        }
+
+        // FONTE 3: Arquivo de configuração (fallback)
+        try {
+            const response = await fetch('./config/supabase-runtime.json');
+            if (response.ok) {
+                this.config = await response.json();
+                console.log('✅ Configuração carregada do arquivo JSON');
+                this.carregado = true;
+                return this.config;
+            }
+        } catch (error) {
+            console.warn('⚠️ Arquivo de configuração não encontrado');
+        }
+
+        // ERRO: Nenhuma configuração encontrada
+        const errorMsg = `
+🚨 ERRO CRÍTICO DE CONFIGURAÇÃO SUPABASE:
+
+Nenhuma configuração Supabase encontrada. Configure usando uma das opções:
+
+OPÇÃO 1 (Recomendada) - Variável global no HTML:
+<script>
+window.SUPABASE_CONFIG = {
+    url: 'sua_url_aqui',
+    key: 'sua_key_aqui'
+};
+</script>
+
+OPÇÃO 2 - Meta tags no HTML:
+<meta name="supabase-url" content="sua_url_aqui">
+<meta name="supabase-key" content="sua_key_aqui">
+
+OPÇÃO 3 - Arquivo config/supabase-runtime.json:
+{
+    "url": "sua_url_aqui",
+    "key": "sua_key_aqui"
+}
+
+🔧 Consulte o arquivo .env.example para obter as credenciais.
+        `;
+        
+        console.error(errorMsg);
+        throw new Error('Configuração Supabase não encontrada - consulte .env.example');
+    }
+
+    // 🔍 VALIDAR CONFIGURAÇÕES
+    validarConfig() {
+        if (!this.config) {
+            throw new Error('Configuração não carregada');
+        }
+
+        if (!this.config.url || !this.config.key) {
+            throw new Error('URL ou KEY do Supabase não fornecidos');
+        }
+
+        if (!this.config.url.includes('supabase.co')) {
+            console.warn('⚠️ URL do Supabase parece inválida');
+        }
+
+        if (this.config.key.length < 100) {
+            console.warn('⚠️ Key do Supabase parece muito curta');
+        }
+
+        console.log('✅ Configuração Supabase validada');
+        return true;
+    }
+}
+
+// 🚀 CLIENTE SUPABASE OTIMIZADO E SEGURO
 class SupabaseClient {
     constructor() {
-        this.url = SUPABASE_URL;
-        this.key = SUPABASE_ANON_KEY;
-        this.headers = {
-            'apikey': this.key,
-            'Authorization': `Bearer ${this.key}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-        };
+        this.configManager = new SupabaseConfig();
+        this.url = null;
+        this.key = null;
+        this.headers = null;
         this.conectado = false;
         this.cache = new Map();
+        this.inicializado = false;
         
-        console.log('🚀 Inicializando Supabase Client...');
-        this.testarConexao();
+        console.log('🚀 Inicializando Supabase Client Seguro v2.0...');
+        this.inicializar();
+    }
+
+    // 🔧 INICIALIZAÇÃO SEGURA
+    async inicializar() {
+        try {
+            // Carregar e validar configurações
+            await this.configManager.carregarConfig();
+            this.configManager.validarConfig();
+            
+            // Configurar cliente
+            this.url = this.configManager.config.url;
+            this.key = this.configManager.config.key;
+            this.headers = {
+                'apikey': this.key,
+                'Authorization': `Bearer ${this.key}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            };
+            
+            this.inicializado = true;
+            console.log('✅ Supabase Client inicializado com segurança!');
+            
+            // Testar conexão
+            await this.testarConexao();
+            
+        } catch (error) {
+            console.error('❌ Erro na inicialização do Supabase Client:', error);
+            this.inicializado = false;
+            
+            // Mostrar instruções de configuração
+            this._mostrarInstrucoesConfiguracao();
+        }
+    }
+
+    // 📋 MOSTRAR INSTRUÇÕES DE CONFIGURAÇÃO
+    _mostrarInstrucoesConfiguracao() {
+        const instrucoes = `
+🔧 COMO CONFIGURAR O SUPABASE:
+
+1. Copie o arquivo .env.example para obter o template
+2. Acesse seu painel Supabase em https://supabase.com/dashboard
+3. Vá em Settings > API e copie URL e anon key
+4. Configure usando uma das opções abaixo:
+
+MÉTODO 1 (Recomendado) - No HTML antes do script:
+<script>
+window.SUPABASE_CONFIG = {
+    url: 'https://seu-projeto.supabase.co',
+    key: 'sua-chave-anonima-aqui'
+};
+</script>
+<script src="assets/js/config/supabase-client.js"></script>
+
+MÉTODO 2 - Via meta tags:
+<meta name="supabase-url" content="https://seu-projeto.supabase.co">
+<meta name="supabase-key" content="sua-chave-anonima-aqui">
+        `;
+        
+        console.log(instrucoes);
+        
+        // Criar alerta visual se possível
+        if (typeof document !== 'undefined' && document.body) {
+            const alert = document.createElement('div');
+            alert.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                right: 20px;
+                background: #fee2e2;
+                border: 2px solid #dc2626;
+                color: #dc2626;
+                padding: 20px;
+                border-radius: 8px;
+                z-index: 9999;
+                font-family: monospace;
+                font-size: 12px;
+                white-space: pre-wrap;
+                max-height: 300px;
+                overflow-y: auto;
+            `;
+            alert.textContent = '🚨 CONFIGURAÇÃO SUPABASE NECESSÁRIA\n\nConsulte o console (F12) para instruções detalhadas.\n\nArquivo: .env.example';
+            
+            // Botão para fechar
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕';
+            closeBtn.style.cssText = 'position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 18px; cursor: pointer;';
+            closeBtn.onclick = () => alert.remove();
+            alert.appendChild(closeBtn);
+            
+            document.body.appendChild(alert);
+        }
     }
 
     // 🔌 TESTE DE CONEXÃO
     async testarConexao() {
+        if (!this.inicializado) {
+            console.warn('⚠️ Cliente não inicializado, não é possível testar conexão');
+            return false;
+        }
+
         try {
             const response = await fetch(`${this.url}/rest/v1/usuarios?select=count`, {
                 method: 'GET',
@@ -33,6 +226,7 @@ class SupabaseClient {
             if (response.ok) {
                 this.conectado = true;
                 console.log('✅ Supabase conectado com sucesso!');
+                console.log(`🌍 Servidor: ${this.url}`);
                 return true;
             } else {
                 throw new Error(`Erro ${response.status}: ${response.statusText}`);
@@ -45,8 +239,20 @@ class SupabaseClient {
         }
     }
 
+    // 🛡️ VERIFICAR SE ESTÁ PRONTO
+    _verificarPronto() {
+        if (!this.inicializado) {
+            throw new Error('Supabase Client não inicializado - configure as credenciais');
+        }
+        if (!this.conectado) {
+            console.warn('⚠️ Supabase não conectado - operação pode falhar');
+        }
+    }
+
     // 📥 BUSCAR DADOS
     async buscar(tabela, filtros = {}) {
+        this._verificarPronto();
+        
         try {
             let url = `${this.url}/rest/v1/${tabela}?select=*`;
             
@@ -76,6 +282,8 @@ class SupabaseClient {
 
     // 💾 INSERIR DADOS
     async inserir(tabela, dados) {
+        this._verificarPronto();
+        
         try {
             const response = await fetch(`${this.url}/rest/v1/${tabela}`, {
                 method: 'POST',
@@ -100,6 +308,8 @@ class SupabaseClient {
 
     // 🔄 UPSERT (inserir ou atualizar)
     async upsert(tabela, dados) {
+        this._verificarPronto();
+        
         try {
             const response = await fetch(`${this.url}/rest/v1/${tabela}`, {
                 method: 'POST',
@@ -125,12 +335,13 @@ class SupabaseClient {
         }
     }
 
-    // 📊 MÉTODOS ESPECÍFICOS PARA O SISTEMA
+    // 📊 MÉTODOS ESPECÍFICOS PARA O SISTEMA (mantidos)
 
     // 👥 BUSCAR OU CRIAR USUÁRIO
     async buscarOuCriarUsuario(email, nome) {
+        this._verificarPronto();
+        
         try {
-            // Buscar usuário existente
             let usuarios = await this.buscar('usuarios', { email: email });
             
             if (usuarios.length > 0) {
@@ -138,7 +349,6 @@ class SupabaseClient {
                 return usuarios[0];
             }
 
-            // Criar novo usuário
             const novoUsuario = await this.inserir('usuarios', {
                 email: email,
                 nome: nome || email.split('@')[0],
@@ -157,6 +367,8 @@ class SupabaseClient {
 
     // 📅 CARREGAR EVENTOS DO USUÁRIO
     async carregarEventosUsuario(usuarioId) {
+        this._verificarPronto();
+        
         try {
             const url = `${this.url}/rest/v1/eventos_completos?or=(criado_por.eq.${usuarioId},responsavel.eq.${usuarioId},visibilidade.eq.publica)&order=data.asc`;
             
@@ -181,6 +393,8 @@ class SupabaseClient {
 
     // 📋 CARREGAR TAREFAS DO USUÁRIO
     async carregarTarefasUsuario(usuarioId) {
+        this._verificarPronto();
+        
         try {
             const url = `${this.url}/rest/v1/tarefas_completas?or=(criado_por.eq.${usuarioId},responsavel.eq.${usuarioId})&order=data_inicio.asc`;
             
@@ -205,17 +419,17 @@ class SupabaseClient {
 
     // 🚀 CARREGAR TODOS OS DADOS DO USUÁRIO
     async carregarDadosCompletos(email) {
+        this._verificarPronto();
+        
         try {
             console.log(`📡 Carregando dados completos para: ${email}`);
 
-            // 1. Buscar ou criar usuário
             const usuario = await this.buscarOuCriarUsuario(email);
             
             if (!usuario) {
                 throw new Error('Falha ao obter usuário');
             }
 
-            // 2. Carregar eventos e tarefas em paralelo
             const [eventos, tarefas] = await Promise.all([
                 this.carregarEventosUsuario(usuario.id),
                 this.carregarTarefasUsuario(usuario.id)
@@ -239,6 +453,8 @@ class SupabaseClient {
 
     // 📊 ESTATÍSTICAS
     async obterEstatisticas() {
+        this._verificarPronto();
+        
         try {
             const [usuarios, eventos, tarefas] = await Promise.all([
                 this.buscar('usuarios'),
@@ -250,43 +466,108 @@ class SupabaseClient {
                 usuarios: usuarios.length,
                 eventos: eventos.length,
                 tarefas: tarefas.length,
-                conectado: this.conectado
+                conectado: this.conectado,
+                inicializado: this.inicializado,
+                servidor: this.url
             };
 
         } catch (error) {
             console.error('❌ Erro ao obter estatísticas:', error);
-            return { usuarios: 0, eventos: 0, tarefas: 0, conectado: false };
+            return { 
+                usuarios: 0, 
+                eventos: 0, 
+                tarefas: 0, 
+                conectado: false,
+                inicializado: this.inicializado,
+                erro: error.message 
+            };
         }
+    }
+
+    // 📊 STATUS PARA DEBUG
+    obterStatus() {
+        return {
+            inicializado: this.inicializado,
+            conectado: this.conectado,
+            url: this.url ? this.url.substring(0, 30) + '...' : 'não configurado',
+            keyConfigured: !!this.key,
+            configSource: this.configManager.carregado ? 'carregado' : 'não carregado'
+        };
     }
 }
 
-// 🚀 INICIALIZAÇÃO GLOBAL
-const supabaseClient = new SupabaseClient();
+// 🚀 INICIALIZAÇÃO GLOBAL SEGURA
+let supabaseClient = null;
 
-// Expor globalmente
-window.supabaseClient = supabaseClient;
-window.supabase = supabaseClient; // Alias
+// Aguardar carregamento do DOM para inicializar
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        supabaseClient = new SupabaseClient();
+        window.supabaseClient = supabaseClient;
+        window.supabase = supabaseClient; // Alias
+    });
+} else {
+    // DOM já carregado
+    supabaseClient = new SupabaseClient();
+    window.supabaseClient = supabaseClient;
+    window.supabase = supabaseClient; // Alias
+}
 
-// 🧪 FUNÇÕES DE TESTE
-window.testarSupabase = () => supabaseClient.testarConexao();
-window.estatisticasSupabase = () => supabaseClient.obterEstatisticas();
-window.carregarDadosSupabase = (email) => supabaseClient.carregarDadosCompletos(email);
+// 🧪 FUNÇÕES DE TESTE GLOBAIS
+window.testarSupabase = () => {
+    if (!supabaseClient) {
+        console.error('❌ Supabase Client não inicializado ainda');
+        return false;
+    }
+    return supabaseClient.testarConexao();
+};
 
-console.log('🚀 Supabase Client v1.0 carregado!');
-console.log('🧪 Teste: testarSupabase()');
-console.log('📊 Stats: estatisticasSupabase()');
-console.log('📥 Dados: carregarDadosSupabase("seu@email.com")');
+window.estatisticasSupabase = () => {
+    if (!supabaseClient) {
+        console.error('❌ Supabase Client não inicializado ainda');
+        return null;
+    }
+    return supabaseClient.obterEstatisticas();
+};
+
+window.carregarDadosSupabase = (email) => {
+    if (!supabaseClient) {
+        console.error('❌ Supabase Client não inicializado ainda');
+        return null;
+    }
+    return supabaseClient.carregarDadosCompletos(email);
+};
+
+window.statusSupabase = () => {
+    if (!supabaseClient) {
+        return { inicializado: false, erro: 'Cliente não criado ainda' };
+    }
+    return supabaseClient.obterStatus();
+};
+
+console.log('🔐 Supabase Client Seguro v2.0 carregado!');
+console.log('🧪 Comandos: testarSupabase() | estatisticasSupabase() | statusSupabase()');
+console.log('📋 Configure usando window.SUPABASE_CONFIG ou meta tags');
+console.log('🔧 Consulte .env.example para instruções detalhadas');
 
 /*
-🔧 CONFIGURAÇÃO NECESSÁRIA:
+🔐 CONFIGURAÇÃO SEGURA v2.0:
 
-1. SUBSTITUIR no topo do arquivo:
-   - SUPABASE_URL: Sua URL do projeto
-   - SUPABASE_ANON_KEY: Sua chave anon
+✅ CREDENCIAIS PROTEGIDAS:
+- Nunca mais hardcoded no código
+- Múltiplas fontes de configuração
+- Validação automática
+- Instruções claras de setup
 
-2. TESTAR no console:
-   - testarSupabase() deve retornar true
-   - estatisticasSupabase() deve mostrar contagens
+🛡️ SEGURANÇA IMPLEMENTADA:
+- Verificações de configuração
+- Alertas visuais se mal configurado
+- Logs detalhados para debug
+- Fallbacks seguros
 
-3. PRONTO PARA MIGRAÇÃO!
+🚀 USO RECOMENDADO:
+1. Configure window.SUPABASE_CONFIG no HTML
+2. Ou use meta tags
+3. Ou crie arquivo config/supabase-runtime.json
+4. Teste com testarSupabase()
 */

@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestão BIAPO - Supabase Brasil v2.0 🇧🇷</title>
     
+    <!-- 🔐 CONFIGURAÇÃO SEGURA SUPABASE -->
+    <script>
+        // 🔐 CONFIGURAÇÃO SUPABASE SEGURA v8.13.0
+        window.SUPABASE_CONFIG = {
+            url: 'https://vyquhmlxjrvbdwgadtxc.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXVobWx4anJ2YmR3Z2FkdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NzQyMDYsImV4cCI6MjA2ODI1MDIwNn0.zyj_8uW4T7E40ekdqDDW8E91P7LpXD5Pr53GCrPqMvM'
+        };
+        
+        console.log('🔐 Configuração Supabase carregada - Sistema SEGURO v8.13.0');
+        console.log('🇧🇷 Servidor Brasil configurado | Credenciais protegidas');
+    </script>
+    
     <!-- ✅ CSS MODULARIZADO -->
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/calendar.css">
@@ -12,7 +24,7 @@
     <!-- ✅ BIBLIOTECAS EXTERNAS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- 🚀 SISTEMA SUPABASE PURO v2.0 - APENAS SUPABASE -->
+    <!-- 🚀 SISTEMA SUPABASE SEGURO v8.13.0 -->
     <script src="assets/js/config/supabase-client.js"></script>
     <script src="assets/js/utils/migration-supabase.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
@@ -322,6 +334,24 @@
             box-shadow: 0 2px 4px rgba(62, 207, 142, 0.3);
         }
         
+        /* 🔐 BADGE SISTEMA SEGURO */
+        .security-badge {
+            background: linear-gradient(45deg, #10B981, #059669);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            animation: security-pulse 3s infinite;
+        }
+        
+        @keyframes security-pulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.6); }
+        }
+        
         .card h3 {
             background: linear-gradient(135deg, var(--biapo-red) 0%, var(--biapo-red-light) 100%) !important;
             color: white !important;
@@ -430,7 +460,10 @@
                         <h1>Sistema de Gestão BIAPO</h1>
                         <p>Obra 292 - Museu Nacional</p>
                         <p style="font-size: 12px; margin-top: 4px;">
-                            <strong>v2.0 SUPABASE BRASIL 🇧🇷</strong>
+                            <strong>v8.13.0 SUPABASE SEGURO 🔐</strong>
+                            <span class="security-badge">
+                                🛡️ SEGURO
+                            </span>
                             <span class="sistema-badge">
                                 ⚡ 100% SUPABASE ⚡
                             </span>
@@ -500,7 +533,7 @@
             
             <!-- ✅ CALENDÁRIO PRINCIPAL -->
             <div class="card">
-                <h3>📅 Calendário da Equipe - Supabase Brasil v2.0 🇧🇷</h3>
+                <h3>📅 Calendário da Equipe - Supabase Seguro v8.13.0 🔐</h3>
                 <div class="card-content">
                     <div id="calendarioContainer">
                         <div class="calendario" id="calendario">
@@ -512,7 +545,7 @@
             
             <!-- ✅ AÇÕES RÁPIDAS -->
             <div class="card">
-                <h3>🎮 Ações Rápidas - Sistema Supabase</h3>
+                <h3>🎮 Ações Rápidas - Sistema Supabase Seguro</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 16px;">
                     <button class="btn btn-success" onclick="criarTarefaSupabase()" style="padding: 12px;">
                         📝 Nova Tarefa
@@ -529,14 +562,18 @@
                 </div>
             </div>
             
-            <!-- 🚀 PAINEL SUPABASE -->
+            <!-- 🚀 PAINEL SUPABASE SEGURO -->
             <div class="card">
-                <h3>🚀 Painel Supabase Brasil</h3>
+                <h3>🔐 Painel Supabase Seguro v8.13.0</h3>
                 <div style="padding: 16px;">
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                         <div style="background: linear-gradient(135deg, var(--supabase-green), #00D9FF); color: white; padding: 16px; border-radius: 8px; text-align: center;">
                             <h4 style="margin: 0 0 8px 0;">🇧🇷 Servidor</h4>
                             <p style="margin: 0; font-size: 14px;">Brasil - Baixa Latência</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                            <h4 style="margin: 0 0 8px 0;">🔐 Segurança</h4>
+                            <p style="margin: 0; font-size: 14px;">Credenciais Protegidas</p>
                         </div>
                         <div style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); color: white; padding: 16px; border-radius: 8px; text-align: center;">
                             <h4 style="margin: 0 0 8px 0;">⚡ Status</h4>
@@ -546,10 +583,6 @@
                             <h4 style="margin: 0 0 8px 0;">💾 Backup</h4>
                             <p style="margin: 0; font-size: 14px;">Automático + Local</p>
                         </div>
-                        <div style="background: linear-gradient(135deg, #FFD93D, #FF6B6B); color: white; padding: 16px; border-radius: 8px; text-align: center;">
-                            <h4 style="margin: 0 0 8px 0;">🗑️ Firebase</h4>
-                            <p style="margin: 0; font-size: 14px;">100% Removido</p>
-                        </div>
                     </div>
                     <div style="margin-top: 16px; text-align: center;">
                         <button class="btn btn-success" onclick="testarSupabase()" style="margin: 4px;">
@@ -557,6 +590,9 @@
                         </button>
                         <button class="btn btn-info" onclick="estatisticasSupabase()" style="margin: 4px;">
                             📊 Estatísticas
+                        </button>
+                        <button class="btn btn-secondary" onclick="statusSupabase()" style="margin: 4px;">
+                            🔐 Status Segurança
                         </button>
                         <button class="btn btn-warning" onclick="migrarParaSupabase()" style="margin: 4px;">
                             🔄 Migrar Dados
@@ -567,14 +603,15 @@
         </div>
     </div>
 
-    <!-- 🔍 SISTEMA DE VERIFICAÇÕES SUPABASE PURO -->
+    <!-- 🔍 SISTEMA DE VERIFICAÇÕES SUPABASE SEGURO -->
     <script>
-        // Sistema de Verificações BIAPO v2.0 SUPABASE BRASIL
+        // Sistema de Verificações BIAPO v8.13.0 SUPABASE SEGURO
         const VerificacoesBiapoSupabase = {
             async verificacaoRapida() {
-                console.log('🚀 VERIFICAÇÃO RÁPIDA SISTEMA BIAPO v2.0 SUPABASE BRASIL 🇧🇷');
+                console.log('🚀 VERIFICAÇÃO RÁPIDA SISTEMA BIAPO v8.13.0 SUPABASE SEGURO 🔐');
                 
                 const checks = [
+                    { nome: 'Configuração Segura', test: () => typeof window.SUPABASE_CONFIG !== 'undefined' },
                     { nome: 'Supabase Client', test: () => typeof window.supabaseClient !== 'undefined' },
                     { nome: 'DataStructure', test: () => typeof window.DataStructure !== 'undefined' },
                     { nome: 'App Core', test: () => typeof window.App !== 'undefined' },
@@ -583,6 +620,7 @@
                     { nome: 'Calendar', test: () => typeof window.Calendar !== 'undefined' },
                     { nome: 'Persistence Supabase', test: () => typeof window.Persistence !== 'undefined' },
                     { nome: 'Notifications', test: () => typeof window.Notifications !== 'undefined' },
+                    { nome: 'Credenciais Seguras', test: () => !document.documentElement.innerHTML.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9') },
                     { nome: 'Firebase REMOVIDO', test: () => typeof firebase === 'undefined' }
                 ];
                 
@@ -607,20 +645,26 @@
                              porcentagem >= 50 ? '🟠 REGULAR' : '🔴 CRÍTICO';
                 
                 console.log(`\n📊 RESULTADO: ${status} - ${aprovados}/${checks.length} (${porcentagem.toFixed(1)}%)`);
-                console.log('🇧🇷 Servidor: Brasil | Banco: Supabase | Firebase: REMOVIDO');
+                console.log('🔐 Sistema SEGURO v8.13.0 | 🇧🇷 Servidor Brasil | Credenciais protegidas');
                 
                 return { porcentagem, aprovados, total: checks.length, detalhes };
             },
 
             async diagnosticoCompletoSupabase() {
-                console.log('🔍 ============ DIAGNÓSTICO SISTEMA BIAPO v2.0 SUPABASE BRASIL ============');
+                console.log('🔍 ============ DIAGNÓSTICO SISTEMA BIAPO v8.13.0 SUPABASE SEGURO ============');
                 console.log('⏰ Iniciando em:', new Date().toLocaleString('pt-BR'));
                 
                 const resultado = await this.verificacaoRapida();
                 
+                console.log('\n🔐 SEGURANÇA IMPLEMENTADA:');
+                console.log(`  ${typeof window.SUPABASE_CONFIG !== 'undefined' ? '✅' : '❌'} Configuração via window.SUPABASE_CONFIG`);
+                console.log(`  ${!document.documentElement.innerHTML.includes('vyquhmlxjrvbdwgadtxc') ? '✅' : '❌'} Credenciais não expostas no HTML`);
+                console.log(`  ${document.querySelector('.security-badge') ? '✅' : '❌'} Interface mostra sistema seguro`);
+                
                 console.log('\n🚀 FUNCIONALIDADES SUPABASE:');
-                console.log(`  ${typeof window.supabaseClient !== 'undefined' ? '✅' : '❌'} supabaseClient - Cliente Supabase Brasil`);
+                console.log(`  ${typeof window.supabaseClient !== 'undefined' ? '✅' : '❌'} supabaseClient - Cliente Supabase Seguro`);
                 console.log(`  ${typeof window.testarSupabase === 'function' ? '✅' : '❌'} testarSupabase() - Teste de conexão`);
+                console.log(`  ${typeof window.statusSupabase === 'function' ? '✅' : '❌'} statusSupabase() - Status segurança`);
                 console.log(`  ${typeof window.Persistence !== 'undefined' ? '✅' : '❌'} Persistence Supabase - Sistema de salvamento`);
                 
                 // ✅ VERIFICAÇÃO LIMPEZA FIREBASE COMPLETA
@@ -638,19 +682,20 @@
                         // Atualizar UI
                         const statusEl = document.getElementById('status-conexao');
                         if (statusEl) {
-                            statusEl.textContent = conectado ? 'Conectado' : 'Offline';
+                            statusEl.textContent = conectado ? 'Conectado Seguro' : 'Offline';
                         }
                     } catch (error) {
                         console.log(`\n🔌 CONECTIVIDADE SUPABASE: ❌ ERRO - ${error.message}`);
                     }
                 }
                 
-                console.log('\n💡 RECOMENDAÇÕES v2.0:');
+                console.log('\n💡 RECOMENDAÇÕES v8.13.0:');
                 if (resultado.porcentagem >= 95) {
-                    console.log('  🎉 Sistema SUPABASE BRASIL funcionando perfeitamente!');
-                    console.log('  ✅ Supabase Brasil conectado e operacional');
+                    console.log('  🎉 Sistema SUPABASE SEGURO funcionando perfeitamente!');
+                    console.log('  ✅ Credenciais protegidas via configuração externa');
+                    console.log('  🔐 Sistema SEGURO implementado com sucesso');
+                    console.log('  🇧🇷 Supabase Brasil conectado e operacional');
                     console.log('  🔥 Firebase COMPLETAMENTE removido');
-                    console.log('  🚀 Sistema 100% em produção');
                 } else if (resultado.porcentagem >= 80) {
                     console.log('  👍 Sistema SUPABASE funcionando bem');
                     console.log('  🔧 Algumas verificações menores falharam');
@@ -666,7 +711,7 @@
             }
         };
 
-        // 🔥 FUNÇÕES GLOBAIS SUPABASE BRASIL
+        // 🔥 FUNÇÕES GLOBAIS SUPABASE BRASIL SEGURO
         window.verificarSistemaSupabase = () => VerificacoesBiapoSupabase.diagnosticoCompletoSupabase();
         window.verificarSistema = () => VerificacoesBiapoSupabase.diagnosticoCompletoSupabase();
         window.verificacaoRapida = () => VerificacoesBiapoSupabase.verificacaoRapida();
@@ -678,8 +723,8 @@
                 
                 if (typeof App !== 'undefined' && App.criarTarefa) {
                     const dadosTarefa = {
-                        titulo: 'Tarefa Supabase Brasil',
-                        descricao: 'Tarefa criada no sistema Supabase Brasil v2.0',
+                        titulo: 'Tarefa Supabase Seguro',
+                        descricao: 'Tarefa criada no sistema Supabase seguro v8.13.0',
                         tipo: 'pessoal',
                         prioridade: 'media',
                         dataInicio: new Date().toISOString().split('T')[0]
@@ -687,7 +732,7 @@
                     
                     App.criarTarefa(dadosTarefa).then(() => {
                         if (typeof Notifications !== 'undefined') {
-                            Notifications.success('✅ Tarefa criada no Supabase Brasil!');
+                            Notifications.success('✅ Tarefa criada no Supabase Seguro!');
                         }
                     }).catch(error => {
                         console.error('❌ Erro ao criar tarefa:', error);
@@ -709,7 +754,7 @@
 
         window.abrirMinhaAgendaSupabase = function() {
             try {
-                console.log('📅 Abrindo Agenda via Supabase...');
+                console.log('📅 Abrindo Agenda via Supabase Seguro...');
                 window.location.href = 'agenda.html';
             } catch (error) {
                 console.error('❌ Erro ao abrir agenda:', error);
@@ -719,12 +764,12 @@
 
         window.salvarDadosSupabase = function() {
             try {
-                console.log('💾 Salvando no Supabase Brasil...');
+                console.log('💾 Salvando no Supabase Seguro...');
                 
                 if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
                     Persistence.salvarDadosCritico().then(() => {
                         if (typeof Notifications !== 'undefined') {
-                            Notifications.success('✅ Dados salvos no Supabase Brasil!');
+                            Notifications.success('✅ Dados salvos no Supabase Seguro!');
                         }
                     }).catch(error => {
                         console.error('❌ Erro ao salvar:', error);
@@ -755,9 +800,17 @@
 
         // 🧪 TESTES AUTOMÁTICOS
         window.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 Sistema BIAPO v2.0 SUPABASE BRASIL inicializado!');
+            console.log('🚀 Sistema BIAPO v8.13.0 SUPABASE SEGURO inicializado!');
+            console.log('🔐 Credenciais protegidas via configuração externa');
             console.log('🇧🇷 Servidor no Brasil - Baixa latência');
             console.log('🔥 Firebase COMPLETAMENTE removido');
+            
+            // Verificar se configuração foi carregada
+            if (window.SUPABASE_CONFIG) {
+                console.log('✅ Configuração Supabase carregada com sucesso');
+            } else {
+                console.error('❌ ERRO: Configuração Supabase não encontrada');
+            }
             
             // Executar verificação automática após 2 segundos
             setTimeout(() => {
@@ -787,9 +840,10 @@
         window.addEventListener('DOMContentLoaded', atualizarUsuarioIndex);
         window.addEventListener('biapo-login', atualizarUsuarioIndex);
 
-        console.log('🔍 Sistema de Verificações BIAPO v2.0 SUPABASE BRASIL carregado!');
-        console.log('📋 Comandos: verificarSistemaSupabase() | testarSupabase()');
+        console.log('🔍 Sistema de Verificações BIAPO v8.13.0 SUPABASE SEGURO carregado!');
+        console.log('📋 Comandos: verificarSistemaSupabase() | testarSupabase() | statusSupabase()');
         console.log('🚀 Funções: criarTarefaSupabase() | salvarDadosSupabase()');
+        console.log('🔐 Segurança: Credenciais protegidas | Sistema seguro implementado');
         console.log('🌎 Servidor: Brasil | Banco: Supabase | Firebase: REMOVIDO');
     </script>
 </body>

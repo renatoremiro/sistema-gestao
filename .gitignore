@@ -1,2 +1,63 @@
-# Ignore firebase configuration file
+# 🔐 ARQUIVOS SENSÍVEIS (CREDENCIAIS)
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# 🔥 CONFIGURAÇÕES ESPECÍFICAS
 assets/js/config/firebaseConfig.json
+assets/js/config/supabase-config.json
+config/secrets.json
+
+# 📊 LOGS E CACHE
+*.log
+logs/
+.cache/
+tmp/
+temp/
+
+# 🛠️ FERRAMENTAS DE DESENVOLVIMENTO
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 📦 DEPENDÊNCIAS (se houver)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# 🏗️ BUILD E DIST
+dist/
+build/
+.parcel-cache/
+
+# 🖥️ SISTEMA OPERACIONAL
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 🔄 BACKUP E TEMPORÁRIOS
+*.bak
+*.backup
+*.tmp
+*backup*
+_backup*/
+
+# 🧪 TESTES
+coverage/
+.nyc_output/
+test-results/
+
+# 📱 MOBILE (futuro)
+*.apk
+*.ipa
+
+# ===== COMENTÁRIOS =====
+# Nunca commitar credenciais reais
+# Sempre usar .env.example como template
+# Revisar este arquivo periodicamente
