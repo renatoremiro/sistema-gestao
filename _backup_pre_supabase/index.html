@@ -3,30 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão BIAPO - Supabase Brasil v2.0 🇧🇷</title>
+    <title>Sistema de Gestão BIAPO - Supabase Puro v1.0</title>
     
     <!-- ✅ CSS MODULARIZADO -->
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/calendar.css">
+<link rel="stylesheet" href="assets/css/calendar.css">
   
     <!-- ✅ BIBLIOTECAS EXTERNAS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- 🚀 SISTEMA SUPABASE PURO v2.0 - APENAS SUPABASE -->
+    <!-- 🚀 SISTEMA SUPABASE PURO v1.0 -->
     <script src="assets/js/config/supabase-client.js"></script>
     <script src="assets/js/utils/migration-supabase.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
-    <script src="assets/js/utils/validation.js"></script>
-    <script src="assets/js/utils/notifications.js"></script>
-    <script src="assets/js/core/data.js"></script>
-    <script src="assets/js/core/app.js"></script>
-    <!-- 🔥 SISTEMA DE PERSISTÊNCIA: APENAS SUPABASE -->
-    <script src="assets/js/modules/persistence-supabase.js"></script>
-    <script src="assets/js/modules/auth.js"></script>
-    <script src="assets/js/modules/events.js"></script>
-    <script src="assets/js/modules/calendar.js"></script>
-    <script src="assets/js/modules/admin-users-manager.js"></script>
-    <script src="assets/js/utils/inicializador_sistema.js"></script>
+<script src="assets/js/utils/validation.js"></script>
+<script src="assets/js/utils/notifications.js"></script>
+<script src="assets/js/core/data.js"></script>
+<script src="assets/js/core/app.js"></script>
+<script src="assets/js/modules/persistence-supabase.js"></script>
+<script src="assets/js/modules/auth.js"></script>
+<script src="assets/js/modules/events.js"></script>
+<script src="assets/js/modules/calendar.js"></script>
+<script src="assets/js/modules/admin-users-manager.js"></script>
+<!-- 🔥 SCRIPTS CONFLITANTES REMOVIDOS PARA LIMPEZA CONSERVATIVA -->
+<!-- sistema_sincronizado_v8110.js - REMOVIDO (desatualizado v8.11.0) -->
+<!-- corretor_sync_participantes_v8.12.js - REMOVIDO (correção temporária) -->
+<script src="assets/js/utils/inicializador_sistema.js"></script>
 
     <style>
         /* 🔴 CORES BIAPO */
@@ -40,7 +42,6 @@
             --biapo-gray-lighter: #718096;
             --accent-green: #38A169;
             --accent-yellow: #D69E2E;
-            --supabase-green: #3ECF8E;
         }
         
         .btn-primary, .action-btn.primary {
@@ -306,12 +307,12 @@
             opacity: 0.8;
         }
         
-        /* 🔥 INDICADOR SUPABASE */
-        .supabase-badge {
+        /* 🔥 INDICADOR SISTEMA UNIFICADO */
+        .unified-badge {
             position: absolute;
             top: -6px;
             right: -6px;
-            background: var(--supabase-green);
+            background: #10b981;
             color: white;
             padding: 2px 6px;
             border-radius: 10px;
@@ -319,7 +320,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(62, 207, 142, 0.3);
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
         }
         
         .card h3 {
@@ -340,24 +341,6 @@
         .btn-admin:hover {
             background: linear-gradient(135deg, #C05621 0%, var(--biapo-orange) 100%);
             border-color: #C05621;
-        }
-        
-        /* 🔥 BADGE SISTEMA SUPABASE */
-        .sistema-badge {
-            background: linear-gradient(45deg, var(--supabase-green), #00D9FF);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(62, 207, 142, 0.3);
-            animation: pulse-glow 2s infinite;
-        }
-        
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 2px 8px rgba(62, 207, 142, 0.3); }
-            50% { box-shadow: 0 4px 16px rgba(62, 207, 142, 0.6); }
         }
         
         /* 📱 RESPONSIVIDADE */
@@ -430,9 +413,9 @@
                         <h1>Sistema de Gestão BIAPO</h1>
                         <p>Obra 292 - Museu Nacional</p>
                         <p style="font-size: 12px; margin-top: 4px;">
-                            <strong>v2.0 SUPABASE BRASIL 🇧🇷</strong>
-                            <span class="sistema-badge">
-                                ⚡ 100% SUPABASE ⚡
+                            <strong>v1.0 SISTEMA SUPABASE PURO</strong>
+                            <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; margin-left: 8px;">
+                                SUPABASE BRASIL ✅
                             </span>
                         </p>
                     </div>
@@ -448,13 +431,13 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-warning btn-sm" onclick="abrirMinhaAgendaSupabase()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                        <button class="btn btn-warning btn-sm" onclick="abrirMinhaAgendaUnificada()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                             📋 Minha Agenda
                         </button>
                         <button class="btn btn-admin btn-sm" onclick="Auth.mostrarGerenciarUsuarios()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                             👥 Usuários
                         </button>
-                        <button class="btn btn-secondary btn-sm" onclick="verificarSistemaSupabase()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                        <button class="btn btn-secondary btn-sm" onclick="verificarSistema()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
                             🔄 Status
                         </button>
                         <button class="btn-logout" onclick="Auth.fazerLogout()">
@@ -472,11 +455,11 @@
                     <div class="action-desc">Criar evento para a equipe</div>
                 </div>
                 
-                <div class="action-card" onclick="abrirMinhaAgendaSupabase()">
-                    <span class="supabase-badge">🇧🇷 BR</span>
+                <div class="action-card" onclick="abrirMinhaAgendaUnificada()">
+                    <span class="unified-badge">🔥 NOVO</span>
                     <span class="action-icon">📋</span>
                     <div class="action-title">Minha Agenda</div>
-                    <div class="action-desc">Powered by Supabase Brasil</div>
+                    <div class="action-desc">Tarefas unificadas via App.js</div>
                 </div>
                 
                 <div class="action-card" onclick="Events.mostrarGerenciarFeriados()">
@@ -500,7 +483,7 @@
             
             <!-- ✅ CALENDÁRIO PRINCIPAL -->
             <div class="card">
-                <h3>📅 Calendário da Equipe - Supabase Brasil v2.0 🇧🇷</h3>
+                <h3>📅 Calendário da Equipe - Supabase Brasil v1.0</h3>
                 <div class="card-content">
                     <div id="calendarioContainer">
                         <div class="calendario" id="calendario">
@@ -512,78 +495,44 @@
             
             <!-- ✅ AÇÕES RÁPIDAS -->
             <div class="card">
-                <h3>🎮 Ações Rápidas - Sistema Supabase</h3>
+                <h3>🎮 Ações Rápidas</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 16px;">
-                    <button class="btn btn-success" onclick="criarTarefaSupabase()" style="padding: 12px;">
+                    <button class="btn btn-success" onclick="criarTarefaUnificada()" style="padding: 12px;">
                         📝 Nova Tarefa
                     </button>
-                    <button class="btn btn-info" onclick="salvarDadosSupabase()" style="padding: 12px;">
-                        💾 Salvar Supabase
+                    <button class="btn btn-info" onclick="salvarDadosUnificado()" style="padding: 12px;">
+                        💾 Salvar Dados
                     </button>
                     <button class="btn btn-admin" onclick="Auth.mostrarGerenciarUsuarios()" style="padding: 12px;">
                         👥 Equipe
                     </button>
-                    <button class="btn btn-secondary" onclick="verificarSistemaSupabase()" style="padding: 12px;">
-                        📊 Status Supabase
+                    <button class="btn btn-secondary" onclick="verificarSistemaUnificado()" style="padding: 12px;">
+                        📊 Status Unificado
                     </button>
-                </div>
-            </div>
-            
-            <!-- 🚀 PAINEL SUPABASE -->
-            <div class="card">
-                <h3>🚀 Painel Supabase Brasil</h3>
-                <div style="padding: 16px;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                        <div style="background: linear-gradient(135deg, var(--supabase-green), #00D9FF); color: white; padding: 16px; border-radius: 8px; text-align: center;">
-                            <h4 style="margin: 0 0 8px 0;">🇧🇷 Servidor</h4>
-                            <p style="margin: 0; font-size: 14px;">Brasil - Baixa Latência</p>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); color: white; padding: 16px; border-radius: 8px; text-align: center;">
-                            <h4 style="margin: 0 0 8px 0;">⚡ Status</h4>
-                            <p id="status-conexao" style="margin: 0; font-size: 14px;">Conectando...</p>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; padding: 16px; border-radius: 8px; text-align: center;">
-                            <h4 style="margin: 0 0 8px 0;">💾 Backup</h4>
-                            <p style="margin: 0; font-size: 14px;">Automático + Local</p>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #FFD93D, #FF6B6B); color: white; padding: 16px; border-radius: 8px; text-align: center;">
-                            <h4 style="margin: 0 0 8px 0;">🗑️ Firebase</h4>
-                            <p style="margin: 0; font-size: 14px;">100% Removido</p>
-                        </div>
-                    </div>
-                    <div style="margin-top: 16px; text-align: center;">
-                        <button class="btn btn-success" onclick="testarSupabase()" style="margin: 4px;">
-                            🧪 Testar Conexão
-                        </button>
-                        <button class="btn btn-info" onclick="estatisticasSupabase()" style="margin: 4px;">
-                            📊 Estatísticas
-                        </button>
-                        <button class="btn btn-warning" onclick="migrarParaSupabase()" style="margin: 4px;">
-                            🔄 Migrar Dados
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 🔍 SISTEMA DE VERIFICAÇÕES SUPABASE PURO -->
+
+    
+    <!-- 🔍 SISTEMA DE VERIFICAÇÕES UNIFICADO -->
     <script>
-        // Sistema de Verificações BIAPO v2.0 SUPABASE BRASIL
+        // Sistema de Verificações BIAPO v1.0 SUPABASE PURO
         const VerificacoesBiapoSupabase = {
             async verificacaoRapida() {
-                console.log('🚀 VERIFICAÇÃO RÁPIDA SISTEMA BIAPO v2.0 SUPABASE BRASIL 🇧🇷');
+                console.log('🚀 VERIFICAÇÃO RÁPIDA SISTEMA BIAPO v1.0 SUPABASE PURO');
                 
                 const checks = [
-                    { nome: 'Supabase Client', test: () => typeof window.supabaseClient !== 'undefined' },
+                    { nome: 'Supabase', test: () => typeof window.supabaseClient !== 'undefined' },
                     { nome: 'DataStructure', test: () => typeof window.DataStructure !== 'undefined' },
-                    { nome: 'App Core', test: () => typeof window.App !== 'undefined' },
+                    { nome: 'App v1.0', test: () => typeof window.App !== 'undefined' },
                     { nome: 'Auth', test: () => typeof window.Auth !== 'undefined' },
                     { nome: 'Events', test: () => typeof window.Events !== 'undefined' },
-                    { nome: 'Calendar', test: () => typeof window.Calendar !== 'undefined' },
+                    { nome: 'Calendar v1.0', test: () => typeof window.Calendar !== 'undefined' },
                     { nome: 'Persistence Supabase', test: () => typeof window.Persistence !== 'undefined' },
-                    { nome: 'Notifications', test: () => typeof window.Notifications !== 'undefined' },
-                    { nome: 'Firebase REMOVIDO', test: () => typeof firebase === 'undefined' }
+                    { nome: 'Usuários BIAPO', test: () => DataStructure?.usuariosBiapo && Object.keys(DataStructure.usuariosBiapo).length >= 10 },
+                    { nome: 'Sistema Supabase', test: () => App?.dados && typeof App.dados.tarefas !== 'undefined' }
                 ];
                 
                 let aprovados = 0;
@@ -607,50 +556,60 @@
                              porcentagem >= 50 ? '🟠 REGULAR' : '🔴 CRÍTICO';
                 
                 console.log(`\n📊 RESULTADO: ${status} - ${aprovados}/${checks.length} (${porcentagem.toFixed(1)}%)`);
-                console.log('🇧🇷 Servidor: Brasil | Banco: Supabase | Firebase: REMOVIDO');
                 
                 return { porcentagem, aprovados, total: checks.length, detalhes };
             },
 
             async diagnosticoCompletoSupabase() {
-                console.log('🔍 ============ DIAGNÓSTICO SISTEMA BIAPO v2.0 SUPABASE BRASIL ============');
+                console.log('🔍 ============ DIAGNÓSTICO SISTEMA BIAPO v1.0 SUPABASE PURO ============');
                 console.log('⏰ Iniciando em:', new Date().toLocaleString('pt-BR'));
                 
                 const resultado = await this.verificacaoRapida();
+                
+                console.log('\n📦 STATUS DOS MÓDULOS SUPABASE:');
+                const modulos = ['Supabase', 'DataStructure', 'App', 'Auth', 'Events', 'Calendar', 'Persistence', 'Notifications', 'Helpers'];
+                modulos.forEach(modulo => {
+                    const disponivel = typeof window[modulo] !== 'undefined';
+                    let extra = '';
+                    
+                    if (disponivel) {
+                        try {
+                            if (modulo === 'App' && App.obterStatusSistema) {
+                                const status = App.obterStatusSistema();
+                                extra = ` (v${status.versao}, ${status.sistemaSupabase ? 'SUPABASE' : 'Padrão'})`;
+                            } else if (modulo === 'Calendar' && Calendar.obterStatus) {
+                                const status = Calendar.obterStatus();
+                                extra = ` (${status.tipo})`;
+                            } else if (modulo === 'Supabase') {
+                                extra = ' (BRASIL)';
+                            }
+                        } catch (e) {
+                            extra = ' (erro ao obter info)';
+                        }
+                    }
+                    
+                    console.log(`  ${disponivel ? '✅' : '❌'} ${modulo}${extra}`);
+                });
                 
                 console.log('\n🚀 FUNCIONALIDADES SUPABASE:');
                 console.log(`  ${typeof window.supabaseClient !== 'undefined' ? '✅' : '❌'} supabaseClient - Cliente Supabase Brasil`);
                 console.log(`  ${typeof window.testarSupabase === 'function' ? '✅' : '❌'} testarSupabase() - Teste de conexão`);
                 console.log(`  ${typeof window.Persistence !== 'undefined' ? '✅' : '❌'} Persistence Supabase - Sistema de salvamento`);
+                console.log(`  ${App?.dados?.tarefas ? '✅' : '❌'} App.dados.tarefas[] - Array de tarefas`);
+                console.log(`  ${App?.dados?.eventos ? '✅' : '❌'} App.dados.eventos[] - Array de eventos`);
                 
-                // ✅ VERIFICAÇÃO LIMPEZA FIREBASE COMPLETA
-                console.log('\n🗑️ VERIFICAÇÃO LIMPEZA FIREBASE:');
-                console.log(`  ${typeof firebase === 'undefined' ? '✅' : '❌'} Firebase SDK removido`);
+                // ✅ VERIFICAÇÃO LIMPEZA FIREBASE
+                console.log('\n🗑️ VERIFICAÇÃO LIMPEZA:');
+                console.log(`  ${typeof firebase === 'undefined' ? '✅' : '❌'} Firebase removido (esperado: undefined)`);
                 console.log(`  ${typeof window.database === 'undefined' ? '✅' : '❌'} Firebase database removido`);
-                console.log(`  ${!document.querySelector('script[src*="firebase"]') ? '✅' : '❌'} Scripts Firebase removidos`);
+                console.log(`  ${typeof PersonalTasks === 'undefined' ? '✅' : '❌'} PersonalTasks removido (agora App.criarTarefa())`);
                 
-                // 🔥 TESTE DE CONECTIVIDADE SUPABASE
-                if (typeof window.supabaseClient !== 'undefined') {
-                    try {
-                        const conectado = await window.supabaseClient.testarConexao();
-                        console.log(`\n🔌 CONECTIVIDADE SUPABASE: ${conectado ? '✅ CONECTADO' : '❌ OFFLINE'}`);
-                        
-                        // Atualizar UI
-                        const statusEl = document.getElementById('status-conexao');
-                        if (statusEl) {
-                            statusEl.textContent = conectado ? 'Conectado' : 'Offline';
-                        }
-                    } catch (error) {
-                        console.log(`\n🔌 CONECTIVIDADE SUPABASE: ❌ ERRO - ${error.message}`);
-                    }
-                }
-                
-                console.log('\n💡 RECOMENDAÇÕES v2.0:');
+                console.log('\n💡 RECOMENDAÇÕES v1.0:');
                 if (resultado.porcentagem >= 95) {
-                    console.log('  🎉 Sistema SUPABASE BRASIL funcionando perfeitamente!');
+                    console.log('  🎉 Sistema SUPABASE funcionando perfeitamente!');
                     console.log('  ✅ Supabase Brasil conectado e operacional');
-                    console.log('  🔥 Firebase COMPLETAMENTE removido');
-                    console.log('  🚀 Sistema 100% em produção');
+                    console.log('  🔥 Firebase removido com sucesso');
+                    console.log('  🚀 Sistema pronto para uso em produção');
                 } else if (resultado.porcentagem >= 80) {
                     console.log('  👍 Sistema SUPABASE funcionando bem');
                     console.log('  🔧 Algumas verificações menores falharam');
@@ -666,20 +625,26 @@
             }
         };
 
-        // 🔥 FUNÇÕES GLOBAIS SUPABASE BRASIL
+        // 🔥 FUNÇÕES GLOBAIS SUPABASE
         window.verificarSistemaSupabase = () => VerificacoesBiapoSupabase.diagnosticoCompletoSupabase();
-        window.verificarSistema = () => VerificacoesBiapoSupabase.diagnosticoCompletoSupabase();
+        window.verificarSistema = () => VerificacoesBiapoSupabase.diagnosticoCompletoSupabase(); // Manter compatibilidade
         window.verificacaoRapida = () => VerificacoesBiapoSupabase.verificacaoRapida();
         
-        // ✅ FUNÇÕES SUPABASE ESPECÍFICAS
-        window.criarTarefaSupabase = function() {
+        // ✅ GARANTIR EXPOSIÇÃO DO SUPABASE
+        if (typeof supabaseClient !== 'undefined') {
+            window.Supabase = supabaseClient;
+        }
+        
+        // ✅ FUNÇÕES UNIFICADAS PARA TAREFAS (via App.js)
+        window.criarTarefaUnificada = function() {
             try {
-                console.log('📋 Criando tarefa via Supabase...');
+                console.log('📋 Criando tarefa via App.js unificado...');
                 
                 if (typeof App !== 'undefined' && App.criarTarefa) {
+                    // Dados básicos para teste
                     const dadosTarefa = {
-                        titulo: 'Tarefa Supabase Brasil',
-                        descricao: 'Tarefa criada no sistema Supabase Brasil v2.0',
+                        titulo: 'Tarefa criada pelo sistema principal',
+                        descricao: 'Tarefa de teste criada via App.js unificado',
                         tipo: 'pessoal',
                         prioridade: 'media',
                         dataInicio: new Date().toISOString().split('T')[0]
@@ -687,85 +652,106 @@
                     
                     App.criarTarefa(dadosTarefa).then(() => {
                         if (typeof Notifications !== 'undefined') {
-                            Notifications.success('✅ Tarefa criada no Supabase Brasil!');
+                            Notifications.success('✅ Tarefa criada via App.js unificado!');
+                        } else {
+                            alert('✅ Tarefa criada via App.js unificado!');
                         }
                     }).catch(error => {
                         console.error('❌ Erro ao criar tarefa:', error);
                         if (typeof Notifications !== 'undefined') {
                             Notifications.error('❌ Erro ao criar tarefa');
+                        } else {
+                            alert('❌ Erro ao criar tarefa: ' + error.message);
                         }
                     });
                 } else {
-                    throw new Error('App.js não disponível');
+                    throw new Error('App.js não disponível ou sem função criarTarefa()');
                 }
                 
             } catch (error) {
-                console.error('❌ Erro ao criar tarefa Supabase:', error);
+                console.error('❌ Erro ao criar tarefa unificada:', error);
                 if (typeof Notifications !== 'undefined') {
-                    Notifications.error('❌ Sistema indisponível');
+                    Notifications.error('❌ App.js não disponível para criar tarefa');
+                } else {
+                    alert('❌ App.js não disponível para criar tarefa');
                 }
             }
         };
 
-        window.abrirMinhaAgendaSupabase = function() {
+        // 🔥 ABRIR AGENDA UNIFICADA (nova função)
+        window.abrirMinhaAgendaUnificada = function() {
             try {
-                console.log('📅 Abrindo Agenda via Supabase...');
-                window.location.href = 'agenda.html';
+                console.log('📅 Abrindo Minha Agenda UNIFICADA...');
+                
+                // ✅ VERIFICAR SE APP.JS ESTÁ DISPONÍVEL
+                if (typeof App !== 'undefined' && App.estadoSistema?.inicializado) {
+                    console.log('✅ App.js v8.6.0 UNIFICADO disponível - redirecionando para agenda');
+                    window.location.href = 'agenda.html';
+                } else {
+                    console.warn('⚠️ App.js não inicializado completamente - redirecionando mesmo assim');
+                    window.location.href = 'agenda.html';
+                }
+                
             } catch (error) {
-                console.error('❌ Erro ao abrir agenda:', error);
-                window.location.href = 'agenda.html';
+                console.error('❌ Erro ao abrir agenda unificada:', error);
+                window.location.href = 'agenda.html'; // Fallback
             }
         };
 
-        window.salvarDadosSupabase = function() {
+        // 💾 SALVAR DADOS VIA SISTEMA UNIFICADO
+        window.salvarDadosUnificado = function() {
             try {
-                console.log('💾 Salvando no Supabase Brasil...');
+                console.log('💾 Salvando dados via App.js unificado...');
                 
-                if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
-                    Persistence.salvarDadosCritico().then(() => {
+                if (typeof App !== 'undefined' && App._salvarDadosUnificados) {
+                    App._salvarDadosUnificados().then(() => {
                         if (typeof Notifications !== 'undefined') {
-                            Notifications.success('✅ Dados salvos no Supabase Brasil!');
+                            Notifications.success('✅ Dados salvos via App.js unificado!');
+                        } else {
+                            alert('✅ Dados salvos via App.js unificado!');
                         }
                     }).catch(error => {
                         console.error('❌ Erro ao salvar:', error);
                         if (typeof Notifications !== 'undefined') {
-                            Notifications.error('❌ Erro ao salvar no Supabase');
+                            Notifications.error('❌ Erro ao salvar dados');
                         }
                     });
+                } else if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
+                    Persistence.salvarDadosCritico();
                 } else {
-                    throw new Error('Sistema de persistência Supabase não disponível');
+                    throw new Error('Sistema de persistência não disponível');
                 }
                 
             } catch (error) {
-                console.error('❌ Erro ao salvar Supabase:', error);
+                console.error('❌ Erro ao salvar dados unificado:', error);
                 if (typeof Notifications !== 'undefined') {
-                    Notifications.warning('⚠️ Sistema Supabase indisponível');
+                    Notifications.warning('⚠️ Sistema de salvamento não disponível no momento');
+                } else {
+                    alert('⚠️ Sistema de salvamento não disponível no momento');
                 }
             }
         };
 
-        window.migrarParaSupabase = function() {
-            try {
-                console.log('🔄 Abrindo ferramenta de migração...');
-                window.open('teste-migracao-supabase.html', '_blank');
-            } catch (error) {
-                console.error('❌ Erro ao abrir migração:', error);
-            }
+        // ⚠️ MANTER COMPATIBILIDADE COM FUNÇÕES ANTIGAS
+        window.salvarDadosCritico = function() {
+            console.warn('⚠️ salvarDadosCritico() é função legada - usando salvarDadosUnificado()');
+            salvarDadosUnificado();
         };
 
-        // 🧪 TESTES AUTOMÁTICOS
-        window.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 Sistema BIAPO v2.0 SUPABASE BRASIL inicializado!');
-            console.log('🇧🇷 Servidor no Brasil - Baixa latência');
-            console.log('🔥 Firebase COMPLETAMENTE removido');
-            
-            // Executar verificação automática após 2 segundos
-            setTimeout(() => {
-                verificarSistemaSupabase();
-            }, 2000);
-        });
-
-        // Atualizar nome do usuário no header
+        // ❌ DETECTAR USO DE PERSONALTASKS (para debug)
+        if (typeof PersonalTasks !== 'undefined') {
+            console.warn('⚠️ PersonalTasks ainda carregado! Deve ser removido para sistema unificado.');
+        } else {
+            console.log('✅ PersonalTasks removido com sucesso - sistema 100% unificado!');
+        }
+        
+        console.log('🔍 Sistema de Verificações BIAPO v1.0 SUPABASE PURO carregado!');
+        console.log('📋 Comandos: verificarSistemaSupabase() | verificacaoRapida()');
+        console.log('🚀 Funções: criarTarefaUnificada() | abrirMinhaAgendaUnificada()');
+        console.log('🌎 Servidor: Brasil | Banco: Supabase | Status: Operacional');
+    </script>
+    <script>
+        // Atualizar nome do usuário no topo do index
         function atualizarUsuarioIndex() {
             if (window.Auth && Auth.state && Auth.state.usuario) {
                 var nome = Auth.state.usuario.displayName || Auth.state.usuario.nome || Auth.state.usuario.email || 'Usuário';
@@ -773,7 +759,7 @@
                 if (usuarioEl) usuarioEl.textContent = '👤 ' + nome;
             }
         }
-
+        // Atualizar ao logar
         if (window.Auth) {
             if (typeof Auth._executarCallbacksLogin === 'function') {
                 var originalLogin = Auth._executarCallbacksLogin;
@@ -783,14 +769,8 @@
                 };
             }
         }
-        
         window.addEventListener('DOMContentLoaded', atualizarUsuarioIndex);
         window.addEventListener('biapo-login', atualizarUsuarioIndex);
-
-        console.log('🔍 Sistema de Verificações BIAPO v2.0 SUPABASE BRASIL carregado!');
-        console.log('📋 Comandos: verificarSistemaSupabase() | testarSupabase()');
-        console.log('🚀 Funções: criarTarefaSupabase() | salvarDadosSupabase()');
-        console.log('🌎 Servidor: Brasil | Banco: Supabase | Firebase: REMOVIDO');
     </script>
 </body>
 </html>
