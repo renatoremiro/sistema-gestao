@@ -1,9 +1,9 @@
 // 🚀 CLIENTE SUPABASE OTIMIZADO PARA SISTEMA BIAPO
 // Arquivo: assets/js/config/supabase-client.js
 
-// ⚠️ SUBSTITUA ESTAS CONFIGURAÇÕES PELAS SUAS:
-const SUPABASE_URL = 'https://SEU_PROJECT_ID.supabase.co'; // COLE SUA URL AQUI
-const SUPABASE_ANON_KEY = 'SUA_ANON_KEY_AQUI'; // COLE SUA CHAVE AQUI
+// ✅ CONFIGURAÇÕES SUPABASE - SISTEMA GESTÃO 292
+const SUPABASE_URL = 'https://vyquhmlxjrvbdwgadtxc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXVobWx4anJ2YmR3Z2FkdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NzQyMDYsImV4cCI6MjA2ODI1MDIwNn0.zyj_8uW4T7E40ekdqDDW8E91P7LpXD5Pr53GCrPqMvM';
 
 class SupabaseClient {
     constructor() {

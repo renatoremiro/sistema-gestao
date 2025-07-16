@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Migração Firebase → Supabase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #007bff;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,123,255,0.3);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+
+        .btn.warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .log-container {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #28a745);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid #007bff;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning-box h3 {
+            margin-bottom: 10px;
+            color: #dc3545;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Migração Firebase → Supabase</h1>
+            <p>Sistema de Gestão BIAPO v8.13.0</p>
+        </div>
+
+        <div class="content">
+            <!-- Status Geral -->
+            <div class="section">
+                <h2>📊 Status da Migração</h2>
+                <div id="status-geral" class="status info">
+                    🔄 Aguardando início da migração...
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Aviso Importante -->
+            <div class="warning-box">
+                <h3>⚠️ Importante - Leia Antes de Continuar</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Este processo fará backup completo dos dados Firebase</li>
+                    <li>Os dados serão migrados para o Supabase configurado</li>
+                    <li>O backup será baixado automaticamente</li>
+                    <li>O processo pode levar alguns minutos</li>
+                    <li><strong>Mantenha esta aba aberta durante todo o processo</strong></li>
+                </ul>
+            </div>
+
+            <!-- Testes de Conexão -->
+            <div class="section">
+                <h2>🔌 Teste de Conexões</h2>
+                <button id="testar-firebase" class="btn">🔥 Testar Firebase</button>
+                <button id="testar-supabase" class="btn">⚡ Testar Supabase</button>
+                <div id="status-conexoes"></div>
+            </div>
+
+            <!-- Migração -->
+            <div class="section">
+                <h2>🚀 Executar Migração</h2>
+                <button id="backup-only" class="btn warning">🛡️ Só Backup Firebase</button>
+                <button id="migracao-completa" class="btn success">🔄 Migração Completa</button>
+                <button id="validar-migracao" class="btn">🔍 Validar Migração</button>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="section">
+                <h2>📈 Estatísticas</h2>
+                <div class="stats" id="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-usuarios">-</div>
+                        <div class="stat-label">Usuários</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-eventos">-</div>
+                        <div class="stat-label">Eventos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-tarefas">-</div>
+                        <div class="stat-label">Tarefas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-status">🔄</div>
+                        <div class="stat-label">Status</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log da Migração -->
+            <div class="section">
+                <h2>📝 Log da Migração</h2>
+                <div id="log-migracao" class="log-container">
+                    Aguardando início da migração...
+                </div>
+                <button id="limpar-log" class="btn" style="margin-top: 10px;">🗑️ Limpar Log</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    
+    <script src="assets/js/config/firebase.js"></script>
+    <script src="assets/js/config/supabase-client.js"></script>
+    <script src="assets/js/utils/migration-supabase.js"></script>
+
+    <script>
+        // 🎮 CONTROLE DA INTERFACE
+        class InterfaceMigracao {
+            constructor() {
+                this.elementos = {
+                    statusGeral: document.getElementById('status-geral'),
+                    progressFill: document.getElementById('progress-fill'),
+                    logMigracao: document.getElementById('log-migracao'),
+                    statusConexoes: document.getElementById('status-conexoes'),
+                    statUsuarios: document.getElementById('stat-usuarios'),
+                    statEventos: document.getElementById('stat-eventos'),
+                    statTarefas: document.getElementById('stat-tarefas'),
+                    statStatus: document.getElementById('stat-status')
+                };
+
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Testes de conexão
+                document.getElementById('testar-firebase').onclick = () => this.testarFirebase();
+                document.getElementById('testar-supabase').onclick = () => this.testarSupabase();
+
+                // Migração
+                document.getElementById('backup-only').onclick = () => this.executarBackup();
+                document.getElementById('migracao-completa').onclick = () => this.executarMigracao();
+                document.getElementById('validar-migracao').onclick = () => this.validarMigracao();
+
+                // Log
+                document.getElementById('limpar-log').onclick = () => this.limparLog();
+            }
+
+            async testarFirebase() {
+                this.atualizarStatus('Testando conexão Firebase...', 'info');
+                try {
+                    if (window.firebaseInitPromise) {
+                        await window.firebaseInitPromise;
+                    }
+
+                    if (window.database) {
+                        const snapshot = await window.database.ref('.info/connected').once('value');
+                        const conectado = snapshot.val() === true;
+                        
+                        if (conectado) {
+                            this.atualizarStatus('✅ Firebase conectado com sucesso!', 'success');
+                        } else {
+                            this.atualizarStatus('⚠️ Firebase offline', 'warning');
+                        }
+                    } else {
+                        this.atualizarStatus('❌ Firebase não inicializado', 'error');
+                    }
+                } catch (error) {
+                    this.atualizarStatus(`❌ Erro Firebase: ${error.message}`, 'error');
+                }
+            }
+
+            async testarSupabase() {
+                this.atualizarStatus('Testando conexão Supabase...', 'info');
+                try {
+                    if (window.supabaseClient) {
+                        const conectado = await window.supabaseClient.testarConexao();
+                        if (conectado) {
+                            this.atualizarStatus('✅ Supabase conectado com sucesso!', 'success');
+                            this.atualizarEstatisticas();
+                        } else {
+                            this.atualizarStatus('❌ Falha na conexão Supabase', 'error');
+                        }
+                    } else {
+                        this.atualizarStatus('❌ Supabase client não encontrado', 'error');
+                    }
+                } catch (error) {
+                    this.atualizarStatus(`❌ Erro Supabase: ${error.message}`, 'error');
+                }
+            }
+
+            async executarBackup() {
+                this.atualizarStatus('🛡️ Executando backup Firebase...', 'info');
+                this.atualizarProgresso(25);
+                
+                try {
+                    await window.backupFirebase();
+                    this.atualizarStatus('✅ Backup Firebase concluído!', 'success');
+                    this.atualizarProgresso(100);
+                } catch (error) {
+                    this.atualizarStatus(`❌ Erro no backup: ${error.message}`, 'error');
+                    this.atualizarProgresso(0);
+                }
+            }
+
+            async executarMigracao() {
+                this.atualizarStatus('🚀 Executando migração completa...', 'info');
+                this.atualizarProgresso(10);
+                
+                try {
+                    const resultado = await window.executarMigracaoCompleta();
+                    
+                    this.atualizarProgresso(100);
+                    this.atualizarStatus(
+                        `🎉 Migração concluída! ${resultado.totalSucesso} sucessos, ${resultado.totalErro} erros`, 
+                        resultado.totalErro === 0 ? 'success' : 'warning'
+                    );
+                    
+                    this.atualizarEstatisticas();
+                    
+                } catch (error) {
+                    this.atualizarStatus(`❌ Erro na migração: ${error.message}`, 'error');
+                    this.atualizarProgresso(0);
+                }
+            }
+
+            async validarMigracao() {
+                this.atualizarStatus('🔍 Validando migração...', 'info');
+                
+                try {
+                    const stats = await window.validarMigracaoSupabase();
+                    this.atualizarStatus('✅ Validação concluída!', 'success');
+                    this.atualizarEstatisticas();
+                } catch (error) {
+                    this.atualizarStatus(`❌ Erro na validação: ${error.message}`, 'error');
+                }
+            }
+
+            async atualizarEstatisticas() {
+                try {
+                    if (window.supabaseClient) {
+                        const stats = await window.supabaseClient.obterEstatisticas();
+                        this.elementos.statUsuarios.textContent = stats.usuarios || 0;
+                        this.elementos.statEventos.textContent = stats.eventos || 0;
+                        this.elementos.statTarefas.textContent = stats.tarefas || 0;
+                        this.elementos.statStatus.textContent = stats.conectado ? '✅' : '❌';
+                    }
+                } catch (error) {
+                    console.error('Erro ao atualizar estatísticas:', error);
+                }
+            }
+
+            atualizarStatus(mensagem, tipo) {
+                this.elementos.statusGeral.textContent = mensagem;
+                this.elementos.statusGeral.className = `status ${tipo}`;
+            }
+
+            atualizarProgresso(porcentagem) {
+                this.elementos.progressFill.style.width = `${porcentagem}%`;
+            }
+
+            limparLog() {
+                this.elementos.logMigracao.textContent = 'Log limpo.';
+            }
+        }
+
+        // 📝 INTERCEPTAR LOGS
+        const logOriginal = console.log;
+        console.log = function(...args) {
+            logOriginal.apply(console, args);
+            
+            const logElement = document.getElementById('log-migracao');
+            if (logElement) {
+                const timestamp = new Date().toLocaleTimeString();
+                const mensagem = args.join(' ');
+                logElement.innerHTML += `[${timestamp}] ${mensagem}\n`;
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+        };
+
+        // 🚀 INICIALIZAÇÃO
+        document.addEventListener('DOMContentLoaded', () => {
+            window.interfaceMigracao = new InterfaceMigracao();
+            console.log('🎮 Interface de migração carregada!');
+            console.log('🔧 Teste as conexões antes de executar a migração');
+        });
+    </script>
+</body>
+</html>
