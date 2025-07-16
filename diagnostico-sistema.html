@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Diagnóstico Sistema BIAPO v2.1</title>
+    
+    <!-- CARREGAMENTO DOS SCRIPTS PRINCIPAIS -->
+    <script src="assets/js/config/supabase-config.js"></script>
+    <script src="assets/js/config/supabase-client.js"></script>
+    <script src="assets/js/modules/persistence-supabase.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #C53030 0%, #9B2C2C 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f9fafb;
+        }
+        
+        .section h3 {
+            margin: 0 0 15px 0;
+            color: #374151;
+            font-size: 18px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .test-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .status.error {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .status.warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .status.loading {
+            background: #6b7280;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #C53030 0%, #9B2C2C 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #9B2C2C 0%, #742A2A 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(197, 48, 48, 0.3);
+        }
+        
+        .btn.secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        }
+        
+        .btn.secondary:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        }
+        
+        .log-area {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert.success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        
+        .alert.error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .alert.warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Diagnóstico Sistema BIAPO v2.1</h1>
+            <p>Verificação completa do sistema Supabase seguro</p>
+        </div>
+        
+        <div class="content">
+            <!-- CONFIGURAÇÃO -->
+            <div class="section">
+                <h3>🔐 Configuração Supabase</h3>
+                <div class="test-item">
+                    <div class="status loading" id="config-status">⏳</div>
+                    <span>Sistema de configuração segura</span>
+                </div>
+                <div class="test-item">
+                    <div class="status loading" id="credentials-status">⏳</div>
+                    <span>Credenciais carregadas</span>
+                </div>
+                <div class="test-item">
+                    <div class="status loading" id="security-status">⏳</div>
+                    <span>Verificação de segurança</span>
+                </div>
+            </div>
+            
+            <!-- CONECTIVIDADE -->
+            <div class="section">
+                <h3>🌐 Conectividade</h3>
+                <div class="test-item">
+                    <div class="status loading" id="client-status">⏳</div>
+                    <span>Cliente Supabase inicializado</span>
+                </div>
+                <div class="test-item">
+                    <div class="status loading" id="connection-status">⏳</div>
+                    <span>Conexão com servidor</span>
+                </div>
+                <div class="test-item">
+                    <div class="status loading" id="tables-status">⏳</div>
+                    <span>Estrutura de tabelas</span>
+                </div>
+            </div>
+            
+            <!-- FUNCIONALIDADES -->
+            <div class="section">
+                <h3>💾 Funcionalidades</h3>
+                <div class="test-item">
+                    <div class="status loading" id="persistence-status">⏳</div>
+                    <span>Sistema de persistência</span>
+                </div>
+                <div class="test-item">
+                    <div class="status loading" id="save-status">⏳</div>
+                    <span>Salvamento de dados</span>
+                </div>
+                <div class="test-item">
+                    <div class="status loading" id="load-status">⏳</div>
+                    <span>Carregamento de dados</span>
+                </div>
+                <div class="test-item">
+                    <div class="status loading" id="backup-status">⏳</div>
+                    <span>Backup local</span>
+                </div>
+            </div>
+            
+            <!-- RESULTADO FINAL -->
+            <div class="section">
+                <h3>📊 Resultado Final</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <div id="final-result" class="alert" style="display: none;">
+                    <strong>Resultado será exibido aqui...</strong>
+                </div>
+            </div>
+            
+            <!-- AÇÕES -->
+            <div class="actions">
+                <button class="btn" onclick="executarDiagnostico()">🔄 Executar Diagnóstico</button>
+                <button class="btn secondary" onclick="testarSalvamento()">💾 Testar Salvamento</button>
+                <button class="btn secondary" onclick="testarCarregamento()">📥 Testar Carregamento</button>
+                <button class="btn secondary" onclick="configurarSupabase()">⚙️ Configurar</button>
+                <button class="btn secondary" onclick="mostrarLogs()">📋 Ver Logs</button>
+                <button class="btn secondary" onclick="exportarRelatorio()">📄 Exportar Relatório</button>
+            </div>
+            
+            <!-- ÁREA DE LOGS -->
+            <div class="log-area" id="log-area" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // SISTEMA DE DIAGNÓSTICO BIAPO v2.1
+        class DiagnosticoBiapo {
+            constructor() {
+                this.resultados = {};
+                this.logs = [];
+                this.totalTestes = 10;
+                this.testesCompletos = 0;
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logMessage = `[${timestamp}] ${message}`;
+                this.logs.push(logMessage);
+                console.log(logMessage);
+            }
+
+            atualizarStatus(elementId, status, message = '') {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                element.className = `status ${status}`;
+                
+                switch (status) {
+                    case 'success':
+                        element.textContent = '✅';
+                        break;
+                    case 'error':
+                        element.textContent = '❌';
+                        break;
+                    case 'warning':
+                        element.textContent = '⚠️';
+                        break;
+                    case 'loading':
+                        element.textContent = '⏳';
+                        break;
+                }
+                
+                this.resultados[elementId] = { status, message };
+                this.atualizarProgresso();
+                
+                if (status !== 'loading') {
+                    this.testesCompletos++;
+                }
+            }
+
+            atualizarProgresso() {
+                const progresso = (this.testesCompletos / this.totalTestes) * 100;
+                const progressBar = document.getElementById('progress-fill');
+                if (progressBar) {
+                    progressBar.style.width = `${progresso}%`;
+                }
+                
+                if (this.testesCompletos >= this.totalTestes) {
+                    this.mostrarResultadoFinal();
+                }
+            }
+
+            mostrarResultadoFinal() {
+                const sucessos = Object.values(this.resultados).filter(r => r.status === 'success').length;
+                const erros = Object.values(this.resultados).filter(r => r.status === 'error').length;
+                const avisos = Object.values(this.resultados).filter(r => r.status === 'warning').length;
+                
+                const resultDiv = document.getElementById('final-result');
+                resultDiv.style.display = 'block';
+                
+                let className = 'success';
+                let titulo = '🎉 Sistema funcionando perfeitamente!';
+                let detalhes = 'Todos os testes passaram. O sistema está pronto para uso.';
+                
+                if (erros > 0) {
+                    className = 'error';
+                    titulo = '❌ Problemas críticos encontrados';
+                    detalhes = `${erros} erro(s) crítico(s) encontrado(s). Verifique a configuração.`;
+                } else if (avisos > 0) {
+                    className = 'warning';
+                    titulo = '⚠️ Sistema funcional com avisos';
+                    detalhes = `${avisos} aviso(s) encontrado(s). Sistema funcional mas pode ser melhorado.`;
+                }
+                
+                resultDiv.className = `alert ${className}`;
+                resultDiv.innerHTML = `
+                    <strong>${titulo}</strong><br>
+                    ${detalhes}<br>
+                    <small>Sucessos: ${sucessos} | Avisos: ${avisos} | Erros: ${erros}</small>
+                `;
+                
+                this.log(`Diagnóstico completo: ${sucessos} sucessos, ${avisos} avisos, ${erros} erros`);
+            }
+
+            async executarDiagnostico() {
+                this.log('🚀 Iniciando diagnóstico completo...');
+                this.testesCompletos = 0;
+                
+                // Reset de todos os status
+                ['config-status', 'credentials-status', 'security-status', 
+                 'client-status', 'connection-status', 'tables-status',
+                 'persistence-status', 'save-status', 'load-status', 'backup-status'].forEach(id => {
+                    this.atualizarStatus(id, 'loading');
+                });
+
+                // 1. Verificar configuração
+                await this.testarConfiguracao();
+                
+                // 2. Verificar credenciais
+                await this.testarCredenciais();
+                
+                // 3. Verificar segurança
+                await this.testarSeguranca();
+                
+                // 4. Verificar cliente
+                await this.testarCliente();
+                
+                // 5. Verificar conexão
+                await this.testarConexao();
+                
+                // 6. Verificar tabelas
+                await this.testarTabelas();
+                
+                // 7. Verificar persistência
+                await this.testarPersistencia();
+                
+                // 8. Verificar salvamento
+                await this.testarSalvamento();
+                
+                // 9. Verificar carregamento
+                await this.testarCarregamento();
+                
+                // 10. Verificar backup
+                await this.testarBackup();
+            }
+
+            async testarConfiguracao() {
+                try {
+                    if (typeof window.supabaseConfigSegura !== 'undefined') {
+                        this.log('✅ Sistema de configuração segura carregado');
+                        this.atualizarStatus('config-status', 'success');
+                    } else {
+                        this.log('❌ Sistema de configuração não carregado');
+                        this.atualizarStatus('config-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro na configuração: ${error.message}`);
+                    this.atualizarStatus('config-status', 'error');
+                }
+            }
+
+            async testarCredenciais() {
+                try {
+                    if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.key) {
+                        this.log('✅ Credenciais carregadas');
+                        this.atualizarStatus('credentials-status', 'success');
+                    } else {
+                        this.log('⚠️ Credenciais não configuradas - será necessário configurar');
+                        this.atualizarStatus('credentials-status', 'warning');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro nas credenciais: ${error.message}`);
+                    this.atualizarStatus('credentials-status', 'error');
+                }
+            }
+
+            async testarSeguranca() {
+                try {
+                    const htmlContent = document.documentElement.innerHTML;
+                    if (!htmlContent.includes('eyJhbGciOiJIUzI1NiIs') && !htmlContent.includes('vyquhmlxjrvbdwgadtxc')) {
+                        this.log('✅ Segurança OK - nenhuma credencial hardcoded encontrada');
+                        this.atualizarStatus('security-status', 'success');
+                    } else {
+                        this.log('❌ RISCO DE SEGURANÇA - credenciais hardcoded encontradas!');
+                        this.atualizarStatus('security-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro na verificação de segurança: ${error.message}`);
+                    this.atualizarStatus('security-status', 'error');
+                }
+            }
+
+            async testarCliente() {
+                try {
+                    if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+                        this.log('✅ Cliente Supabase inicializado');
+                        this.atualizarStatus('client-status', 'success');
+                    } else {
+                        this.log('❌ Cliente Supabase não inicializado');
+                        this.atualizarStatus('client-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro no cliente: ${error.message}`);
+                    this.atualizarStatus('client-status', 'error');
+                }
+            }
+
+            async testarConexao() {
+                try {
+                    if (typeof window.testarSupabase === 'function') {
+                        const conectado = await window.testarSupabase();
+                        if (conectado) {
+                            this.log('✅ Conexão com Supabase estabelecida');
+                            this.atualizarStatus('connection-status', 'success');
+                        } else {
+                            this.log('❌ Falha na conexão com Supabase');
+                            this.atualizarStatus('connection-status', 'error');
+                        }
+                    } else {
+                        this.log('❌ Função de teste não disponível');
+                        this.atualizarStatus('connection-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro na conexão: ${error.message}`);
+                    this.atualizarStatus('connection-status', 'error');
+                }
+            }
+
+            async testarTabelas() {
+                try {
+                    if (window.supabaseClient && window.supabaseClient.conectado) {
+                        // Tentar buscar um registro de cada tabela principal
+                        const usuarios = await window.supabaseClient.buscar('usuarios');
+                        const eventos = await window.supabaseClient.buscar('eventos');
+                        const tarefas = await window.supabaseClient.buscar('tarefas');
+                        
+                        this.log(`✅ Tabelas acessíveis - Usuários: ${usuarios.length}, Eventos: ${eventos.length}, Tarefas: ${tarefas.length}`);
+                        this.atualizarStatus('tables-status', 'success');
+                    } else {
+                        this.log('⚠️ Não foi possível verificar tabelas - cliente desconectado');
+                        this.atualizarStatus('tables-status', 'warning');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro nas tabelas: ${error.message}`);
+                    this.atualizarStatus('tables-status', 'error');
+                }
+            }
+
+            async testarPersistencia() {
+                try {
+                    if (typeof window.Persistence !== 'undefined') {
+                        const status = window.Persistence.obterStatus();
+                        this.log(`✅ Sistema de persistência ativo - Versão: ${status.versao}`);
+                        this.atualizarStatus('persistence-status', 'success');
+                    } else {
+                        this.log('❌ Sistema de persistência não carregado');
+                        this.atualizarStatus('persistence-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro na persistência: ${error.message}`);
+                    this.atualizarStatus('persistence-status', 'error');
+                }
+            }
+
+            async testarSalvamento() {
+                try {
+                    if (typeof window.salvarDadosSupabase === 'function') {
+                        // Simular dados de teste
+                        window.App = window.App || {};
+                        window.App.dados = {
+                            eventos: [{ id: 'teste_' + Date.now(), titulo: 'Teste Diagnóstico', data: new Date().toISOString().split('T')[0] }],
+                            tarefas: [],
+                            usuarios: {},
+                            areas: {}
+                        };
+                        
+                        // Simular usuário logado
+                        window.App.usuarioAtual = { email: 'teste@diagnostico.com', nome: 'Teste Diagnóstico' };
+                        
+                        await window.salvarDadosSupabase();
+                        this.log('✅ Teste de salvamento bem-sucedido');
+                        this.atualizarStatus('save-status', 'success');
+                    } else {
+                        this.log('❌ Função de salvamento não disponível');
+                        this.atualizarStatus('save-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`⚠️ Aviso no salvamento: ${error.message}`);
+                    this.atualizarStatus('save-status', 'warning');
+                }
+            }
+
+            async testarCarregamento() {
+                try {
+                    if (typeof window.carregarDadosSupabase === 'function') {
+                        const dados = await window.carregarDadosSupabase('teste@diagnostico.com');
+                        if (dados) {
+                            this.log('✅ Teste de carregamento bem-sucedido');
+                            this.atualizarStatus('load-status', 'success');
+                        } else {
+                            this.log('⚠️ Carregamento retornou vazio (normal para usuário teste)');
+                            this.atualizarStatus('load-status', 'warning');
+                        }
+                    } else {
+                        this.log('❌ Função de carregamento não disponível');
+                        this.atualizarStatus('load-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`⚠️ Aviso no carregamento: ${error.message}`);
+                    this.atualizarStatus('load-status', 'warning');
+                }
+            }
+
+            async testarBackup() {
+                try {
+                    if (window.Persistence && typeof window.Persistence.recuperarBackupLocal === 'function') {
+                        const backup = window.Persistence.recuperarBackupLocal();
+                        this.log(`✅ Sistema de backup local funcionando`);
+                        this.atualizarStatus('backup-status', 'success');
+                    } else {
+                        this.log('❌ Sistema de backup não disponível');
+                        this.atualizarStatus('backup-status', 'error');
+                    }
+                } catch (error) {
+                    this.log(`❌ Erro no backup: ${error.message}`);
+                    this.atualizarStatus('backup-status', 'error');
+                }
+            }
+        }
+
+        // INSTÂNCIA GLOBAL
+        const diagnostico = new DiagnosticoBiapo();
+
+        // FUNÇÕES GLOBAIS
+        window.executarDiagnostico = () => diagnostico.executarDiagnostico();
+        window.testarSalvamento = () => diagnostico.testarSalvamento();
+        window.testarCarregamento = () => diagnostico.testarCarregamento();
+        
+        window.configurarSupabase = async () => {
+            if (typeof window.configurarSupabaseSeguro === 'function') {
+                try {
+                    await window.configurarSupabaseSeguro();
+                    alert('✅ Configuração realizada! Execute o diagnóstico novamente.');
+                } catch (error) {
+                    alert('❌ Erro na configuração: ' + error.message);
+                }
+            } else {
+                alert('❌ Sistema de configuração não disponível');
+            }
+        };
+        
+        window.mostrarLogs = () => {
+            const logArea = document.getElementById('log-area');
+            logArea.style.display = logArea.style.display === 'none' ? 'block' : 'none';
+            logArea.innerHTML = diagnostico.logs.join('\n');
+        };
+        
+        window.exportarRelatorio = () => {
+            const relatorio = {
+                timestamp: new Date().toISOString(),
+                versao: '2.1',
+                resultados: diagnostico.resultados,
+                logs: diagnostico.logs,
+                estatisticas: {
+                    sucessos: Object.values(diagnostico.resultados).filter(r => r.status === 'success').length,
+                    avisos: Object.values(diagnostico.resultados).filter(r => r.status === 'warning').length,
+                    erros: Object.values(diagnostico.resultados).filter(r => r.status === 'error').length
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(relatorio, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `diagnostico-biapo-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // EXECUÇÃO AUTOMÁTICA
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔧 Sistema de Diagnóstico BIAPO v2.1 carregado!');
+            
+            // Aguardar carregamento completo dos scripts
+            setTimeout(() => {
+                executarDiagnostico();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

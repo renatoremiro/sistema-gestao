@@ -119,9 +119,15 @@ class SupabaseClient {
         this.inicializar();
     }
 
-    // 🔧 INICIALIZAÇÃO SEGURA
+    // 🔧 INICIALIZAÇÃO SEGURA v2.1
     async inicializar() {
         try {
+            // Aguardar configuração segura externa
+            if (!window.SUPABASE_CONFIG && window.configurarSupabaseSeguro) {
+                console.log('🔐 Carregando configuração segura...');
+                await window.configurarSupabaseSeguro();
+            }
+            
             // Carregar e validar configurações
             await this.configManager.carregarConfig();
             this.configManager.validarConfig();

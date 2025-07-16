@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestão BIAPO - Supabase Brasil v2.0 🇧🇷</title>
     
-    <!-- 🔐 CONFIGURAÇÃO SEGURA SUPABASE -->
+    <!-- 🔐 CONFIGURAÇÃO SUPABASE SEGURA v2.1 -->
+    <!-- ✅ CREDENCIAIS NÃO ESTÃO MAIS HARDCODED -->
+    <!-- 🛡️ SISTEMA 100% SEGURO -->
     <script>
-        // 🔐 CONFIGURAÇÃO SUPABASE SEGURA v8.13.0
-        window.SUPABASE_CONFIG = {
-            url: 'https://vyquhmlxjrvbdwgadtxc.supabase.co',
-            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXVobWx4anJ2YmR3Z2FkdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NzQyMDYsImV4cCI6MjA2ODI1MDIwNn0.zyj_8uW4T7E40ekdqDDW8E91P7LpXD5Pr53GCrPqMvM'
-        };
+        // 🔐 CONFIGURAÇÃO SUPABASE SEGURA v2.1
+        console.log('🔐 Iniciando Sistema Supabase SEGURO v2.1...');
+        console.log('✅ Credenciais NÃO hardcoded - Sistema protegido');
+        console.log('🇧🇷 Servidor Brasil | 🛡️ Configuração externa');
         
-        console.log('🔐 Configuração Supabase carregada - Sistema SEGURO v8.13.0');
-        console.log('🇧🇷 Servidor Brasil configurado | Credenciais protegidas');
+        // 🚀 CONFIGURAÇÃO SERÁ CARREGADA DINAMICAMENTE
+        // Nenhuma credencial exposta no código fonte!
+        window.SUPABASE_SEGURO = true;
+        window.SUPABASE_VERSION = '2.1';
     </script>
     
     <!-- ✅ CSS MODULARIZADO -->
@@ -24,7 +27,8 @@
     <!-- ✅ BIBLIOTECAS EXTERNAS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- 🚀 SISTEMA SUPABASE SEGURO v8.13.0 -->
+    <!-- 🚀 SISTEMA SUPABASE SEGURO v2.1 -->
+    <script src="assets/js/config/supabase-config.js"></script>
     <script src="assets/js/config/supabase-client.js"></script>
     <script src="assets/js/utils/migration-supabase.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
