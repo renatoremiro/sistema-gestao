@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Teste de Persistência Corrigida</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #C53030;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .btn {
+            background: #C53030;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #9B2C2C;
+        }
+        .result {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+        #log {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Teste de Persistência Firebase - Correções Aplicadas</h1>
+        
+        <div class="test-section">
+            <h3>📊 Status do Sistema</h3>
+            <button class="btn" onclick="testarSistema()">🔍 Verificar Sistema</button>
+            <div id="statusResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔥 Teste Firebase Direto</h3>
+            <button class="btn" onclick="testarFirebase()">📡 Testar Firebase</button>
+            <div id="firebaseResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>💾 Teste Persistence.js</h3>
+            <button class="btn" onclick="testarPersistence()">💾 Testar Salvamento</button>
+            <div id="persistenceResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📅 Teste Agenda Unificada</h3>
+            <button class="btn" onclick="abrirAgenda()">📅 Abrir Agenda</button>
+            <div id="agendaResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Log de Execução</h3>
+            <button class="btn" onclick="limparLog()">🗑️ Limpar Log</button>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <!-- Scripts do Sistema -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <script src="assets/js/config/firebase.js"></script>
+    <script src="assets/js/modules/persistence.js"></script>
+
+    <script>
+        // 🔥 SISTEMA DE TESTE DE PERSISTÊNCIA
+        
+        function log(mensagem) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            logElement.textContent += `[${timestamp}] ${mensagem}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(mensagem);
+        }
+        
+        function mostrarResultado(elementId, conteudo, sucesso = true) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = conteudo;
+            element.className = sucesso ? 'result' : 'result error';
+            element.style.display = 'block';
+        }
+        
+        function limparLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        async function testarSistema() {
+            log('🔍 Iniciando teste do sistema...');
+            
+            try {
+                const checks = {
+                    firebase: typeof firebase !== 'undefined',
+                    database: typeof database !== 'undefined' && database !== null,
+                    persistence: typeof Persistence !== 'undefined',
+                    persistenceValidacao: typeof Persistence !== 'undefined' && typeof Persistence._validarDadosSimples === 'function',
+                    persistenceAguardaFirebase: typeof Persistence !== 'undefined' && typeof Persistence._aguardarFirebaseCompleto === 'function'
+                };
+                
+                log('Firebase disponível: ' + checks.firebase);
+                log('Database disponível: ' + checks.database);
+                log('Persistence.js carregado: ' + checks.persistence);
+                log('Validação flexível: ' + checks.persistenceValidacao);
+                log('Aguardo Firebase: ' + checks.persistenceAguardaFirebase);
+                
+                const todosFuncionando = Object.values(checks).every(check => check);
+                
+                if (todosFuncionando) {
+                    mostrarResultado('statusResult', '✅ Todos os módulos carregados corretamente!', true);
+                    log('✅ Sistema funcionando corretamente');
+                } else {
+                    const problemas = Object.entries(checks)
+                        .filter(([key, value]) => !value)
+                        .map(([key]) => key);
+                    
+                    mostrarResultado('statusResult', `❌ Problemas encontrados: ${problemas.join(', ')}`, false);
+                    log('❌ Problemas no sistema: ' + problemas.join(', '));
+                }
+                
+            } catch (error) {
+                log('❌ Erro no teste do sistema: ' + error.message);
+                mostrarResultado('statusResult', '❌ Erro ao testar sistema: ' + error.message, false);
+            }
+        }
+        
+        async function testarFirebase() {
+            log('🔥 Testando conexão Firebase...');
+            
+            try {
+                if (typeof database === 'undefined' || !database) {
+                    throw new Error('Database não disponível');
+                }
+                
+                // Testar conectividade com timeout
+                const snapshot = await Promise.race([
+                    database.ref('.info/connected').once('value'),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Timeout 5s')), 5000)
+                    )
+                ]);
+                
+                const conectado = snapshot.val() === true;
+                
+                if (conectado) {
+                    log('✅ Firebase conectado!');
+                    
+                    // Testar leitura de dados
+                    try {
+                        const dadosSnapshot = await database.ref('dados').once('value');
+                        const dados = dadosSnapshot.val();
+                        
+                        if (dados) {
+                            const numEventos = dados.eventos?.length || 0;
+                            const numTarefas = dados.tarefas?.length || 0;
+                            
+                            mostrarResultado('firebaseResult', 
+                                `✅ Firebase funcionando!<br>
+                                📊 Dados encontrados: ${numEventos} eventos, ${numTarefas} tarefas`, true);
+                            log(`✅ Dados carregados: ${numEventos} eventos, ${numTarefas} tarefas`);
+                        } else {
+                            mostrarResultado('firebaseResult', '⚠️ Firebase conectado mas sem dados', true);
+                            log('⚠️ Firebase conectado mas sem dados');
+                        }
+                    } catch (error) {
+                        log('⚠️ Erro ao ler dados: ' + error.message);
+                        mostrarResultado('firebaseResult', '⚠️ Conectado mas erro ao ler dados', true);
+                    }
+                } else {
+                    throw new Error('Firebase offline');
+                }
+                
+            } catch (error) {
+                log('❌ Erro Firebase: ' + error.message);
+                mostrarResultado('firebaseResult', '❌ Firebase não disponível: ' + error.message, false);
+            }
+        }
+        
+        async function testarPersistence() {
+            log('💾 Testando Persistence.js...');
+            
+            try {
+                if (typeof Persistence === 'undefined') {
+                    throw new Error('Persistence.js não carregado');
+                }
+                
+                // Testar validação flexível
+                const dadosTeste = {
+                    eventos: [
+                        { id: 'test1', titulo: 'Evento Teste', data: '2025-07-16' }
+                    ],
+                    tarefas: [
+                        { id: 'test2', titulo: 'Tarefa Teste' }
+                    ]
+                };
+                
+                log('Testando validação flexível...');
+                const validacao = Persistence._validarDadosSimples(dadosTeste);
+                log('Validação resultado: ' + validacao);
+                
+                if (validacao) {
+                    log('✅ Validação flexível funcionando');
+                    
+                    // Testar aguardo Firebase
+                    if (typeof Persistence._aguardarFirebaseCompleto === 'function') {
+                        log('Testando aguardo Firebase...');
+                        const firebaseOk = await Persistence._aguardarFirebaseCompleto();
+                        log('Firebase pronto: ' + firebaseOk);
+                        
+                        mostrarResultado('persistenceResult', 
+                            `✅ Persistence.js funcionando!<br>
+                            ✅ Validação flexível: OK<br>
+                            ✅ Aguardo Firebase: ${firebaseOk ? 'OK' : 'Offline'}`, true);
+                    } else {
+                        mostrarResultado('persistenceResult', '⚠️ Função aguardo Firebase não encontrada', false);
+                    }
+                } else {
+                    throw new Error('Validação falhou');
+                }
+                
+            } catch (error) {
+                log('❌ Erro Persistence: ' + error.message);
+                mostrarResultado('persistenceResult', '❌ Erro no Persistence.js: ' + error.message, false);
+            }
+        }
+        
+        function abrirAgenda() {
+            log('📅 Abrindo agenda unificada...');
+            mostrarResultado('agendaResult', '🔄 Redirecionando para agenda...', true);
+            
+            setTimeout(() => {
+                window.open('agenda.html', '_blank');
+            }, 1000);
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Teste de persistência iniciado');
+            log('📅 Versão: Correções aplicadas 2025-07-16');
+            log('🔥 Aguardando Firebase carregar...');
+            
+            // Aguardar Firebase carregar
+            setTimeout(() => {
+                if (typeof database !== 'undefined') {
+                    log('✅ Firebase carregado');
+                } else {
+                    log('⚠️ Firebase não carregado');
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

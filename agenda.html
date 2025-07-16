@@ -739,25 +739,29 @@
             }
 
             async aguardarApp() {
-                // Tentar menos vezes para ser mais rápido
-                if (this.tentativasInit < 5) {
-                    if (typeof App !== 'undefined' && 
-                        App.estadoSistema && 
-                        App.estadoSistema.inicializado &&
-                        typeof App.obterItensParaUsuario === 'function') {
-                        console.log('✅ App.js v' + (App.config?.versao || '8.12.x') + ' detectado');
-                        return true;
+                // Aguardar até 15 tentativas para melhor timing
+                if (this.tentativasInit < 15) {
+                    // Verificar App.js com critérios mais flexíveis
+                    if (typeof App !== 'undefined') {
+                        // App.js existe - verificar se tem dados ou funcionalidade mínima
+                        if (App.obterItensParaUsuario || App.dados || App.estadoSistema) {
+                            console.log('✅ App.js v' + (App.config?.versao || '8.12.x') + ' detectado e funcional');
+                            return true;
+                        }
                     }
                     
-                    console.log('⏳ Aguardando App.js...');
+                    console.log(`⏳ Aguardando App.js... (${this.tentativasInit + 1}/15)`);
                     this.tentativasInit++;
                     
-                    // Aguardar e tentar novamente
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    // Aguardar progressivamente mais tempo nas primeiras tentativas
+                    const delay = this.tentativasInit <= 5 ? 500 : 
+                                  this.tentativasInit <= 10 ? 1000 : 1500;
+                    
+                    await new Promise(resolve => setTimeout(resolve, delay));
                     return this.aguardarApp();
                 }
                 
-                console.warn('⚠️ App.js não disponível, usando fallbacks');
+                console.warn('⚠️ App.js não ficou disponível em 15 tentativas - usando fallbacks');
                 return false;
             }
 
@@ -986,21 +990,25 @@
                         return;
                     }
                     
-                    // 2. Fallback: localStorage
-                    console.log('⚠️ App.js não disponível, tentando localStorage...');
-                    const dadosLocal = localStorage.getItem('agendaDados');
-                    if (dadosLocal) {
-                        try {
-                            const parsed = JSON.parse(dadosLocal);
-                            this.dados = parsed;
-                            console.log(`✅ Dados do localStorage: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
-                            return;
-                        } catch (e) {
-                            console.error('Erro ao ler localStorage:', e);
-                        }
+                    // 2. NOVO: Tentar carregar direto do Firebase
+                    console.log('🔥 Tentando carregar direto do Firebase...');
+                    const dadosFirebase = await this.tentarCarregarDoFirebase();
+                    if (dadosFirebase) {
+                        this.dados = this.filtrarDadosParaUsuario(dadosFirebase);
+                        console.log(`✅ Dados do Firebase: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
+                        return;
                     }
                     
-                    // 3. Fallback final: dados de exemplo
+                    // 3. Fallback: localStorage
+                    console.log('⚠️ Tentando localStorage...');
+                    const dadosLocal = this.carregarDoLocalStorage();
+                    if (dadosLocal) {
+                        this.dados = dadosLocal;
+                        console.log(`✅ Dados do localStorage: ${this.dados.tarefas.length} tarefas + ${this.dados.eventos.length} eventos`);
+                        return;
+                    }
+                    
+                    // 4. Fallback final: dados de exemplo
                     console.log('⚠️ Usando dados de exemplo...');
                     this.dados = this.dadosExemplo;
                     
@@ -1010,10 +1018,127 @@
                 }
                 
                 // Sempre salvar no localStorage
+                this.salvarNoLocalStorage();
+            }
+            
+            // 🔥 NOVA FUNÇÃO: Tentar carregar direto do Firebase
+            async tentarCarregarDoFirebase() {
+                try {
+                    // Verificar se Firebase está disponível
+                    if (typeof database === 'undefined' || !database) {
+                        console.warn('⚠️ Database não disponível');
+                        return null;
+                    }
+                    
+                    // Carregar com timeout
+                    const snapshot = await Promise.race([
+                        database.ref('dados').once('value'),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout Firebase')), 8000)
+                        )
+                    ]);
+                    
+                    const dados = snapshot.val();
+                    
+                    if (dados && typeof dados === 'object') {
+                        console.log('✅ Dados carregados direto do Firebase');
+                        return dados;
+                    }
+                    
+                    return null;
+                    
+                } catch (error) {
+                    console.warn('⚠️ Erro ao carregar do Firebase:', error.message);
+                    return null;
+                }
+            }
+            
+            // 🔥 NOVA FUNÇÃO: Carregar do localStorage
+            carregarDoLocalStorage() {
+                try {
+                    // Tentar várias fontes
+                    const agendaDados = localStorage.getItem('agendaDados');
+                    const biapoV8 = localStorage.getItem('biapo_dados_v8');
+                    const backupRobusto = localStorage.getItem('biapo_backup_robusto');
+                    
+                    // Tentar agenda primeiro
+                    if (agendaDados) {
+                        const dados = JSON.parse(agendaDados);
+                        if (dados.tarefas || dados.eventos) {
+                            return dados;
+                        }
+                    }
+                    
+                    // Tentar dados do sistema principal
+                    if (biapoV8) {
+                        const dados = JSON.parse(biapoV8);
+                        return this.filtrarDadosParaUsuario(dados);
+                    }
+                    
+                    // Tentar backup robusto
+                    if (backupRobusto) {
+                        const backup = JSON.parse(backupRobusto);
+                        return this.filtrarDadosParaUsuario(backup.dados || backup);
+                    }
+                    
+                    return null;
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao carregar localStorage:', error);
+                    return null;
+                }
+            }
+            
+            // 🔥 NOVA FUNÇÃO: Filtrar dados para usuário
+            filtrarDadosParaUsuario(dados) {
+                if (!dados) return { tarefas: [], eventos: [] };
+                
+                return {
+                    tarefas: this.filtrarTarefas(dados.tarefas || []),
+                    eventos: this.filtrarEventos(dados.eventos || [])
+                };
+            }
+            
+            // 🔥 NOVA FUNÇÃO: Filtrar tarefas
+            filtrarTarefas(tarefas) {
+                if (!Array.isArray(tarefas)) return [];
+                
+                const email = this.usuarioAtual?.email?.toLowerCase();
+                if (!email) return tarefas;
+                
+                return tarefas.filter(tarefa => {
+                    return tarefa.responsavel?.toLowerCase() === email || 
+                           tarefa.criadoPor?.toLowerCase() === email ||
+                           tarefa.participantes?.some(p => p.toLowerCase().includes(email)) ||
+                           tarefa.escopo === 'pessoal' ||
+                           tarefa.escopo === 'publico';
+                });
+            }
+            
+            // 🔥 NOVA FUNÇÃO: Filtrar eventos
+            filtrarEventos(eventos) {
+                if (!Array.isArray(eventos)) return [];
+                
+                const email = this.usuarioAtual?.email?.toLowerCase();
+                if (!email) return eventos;
+                
+                return eventos.filter(evento => {
+                    return evento.responsavel?.toLowerCase() === email || 
+                           evento.criadoPor?.toLowerCase() === email ||
+                           evento.participantes?.some(p => p.toLowerCase().includes(email)) ||
+                           evento.pessoas?.some(p => p.toLowerCase().includes(email)) ||
+                           evento.visibilidade === 'publica';
+                });
+            }
+            
+            // 🔥 NOVA FUNÇÃO: Salvar no localStorage
+            salvarNoLocalStorage() {
                 try {
                     localStorage.setItem('agendaDados', JSON.stringify(this.dados));
+                    localStorage.setItem('agendaDados_timestamp', new Date().toISOString());
+                    localStorage.setItem('agendaDados_usuario', this.usuarioAtual?.email || 'demo');
                 } catch (e) {
-                    console.error('Erro ao salvar dados:', e);
+                    console.error('Erro ao salvar localStorage:', e);
                 }
             }
 
@@ -1288,16 +1413,32 @@
 
             async recarregar() {
                 try {
-                    console.log('🔄 Recarregando agenda unificada...');
+                    console.log('🔄 Recarregando agenda unificada v8.13.0 ROBUSTO...');
                     this.atualizarStatus('🔄 Recarregando...');
                     
                     // Verificar usuário
                     this.verificarUsuario();
                     
-                    // Verificar se App.js está disponível agora
-                    const appDisponivel = typeof App !== 'undefined' && App.obterItensParaUsuario;
+                    // 🔥 PRIMEIRO: Tentar salvar dados atuais se houver modificações
+                    if (typeof Persistence !== 'undefined' && Persistence.salvarDadosCritico) {
+                        try {
+                            await Persistence.salvarDadosCritico();
+                            console.log('💾 Dados salvos antes do recarregamento');
+                        } catch (error) {
+                            console.warn('⚠️ Não foi possível salvar antes de recarregar:', error.message);
+                        }
+                    }
                     
-                    // Carregar dados
+                    // 🔥 AGUARDAR Firebase ficar pronto
+                    if (typeof database !== 'undefined') {
+                        console.log('🔥 Aguardando Firebase para recarregamento...');
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                    
+                    // Verificar se App.js está disponível agora
+                    const appDisponivel = typeof App !== 'undefined' && (App.obterItensParaUsuario || App.dados);
+                    
+                    // Carregar dados com sistema robusto
                     await this.carregarDados(appDisponivel);
                     
                     // Renderizar
@@ -1310,6 +1451,9 @@
                     console.error('❌ Erro ao recarregar agenda:', error);
                     this.atualizarStatus('❌ Erro ao recarregar');
                     this.notificar('❌ Erro ao recarregar agenda', 'error');
+                    
+                    // 🔥 FALLBACK: garantir grid visível mesmo com erro
+                    this.garantirGridVisivel();
                 }
             }
             
