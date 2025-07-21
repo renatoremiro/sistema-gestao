@@ -1,0 +1,17 @@
+{
+    "url": "https://seu-projeto.supabase.co",
+    "key": "sua-chave-anonima-aqui",
+    "_instrucoes": {
+        "1": "Este é um arquivo de EXEMPLO",
+        "2": "Copie para supabase.json e preencha com suas credenciais",
+        "3": "Acesse https://supabase.com/dashboard",
+        "4": "Vá em Settings > API",
+        "5": "Copie Project URL e anon public key",
+        "6": "NUNCA use a service_role key aqui",
+        "7": "Adicione supabase.json no .gitignore"
+    },
+    "_exemplo": {
+        "url": "https://abc123def456.supabase.co",
+        "key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.exemplo..."
+    }
+}

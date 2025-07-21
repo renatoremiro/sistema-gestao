@@ -9,6 +9,7 @@
 assets/js/config/firebaseConfig.json
 assets/js/config/supabase-config.json
 config/secrets.json
+config/supabase.json
 
 # 📊 LOGS E CACHE
 *.log
