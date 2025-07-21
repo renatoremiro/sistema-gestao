@@ -5,11 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minha Agenda - Sistema BIAPO Supabase v1.0</title>
     
-    <!-- ✅ CSS DO SISTEMA -->
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/calendar.css">
+    <!-- ✅ CSS CONSOLIDADO ULTRA-OTIMIZADO -->
+    <link rel="stylesheet" href="assets/css/main-otimizado-v8.css">
     
-    <!-- 🚀 SISTEMA SUPABASE PURO v1.0 -->
+    <!-- 🔐 CONFIGURAÇÃO SUPABASE AUTOMÁTICA -->
+    <script>
+        // 🔐 Carregamento automático de credenciais
+        window.SUPABASE_CONFIG = {
+            url: 'https://vyquhmlxjrvbdwgadtxc.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5cXVobWx4anJ2YmR3Z2FkdHhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NzQyMDYsImV4cCI6MjA2ODI1MDIwNn0.zyj_8uW4T7E40ekdqDDW8E91P7LpXD5Pr53GCrPqMvM'
+        };
+        console.log('✅ Configuração Supabase carregada automaticamente na agenda!');
+    </script>
+    
+    <!-- 🚀 SISTEMA SUPABASE CORRIGIDO v1.0 -->
+    <script src="assets/js/config/env-loader.js"></script>
     <script src="assets/js/config/supabase-client.js"></script>
     <script src="assets/js/utils/helpers.js"></script>
     <script src="assets/js/utils/validation.js"></script>
@@ -20,6 +30,7 @@
     <script src="assets/js/modules/auth.js"></script>
     <script src="assets/js/modules/events.js"></script>
     <script src="assets/js/modules/calendar.js"></script>
+    <script src="assets/js/utils/corretor-automatico.js"></script>
     <script src="assets/js/utils/inicializador_sistema.js"></script>
 
     <style>
