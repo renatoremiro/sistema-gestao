@@ -29,47 +29,52 @@ const Persistence = {
         ultimaVerificacaoUsuario: null
     },
 
-    // 🔥 VERIFICAÇÃO DE USUÁRIO CACHED
+    // 🔥 VERIFICAÇÃO DE USUÁRIO SIMPLIFICADA E ROBUSTA
     _verificarUsuarioLogado() {
-        const agora = Date.now();
-        
-        // Cache válido por 30 segundos
-        if (this.state.ultimaVerificacaoUsuario && 
-            (agora - this.state.ultimaVerificacaoUsuario) < this.config.CACHE_USUARIO &&
-            this.state.usuarioAtual !== null) {
-            return this.state.usuarioAtual;
-        }
-        
-        // Verificar usuário atual
+        // Sempre tentar verificar usuário atual
         let usuario = null;
         
-        if (typeof App !== 'undefined' && App.usuarioAtual) {
-            usuario = App.usuarioAtual;
-        } else if (typeof Auth !== 'undefined' && Auth.state?.usuario) {
-            usuario = Auth.state.usuario;
+        try {
+            if (typeof App !== 'undefined' && App.usuarioAtual && App.usuarioAtual.email) {
+                usuario = App.usuarioAtual;
+            } else if (typeof Auth !== 'undefined' && Auth.state?.usuario && Auth.state.usuario.email) {
+                usuario = Auth.state.usuario;
+            } else if (typeof Auth !== 'undefined' && typeof Auth.obterUsuario === 'function') {
+                usuario = Auth.obterUsuario();
+            }
+        } catch (error) {
+            console.warn('⚠️ Erro ao verificar usuário:', error);
         }
         
-        // Atualizar cache
+        // Atualizar cache sempre
         this.state.usuarioAtual = usuario;
-        this.state.ultimaVerificacaoUsuario = agora;
+        this.state.ultimaVerificacaoUsuario = Date.now();
         
         return usuario;
     },
 
-    // 🚀 SALVAMENTO SUPABASE SIMPLES
+    // 🚀 SALVAMENTO SUPABASE INTELIGENTE E ROBUSTO
     async salvarDados() {
         const usuario = this._verificarUsuarioLogado();
-        if (!usuario) {
-            console.warn('⚠️ Salvamento bloqueado: usuário não logado');
-            return this._salvarLocalApenas();
-        }
         
+        // Sempre salvar localmente primeiro (garante que dados não se percam)
         clearTimeout(this.state.salvandoTimeout);
         this.state.dadosParaSalvar = { ...App.dados };
         
-        this.state.salvandoTimeout = setTimeout(() => {
-            this._executarSalvamentoSupabase();
-        }, 300);
+        // Salvar local imediatamente
+        this._salvarBackupLocal(this.state.dadosParaSalvar);
+        
+        // Tentar Supabase se usuário logado
+        if (usuario && usuario.email) {
+            this.state.salvandoTimeout = setTimeout(() => {
+                this._executarSalvamentoSupabase();
+            }, 300);
+        } else {
+            console.log('💾 Dados salvos localmente (usuário não logado)');
+            if (typeof Notifications !== 'undefined') {
+                Notifications.info('💾 Dados salvos localmente');
+            }
+        }
 
         return Promise.resolve();
     },

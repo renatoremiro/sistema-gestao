@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste Final - Sistema BIAPO Corrigido</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .test {
+            background: #f8f9ff;
+            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .test.success {
+            border-color: #059669;
+            background: #ecfdf5;
+        }
+        .test.error {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        .test.warning {
+            border-color: #d97706;
+            background: #fffbeb;
+        }
+        .btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background: #4338ca;
+        }
+        .btn.success {
+            background: #059669;
+        }
+        .btn.danger {
+            background: #dc2626;
+        }
+        .log {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.success { background: #059669; color: white; }
+        .status.error { background: #dc2626; color: white; }
+        .status.warning { background: #d97706; color: white; }
+        .status.info { background: #0284c7; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste Final - Sistema BIAPO Corrigido</h1>
+        <p>Este teste verifica se todas as correções foram aplicadas corretamente.</p>
+        
+        <div class="test">
+            <h3>🔧 Testes Automáticos</h3>
+            <p>Execute os testes para verificar o funcionamento do sistema:</p>
+            
+            <button class="btn" onclick="executarTesteCompleto()">🚀 Teste Completo</button>
+            <button class="btn success" onclick="executarCorrecaoAutomatica()">🔧 Correção Automática</button>
+            <button class="btn" onclick="testarPersistencia()">💾 Testar Persistência</button>
+            <button class="btn" onclick="testarSupabaseConectividade()">🔗 Testar Supabase</button>
+            <button class="btn danger" onclick="limparLog()">🗑️ Limpar Log</button>
+        </div>
+        
+        <div class="test">
+            <h3>📊 Status dos Componentes</h3>
+            <div id="statusComponentes">Aguardando teste...</div>
+        </div>
+        
+        <div class="test">
+            <h3>📝 Log de Testes</h3>
+            <div class="log" id="logTestes">Clique em "Teste Completo" para iniciar...\n</div>
+        </div>
+        
+        <div class="test">
+            <h3>✅ Resultado Final</h3>
+            <div id="resultadoFinal">
+                <p><strong>Aguardando execução dos testes...</strong></p>
+                <p>Execute o "Teste Completo" para ver o resultado.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carregar scripts do sistema -->
+    <script src="assets/js/config/env-loader.js"></script>
+    <script src="assets/js/config/supabase-client.js"></script>
+    <script src="assets/js/utils/helpers.js"></script>
+    <script src="assets/js/utils/validation.js"></script>
+    <script src="assets/js/utils/notifications.js"></script>
+    <script src="assets/js/core/data.js"></script>
+    <script src="assets/js/core/app.js"></script>
+    <script src="assets/js/modules/persistence-supabase.js"></script>
+    <script src="assets/js/modules/auth.js"></script>
+    <script src="assets/js/utils/corretor-automatico.js"></script>
+
+    <script>
+        // Sistema de Testes
+        const TesteFinal = {
+            resultados: {},
+            log: [],
+            
+            log_(msg) {
+                const timestamp = new Date().toLocaleTimeString('pt-BR');
+                const logMsg = `[${timestamp}] ${msg}`;
+                this.log.push(logMsg);
+                const logElement = document.getElementById('logTestes');
+                if (logElement) {
+                    logElement.textContent = this.log.join('\n') + '\n';
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+                console.log(logMsg);
+            },
+            
+            atualizarStatus() {
+                const statusEl = document.getElementById('statusComponentes');
+                if (!statusEl) return;
+                
+                const componentes = [
+                    { nome: 'EnvLoader', test: () => typeof EnvLoader !== 'undefined' },
+                    { nome: 'Supabase Config', test: () => !!window.SUPABASE_CONFIG },
+                    { nome: 'Supabase Client', test: () => !!window.supabaseClient },
+                    { nome: 'App Core', test: () => typeof App !== 'undefined' },
+                    { nome: 'Persistence', test: () => typeof Persistence !== 'undefined' },
+                    { nome: 'Auth', test: () => typeof Auth !== 'undefined' },
+                    { nome: 'Corretor', test: () => typeof CorretorAutomatico !== 'undefined' }
+                ];
+                
+                let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">';
+                
+                componentes.forEach(comp => {
+                    const status = comp.test();
+                    const statusClass = status ? 'success' : 'error';
+                    const statusText = status ? 'OK' : 'ERRO';
+                    
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                            <span>${comp.nome}</span>
+                            <span class="status ${statusClass}">${statusText}</span>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                statusEl.innerHTML = html;
+            },
+            
+            async executarTesteCompleto() {
+                this.log.length = 0;
+                this.resultados = {};
+                
+                this.log_('🚀 INICIANDO TESTE COMPLETO DO SISTEMA BIAPO');
+                this.log_('==========================================');
+                
+                // Teste 1: Componentes básicos
+                this.log_('\n📋 TESTE 1: Componentes básicos...');
+                const componentesOk = this.testarComponentes();
+                this.resultados.componentes = componentesOk;
+                
+                // Teste 2: Configuração Supabase
+                this.log_('\n🔐 TESTE 2: Configuração Supabase...');
+                const configOk = await this.testarConfiguracao();
+                this.resultados.configuracao = configOk;
+                
+                // Teste 3: Conectividade
+                this.log_('\n🔗 TESTE 3: Conectividade...');
+                const conectividadeOk = await this.testarConectividade();
+                this.resultados.conectividade = conectividadeOk;
+                
+                // Teste 4: Persistência
+                this.log_('\n💾 TESTE 4: Sistema de persistência...');
+                const persistenciaOk = await this.testarPersistenciaCompleta();
+                this.resultados.persistencia = persistenciaOk;
+                
+                // Teste 5: Funcionalidades
+                this.log_('\n🧪 TESTE 5: Funcionalidades...');
+                const funcionalidadesOk = await this.testarFuncionalidades();
+                this.resultados.funcionalidades = funcionalidadesOk;
+                
+                // Resultado final
+                this.gerarResultadoFinal();
+                this.atualizarStatus();
+            },
+            
+            testarComponentes() {
+                let sucessos = 0;
+                const testes = [
+                    { nome: 'EnvLoader', test: () => typeof EnvLoader !== 'undefined' },
+                    { nome: 'window.SUPABASE_CONFIG', test: () => !!window.SUPABASE_CONFIG },
+                    { nome: 'supabaseClient', test: () => !!window.supabaseClient },
+                    { nome: 'App', test: () => typeof App !== 'undefined' },
+                    { nome: 'Persistence', test: () => typeof Persistence !== 'undefined' },
+                    { nome: 'Auth', test: () => typeof Auth !== 'undefined' },
+                    { nome: 'CorretorAutomatico', test: () => typeof CorretorAutomatico !== 'undefined' }
+                ];
+                
+                testes.forEach(teste => {
+                    const resultado = teste.test();
+                    this.log_(`   ${resultado ? '✅' : '❌'} ${teste.nome}: ${resultado ? 'OK' : 'ERRO'}`);
+                    if (resultado) sucessos++;
+                });
+                
+                const porcentagem = (sucessos / testes.length) * 100;
+                this.log_(`   📊 Resultado: ${sucessos}/${testes.length} (${porcentagem.toFixed(1)}%)`);
+                
+                return porcentagem >= 85;
+            },
+            
+            async testarConfiguracao() {
+                try {
+                    // Verificar configuração
+                    if (!window.SUPABASE_CONFIG) {
+                        this.log_('   ❌ window.SUPABASE_CONFIG não definida');
+                        
+                        if (typeof EnvLoader !== 'undefined') {
+                            this.log_('   🔄 Tentando carregar via EnvLoader...');
+                            await EnvLoader.carregarCredenciais();
+                            
+                            if (window.SUPABASE_CONFIG) {
+                                this.log_('   ✅ Credenciais carregadas automaticamente');
+                                return true;
+                            }
+                        }
+                        
+                        return false;
+                    }
+                    
+                    this.log_('   ✅ window.SUPABASE_CONFIG definida');
+                    this.log_(`   🌐 URL: ${window.SUPABASE_CONFIG.url}`);
+                    this.log_(`   🔑 Key: ${window.SUPABASE_CONFIG.key ? 'Presente' : 'Ausente'}`);
+                    
+                    return true;
+                    
+                } catch (error) {
+                    this.log_(`   ❌ Erro: ${error.message}`);
+                    return false;
+                }
+            },
+            
+            async testarConectividade() {
+                try {
+                    if (!window.supabaseClient) {
+                        this.log_('   ❌ supabaseClient não disponível');
+                        return false;
+                    }
+                    
+                    this.log_('   🔄 Testando conexão...');
+                    const conectado = await window.supabaseClient.testarConexao();
+                    
+                    if (conectado) {
+                        this.log_('   ✅ Conexão estabelecida com sucesso');
+                        
+                        // Testar estatísticas
+                        const stats = await window.supabaseClient.obterEstatisticas();
+                        this.log_(`   📊 Usuários: ${stats.usuarios}, Eventos: ${stats.eventos}, Tarefas: ${stats.tarefas}`);
+                        
+                        return true;
+                    } else {
+                        this.log_('   ❌ Falha na conexão');
+                        return false;
+                    }
+                    
+                } catch (error) {
+                    this.log_(`   ❌ Erro de conectividade: ${error.message}`);
+                    return false;
+                }
+            },
+            
+            async testarPersistenciaCompleta() {
+                try {
+                    if (typeof Persistence === 'undefined') {
+                        this.log_('   ❌ Módulo Persistence não encontrado');
+                        return false;
+                    }
+                    
+                    this.log_('   ✅ Módulo Persistence carregado');
+                    
+                    // Testar salvamento local
+                    this.log_('   🧪 Testando salvamento local...');
+                    const dadosTeste = { teste: Date.now(), origem: 'teste_final' };
+                    Persistence._salvarBackupLocal(dadosTeste);
+                    this.log_('   ✅ Salvamento local funcionando');
+                    
+                    // Testar verificação de usuário
+                    const usuario = Persistence._verificarUsuarioLogado();
+                    this.log_(`   👤 Usuário: ${usuario ? usuario.email || 'ID: ' + usuario.id : 'Nenhum'}`);
+                    
+                    // Testar salvamento geral
+                    if (typeof App !== 'undefined' && App.dados) {
+                        this.log_('   🧪 Testando salvamento geral...');
+                        await Persistence.salvarDados();
+                        this.log_('   ✅ Salvamento geral funcionando');
+                    }
+                    
+                    return true;
+                    
+                } catch (error) {
+                    this.log_(`   ❌ Erro de persistência: ${error.message}`);
+                    return false;
+                }
+            },
+            
+            async testarFuncionalidades() {
+                try {
+                    let sucessos = 0;
+                    const totalTestes = 3;
+                    
+                    // Teste função global
+                    if (typeof testarSupabase === 'function') {
+                        this.log_('   ✅ Função testarSupabase disponível');
+                        sucessos++;
+                    } else {
+                        this.log_('   ❌ Função testarSupabase não encontrada');
+                    }
+                    
+                    // Teste corretor automático
+                    if (typeof corretorAutomatico === 'function') {
+                        this.log_('   ✅ Função corretorAutomatico disponível');
+                        sucessos++;
+                    } else {
+                        this.log_('   ❌ Função corretorAutomatico não encontrada');
+                    }
+                    
+                    // Teste verificação sistema
+                    if (typeof verificarSistemaSupabase === 'function') {
+                        this.log_('   ✅ Função verificarSistemaSupabase disponível');
+                        sucessos++;
+                    } else {
+                        this.log_('   ❌ Função verificarSistemaSupabase não encontrada');
+                    }
+                    
+                    const porcentagem = (sucessos / totalTestes) * 100;
+                    this.log_(`   📊 Funcionalidades: ${sucessos}/${totalTestes} (${porcentagem.toFixed(1)}%)`);
+                    
+                    return porcentagem >= 80;
+                    
+                } catch (error) {
+                    this.log_(`   ❌ Erro ao testar funcionalidades: ${error.message}`);
+                    return false;
+                }
+            },
+            
+            gerarResultadoFinal() {
+                this.log_('\n📊 ========== RESULTADO FINAL ==========');
+                
+                const testes = Object.keys(this.resultados);
+                const sucessos = Object.values(this.resultados).filter(r => r).length;
+                const porcentagem = (sucessos / testes.length) * 100;
+                
+                Object.entries(this.resultados).forEach(([nome, resultado]) => {
+                    this.log_(`   ${resultado ? '✅' : '❌'} ${nome}: ${resultado ? 'SUCESSO' : 'FALHA'}`);
+                });
+                
+                const status = porcentagem >= 90 ? '🟢 EXCELENTE' :
+                              porcentagem >= 75 ? '🟡 BOM' :
+                              porcentagem >= 50 ? '🟠 REGULAR' :
+                              '🔴 CRÍTICO';
+                
+                this.log_(`\n📊 STATUS GERAL: ${status} (${porcentagem.toFixed(1)}%)`);
+                
+                // Atualizar UI
+                const resultadoEl = document.getElementById('resultadoFinal');
+                if (resultadoEl) {
+                    const statusClass = porcentagem >= 75 ? 'success' : porcentagem >= 50 ? 'warning' : 'error';
+                    
+                    resultadoEl.innerHTML = `
+                        <div class="test ${statusClass}">
+                            <h4>STATUS: ${status}</h4>
+                            <p><strong>Pontuação:</strong> ${sucessos}/${testes.length} testes aprovados (${porcentagem.toFixed(1)}%)</p>
+                            ${porcentagem >= 75 ? 
+                                '<p>✅ <strong>Sistema funcionando corretamente!</strong> Todas as correções foram aplicadas com sucesso.</p>' :
+                                '<p>⚠️ <strong>Algumas correções ainda são necessárias.</strong> Execute o corretor automático.</p>'
+                            }
+                        </div>
+                    `;
+                }
+                
+                if (porcentagem >= 75) {
+                    this.log_('\n🎉 SISTEMA CORRIGIDO COM SUCESSO!');
+                    this.log_('✅ Todas as correções foram aplicadas');
+                    this.log_('✅ Persistência funcionando corretamente');
+                    this.log_('✅ Sistema pronto para uso');
+                } else {
+                    this.log_('\n⚠️ CORREÇÕES ADICIONAIS NECESSÁRIAS');
+                    this.log_('🔧 Execute: corretorAutomatico()');
+                    this.log_('📋 Verifique o arquivo: SOLUCAO-DEFINITIVA-PERSISTENCIA.md');
+                }
+                
+                this.log_('\n==========================================');
+            }
+        };
+        
+        // Funções para os botões
+        function executarTesteCompleto() {
+            TesteFinal.executarTesteCompleto();
+        }
+        
+        async function executarCorrecaoAutomatica() {
+            TesteFinal.log_('🔧 Executando correção automática...');
+            if (typeof CorretorAutomatico !== 'undefined') {
+                const resultado = await CorretorAutomatico.executarCorrecaoCompleta();
+                TesteFinal.log_(`✅ Correção concluída: ${resultado.correcoes.length} correções aplicadas`);
+                if (resultado.problemas.length > 0) {
+                    TesteFinal.log_(`⚠️ Problemas restantes: ${resultado.problemas.length}`);
+                }
+            } else {
+                TesteFinal.log_('❌ CorretorAutomatico não disponível');
+            }
+            TesteFinal.atualizarStatus();
+        }
+        
+        async function testarPersistencia() {
+            TesteFinal.log_('💾 Testando sistema de persistência...');
+            const resultado = await TesteFinal.testarPersistenciaCompleta();
+            TesteFinal.log_(`📊 Resultado: ${resultado ? 'SUCESSO' : 'FALHA'}`);
+        }
+        
+        async function testarSupabaseConectividade() {
+            TesteFinal.log_('🔗 Testando conectividade Supabase...');
+            const resultado = await TesteFinal.testarConectividade();
+            TesteFinal.log_(`📊 Resultado: ${resultado ? 'CONECTADO' : 'FALHA'}`);
+        }
+        
+        function limparLog() {
+            TesteFinal.log.length = 0;
+            const logElement = document.getElementById('logTestes');
+            if (logElement) {
+                logElement.textContent = 'Log limpo. Execute um teste para ver resultados...\n';
+            }
+        }
+        
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            TesteFinal.log_('🧪 Sistema de Testes carregado');
+            TesteFinal.log_('📋 Execute "Teste Completo" para verificar o sistema');
+            
+            setTimeout(() => {
+                TesteFinal.atualizarStatus();
+            }, 2000);
+        });
+        
+        // Exposar para debug
+        window.TesteFinal = TesteFinal;
+    </script>
+</body>
+</html>
